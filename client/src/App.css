@@ -1,0 +1,19 @@
+.hover_on_image_with_div:hover .hover_on_image {
+    transform: scale(1.2);
+}
+
+.hover_on_image {
+    transition: transform 0.3s ease;
+}
+
+.no-arrows::-webkit-outer-spin-button,
+.no-arrows::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.rupees_symbol{
+    background-image: url('./assets/rupees_symbol.png');
+    background-size: 18px;
+    background-position: 10px 50%;
+}
