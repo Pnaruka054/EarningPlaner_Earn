@@ -9,11 +9,18 @@ import Deposit from './website/client/deposit/deposit';
 import SideMenu from './website/client/components/sideMenu/sideMenu';
 import { createPortal } from 'react-dom'
 import PopUp from './website/client/components/popUp/popUp';
+import Withdraw from './website/client/withdraw/withdraw';
+import BottomAlert from './website/client/components/bottomAlert/bottomAlert';
+import Invoice from './website/client/invoice/invoice';
+import Support from './website/client/support/support';
+import ReferEarn from './website/client/ReferEarn/ReferEarn';
 
 const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
   const [showPopUp_onLogOut_btn, setShowPopUp_onLogOut_btn] = useState(false);
   const [sideMenu_state, setSideMenu_state] = useState('menu-outline');
+  const [showBottomAlert, setShowBottomAlert] = useState(false);
+
   const location = useLocation();
   useEffect(() => {
     if (
@@ -39,12 +46,22 @@ const App = () => {
           document.getElementById('LoginConfirm_popup')
         )
       }
+      {
+        showBottomAlert && createPortal(
+          <BottomAlert />,
+          document.getElementById('showBottomAlert')
+        )
+      }
       {!show_navBar_state && <SideMenu sideMenu_show={{ sideMenu_state, setSideMenu_state }} />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/member/dashboard" element={<DashBoard getLogOut_btnClicked={showPopUp_onLogOut_btn} setLogOut_btnClicked={setShowPopUp_onLogOut_btn} />} />
-        <Route path="/member/deposit" element={<Deposit />} />
+        <Route path="/member/deposit" element={<Deposit setShowBottomAlert={setShowBottomAlert} />} />
+        <Route path="/member/withdraw" element={<Withdraw setShowBottomAlert={setShowBottomAlert} />} />
+        <Route path="/member/refer-and-earn" element={<ReferEarn />} />
+        <Route path="/member/invoices" element={<Invoice />} />
+        <Route path="/member/support" element={<Support />} />
       </Routes>
     </>
   );

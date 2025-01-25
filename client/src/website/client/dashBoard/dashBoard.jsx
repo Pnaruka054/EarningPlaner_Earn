@@ -13,6 +13,29 @@ import Mining from '../../../assets/Mining.png'
 import Footer from '../components/footer/footer';
 
 const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
+
+    let months = [
+        'January 2025',
+        'February 2025',
+        'March 2025',
+        'April 2025',
+    ]
+    let table = [
+        {
+            Date: '2024-12-01',
+            SelfEarnings: '₹5.4524',
+            ReferralEarnings: '₹1.6523',
+            TotalEarnings: '₹6.3251',
+        },
+        {
+            Date: '2024-12-01',
+            SelfEarnings: '₹5.4524',
+            ReferralEarnings: '₹1.6523',
+            TotalEarnings: '₹6.3251',
+        },
+    ]
+
+
     let dropdownRef = useRef(null)
     let logOut_btnRef = useRef(null)
     const [dropdownButtonValue_state, setDropdownButtonValue_state] = useState('January 2025');
@@ -23,16 +46,16 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
 
     useEffect(() => {
         if (getLogOut_btnClicked) {
-            logOut_btnRef.current.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`
+            logOut_btnRef.current.innerHTML = `<i className="fa-solid fa-spinner fa-spin"></i>`
         } else {
             logOut_btnRef.current.innerHTML = `LogOut`
         }
     }, [getLogOut_btnClicked]);
 
     return (
-        <div className="ml-auto bg-[#ecf0f5] w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+        <div className="ml-auto bg-[#ecf0f5] flex flex-col justify-between  w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
             <div className='px-2 py-1'>
-                <div className='text-2xl select-none mb-4 mt-2 flex justify-between'>
+                <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
                     <h1>Dashboard</h1>
                     <button ref={logOut_btnRef} onClick={() => setLogOut_btnClicked(true)} className='text-lg border border-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg text-red-500'>LogOut</button>
                 </div>
@@ -98,23 +121,23 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
                         <img src={Mining} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </div>
                 </div>
-                <div class="w-full mt-4 bg-white border border-blue-500 rounded-lg shadow-md mb-4">
-                    <div class="bg-red-800 text-white p-4 rounded-t-lg flex items-center space-x-2">
-                        <i class="fa fa-bullhorn"></i>
+                <div className="w-full mt-4 bg-white border border-blue-500 rounded-lg shadow-md mb-4">
+                    <div className="bg-red-800 text-white p-4 rounded-t-lg flex items-center space-x-2">
+                        <i className="fa fa-bullhorn"></i>
                         <span>Announcements</span>
-                        <span class="relative flex size-3">
-                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
-                            <span class="relative inline-flex size-3 rounded-full bg-redky-500"></span>
+                        <span className="relative flex size-3">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+                            <span className="relative inline-flex size-3 rounded-full bg-redky-500"></span>
                         </span>
                     </div>
-                    <div class="p-4 space-y-4">
-                        <div class="space-y-2">
-                            <p class="announcement">
-                                <span class="text-sm text-gray-500 float-right">
-                                    <i class="fa fa-clock-o"></i> 8/10/24, 11:53 AM
+                    <div className="p-4 space-y-4">
+                        <div className="space-y-2">
+                            <p className="announcement">
+                                <span className="text-sm text-gray-500 float-right">
+                                    <i className="fa fa-clock-o"></i> 8/10/24, 11:53 AM
                                 </span>
                             </p>
-                            <p class="font-semibold">Why Choose Us?</p>
+                            <p className="font-semibold">Why Choose Us?</p>
                             <p>
                                 1. Receive a $1 bonus for signing up.<br />
                                 2. Enjoy the highest CPM rates globally.<br />
@@ -122,50 +145,50 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
                                 4. Ability to shorten links for 18+, Movies, Faucets, etc.<br />
                                 5. Fast payments within 2 to 3 days.
                             </p>
-                            <p class="text-red-500 font-semibold">
+                            <p className="text-red-500 font-semibold">
                                 (Your first payment will be processed within 1 - 2 days)
                             </p>
-                            <p class="font-semibold">Statistics will be refreshed every 10 minutes.</p>
+                            <p className="font-semibold">Statistics will be refreshed every 10 minutes.</p>
                         </div>
-                        <hr class="border-t-2 border-gray-300" />
-                        <div class="space-y-2">
-                            <p class="announcement">
-                                <span class="text-sm text-gray-500 float-right">
-                                    <i class="fa fa-clock-o"></i> 8/10/24, 11:52 AM
+                        <hr className="border-t-2 border-gray-300" />
+                        <div className="space-y-2">
+                            <p className="announcement">
+                                <span className="text-sm text-gray-500 float-right">
+                                    <i className="fa fa-clock-o"></i> 8/10/24, 11:52 AM
                                 </span>
                             </p>
-                            <p class="font-semibold">Contest</p>
-                            <p class="text-red-500 font-semibold">Use Your Referral Link:</p>
+                            <p className="font-semibold">Contest</p>
+                            <p className="text-red-500 font-semibold">Use Your Referral Link:</p>
                             <p>
                                 The user with the most active referrals will earn a
-                                <span class="text-green-500 font-semibold">25% commission</span>.
+                                <span className="text-green-500 font-semibold">25% commission</span>.
                                 Find your referral link here -
-                                <a href="https://droplink.co/member/users/referrals" target="_blank" class="text-blue-500 hover:underline">Click</a><br />
+                                <a href="https://droplink.co/member/users/referrals" target="_blank" className="text-blue-500 hover:underline">Click</a><br />
                                 When your referral earns money, your commission will be credited to your DropLink wallet.
                             </p>
-                            <p class="text-red-500 font-semibold">Spread the Word:</p>
+                            <p className="text-red-500 font-semibold">Spread the Word:</p>
                             <p>
                                 Write an article about us (feel free to include your referral link!) and earn up to
-                                <span class="text-green-500 font-semibold">$5</span>.<br />
+                                <span className="text-green-500 font-semibold">$5</span>.<br />
                                 Create a YouTube video discussing our platform and earn up to $100. Minimum withdrawal is
-                                <span class="text-green-500 font-semibold">$5</span>.<br />
+                                <span className="text-green-500 font-semibold">$5</span>.<br />
                                 Send us the link to your article or video via -
-                                <a href="mailto:support@droplink.co" class="text-blue-500 hover:underline">Email</a> |
-                                <a href="https://t.me/droplinksp" target="_blank" class="text-blue-500 hover:underline">Telegram</a><br />
+                                <a href="mailto:support@droplink.co" className="text-blue-500 hover:underline">Email</a> |
+                                <a href="https://t.me/droplinksp" target="_blank" className="text-blue-500 hover:underline">Telegram</a><br />
                                 Funds will be credited to your account every Sunday.
                             </p>
                         </div>
-                        <hr class="border-t-2 border-gray-300" />
-                        <div class="space-y-2">
-                            <p class="announcement">
-                                <span class="text-sm text-gray-500 float-right">
-                                    <i class="fa fa-clock-o"></i> 8/10/24, 11:50 AM
+                        <hr className="border-t-2 border-gray-300" />
+                        <div className="space-y-2">
+                            <p className="announcement">
+                                <span className="text-sm text-gray-500 float-right">
+                                    <i className="fa fa-clock-o"></i> 8/10/24, 11:50 AM
                                 </span>
                             </p>
-                            <p class="font-semibold">Policy</p>
+                            <p className="font-semibold">Policy</p>
                             <p>
                                 Dear users, please refrain from creating bots, using proxies, or generating fake traffic. Violating this policy will result in
-                                <span class="text-red-500 font-semibold">account deactivation</span>.
+                                <span className="text-red-500 font-semibold">account deactivation</span>.
                             </p>
                         </div>
                     </div>
@@ -178,20 +201,15 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                             </svg>
                         </button>
-                        <div ref={dropdownRef} id="dropdown" className="bg-white hidden rounded-md absolute left-0 right-0">
+                        <div ref={dropdownRef} id="dropdown" className="bg-white hidden rounded-md absolute left-0 right-0 h-52 overflow-auto">
                             <ul onClick={dropdownButtonValue} className="py-2 text-sm dark:text-gray-200">
-                                <li className="block px-4 py-2 text-black hover:bg-slate-100 cursor-pointer">
-                                    January 2025
-                                </li>
-                                <li className="block px-4 py-2 text-black hover:bg-slate-100 cursor-pointer">
-                                    February 2025
-                                </li>
-                                <li className="block px-4 py-2 text-black hover:bg-slate-100 cursor-pointer">
-                                    March 2025
-                                </li>
-                                <li className="block px-4 py-2 text-black hover:bg-slate-100 cursor-pointer">
-                                    April 2025
-                                </li>
+                                {
+                                    months.map((monthName, index) => (
+                                        <li key={index} className="block px-4 py-2 text-black hover:bg-slate-100 cursor-pointer">
+                                            {monthName}
+                                        </li>
+                                    ))
+                                }
                             </ul>
                         </div>
                     </div>
@@ -207,12 +225,16 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr className="odd:bg-gray-200">
-                                <td className="px-4 py-2 border border-gray-300">2024-12-01</td>
-                                <td className="px-4 py-2 border border-gray-300">₹5.4524</td>
-                                <td className="px-4 py-2 border border-gray-300">₹1.6523</td>
-                                <td className="px-4 py-2 border border-gray-300">₹6.3251</td>
-                            </tr>
+                            {
+                                table.map((table_values, index) => (
+                                    <tr key={index} className="odd:bg-gray-200">
+                                        <td className="px-4 py-2 border border-gray-300">{table_values.Date}</td>
+                                        <td className="px-4 py-2 border border-gray-300">{table_values.SelfEarnings}</td>
+                                        <td className="px-4 py-2 border border-gray-300">{table_values.ReferralEarnings}</td>
+                                        <td className="px-4 py-2 border border-gray-300">{table_values.TotalEarnings}</td>
+                                    </tr>
+                                ))
+                            }
                         </tbody>
                     </table>
                 </div>

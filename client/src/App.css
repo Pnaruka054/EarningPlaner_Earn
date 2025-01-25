@@ -12,8 +12,16 @@
     margin: 0;
 }
 
-.rupees_symbol{
+.rupees_symbol {
     background-image: url('./assets/rupees_symbol.png');
-    background-size: 18px;
+    background-size: 15px;
     background-position: 10px 50%;
+}
+
+.deposit-list-image {
+    background-image: url('./assets/depositInstructionsList.png');
+    background-size: 20px 20px;
+    background-repeat: no-repeat;
+    background-position: 0.5% 50%;
+    padding-left: 30px;
 }

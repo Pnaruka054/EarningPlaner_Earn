@@ -3,7 +3,11 @@ import Support_icon from '../../../../assets/Support.png'
 
 const SideMenu = ({ sideMenu_show }) => {
     return (
-        <div onClick={(e) => e.stopPropagation()} className={`${sideMenu_show.sideMenu_state === 'close' ? 'block' : 'hidden'} select-none md:block bg-slate-800 absolute md:fixed bottom-0 left-0 px-2 py-4 top-12 w-full sm:w-52 md:w-[25%] lg:w-[20%] text-white`}>
+        <div onClick={(e) => {
+            e.stopPropagation()
+            e.currentTarget.classList.add('hidden')
+            sideMenu_show.setSideMenu_state((prev) => prev = 'menu-outline')
+        }} className={`${sideMenu_show.sideMenu_state === 'close' ? 'block' : 'hidden'} select-none md:block bg-slate-800 absolute z-[1] md:fixed bottom-0 left-0 px-2 py-4 top-12 w-full sm:w-52 md:w-[25%] lg:w-[20%] text-white`}>
             <Link to="/member/dashboard" className='space-x-1 block px-3 py-2 rounded-lg hover:bg-slate-950'>
                 <span className="align-middle">
                     <ion-icon name="bar-chart-outline"></ion-icon>
@@ -22,11 +26,11 @@ const SideMenu = ({ sideMenu_show }) => {
                 </span>
                 <span>Withdraw</span>
             </Link>
-            <Link to="/member/referrals-income" className='space-x-1 block px-3 py-2 rounded-lg hover:bg-slate-950'>
+            <Link to="/member/refer-and-earn" className='space-x-1 block px-3 py-2 rounded-lg hover:bg-slate-950'>
                 <span className="align-middle">
                     <ion-icon name="person-add-outline"></ion-icon>
                 </span>
-                <span>Referrals Income</span>
+                <span>Refer & Earn</span>
             </Link>
             <Link to="/member/invoices" className='space-x-1 block px-3 py-2 rounded-lg hover:bg-slate-950'>
                 <span className="align-middle">
