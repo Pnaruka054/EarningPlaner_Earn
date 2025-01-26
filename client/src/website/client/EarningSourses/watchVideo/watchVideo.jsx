@@ -36,11 +36,11 @@ const WatchVideo = () => {
         demo.children[2].style.height = '100%'
         let demo1 = document.getElementById('demo')
         demo1.appendChild(demo)
-        console.log(demo, 'nul');
+        console.log(demo, 'nul'); 
     };
     return (
         <div className='ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12'>
-            <div id="demo" style="background-color: red; padding: 20px;"></div>
+            <div id="demo"></div>
         </div>
     );
 }
