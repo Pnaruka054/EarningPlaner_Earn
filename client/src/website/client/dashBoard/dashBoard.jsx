@@ -11,6 +11,7 @@ import Games from '../../../assets/Games.png'
 import FillSurvey from '../../../assets/FillSurvey.png'
 import Mining from '../../../assets/Mining.png'
 import Footer from '../components/footer/footer';
+import { Link } from 'react-router-dom';
 
 const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
 
@@ -46,25 +47,38 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
 
     useEffect(() => {
         if (getLogOut_btnClicked) {
-            logOut_btnRef.current.innerHTML = `<i className="fa-solid fa-spinner fa-spin"></i>`
+            logOut_btnRef.current.innerHTML = `<i class="fa-light fa-spinner fa-spin"></i>`
         } else {
             logOut_btnRef.current.innerHTML = `LogOut`
+        }
+        window.addEventListener('click',(e)=>{
+            e.stopPropagation()
+            dropdownRef.current.classList.add('hidden')
+        })
+        return () =>{
+            window.removeEventListener('click',(e)=>{
+                e.stopPropagation()
+                dropdownRef.current.classList.add('hidden')
+            })
         }
     }, [getLogOut_btnClicked]);
 
     return (
-        <div className="ml-auto bg-[#ecf0f5] flex flex-col justify-between  w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
-            <div className='px-2 py-1'>
-                <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
+        <div onScroll={(e)=>{
+            e.stopPropagation()
+            dropdownRef.current.classList.add('hidden')
+        }} className="ml-auto bg-[#ecf0f5] flex flex-col justify-between  w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+            <div className='px-2 py-1 select-none'>
+                <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 flex justify-between'>
                     <h1>Dashboard</h1>
                     <button ref={logOut_btnRef} onClick={() => setLogOut_btnClicked(true)} className='text-lg border border-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg text-red-500'>LogOut</button>
                 </div>
-                <div className="grid grid-cols-2 select-none grid-rows-6 sm:grid-cols-3 sm:grid-rows-4 grid-flow-col gap-2 font-poppins text-lg sm:text-xl text-center">
-                    <div className="bg-blue-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
+                <div className="grid grid-cols-2 grid-rows-6 sm:grid-cols-3 sm:grid-rows-4 grid-flow-col gap-2 font-poppins text-lg sm:text-xl text-center">
+                    <Link to="/member/watch-video" className="bg-blue-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Watch Video</div>
                         <div>₹0.2155</div>
                         <img src={Watch_Video_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
-                    </div>
+                    </Link>
                     <div className="bg-green-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>View Ads</div>
                         <div>₹0.2155</div>
@@ -194,14 +208,17 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
                     </div>
                 </div>
                 <div className='flex justify-center mt-3'>
-                    <div className='relative select-none'>
-                        <button onClick={() => dropdownRef.current.classList.toggle('hidden')} className="text-white bg-blue-700 hover:bg-blue-800 rounded-lg w-48 justify-between px-4 py-2 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+                    <div className='relative'>
+                        <button onClick={(e) => {
+                            e.stopPropagation()
+                            dropdownRef.current.classList.toggle('hidden')
+                        }} className="text-white bg-blue-700 hover:bg-blue-800 rounded-lg w-48 justify-between px-4 py-2 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
                             <span>{dropdownButtonValue_state}</span>
                             <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                             </svg>
                         </button>
-                        <div ref={dropdownRef} id="dropdown" className="bg-white hidden rounded-md absolute left-0 right-0 h-52 overflow-auto">
+                        <div ref={dropdownRef} id="dropdown" className="bg-white hidden rounded-md absolute left-0 right-0 max-h-52 overflow-auto">
                             <ul onClick={dropdownButtonValue} className="py-2 text-sm dark:text-gray-200">
                                 {
                                     months.map((monthName, index) => (

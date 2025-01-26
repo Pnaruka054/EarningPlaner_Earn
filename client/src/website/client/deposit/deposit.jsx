@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import Footer from '../components/footer/footer';
 
-const Deposit = ({ setShowBottomAlert }) => {
+const Deposit = ({ setShowBottomAlert_state }) => {
     const [deposit_amount_state, setDeposit_amount_state] = useState(0);
 
     const handleCopy = () => {
         const textToCopy = document.getElementById('copyText');
         navigator.clipboard.writeText(textToCopy.textContent).then(() => {
-            setShowBottomAlert(true);
-            setTimeout(() => setShowBottomAlert(false), 2000);
+            setShowBottomAlert_state(true);
+            setTimeout(() => setShowBottomAlert_state(false), 2000);
         });
     };
+
+    const handleDeposit_btn = () => {
+        
+    }
 
     function deposit_amount_btn(e) {
         setDeposit_amount_state(e.currentTarget.children[1].innerText);
@@ -48,7 +52,7 @@ const Deposit = ({ setShowBottomAlert }) => {
                 <div className='px-5'>
                     <input type="number" value={deposit_amount_state} onFocus={(e) => setDeposit_amount_state((prev) => prev = '')} onBlur={(e) => setDeposit_amount_state((prev) => prev === '' ? prev = 0 : prev = prev)} onChange={(e) => setDeposit_amount_state((prev) => prev = e.target.value)} pattern='^[0-9]' required className='block w-full my-3 pl-10 py-2 px-3 outline-none text-blue-600 no-arrows rounded-md rupees_symbol bg-no-repeat' />
                     <div className='space-x-5 flex justify-center'>
-                        <button className='w-full py-2 bg-green-600 text-white'>Deposit</button>
+                        <button onClick={handleDeposit_btn} className='w-full py-2 bg-green-600 text-white'>Deposit</button>
                         <button onClick={() => setDeposit_amount_state(0)} className='w-full py-2 bg-red-600 text-white'>Clear</button>
                     </div>
                 </div>

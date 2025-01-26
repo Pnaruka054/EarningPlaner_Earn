@@ -32,17 +32,17 @@ const SideMenu = ({ sideMenu_show }) => {
                 </span>
                 <span>Refer & Earn</span>
             </Link>
-            <Link to="/member/invoices" className='space-x-1 block px-3 py-2 rounded-lg hover:bg-slate-950'>
-                <span className="align-middle">
-                    <ion-icon name="document-text-outline"></ion-icon>
-                </span>
-                <span>Invoices</span>
-            </Link>
             <Link to="/member/support" className='space-x-1 block px-3 py-2 rounded-lg hover:bg-slate-950'>
                 <span className="align-middle inline-block w-[16px]">
                     <img className='w-full h-full' src={Support_icon} />
                 </span>
                 <span>Support</span>
+            </Link>
+            <Link to="/member/settings" className='space-x-1 block px-3 py-2 rounded-lg hover:bg-slate-950'>
+                <span className="align-middle">
+                    <i className="fa fa-gears"></i>
+                </span>
+                <span>Settings</span>
             </Link>
         </div>
     );

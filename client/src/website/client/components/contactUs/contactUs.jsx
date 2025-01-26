@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const ContactUs = ({ style }) => {
-  const [formData, setFormData] = useState({
+const ContactUs = () => {
+  const [formData_state, setFormData_state] = useState({
     name: "",
     email: "",
     subject: "",
@@ -13,8 +13,8 @@ const ContactUs = ({ style }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+    setFormData_state({
+      ...formData_state,
       [name]: type === "checkbox" ? checked : value,
     });
   };
@@ -23,7 +23,7 @@ const ContactUs = ({ style }) => {
     e.preventDefault();
     setSubmitProcessState(false); // Set to false when starting to submit
     try {
-      await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/add_to_sheet`, formData);
+      await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/add_to_sheet`, formData_state);
       setSubmitProcessState(true); // Set back to true if successful
     } catch (error) {
       setSubmitProcessState(true); // Set back to true on error
@@ -44,7 +44,7 @@ const ContactUs = ({ style }) => {
               id="name"
               name="name"
               className="mt-2 w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.name}
+              value={formData_state.name}
               onChange={handleChange}
               required
             />
@@ -57,7 +57,7 @@ const ContactUs = ({ style }) => {
               id="email"
               name="email"
               className="mt-2 w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.email}
+              value={formData_state.email}
               onChange={handleChange}
               required
             />
@@ -70,7 +70,7 @@ const ContactUs = ({ style }) => {
               id="subject"
               name="subject"
               className="mt-2 w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.subject}
+              value={formData_state.subject}
               onChange={handleChange}
               required
             />
@@ -82,7 +82,7 @@ const ContactUs = ({ style }) => {
               id="message"
               name="message"
               className="mt-2 w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.message}
+              value={formData_state.message}
               onChange={handleChange}
               required
             />
@@ -94,7 +94,7 @@ const ContactUs = ({ style }) => {
               id="consent"
               name="consent"
               className="mr-2"
-              checked={formData.consent}
+              checked={formData_state.consent}
               onChange={handleChange}
               required
             />

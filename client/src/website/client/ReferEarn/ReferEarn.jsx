@@ -3,8 +3,8 @@ import axios from 'axios';
 import Footer from '../components/footer/footer';
 
 const ReferEarn = () => {
-    const [currentPage, setCurrentPage] = useState(1);
-    const [referralRecords, setReferralRecords] = useState([
+    const [currentPage_state, setCurrentPage_state] = useState(1);
+    const [referralRecords_state, setReferralRecords] = useState([
         {
             username: "1",
             income: "0",
@@ -33,13 +33,13 @@ const ReferEarn = () => {
     ]);
     const linksPerPage = 10;
 
-    const indexOfLastReferral = currentPage * linksPerPage;
+    const indexOfLastReferral = currentPage_state * linksPerPage;
     const indexOfFirstReferral = indexOfLastReferral - linksPerPage;
-    const currentReferrals = referralRecords.slice(indexOfFirstReferral, indexOfLastReferral);
-    const totalPages = Math.ceil(referralRecords.length / linksPerPage);
+    const currentReferrals = referralRecords_state.slice(indexOfFirstReferral, indexOfLastReferral);
+    const totalPages = Math.ceil(referralRecords_state.length / linksPerPage);
 
     const handlePageChange = (pageNumber) => {
-        setCurrentPage(pageNumber);
+        setCurrentPage_state(pageNumber);
     };
 
     const copyToClipboard = (text) => {

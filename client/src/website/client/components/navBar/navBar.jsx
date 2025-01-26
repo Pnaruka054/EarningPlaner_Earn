@@ -92,7 +92,7 @@ const NavBar = ({ sideMenu_show, show }) => {
                         <a href="#"><span className='sm:inline-block hidden'>Available Balance:</span> ₹0.0120</a>
                     </li>
                     <li className='hover:bg-blue-700 px-3 h-12 flex items-center'>
-                        <a href='#'><ion-icon name="person"></ion-icon> Profile</a>
+                        <Link to='/member/profile'><ion-icon name="person"></ion-icon> Profile</Link>
                     </li>
                 </ul>
             </nav>

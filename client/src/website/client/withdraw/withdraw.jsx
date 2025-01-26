@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import Footer from '../components/footer/footer';
 
-const Withdraw = ({ setShowBottomAlert }) => {
+const Withdraw = ({ setShowBottomAlert_state }) => {
     const [withdraw_amount_state, setWithdraw_amount_state] = useState(0);
     const handleCopy = () => {
         const textToCopy = document.getElementById('copyText');
         navigator.clipboard.writeText(textToCopy.textContent).then(() => {
-            setShowBottomAlert(true);
-            setTimeout(() => setShowBottomAlert(false), 2000);
+            setShowBottomAlert_state(true);
+            setTimeout(() => setShowBottomAlert_state(false), 2000);
         });
     };
+
     return (
         <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
             <div className='px-2 py-2'>
@@ -23,7 +24,7 @@ const Withdraw = ({ setShowBottomAlert }) => {
                             <p className="text-lg">Available Balance</p>
                         </div>
                         <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
-                        <i className="fa-duotone fa-light fa-money-from-bracket hover_on_image"></i>
+                            <i className="fa-duotone fa-light fa-money-from-bracket hover_on_image"></i>
                         </div>
                     </div>
                     <div className="bg-red-500 p-6 rounded-lg shadow-md text-white relative hover_on_image_with_div">
@@ -88,7 +89,7 @@ const Withdraw = ({ setShowBottomAlert }) => {
                                     <span className='text-gray-500 font-medium'>Order number</span>
                                     <span className='text-gray-500 font-medium space-x-1'>
                                         <span id='copyText'>WD20250125458KJSH4584</span>
-                                        <i onClick={(e)=>{
+                                        <i onClick={(e) => {
                                             handleCopy()
                                             e.target.className = 'fa-solid fa-clipboard cursor-pointer'
                                             setTimeout(() => {
