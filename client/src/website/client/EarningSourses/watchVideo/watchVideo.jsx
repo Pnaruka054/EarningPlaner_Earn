@@ -53,6 +53,7 @@ const WatchVideo = () => {
         let video_stop_traker = setInterval(() => {
             let ads_header__close_ad = document.getElementsByClassName('ads_header__close-ad')[0].children[0].innerText
             if (ads_header__close_ad === 'Close ad') {
+                console.log("success");
                 document.querySelector(iframe).remove()
                 document.querySelector(script).remove()
                 document.querySelector('span[class="ads_header__close-ad"]').remove()
