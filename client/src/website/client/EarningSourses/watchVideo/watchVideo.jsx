@@ -50,6 +50,7 @@ const WatchVideo = () => {
     }, [onClicka_clickadilla_state]);
 
     async function handle_onClickaAds(iframe, script) {
+        let onClicka_video_ads_div = document.getElementById('onClicka_video_ads_div')
         await setOnClickaAds_state((p) => p = true)
         let video_slider = document.getElementsByClassName('video_slider')[0]
         let video_stop_traker = setInterval(() => {
@@ -77,12 +78,20 @@ const WatchVideo = () => {
                 setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
                 sethandle_videoAds_btnClick_state_state((p) => p = false)
                 clearInterval(video_stop_traker)
+            } else if (onClicka_video_ads_div.children[0].style.display === 'none') {
+                document.querySelector(iframe).remove()
+                document.querySelector(script).remove()
+                document.querySelector('span[class="ads_header__close-ad"]').remove()
+                setOnClickaAds_state((p) => p = false)
+                setBottomAlert_state((p) => p = 'ooh Please Try again!')
+                setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
+                sethandle_videoAds_btnClick_state_state((p) => p = false)
+                clearInterval(video_stop_traker)
             }
         }, 1000)
         await video_slider.removeAttribute('class')
         await video_slider.removeAttribute('style')
         video_slider.style.flexDirection = 'column'
-        let onClicka_video_ads_div = document.getElementById('onClicka_video_ads_div')
         onClicka_video_ads_div.appendChild(video_slider)
         setProcessing_state((p) => p = false)
     }
