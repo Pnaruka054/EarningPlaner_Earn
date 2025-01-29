@@ -7,7 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        poppins: ["Poppins", 'serif']
+        poppins: ["Poppins", 'serif'],
+        lexend: ["Lexend Giga", 'serif']
       }
     },
   },

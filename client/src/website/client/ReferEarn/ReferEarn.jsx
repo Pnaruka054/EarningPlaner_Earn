@@ -74,7 +74,7 @@ const ReferEarn = () => {
                         <pre className="bg-gray-100 p-2 rounded-md text-gray-800 font-bold">{referralLink}</pre>
                         <button
                             className="btn btn-outline-primary text-sm bg-blue-500 hover:bg-blue-600 text-white rounded p-2"
-                            onClick={() => copyToClipboard(referralLink)}
+                            onClick={() => copyToClipboard(referralLink)} 
                         >
                             <i className="fa fa-copy"></i>
                         </button>

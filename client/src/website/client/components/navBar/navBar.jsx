@@ -73,7 +73,7 @@ const NavBar = ({ sideMenu_show, show }) => {
 
     return (
         <>
-            <nav className='bg-blue-600 select-none z-1 h-12 px-3 flex items-center fixed top-0 left-0 right-0 justify-between shadow'>
+            <nav className='bg-blue-600 select-none z-[2] h-12 px-3 flex items-center fixed top-0 left-0 right-0 justify-between shadow'>
                 <span className='h-[100%] hidden md:flex items-center'>
                     <img className='h-[90%]' src={navBar_logo} alt="hello prem" />
                 </span>

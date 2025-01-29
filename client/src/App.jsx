@@ -50,7 +50,7 @@ const App = () => {
       }
       {
         showBottomAlert_state && createPortal(
-          <BottomAlert />,
+          <BottomAlert text={'Text copied to clipboard!'} />,
           document.getElementById('showBottomAlert')
         )
       }

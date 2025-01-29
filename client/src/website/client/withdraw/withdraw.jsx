@@ -91,6 +91,7 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                                         <span id='copyText'>WD20250125458KJSH4584</span>
                                         <i onClick={(e) => {
                                             handleCopy()
+                                            console.log("sdfh");
                                             e.target.className = 'fa-solid fa-clipboard cursor-pointer'
                                             setTimeout(() => {
                                                 e.target.className = 'fa-regular fa-clipboard cursor-pointer'
