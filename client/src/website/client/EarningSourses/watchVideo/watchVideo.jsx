@@ -63,6 +63,17 @@ const WatchVideo = () => {
                 setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
                 sethandle_videoAds_btnClick_state_state((p) => p = false)
                 clearInterval(video_stop_traker)
+            } else if (!ads_header__close_ad) {
+                console.log("success");
+                document.querySelector(iframe).remove()
+                document.querySelector(script).remove()
+                document.querySelector('span[class="ads_header__close-ad"]').remove()
+                video_slider.style.display = 'none'
+                setOnClickaAds_state((p) => p = false)
+                setBottomAlert_state((p) => p = 'Success!')
+                setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
+                sethandle_videoAds_btnClick_state_state((p) => p = false)
+                clearInterval(video_stop_traker)
             }
         }, 1000)
         video_slider.removeAttribute('class')
