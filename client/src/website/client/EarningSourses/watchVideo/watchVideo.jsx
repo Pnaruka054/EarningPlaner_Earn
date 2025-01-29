@@ -49,48 +49,48 @@ const WatchVideo = () => {
         };
     }, [onClicka_clickadilla_state]);
 
-    async function handle_onClickaAds(iframe, script) {
+    function handle_onClickaAds(iframe, script) {
         let onClicka_video_ads_div = document.getElementById('onClicka_video_ads_div')
-        await setOnClickaAds_state((p) => p = true)
+        setOnClickaAds_state((p) => p = true)
         let video_slider = document.getElementsByClassName('video_slider')[0]
         let video_stop_traker = setInterval(() => {
             console.log("Interval");
             let ads_header__close_ad = document.getElementsByClassName('ads_header__close-ad')[0].children[0].innerText
             if (ads_header__close_ad === 'Close ad') {
                 console.log("success");
+                clearInterval(video_stop_traker)
+                document.getElementById('onClicka_video_ads_div').innerHTML = ''
                 document.querySelector(iframe).remove()
                 document.querySelector(script).remove()
-                document.querySelector('span[class="ads_header__close-ad"]').remove()
                 video_slider.style.display = 'none'
                 setOnClickaAds_state((p) => p = false)
                 setBottomAlert_state((p) => p = 'Success!')
                 setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
                 sethandle_videoAds_btnClick_state_state((p) => p = false)
-                clearInterval(video_stop_traker)
             } else if (!ads_header__close_ad) {
+                clearInterval(video_stop_traker)
                 console.log("success2");
+                document.getElementById('onClicka_video_ads_div').innerHTML = ''
                 document.querySelector(iframe).remove()
                 document.querySelector(script).remove()
-                document.querySelector('span[class="ads_header__close-ad"]').remove()
                 video_slider.style.display = 'none'
                 setOnClickaAds_state((p) => p = false)
                 setBottomAlert_state((p) => p = 'Success!')
                 setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
                 sethandle_videoAds_btnClick_state_state((p) => p = false)
-                clearInterval(video_stop_traker)
             } else if (onClicka_video_ads_div.children[0].style.display === 'none') {
+                clearInterval(video_stop_traker)
+                document.getElementById('onClicka_video_ads_div').innerHTML = ''
                 document.querySelector(iframe).remove()
                 document.querySelector(script).remove()
-                document.querySelector('span[class="ads_header__close-ad"]').remove()
                 setOnClickaAds_state((p) => p = false)
                 setBottomAlert_state((p) => p = 'ooh Please Try again!')
                 setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
                 sethandle_videoAds_btnClick_state_state((p) => p = false)
-                clearInterval(video_stop_traker)
             }
         }, 1000)
-        await video_slider.removeAttribute('class')
-        await video_slider.removeAttribute('style')
+        video_slider.removeAttribute('class')
+        video_slider.removeAttribute('style')
         video_slider.style.flexDirection = 'column'
         onClicka_video_ads_div.appendChild(video_slider)
         setProcessing_state((p) => p = false)
@@ -118,7 +118,7 @@ const WatchVideo = () => {
                             sethandle_videoAds_btnClick_state_state(true)
                             setProcessing_state((p) => p = true)
                             setOnClicka_clickadilla_state('clickAdilla')
-                            OnClickaVideoAds('https://js.wpadmngr.com/static/adManager.js', '286581')
+                            OnClickaVideoAds('https://js.wpadmngr.com/static/adManager.js', '286401')
                         }}><span>Watch Video 2</span><span>₹0.001</span></button>
                         {/* <button disabled={handle_videoAds_btnClick_state ? true : false} className={`${handle_videoAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`}><span>Watch Video 3</span><span>₹0.002</span></button>
                         <button disabled={handle_videoAds_btnClick_state ? true : false} className={`${handle_videoAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`}><span>Watch Video 4</span><span>₹0.002</span></button>
