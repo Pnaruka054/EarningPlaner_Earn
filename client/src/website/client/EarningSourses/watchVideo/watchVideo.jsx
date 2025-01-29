@@ -112,7 +112,7 @@ const WatchVideo = () => {
                             sethandle_videoAds_btnClick_state_state(true)
                             setProcessing_state((p) => p = true)
                             setOnClicka_clickadilla_state('onClicka')
-                            OnClickaVideoAds('https://js.onclckmn.com/static/onclicka.js', '286401')
+                            OnClickaVideoAds('https://js.onclckmn.com/static/onclicka.js', '287247')
                         }}><span>Watch Video 1</span><span>₹0.001</span></button>
                         <button disabled={handle_videoAds_btnClick_state ? true : false} className={`${handle_videoAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={() => {
                             sethandle_videoAds_btnClick_state_state(true)
