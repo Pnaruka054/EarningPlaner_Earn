@@ -10,6 +10,7 @@ import poolTrading from '../../../assets/poolTrading.png'
 import Games from '../../../assets/Games.png'
 import FillSurvey from '../../../assets/FillSurvey.png'
 import Mining from '../../../assets/Mining.png'
+import ClickToEarn from '../../../assets/ClickToEarn.png'
 import Footer from '../components/footer/footer';
 import { Link } from 'react-router-dom';
 
@@ -51,12 +52,12 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
         } else {
             logOut_btnRef.current.innerHTML = `LogOut`
         }
-        window.addEventListener('click',(e)=>{
+        window.addEventListener('click', (e) => {
             e.stopPropagation()
             dropdownRef.current.classList.add('hidden')
         })
-        return () =>{
-            window.removeEventListener('click',(e)=>{
+        return () => {
+            window.removeEventListener('click', (e) => {
                 e.stopPropagation()
                 dropdownRef.current.classList.add('hidden')
             })
@@ -64,7 +65,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
     }, [getLogOut_btnClicked]);
 
     return (
-        <div onScroll={(e)=>{
+        <div onScroll={(e) => {
             e.stopPropagation()
             dropdownRef.current.classList.add('hidden')
         }} className="ml-auto bg-[#ecf0f5] flex flex-col justify-between  w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
@@ -79,31 +80,31 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
                         <div>₹0.2155</div>
                         <img src={Watch_Video_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </Link>
-                    <div className="bg-green-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
+                    <Link to="/member/view-ads" className="bg-green-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>View Ads</div>
                         <div>₹0.2155</div>
                         <img src={ViewAds} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
+                    </Link>
+                    {/* bg-purple-500 */}  <div className=" text-white bg-gray-500 relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
+                        <div>Play Betting Game</div>
+                        <div>Null</div>
+                        <img src={Betting_games_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
                     </div>
-                    <div className="bg-red-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
+                    {/* bg-red-500 */} <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Play Games</div>
-                        <div>₹0.2155</div>
-                        <img src={Games} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
+                        <div>Null</div>
+                        <img src={Games} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
                     </div>
-                    <div className="bg-orange-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
+                    <Link to="/member/click-to-earn" className="bg-teal-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
+                        <div>Click to Earn</div>
+                        <div>₹0.2155</div>
+                        <img src={ClickToEarn} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
+                    </Link>
+                    <Link to="/member/click-on-ads" className="bg-orange-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Click On Ads</div>
                         <div>₹0.2155</div>
                         <img src={ClickOnAds} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
-                    </div>
-                    <div className="bg-purple-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Play Betting Game</div>
-                        <div>₹0.2155</div>
-                        <img src={Betting_games_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
-                    </div>
-                    <div className="bg-yellow-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Play Quiz</div>
-                        <div>₹0.2155</div>
-                        <img src={Quiz} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
-                    </div>
+                    </Link>
                     <div className="bg-cyan-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Click Shorten Link</div>
                         <div>₹0.2155</div>
@@ -114,25 +115,30 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
                     <div>₹0.2155</div>
                     <img src={Watch_Video_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                 </div> */}
+                    {/* bg-yellow-500 */} <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
+                        <div>Play Quiz</div>
+                        <div>Null</div>
+                        <img src={Quiz} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
+                    </div>
+                    {/* bg-indigo-500 */} <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
+                        <div>Pool Trading</div>
+                        <div>Null</div>
+                        <img src={poolTrading} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
+                    </div>
                     <div className="bg-pink-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Short Link</div>
                         <div>₹0.2155</div>
                         <img src={ShortLink_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </div>
-                    <div className="bg-indigo-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Pool Trading</div>
-                        <div>₹0.2155</div>
-                        <img src={poolTrading} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
-                    </div>
-                    <div className="bg-blue-300 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Fill Survey</div>
-                        <div>₹0.2155</div>
-                        <img src={FillSurvey} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
-                    </div>
                     <div className="bg-green-700 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Mining</div>
                         <div>₹0.2155</div>
                         <img src={Mining} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
+                    </div>
+                    {/* bg-blue-300 */} <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
+                        <div>Fill Survey</div>
+                        <div>Null</div>
+                        <img src={FillSurvey} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
                     </div>
                 </div>
                 <div className="w-full mt-4 bg-white border border-blue-500 rounded-lg shadow-md mb-4">

@@ -16,12 +16,16 @@ import ReferEarn from './website/client/ReferEarn/ReferEarn';
 import Profile from './website/client/profile/profile';
 import Setting from './website/client/setting/setting';
 import WatchVideo from './website/client/EarningSourses/watchVideo/watchVideo';
+import ViewAds from './website/client/EarningSourses/viewAds/viewAds';
+import ClickToEarn from './website/client/EarningSourses/clickToEarn/clickToEarn';
+import WaitRedirecting from './website/client/EarningSourses/clickToEarn/waitRedirecting';
 
 const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
   const [showPopUp_onLogOut_btn_state, setShowPopUp_onLogOut_btn_state] = useState(false);
   const [sideMenu_state, setSideMenu_state] = useState('menu-outline');
   const [showBottomAlert_state, setShowBottomAlert_state] = useState(false);
+  const [showSideMenu_navBar_state, setShowSideMenu_navBar_state] = useState(true);
 
   const location = useLocation();
   useEffect(() => {
@@ -32,12 +36,15 @@ const App = () => {
     ) {
       setshow_NavBar_state(true)
     }
+    if (location.pathname === '/waitRedirecting') {
+      setShowSideMenu_navBar_state(false)
+    }
   }, []);
 
   return (
     <>
       {
-        createPortal(
+        showSideMenu_navBar_state && createPortal(
           <NavBar sideMenu_show={{ sideMenu_state, setSideMenu_state }} show={show_navBar_state} />,
           document.getElementById('navBar')
         )
@@ -54,7 +61,7 @@ const App = () => {
           document.getElementById('showBottomAlert')
         )
       }
-      {!show_navBar_state && <SideMenu sideMenu_show={{ sideMenu_state, setSideMenu_state }} />}
+      {showSideMenu_navBar_state && !show_navBar_state && <SideMenu sideMenu_show={{ sideMenu_state, setSideMenu_state }} />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
@@ -67,6 +74,9 @@ const App = () => {
         <Route path="/member/profile" element={<Profile />} />
         {/* Earning Sourse */}
         <Route path="/member/watch-video" element={<WatchVideo />} />
+        <Route path="/member/click-to-earn" element={<ClickToEarn />} />
+        <Route path="/member/view-ads" element={<ViewAds />} />
+        <Route path="/waitRedirecting" element={<WaitRedirecting />} />
       </Routes>
     </>
   );
