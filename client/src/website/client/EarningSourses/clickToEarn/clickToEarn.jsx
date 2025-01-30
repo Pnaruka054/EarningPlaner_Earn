@@ -26,6 +26,7 @@ const ClickToEarn = () => {
             setBottomAlert_state('Success!');
             setTimeout(() => {
                 setBottomAlert_state(false);
+                alert('success')
             }, 3000);
         }
     }, [clickSuccess_state]);
