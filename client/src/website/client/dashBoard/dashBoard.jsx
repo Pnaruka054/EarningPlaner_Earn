@@ -77,12 +77,12 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
                 <div className="grid grid-cols-2 grid-rows-6 sm:grid-cols-3 sm:grid-rows-4 grid-flow-col gap-2 font-poppins text-lg sm:text-xl text-center">
                     <Link to="/member/watch-video" className="bg-blue-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Watch Video</div>
-                        <div>₹0.2155</div>
+                        <div className='z-[1]'>₹0.2155</div>
                         <img src={Watch_Video_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </Link>
                     <Link to="/member/view-ads" className="bg-green-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>View Ads</div>
-                        <div>₹0.2155</div>
+                        <div className='z-[1]'>₹0.2155</div>
                         <img src={ViewAds} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </Link>
                     {/* bg-purple-500 */}  <div className=" text-white bg-gray-500 relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
@@ -97,22 +97,22 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
                     </div>
                     <Link to="/member/click-to-earn" className="bg-teal-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Click to Earn</div>
-                        <div>₹0.2155</div>
+                        <div className='z-[1]'>₹0.2155</div>
                         <img src={ClickToEarn} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </Link>
                     <Link to="/member/click-on-ads" className="bg-orange-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Click On Ads</div>
-                        <div>₹0.2155</div>
+                        <div className='z-[1]'>₹0.2155</div>
                         <img src={ClickOnAds} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </Link>
                     <div className="bg-cyan-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Click Shorten Link</div>
-                        <div>₹0.2155</div>
+                        <div className='z-[1]'>₹0.2155</div>
                         <img src={ClickShortenLink_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </div>
                     {/* <div className="bg-lime-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                     <div>Referral Income</div>
-                    <div>₹0.2155</div>
+                    <div className='z-[1]'>₹0.2155</div>
                     <img src={Watch_Video_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                 </div> */}
                     {/* bg-yellow-500 */} <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
@@ -127,12 +127,12 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
                     </div>
                     <div className="bg-pink-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Short Link</div>
-                        <div>₹0.2155</div>
+                        <div className='z-[1]'>₹0.2155</div>
                         <img src={ShortLink_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </div>
                     <div className="bg-green-700 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Mining</div>
-                        <div>₹0.2155</div>
+                        <div className='z-[1]'>₹0.2155</div>
                         <img src={Mining} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </div>
                     {/* bg-blue-300 */} <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">

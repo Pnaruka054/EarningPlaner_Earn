@@ -26,8 +26,7 @@ const ClickToEarn = () => {
             setBottomAlert_state('Success!');
             setTimeout(() => {
                 setBottomAlert_state(false);
-                alert('success')
-            }, 3000);
+            }, 10000);
         }
     }, [clickSuccess_state]);
 
@@ -42,8 +41,10 @@ const ClickToEarn = () => {
         'Users can change their IP address 50 times per day.',
         'Users can maximize their income by clicking Ads and changing IPs carefully.',
         'The cycle resets every day to allow users to earn again.',
-        'As more users join the platform, the limits on ad clicks and IP changes will gradually increase, allowing users to earn even more as the platform grows.'
-    ];    
+        'As more users join the platform, the limits on ad clicks and IP changes will gradually increase, allowing users to earn even more as the platform grows.',
+        'Please do not attempt to cheat or hack the website, as this could lead to your account being permanently banned. We are working hard to increase your income opportunities, so please follow the rules and earn money fairly. Any attempts to exploit scripts or find income tricks will result in both you and us being unable to earn. Follow the guidelines to maximize your earnings.'
+    ];
+    
     
 
     const handle_link_click = (link) => {

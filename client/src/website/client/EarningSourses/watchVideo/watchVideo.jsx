@@ -22,7 +22,8 @@ const WatchVideo = () => {
         'After 10 IP changes, they must wait 24 hours before earning again.',
         'Users can maximize their income by watching ads and changing IPs carefully.',
         'After 10 IP changes, the cycle resets the next day.',
-        'As more users join the platform, the limits on ad clicks and IP changes will gradually increase, allowing users to earn even more as the platform grows.'
+        'As more users join the platform, the limits on ad clicks and IP changes will gradually increase, allowing users to earn even more as the platform grows.',
+        'Please do not attempt to cheat or hack the website, as this could lead to your account being permanently banned. We are working hard to increase your income opportunities, so please follow the rules and earn money fairly. Any attempts to exploit scripts or find income tricks will result in both you and us being unable to earn. Follow the guidelines to maximize your earnings.'
     ]
 
     useEffect(() => {
