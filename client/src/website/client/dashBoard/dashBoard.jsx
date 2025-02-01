@@ -54,7 +54,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
         }
         window.addEventListener('click', (e) => {
             e.stopPropagation()
-            dropdownRef.current.classList.add('hidden')
+            dropdownRef.current?.classList.add('hidden')
         })
         return () => {
             window.removeEventListener('click', (e) => {

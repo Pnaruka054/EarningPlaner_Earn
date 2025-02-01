@@ -70,6 +70,7 @@ const ViewAds = () => {
                     setShowAdsDiv_state(false)
                     setTimerCount_state(10)
                     handelDottomAlert('Success!')
+                    setHandle_clickAds_btnClick_state(false)
                     clearInterval(interval)
                 }
                 return newCount;
@@ -104,28 +105,31 @@ const ViewAds = () => {
             let count = 0;
             let checkInterval = setInterval(() => {
                 count += 0
-                if (count === 5 || adDiv.children[1].tagName === 'IFRAME') {
-                    clearInterval(checkInterval)
-                }
-                if (adDiv.children[1].tagName === 'IFRAME') {
-                    setTimeout(() => {
-                        setRemoveTimer_state(true)
-                        setProcessing_state((p) => p = false)
-                    }, 1000);
-                    let interval = setInterval(() => {
-                        setTimerCount_state((prevCount) => {
-                            const newCount = prevCount - 1;
-                            if (newCount === -1) {
-                                adDiv.innerHTML = ''
-                                setShowAdsDiv_state(false)
-                                clearInterval(interval)
-                                handelDottomAlert('Success!')
-                                setTimerCount_state(10)
-                            }
-                            return newCount;
-                        });
-                    }, 1000);
-                }
+                Array.from(adDiv.children).forEach((elements) => {
+                    if (count === 5 || elements.tagName === 'IFRAME') {
+                        clearInterval(checkInterval)
+                    }
+                    if (elements.tagName === 'IFRAME') {
+                        setTimeout(() => {
+                            setRemoveTimer_state(true)
+                            setProcessing_state((p) => p = false)
+                        }, 1000);
+                        let interval = setInterval(() => {
+                            setTimerCount_state((prevCount) => {
+                                const newCount = prevCount - 1;
+                                if (newCount === -1) {
+                                    adDiv.innerHTML = ''
+                                    setShowAdsDiv_state(false)
+                                    clearInterval(interval)
+                                    handelDottomAlert('Success!')
+                                    setHandle_clickAds_btnClick_state(false)
+                                    setTimerCount_state(10)
+                                }
+                                return newCount;
+                            });
+                        }, 1000);
+                    }
+                })
             }, 1000);
 
         } else {
@@ -133,10 +137,52 @@ const ViewAds = () => {
         }
     }
 
-
     function handelClick() {
         setShowAdsDiv_state(true)
         setProcessing_state((p) => p = true)
+    }
+
+    const a_ads_loder = () => {
+        const adContainer = document.getElementById('A_ads');
+        if (adContainer) {
+            adContainer.innerHTML = ''; // Clear the div if any content exists
+            adContainer.innerHTML = `
+        <div id="frame" style="width: 300px; height: auto;">
+          <iframe
+            data-aa="2379444"
+            src="//ad.a-ads.com/2379444?size=300x250"
+            style="width: 300px; height: 250px; border: 0px; padding: 0; overflow: hidden; background-color: transparent;"
+          ></iframe>
+          <a
+            style="display: block; text-align: right; font-size: 12px;"
+            id="preview-link"
+            href="https://aads.com/campaigns/new/?source_id=2379444&source_type=ad_unit&partner=2379444"
+          >
+            Advertise here
+          </a>
+        </div>
+      `;
+        }
+        if (adContainer.children[0].children[0].tagName === 'IFRAME') {
+            setTimeout(() => {
+                setRemoveTimer_state(true)
+                setProcessing_state((p) => p = false)
+            }, 1000);
+            let interval = setInterval(() => {
+                setTimerCount_state((prevCount) => {
+                    const newCount = prevCount - 1;
+                    if (newCount === -1) {
+                        adContainer.innerHTML = ''
+                        setShowAdsDiv_state(false)
+                        clearInterval(interval)
+                        handelDottomAlert('Success!')
+                        setHandle_clickAds_btnClick_state(false)
+                        setTimerCount_state(10)
+                    }
+                    return newCount;
+                });
+            }, 1000);
+        }
     }
 
     return (
@@ -164,11 +210,15 @@ const ViewAds = () => {
                         <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
                             const adSterrakeys = ['9053e4594f6f11cc52b1a92378164206', 'f897c99fe416f65a488b750d0f978646'];
                             let randomNumber = Math.floor(Math.random() * adSterrakeys.length)
-                            console.log(randomNumber);
                             loadAd('9053e4594f6f11cc52b1a92378164206')
                             setHandle_clickAds_btnClick_state(true)
                             handelClick()
                         }}><span>Click On Ads 3</span><span>₹0.01</span></button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
+                            a_ads_loder()
+                            setHandle_clickAds_btnClick_state(true)
+                            handelClick()
+                        }}><span>Click On Ads 4</span><span>₹0.01</span></button>
                         {bottomAlert_state && <BottomAlert text={bottomAlert_state} />}
                     </div>
                 </div>
@@ -177,6 +227,7 @@ const ViewAds = () => {
                     <div data-banner-id="6033510" ></div>
                     <div data-banner-id="1435822"></div>
                     <div id="adSterra"></div>
+                    <div id="A_ads"></div>
                 </div>
                 <div className='bg-white rounded shadow px-5 py-2 mt-5'>
                     <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>Click Ads Instructions</p>
