@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Footer from '../../components/footer/footer';
 import OnClickaVideoAds from '../../components/onClickaVideoAds/onClickaVideoAds';
 import ProcessBgBlack from '../../components/processBgBlack/processBgBlack';
+import BottomAlert from '../../components/bottomAlert/bottomAlert';
 
 const ViewAds = () => {
     const [handle_clickAds_btnClick_state, setHandle_clickAds_btnClick_state] = useState(false);
@@ -11,14 +12,12 @@ const ViewAds = () => {
     const [timerCount_state, setTimerCount_state] = useState(10);
     const [removeTimer_state, setRemoveTimer_state] = useState(false);
 
-    // useEffect(() => {
-    //     if (clickSuccess_state) {
-    //         setBottomAlert_state('Success!');
-    //         setTimeout(() => {
-    //             setBottomAlert_state(false);
-    //         }, 10000);
-    //     }
-    // }, [clickSuccess_state]);
+    function handelDottomAlert(result) {
+        setBottomAlert_state(result);
+        setTimeout(() => {
+            setBottomAlert_state(false);
+        }, 3000);
+    }
 
 
     let Instructions = [
@@ -67,14 +66,71 @@ const ViewAds = () => {
             setTimerCount_state((prevCount) => {
                 const newCount = prevCount - 1;
                 if (newCount === -1) {
-                    gfpl_wrapper[0].remove()
+                    gfpl_wrapper[0]?.remove()
                     setShowAdsDiv_state(false)
+                    setTimerCount_state(10)
+                    handelDottomAlert('Success!')
                     clearInterval(interval)
-                    setTimerCount_state(0)
                 }
                 return newCount;
             });
         }, 1000);
+    }
+
+    function loadAd(key) {
+        const adDiv = document.getElementById('adSterra')
+        if (adDiv) {
+            adDiv.innerHTML = '';
+
+            const script1 = document.createElement('script');
+            script1.type = 'text/javascript';
+            script1.innerHTML = `
+            atOptions = {
+              'key': '${key}',
+              'format': 'iframe',
+              'height': 250,
+              'width': 300,
+              'params': {}
+            };
+          `;
+
+            adDiv.appendChild(script1);
+
+            const script2 = document.createElement('script');
+            script2.type = 'text/javascript';
+            script2.src = `//www.highperformanceformat.com/${key}/invoke.js`;
+
+            adDiv.appendChild(script2);
+            let count = 0;
+            let checkInterval = setInterval(() => {
+                count += 0
+                if (count === 5 || adDiv.children[1].tagName === 'IFRAME') {
+                    clearInterval(checkInterval)
+                }
+                if (adDiv.children[1].tagName === 'IFRAME') {
+                    setTimeout(() => {
+                        setRemoveTimer_state(true)
+                        setProcessing_state((p) => p = false)
+                    }, 1000);
+                    let interval = setInterval(() => {
+                        setTimerCount_state((prevCount) => {
+                            const newCount = prevCount - 1;
+                            if (newCount === -1) {
+                                adDiv.innerHTML = ''
+                                setShowAdsDiv_state(false)
+                                clearInterval(interval)
+                                handelDottomAlert('Success!')
+                                setTimerCount_state(10)
+                            }
+                            return newCount;
+                        });
+                    }, 1000);
+                }
+            }, 1000);
+
+        } else {
+            console.error('Ad container (adstrra) not found.');
+        }
     }
 
 
@@ -97,12 +153,22 @@ const ViewAds = () => {
                     <div className='gap-2 justify-center bg-white px-6 py-3 shadow flex flex-wrap'>
                         <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
                             OnClickaVideoAds('https://js.onclckmn.com/static/onclicka.js', '234995')
+                            setHandle_clickAds_btnClick_state(true)
                             handelClick()
                         }}><span>Click On Ads 1</span><span>₹0.01</span></button>
                         <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
                             OnClickaVideoAds('https://js.wpadmngr.com/static/adManager.js', '288449')
+                            setHandle_clickAds_btnClick_state(true)
                             handelClick()
                         }}><span>Click On Ads 2</span><span>₹0.01</span></button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
+                            const adSterrakeys = ['9053e4594f6f11cc52b1a92378164206', 'f897c99fe416f65a488b750d0f978646'];
+                            let randomNumber = Math.floor(Math.random() * adSterrakeys.length)
+                            console.log(randomNumber);
+                            loadAd('9053e4594f6f11cc52b1a92378164206')
+                            setHandle_clickAds_btnClick_state(true)
+                            handelClick()
+                        }}><span>Click On Ads 3</span><span>₹0.01</span></button>
                         {bottomAlert_state && <BottomAlert text={bottomAlert_state} />}
                     </div>
                 </div>
@@ -110,6 +176,7 @@ const ViewAds = () => {
                     {removeTimer_state && <div className='bg-gray-500 text-white px-2 h-10 text-center rounded-md -mb-[14px]'>Please Wait - {timerCount_state}sec</div>}
                     <div data-banner-id="6033510" ></div>
                     <div data-banner-id="1435822"></div>
+                    <div id="adSterra"></div>
                 </div>
                 <div className='bg-white rounded shadow px-5 py-2 mt-5'>
                     <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>Click Ads Instructions</p>
