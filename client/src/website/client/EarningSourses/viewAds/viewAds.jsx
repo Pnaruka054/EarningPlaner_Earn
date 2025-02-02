@@ -6,7 +6,6 @@ import Swal from 'sweetalert2'
 
 const ViewAds = () => {
     const [handle_clickAds_btnClick_state, setHandle_clickAds_btnClick_state] = useState(false);
-    const [bottomAlert_state, setBottomAlert_state] = useState(false);
     const [showAdsDiv_state, setShowAdsDiv_state] = useState(false);
     const [processing_state, setProcessing_state] = useState(false);
     const [timerCount_state, setTimerCount_state] = useState(15);
@@ -79,6 +78,7 @@ const ViewAds = () => {
                         icon: "success",
                     });
                     setHandle_clickAds_btnClick_state(false)
+                    setRemoveTimer_state(false)
                     if (selector === 'div[data-banner-id="1435822"] .gfpl-wrapper') {
                         document.querySelector('div[data-banner-id="1435822"]').innerHTML = ''
                     }
@@ -137,6 +137,7 @@ const ViewAds = () => {
                                         icon: "success",
                                     });
                                     setHandle_clickAds_btnClick_state(false)
+                                    setRemoveTimer_state(false)
                                     setTimerCount_state(15)
                                 }
                                 return newCount;
@@ -188,6 +189,7 @@ const ViewAds = () => {
                             title: "Success!",
                             icon: "success",
                         });
+                        setRemoveTimer_state(false)
                         setHandle_clickAds_btnClick_state(false)
                         setTimerCount_state(15)
                     }
@@ -228,6 +230,7 @@ const ViewAds = () => {
                                 title: "Success!",
                                 icon: "success",
                             });
+                            setRemoveTimer_state(false)
                             setHandle_clickAds_btnClick_state(false)
                             setTimerCount_state(10)
                         }
@@ -256,8 +259,10 @@ const ViewAds = () => {
                 document.querySelector(script).remove()
                 video_slider.style.display = 'none'
                 setShowAdsDiv_state((p) => p = false)
-                setBottomAlert_state((p) => p = 'Success!')
-                setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
+                Swal.fire({
+                    title: "Success!",
+                    icon: "success",
+                });
                 setHandle_clickAds_btnClick_state((p) => p = false)
             } else if (!ads_header__close_ad) {
                 clearInterval(video_stop_traker)
@@ -266,8 +271,10 @@ const ViewAds = () => {
                 document.querySelector(script).remove()
                 video_slider.style.display = 'none'
                 setShowAdsDiv_state((p) => p = false)
-                setBottomAlert_state((p) => p = 'Success!')
-                setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
+                Swal.fire({
+                    title: "Success!",
+                    icon: "success",
+                });
                 setHandle_clickAds_btnClick_state((p) => p = false)
             } else if (onClicka_video_ads_div.children[0].style.display === 'none') {
                 clearInterval(video_stop_traker)
@@ -275,8 +282,11 @@ const ViewAds = () => {
                 document.querySelector(iframe).remove()
                 document.querySelector(script).remove()
                 setShowAdsDiv_state((p) => p = false)
-                setBottomAlert_state((p) => p = 'ooh Please Try again!')
-                setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
+                Swal.fire({
+                    icon: "error",
+                    title: "Success!",
+                    text: "Something went wrong!",
+                });
                 setHandle_clickAds_btnClick_state((p) => p = false)
             }
         }, 1000)
@@ -403,7 +413,6 @@ const ViewAds = () => {
                         <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click(e, 'https://pertlouv.com/iUyUq55zfnw=?')}>
                             <span>Click On Ads 17</span><span>₹0.01</span>
                         </button>
-                        {bottomAlert_state && <BottomAlert text={bottomAlert_state} />}
                     </div>
                 </div>
                 <div id="container-f2e76b1a9af84306102d9f8675c030e8"></div>
