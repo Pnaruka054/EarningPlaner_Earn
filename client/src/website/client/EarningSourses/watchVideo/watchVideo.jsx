@@ -5,7 +5,7 @@ import BottomAlert from '../../components/bottomAlert/bottomAlert';
 import ProcessBgBlack from '../../components/processBgBlack/processBgBlack';
 
 const WatchVideo = () => {
-    const [onClickaAds_state, setOnClickaAds_state] = useState(false);
+    const [handle_clickAds_btnClick_state, setHandle_clickAds_btnClick_statee] = useState(false);
     const [bottomAlert_state, setBottomAlert_state] = useState(false);
     const [onClicka_clickadilla_state, setOnClicka_clickadilla_state] = useState('');
     const [handle_videoAds_btnClick_state, sethandle_videoAds_btnClick_state_state] = useState(false);
@@ -53,7 +53,7 @@ const WatchVideo = () => {
 
     function handle_onClickaAds(iframe, script) {
         let onClicka_video_ads_div = document.getElementById('onClicka_video_ads_div')
-        setOnClickaAds_state((p) => p = true)
+        setHandle_clickAds_btnClick_statee((p) => p = true)
         let video_slider = document.getElementsByClassName('video_slider')[0]
         let video_stop_traker = setInterval(() => {
             console.log("Interval");
@@ -65,7 +65,7 @@ const WatchVideo = () => {
                 document.querySelector(iframe).remove()
                 document.querySelector(script).remove()
                 video_slider.style.display = 'none'
-                setOnClickaAds_state((p) => p = false)
+                setHandle_clickAds_btnClick_statee((p) => p = false)
                 setBottomAlert_state((p) => p = 'Success!')
                 setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
                 sethandle_videoAds_btnClick_state_state((p) => p = false)
@@ -76,7 +76,7 @@ const WatchVideo = () => {
                 document.querySelector(iframe).remove()
                 document.querySelector(script).remove()
                 video_slider.style.display = 'none'
-                setOnClickaAds_state((p) => p = false)
+                setHandle_clickAds_btnClick_statee((p) => p = false)
                 setBottomAlert_state((p) => p = 'Success!')
                 setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
                 sethandle_videoAds_btnClick_state_state((p) => p = false)
@@ -85,7 +85,7 @@ const WatchVideo = () => {
                 document.getElementById('onClicka_video_ads_div').innerHTML = ''
                 document.querySelector(iframe).remove()
                 document.querySelector(script).remove()
-                setOnClickaAds_state((p) => p = false)
+                setHandle_clickAds_btnClick_statee((p) => p = false)
                 setBottomAlert_state((p) => p = 'ooh Please Try again!')
                 setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
                 sethandle_videoAds_btnClick_state_state((p) => p = false)
@@ -96,6 +96,33 @@ const WatchVideo = () => {
         video_slider.style.flexDirection = 'column'
         onClicka_video_ads_div.appendChild(video_slider)
         setProcessing_state((p) => p = false)
+    }
+
+    function handle_HilltopAds() {
+        const div = document.getElementById('HilltopVideoAds');
+
+        if (div) {
+            // Create a new <script> element
+            const script = document.createElement('script');
+            script.src = "//unusedframe.com/bxXsV.sodQG/lZ0VYEWqcW/DeJmZ9QuDZAU/lxkQP/TLYnwsNrj/MC0iNpzxkUtON/jrAy2/MKzuQ_4oMxAS";
+            script.async = true;
+            script.referrerPolicy = 'no-referrer-when-downgrade';
+
+            // Append the script to the div
+            div.appendChild(script);
+        }
+        let interval = setInterval(() => {
+            let vpaid_video_flash_tester_el = document.getElementById('vpaid_video_flash_tester_el')
+            let HilltopVideoAdsObject_parent = document.getElementById('HilltopVideoAdsObject_parent')
+            let startedVideoCheck = document.getElementsByClassName('▶ started')
+            console.log(startedVideoCheck);
+            console.log(startedVideoCheck.tagName);
+            if (vpaid_video_flash_tester_el.tagName === 'OBJECT') {
+                clearInterval(interval)
+                HilltopVideoAdsObject_parent.appendChild(vpaid_video_flash_tester_el)
+                sethandle_videoAds_btnClick_state_state((p) => p = false)
+            }
+        }, 500);
     }
 
     return (
@@ -122,15 +149,19 @@ const WatchVideo = () => {
                             setOnClicka_clickadilla_state('clickAdilla')
                             OnClickaVideoAds('https://js.wpadmngr.com/static/adManager.js', '287339')
                         }}><span>Watch Video 2</span><span>₹0.001</span></button>
-                        {/* <button disabled={handle_videoAds_btnClick_state ? true : false} className={`${handle_videoAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`}><span>Watch Video 3</span><span>₹0.002</span></button>
-                        <button disabled={handle_videoAds_btnClick_state ? true : false} className={`${handle_videoAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`}><span>Watch Video 4</span><span>₹0.002</span></button>
-                        <button disabled={handle_videoAds_btnClick_state ? true : false} className={`${handle_videoAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`}><span>Watch Video 5</span><span>₹0.002</span></button> */}
+                        <button disabled={handle_videoAds_btnClick_state ? true : false} className={`${handle_videoAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={() => {
+                            sethandle_videoAds_btnClick_state_state(false)
+                            // setProcessing_state((p) => p = true)
+                            handle_HilltopAds()
+                        }}><span>Watch Video 3</span><span>₹0.001</span></button>
+
                         {bottomAlert_state && <BottomAlert text={bottomAlert_state} />}
                     </div>
                 </div>
-                <div className={`z-[1] absolute top-0 left-0 right-0 bottom-0 bg-[#0101015d] flex justify-center items-center ${!onClickaAds_state ? 'hidden' : ''}`}>
+                <div className={`z-[1] absolute top-0 left-0 right-0 bottom-0 bg-[#0101015d] flex justify-center items-center ${!handle_clickAds_btnClick_state ? 'hidden' : ''}`}>
                     <div id="onClicka_video_ads_div" >
                     </div>
+                    <div id="HilltopVideoAds"></div>
                 </div>
                 <div className='bg-white rounded shadow px-5 py-2 mt-5'>
                     <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>Video Ads Instructions</p>

@@ -9,16 +9,15 @@ const ViewAds = () => {
     const [bottomAlert_state, setBottomAlert_state] = useState(false);
     const [showAdsDiv_state, setShowAdsDiv_state] = useState(false);
     const [processing_state, setProcessing_state] = useState(false);
-    const [timerCount_state, setTimerCount_state] = useState(10);
+    const [timerCount_state, setTimerCount_state] = useState(15);
     const [removeTimer_state, setRemoveTimer_state] = useState(false);
 
-    function handelDottomAlert(result) {
+    function handelBottomAlert(result) {
         setBottomAlert_state(result);
         setTimeout(() => {
             setBottomAlert_state(false);
         }, 3000);
     }
-
 
     let Instructions = [
         'Each user gets 5 Ads clicks to earn money per IP address.',
@@ -39,7 +38,7 @@ const ViewAds = () => {
             mutationsList.forEach(mutation => {
                 mutation.addedNodes.forEach(node => {
                     if (node.nodeType === 1 && node.classList.contains('gfpl-wrapper')) {
-                        handelAdsDiv()
+                        handelAdsDiv_for_Onclicka()
                     }
                 });
             });
@@ -54,7 +53,7 @@ const ViewAds = () => {
         };
     }, []);
 
-    function handelAdsDiv() {
+    function handelAdsDiv_for_Onclicka() {
         setProcessing_state(false);
         let gfpl_wrapper = document.getElementsByClassName('gfpl-wrapper');
         if (gfpl_wrapper[0].children[0]) {
@@ -69,7 +68,7 @@ const ViewAds = () => {
                     gfpl_wrapper[0]?.remove()
                     setShowAdsDiv_state(false)
                     setTimerCount_state(10)
-                    handelDottomAlert('Success!')
+                    handelBottomAlert('Success!')
                     setHandle_clickAds_btnClick_state(false)
                     clearInterval(interval)
                 }
@@ -78,7 +77,7 @@ const ViewAds = () => {
         }, 1000);
     }
 
-    function loadAd(key) {
+    function handelAdsDiv_for_adSterra(key) {
         const adDiv = document.getElementById('adSterra')
         if (adDiv) {
             adDiv.innerHTML = '';
@@ -121,7 +120,7 @@ const ViewAds = () => {
                                     adDiv.innerHTML = ''
                                     setShowAdsDiv_state(false)
                                     clearInterval(interval)
-                                    handelDottomAlert('Success!')
+                                    handelBottomAlert('Success!')
                                     setHandle_clickAds_btnClick_state(false)
                                     setTimerCount_state(10)
                                 }
@@ -137,12 +136,7 @@ const ViewAds = () => {
         }
     }
 
-    function handelClick() {
-        setShowAdsDiv_state(true)
-        setProcessing_state((p) => p = true)
-    }
-
-    const a_ads_loder = () => {
+    const handelAdsDiv_for_aAds = () => {
         const adContainer = document.getElementById('A_ads');
         if (adContainer) {
             adContainer.innerHTML = ''; // Clear the div if any content exists
@@ -175,7 +169,7 @@ const ViewAds = () => {
                         adContainer.innerHTML = ''
                         setShowAdsDiv_state(false)
                         clearInterval(interval)
-                        handelDottomAlert('Success!')
+                        handelBottomAlert('Success!')
                         setHandle_clickAds_btnClick_state(false)
                         setTimerCount_state(10)
                     }
@@ -184,6 +178,50 @@ const ViewAds = () => {
             }, 1000);
         }
     }
+
+    function handelAdsDiv_for_HilltopAds() {
+        const div = document.getElementById('HilltopAds');
+
+        if (div) {
+            // Create a new <script> element
+            const script = document.createElement('script');
+            script.src = "//unusedframe.com/bzXKV.s/dAGalc0/YDWLdxi_YqW/5Mu/ZrXrIA/Felmf9Qu/ZQUllrk/PtTSYwwsNAj-Mw0LN/DFMctcN/jDAp2dMmzhQv0INmAc";
+            script.async = true;
+            script.referrerPolicy = 'no-referrer-when-downgrade';
+
+            // Append the script to the div
+            div.appendChild(script);
+        }
+        let checkIframeInterval = setInterval(() => {
+            if (div.children[1].tagName === 'IFRAME') {
+                clearInterval(checkIframeInterval)
+                setTimeout(() => {
+                    setRemoveTimer_state(true)
+                    setProcessing_state((p) => p = false)
+                }, 1000);
+                let interval = setInterval(() => {
+                    setTimerCount_state((prevCount) => {
+                        const newCount = prevCount - 1;
+                        if (newCount === -1) {
+                            div.innerHTML = ''
+                            setShowAdsDiv_state(false)
+                            clearInterval(interval)
+                            handelBottomAlert('Success!')
+                            setHandle_clickAds_btnClick_state(false)
+                            setTimerCount_state(10)
+                        }
+                        return newCount;
+                    });
+                }, 1000);
+            }
+        }, 500);
+    }
+
+    function handelClick() {
+        setShowAdsDiv_state(true)
+        setProcessing_state((p) => p = true)
+    }
+
 
     return (
         <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
@@ -210,15 +248,20 @@ const ViewAds = () => {
                         <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
                             const adSterrakeys = ['9053e4594f6f11cc52b1a92378164206', 'f897c99fe416f65a488b750d0f978646'];
                             let randomNumber = Math.floor(Math.random() * adSterrakeys.length)
-                            loadAd('9053e4594f6f11cc52b1a92378164206')
+                            handelAdsDiv_for_adSterra('9053e4594f6f11cc52b1a92378164206')
                             setHandle_clickAds_btnClick_state(true)
                             handelClick()
                         }}><span>Click On Ads 3</span><span>₹0.01</span></button>
                         <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
-                            a_ads_loder()
+                            handelAdsDiv_for_aAds()
                             setHandle_clickAds_btnClick_state(true)
                             handelClick()
                         }}><span>Click On Ads 4</span><span>₹0.01</span></button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
+                            handelAdsDiv_for_HilltopAds()
+                            setHandle_clickAds_btnClick_state(true)
+                            handelClick()
+                        }}><span>Click On Ads 5</span><span>₹0.01</span></button>
                         {bottomAlert_state && <BottomAlert text={bottomAlert_state} />}
                     </div>
                 </div>
@@ -228,6 +271,7 @@ const ViewAds = () => {
                     <div data-banner-id="1435822"></div>
                     <div id="adSterra"></div>
                     <div id="A_ads"></div>
+                    <div id="HilltopAds"></div>
                 </div>
                 <div className='bg-white rounded shadow px-5 py-2 mt-5'>
                     <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>Click Ads Instructions</p>
