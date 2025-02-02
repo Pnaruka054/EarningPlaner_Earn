@@ -141,7 +141,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
                         <img src={FillSurvey} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
                     </div>
                 </div>
-                <div className='flex justify-around'>
+                <div className='flex justify-around flex-wrap'>
                     <div id="frame" style={{ width: '300px', height: 'auto' }}>
                         <iframe
                             data-aa="2379444"
