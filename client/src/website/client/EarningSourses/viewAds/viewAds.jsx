@@ -299,18 +299,15 @@ const ViewAds = () => {
 
     const handle_link_click = (e, link) => {
         setHandle_clickAds_btnClick_state(true);
-    
-        // Try opening the new tab
-        const newTab = window.open(`/waitRedirecting/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
-        
-        // Check if the new tab was successfully created
+        const newTab = window.open("", '_blank');
         if (!newTab) {
-            // If the popup is blocked or new tab setting is off, show the alert and cancel further actions
-            alert("Please Allow Popups in Your Browser!");
-            return; // This prevents the redirect or further actions
+            alert("Please Allow Popup in Your Browse to Earn Money!");
         }
-        
-        // Optionally, you can handle any other logic for successful popup opening here.
+        newTab.close();
+        const newTab2 = window.open(`/waitRedirecting/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
+        if (!newTab2) {
+            alert("Please Allow Popup in Your Browse to Earn Money!!");
+        }
     };
 
     useEffect(() => {
