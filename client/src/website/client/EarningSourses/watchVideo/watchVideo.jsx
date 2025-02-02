@@ -10,6 +10,9 @@ const WatchVideo = () => {
     const [onClicka_clickadilla_state, setOnClicka_clickadilla_state] = useState('');
     const [handle_videoAds_btnClick_state, sethandle_videoAds_btnClick_state_state] = useState(false);
     const [processing_state, setProcessing_state] = useState(false);
+    const [timerCount_state, setTimerCount_state] = useState(15);
+    const [removeTimer_state, setRemoveTimer_state] = useState(false);
+
 
     let Instructions = [
         'Each user gets 2 video ads to watch per IP address.',
@@ -121,6 +124,15 @@ const WatchVideo = () => {
                 HilltopVideoAdsObject_parent.appendChild(startedVideoCheck)
                 sethandle_videoAds_btnClick_state_state((p) => p = false)
                 setProcessing_state((p) => p = false)
+                div.appendChild(HilltopVideoAdsObject_parent)
+                setHandle_clickAds_btnClick_statee((p) => p = true)
+                setRemoveTimer_state((p) => p = true)
+                let imerCount_iterval = setInterval(() => {
+                    setTimerCount_state((p) => p -= 1)
+                    if (timerCount_state === 15) {
+                        clearInterval(imerCount_iterval)
+                    }
+                }, 1000);
             } else if (count === 10) {
                 clearInterval(interval)
                 setBottomAlert_state((p) => p = 'ooh Please Try again!')
@@ -128,6 +140,8 @@ const WatchVideo = () => {
                 setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
                 vpaid_video_flash_tester_el?.remove()
                 setProcessing_state((p) => p = false)
+                setHandle_clickAds_btnClick_statee((p) => p = false)
+                div.innerHTML = ''
             }
         }, 500);
     }
@@ -168,7 +182,10 @@ const WatchVideo = () => {
                 <div className={`z-[1] absolute top-0 left-0 right-0 bottom-0 bg-[#0101015d] flex justify-center items-center ${!handle_clickAds_btnClick_state ? 'hidden' : ''}`}>
                     <div id="onClicka_video_ads_div" >
                     </div>
-                    <div id="HilltopVideoAds"></div>
+                    <div className='flex flex-col'>
+                        {removeTimer_state && <div className='bg-gray-500 text-white px-2 h-10 text-center rounded-md -mb-[14px]'>Please Wait - {timerCount_state}sec</div>}
+                        <div id="HilltopVideoAds"></div>
+                    </div>
                 </div>
                 <div className='bg-white rounded shadow px-5 py-2 mt-5'>
                     <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>Video Ads Instructions</p>
