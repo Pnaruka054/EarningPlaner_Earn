@@ -299,10 +299,18 @@ const ViewAds = () => {
 
     const handle_link_click = (e, link) => {
         setHandle_clickAds_btnClick_state(true);
+    
+        // Try opening the new tab
         const newTab = window.open(`/waitRedirecting/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
+        
+        // Check if the new tab was successfully created
         if (!newTab) {
-            alert("Please Allow Popup in Your Browse!");
+            // If the popup is blocked or new tab setting is off, show the alert and cancel further actions
+            alert("Please Allow Popups in Your Browser!");
+            return; // This prevents the redirect or further actions
         }
+        
+        // Optionally, you can handle any other logic for successful popup opening here.
     };
 
     useEffect(() => {
