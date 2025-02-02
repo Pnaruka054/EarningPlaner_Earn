@@ -31,3 +31,35 @@
     background-color: red;
     padding: 20px;
 }
+
+.offlineAnimation {
+    margin-bottom: -390px;
+    animation: offlineAnimation 1s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes offlineAnimation {
+    0% {
+        margin-bottom: -390px;
+    }
+
+    100% {
+        margin-bottom: -355px;
+    }
+}
+
+.OnlineAnimation {
+    margin-bottom: -355px;
+    animation: OnlineAnimation 1s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes OnlineAnimation {
+    0% {
+        margin-bottom: -355px;
+    }
+
+    100% {
+        margin-bottom: -390px;
+    }
+}

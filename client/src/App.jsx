@@ -4,7 +4,7 @@ import Login from './website/client/auth/login/login';
 import NavBar from './website/client/components/navBar/navBar';
 import SignUp from './website/client/auth/signUp/signUp';
 import DashBoard from './website/client/dashBoard/dashBoard';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Deposit from './website/client/deposit/deposit';
 import SideMenu from './website/client/components/sideMenu/sideMenu';
 import { createPortal } from 'react-dom'
@@ -24,8 +24,48 @@ const App = () => {
   const [sideMenu_state, setSideMenu_state] = useState('menu-outline');
   const [showBottomAlert_state, setShowBottomAlert_state] = useState(false);
   const [showSideMenu_navBar_state, setShowSideMenu_navBar_state] = useState(true);
-
+  const [isOffline_state, setIsOffline_state] = useState(navigator.onLine ? false : true);
   const location = useLocation();
+  const networkStatusRef = useRef(null);
+  const updateNetworkStatus = (message, classes, status) => {
+    if (networkStatusRef.current) {
+      networkStatusRef.current.innerHTML = `
+        <div class="rounded-[5%] h-96 w-full font-bold text-white pt-1 drop-shadow select-none text-sm ${classes}">
+          ${message}
+        </div>
+      `;
+      if (status === 'offline') {
+        networkStatusRef.current.className = 'fixed top-0 bottom-0 right-0 left-0 bg-[#0005] z-10 text-center flex items-end'
+      } else if (status === 'online') {
+        setTimeout(() => {
+          networkStatusRef.current.className = 'hidden'
+        }, 1200);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOffline_state(false); // Set to online
+      updateNetworkStatus('You are Online', 'bg-green-500 OnlineAnimation', 'online');
+    };
+
+    const handleOffline = () => {
+      setIsOffline_state(true); // Set to offline
+      updateNetworkStatus('You are Offline', 'bg-gray-500 offlineAnimation', 'offline');
+    };
+    // Event listeners for online/offline events
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Cleanup listeners on component unmount
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [isOffline_state]);
+
+
   useEffect(() => {
     if (
       location.pathname === '/' ||
@@ -34,7 +74,7 @@ const App = () => {
     ) {
       setshow_NavBar_state(true)
     }
-    if (location.pathname === '/waitRedirecting') {
+    if (location.pathname.includes('/waitRedirecting')) {
       setShowSideMenu_navBar_state(false)
     }
   }, []);
@@ -74,6 +114,7 @@ const App = () => {
         <Route path="/member/view-ads" element={<ViewAds />} />
         <Route path="/waitRedirecting" element={<WaitRedirecting />} />
       </Routes>
+      <div id="networkStatus" ref={networkStatusRef} className='hidden' />
     </>
   );
 }

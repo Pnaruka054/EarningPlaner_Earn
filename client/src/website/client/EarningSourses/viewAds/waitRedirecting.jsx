@@ -30,6 +30,21 @@ const WaitRedirecting = () => {
         };
     }, [waitingTimer_state, redirectLink]);
 
+    useEffect(() => {
+        const handleBeforeUnload = (event) => {
+            console.log(event);
+            if (localStorage.getItem('isSuccess') !== 'true') {
+                localStorage.setItem('isSuccess', 'false');
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, []);
+
     return (
         <div className="flex items-center justify-center min-h-screen bg-blue-50">
             <div className="bg-white p-8 rounded-xl shadow-lg w-96">
