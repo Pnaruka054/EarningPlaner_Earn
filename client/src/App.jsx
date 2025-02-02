@@ -15,10 +15,8 @@ import Support from './website/client/support/support';
 import ReferEarn from './website/client/ReferEarn/ReferEarn';
 import Profile from './website/client/profile/profile';
 import Setting from './website/client/setting/setting';
-import WatchVideo from './website/client/EarningSourses/watchVideo/watchVideo';
 import ViewAds from './website/client/EarningSourses/viewAds/viewAds';
-import ClickToEarn from './website/client/EarningSourses/clickToEarn/clickToEarn';
-import WaitRedirecting from './website/client/EarningSourses/clickToEarn/waitRedirecting';
+import WaitRedirecting from './website/client/EarningSourses/viewAds/waitRedirecting';
 
 const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
@@ -73,8 +71,6 @@ const App = () => {
         <Route path="/member/settings" element={<Setting />} />
         <Route path="/member/profile" element={<Profile />} />
         {/* Earning Sourse */}
-        <Route path="/member/watch-video" element={<WatchVideo />} />
-        <Route path="/member/click-to-earn" element={<ClickToEarn />} />
         <Route path="/member/view-ads" element={<ViewAds />} />
         <Route path="/waitRedirecting" element={<WaitRedirecting />} />
       </Routes>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Footer from '../../components/footer/footer';
 import OnClickaVideoAds from '../../components/onClickaVideoAds/onClickaVideoAds';
 import ProcessBgBlack from '../../components/processBgBlack/processBgBlack';
@@ -11,6 +11,8 @@ const ViewAds = () => {
     const [processing_state, setProcessing_state] = useState(false);
     const [timerCount_state, setTimerCount_state] = useState(15);
     const [removeTimer_state, setRemoveTimer_state] = useState(false);
+    const [onClicka_clickadilla_state, setOnClicka_clickadilla_state] = useState('');
+    const [directLinkClickSuccess_state, setDirectLinkClickSuccess_state] = useState(false);
 
     function handelBottomAlert(result) {
         setBottomAlert_state(result);
@@ -37,8 +39,20 @@ const ViewAds = () => {
         const observer = new MutationObserver((mutationsList) => {
             mutationsList.forEach(mutation => {
                 mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1 && node.classList.contains('video_slider')) {
+                        console.log(node);
+                        if (onClicka_clickadilla_state === 'onClicka') {
+                            handle_onClickaAds('iframe[src="https://js.onclmng.com/log/count.html"]', 'script[src="https://js.onclckmn.com/static/onclicka.js"]')
+                        } else if (onClicka_clickadilla_state === 'clickAdilla') {
+                            handle_onClickaAds('iframe[src="https://storage.multstorage.com/log/count.html"]', 'script[src="https://js.wpadmngr.com/static/adManager.js"]')
+                        }
+                    }
                     if (node.nodeType === 1 && node.classList.contains('gfpl-wrapper')) {
-                        handelAdsDiv_for_Onclicka()
+                        if (document.querySelector('div[data-banner-id="1435822"] .gfpl-wrapper') && node.classList.contains('gfpl-wrapper')) {
+                            handelAdsDiv_for_Onclicka('div[data-banner-id="1435822"] .gfpl-wrapper')
+                        } else if (document.querySelector('div[data-banner-id="6033510"]') && node.classList.contains('gfpl-wrapper')) {
+                            handelAdsDiv_for_Onclicka('div[data-banner-id="6033510"] .gfpl-wrapper')
+                        }
                     }
                 });
             });
@@ -48,15 +62,17 @@ const ViewAds = () => {
             childList: true,
             subtree: true,
         });
+
         return () => {
             observer.disconnect();
         };
-    }, []);
+    }, [onClicka_clickadilla_state]);
 
-    function handelAdsDiv_for_Onclicka() {
+    function handelAdsDiv_for_Onclicka(selector) {
         setProcessing_state(false);
-        let gfpl_wrapper = document.getElementsByClassName('gfpl-wrapper');
-        if (gfpl_wrapper[0].children[0]) {
+        let gfpl_wrapper = document.querySelector(selector);
+        let onclicka_main_ads_div = document.querySelector(selector)
+        if (gfpl_wrapper?.children[0]) {
             setTimeout(() => {
                 setRemoveTimer_state(true)
             }, 1000);
@@ -65,11 +81,12 @@ const ViewAds = () => {
             setTimerCount_state((prevCount) => {
                 const newCount = prevCount - 1;
                 if (newCount === -1) {
-                    gfpl_wrapper[0]?.remove()
+                    gfpl_wrapper?.remove()
                     setShowAdsDiv_state(false)
-                    setTimerCount_state(10)
+                    setTimerCount_state(15)
                     handelBottomAlert('Success!')
                     setHandle_clickAds_btnClick_state(false)
+                    onclicka_main_ads_div.innerHTML = ''
                     clearInterval(interval)
                 }
                 return newCount;
@@ -122,7 +139,7 @@ const ViewAds = () => {
                                     clearInterval(interval)
                                     handelBottomAlert('Success!')
                                     setHandle_clickAds_btnClick_state(false)
-                                    setTimerCount_state(10)
+                                    setTimerCount_state(15)
                                 }
                                 return newCount;
                             });
@@ -171,7 +188,7 @@ const ViewAds = () => {
                         clearInterval(interval)
                         handelBottomAlert('Success!')
                         setHandle_clickAds_btnClick_state(false)
-                        setTimerCount_state(10)
+                        setTimerCount_state(15)
                     }
                     return newCount;
                 });
@@ -222,13 +239,92 @@ const ViewAds = () => {
         setProcessing_state((p) => p = true)
     }
 
+    function handle_onClickaAds(iframe, script) {
+        let onClicka_video_ads_div = document.getElementById('onClicka_video_ads_div')
+        setShowAdsDiv_state((p) => p = true)
+        let video_slider = document.getElementsByClassName('video_slider')[0]
+        let video_stop_traker = setInterval(() => {
+            let ads_header__close_ad = document.getElementsByClassName('ads_header__close-ad')[0].children[0].innerText
+            if (ads_header__close_ad === 'Close ad') {
+                clearInterval(video_stop_traker)
+                document.getElementById('onClicka_video_ads_div').innerHTML = ''
+                document.querySelector(iframe).remove()
+                document.querySelector(script).remove()
+                video_slider.style.display = 'none'
+                setShowAdsDiv_state((p) => p = false)
+                setBottomAlert_state((p) => p = 'Success!')
+                setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
+                setHandle_clickAds_btnClick_state((p) => p = false)
+            } else if (!ads_header__close_ad) {
+                clearInterval(video_stop_traker)
+                document.getElementById('onClicka_video_ads_div').innerHTML = ''
+                document.querySelector(iframe).remove()
+                document.querySelector(script).remove()
+                video_slider.style.display = 'none'
+                setShowAdsDiv_state((p) => p = false)
+                setBottomAlert_state((p) => p = 'Success!')
+                setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
+                setHandle_clickAds_btnClick_state((p) => p = false)
+            } else if (onClicka_video_ads_div.children[0].style.display === 'none') {
+                clearInterval(video_stop_traker)
+                document.getElementById('onClicka_video_ads_div').innerHTML = ''
+                document.querySelector(iframe).remove()
+                document.querySelector(script).remove()
+                setShowAdsDiv_state((p) => p = false)
+                setBottomAlert_state((p) => p = 'ooh Please Try again!')
+                setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
+                setHandle_clickAds_btnClick_state((p) => p = false)
+            }
+        }, 1000)
+        video_slider.removeAttribute('class')
+        video_slider.removeAttribute('style')
+        video_slider.style.flexDirection = 'column'
+        onClicka_video_ads_div.appendChild(video_slider)
+        setProcessing_state((p) => p = false)
+    }
+
+    const handle_link_click = (link) => {
+        setHandle_clickAds_btnClick_state(true);
+        const newTab = window.open('/waitRedirecting', '_blank');
+        if (newTab) {
+            newTab.onload = () => {
+                newTab.location.search = `?link=${encodeURIComponent(link)}`;
+            };
+        } else {
+            alert("Please Allow Popup in Your Browse!");
+        }
+    };
+
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const clickSuccessStatus = localStorage.getItem('isSuccess');
+            if (clickSuccessStatus === 'true') {
+                setDirectLinkClickSuccess_state(true);
+                localStorage.removeItem('isSuccess')
+            }
+        };
+        window.addEventListener('storage', handleStorageChange);
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (directLinkClickSuccess_state) {
+            setBottomAlert_state('Success!');
+            setTimeout(() => {
+                setBottomAlert_state(false);
+            }, 10000);
+        }
+    }, [directLinkClickSuccess_state]);
 
     return (
         <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
             <div className='px-2 py-2'>
                 <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
-                    Click to Earn
+                    View Ads to Earn
                 </div>
+                <div data-banner-id="6056470"></div>
                 <div className='flex flex-col items-center my-6'>
                     <div className='flex gap-4'>
                         <div className='bg-purple-700 px-2 py-1 shadow font-bold text-white rounded-t-2xl'>Click Balance - 0/5</div>
@@ -262,9 +358,39 @@ const ViewAds = () => {
                             setHandle_clickAds_btnClick_state(true)
                             handelClick()
                         }}><span>Click On Ads 5</span><span>₹0.01</span></button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
+                            setHandle_clickAds_btnClick_state(true)
+                            setProcessing_state((p) => p = true)
+                            setOnClicka_clickadilla_state('onClicka')
+                            OnClickaVideoAds('https://js.onclckmn.com/static/onclicka.js', '287247')
+                        }}><span>Click On Ads 6</span><span>₹0.01</span></button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={() => {
+                            setHandle_clickAds_btnClick_state(true)
+                            setProcessing_state((p) => p = true)
+                            setOnClicka_clickadilla_state('clickAdilla')
+                            OnClickaVideoAds('https://js.wpadmngr.com/static/adManager.js', '287339')
+                        }}><span>Click On Ads 7</span><span>₹0.01</span></button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={() => {
+                            setHandle_clickAds_btnClick_state(true)
+                            setProcessing_state((p) => p = true)
+                        }}><span>Click On Ads 8</span><span>₹0.01</span></button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click('https://poawooptugroo.com/4/8238196')}>
+                            <span>Click On Ads 1</span><span>₹0.01</span>
+                        </button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click('https://poawooptugroo.com/4/8238196')}>
+                            <span>Click On Ads 2</span><span>₹0.01</span>
+                        </button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click('https://poawooptugroo.com/4/8868626')}>
+                            <span>Click On Ads 3</span><span>₹0.01</span>
+                        </button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click('https://poawooptugroo.com/4/8585876')}>
+                            <span>Click On Ads 4</span><span>₹0.01</span>
+                        </button>
+                        {/* <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`}><span>Click On Ads 5</span><span>₹0.02</span></button> */}
                         {bottomAlert_state && <BottomAlert text={bottomAlert_state} />}
                     </div>
                 </div>
+                <div id="container-f2e76b1a9af84306102d9f8675c030e8"></div>
                 <div className={`z-[1] absolute top-0 left-0 right-0 bottom-0 bg-[#0101015d] flex justify-center items-center flex-col ${showAdsDiv_state ? '' : 'hidden'}`}>
                     {removeTimer_state && <div className='bg-gray-500 text-white px-2 h-10 text-center rounded-md -mb-[14px]'>Please Wait - {timerCount_state}sec</div>}
                     <div data-banner-id="6033510" ></div>
@@ -272,9 +398,11 @@ const ViewAds = () => {
                     <div id="adSterra"></div>
                     <div id="A_ads"></div>
                     <div id="HilltopAds"></div>
+                    <div id='adVerticaAds'></div>
+                    <div id="onClicka_video_ads_div" ></div>
                 </div>
-                <div className='bg-white rounded shadow px-5 py-2 mt-5'>
-                    <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>Click Ads Instructions</p>
+                <div className='bg-white rounded shadow px-5 py-2'>
+                    <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>View Ads Instructions</p>
                     <hr className='mt-2 border' />
                     <ul className='mt-4 font-medium text-gray-500 drop-shadow-sm'>
                         {
