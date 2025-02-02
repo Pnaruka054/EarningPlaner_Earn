@@ -56,10 +56,8 @@ const WatchVideo = () => {
         setHandle_clickAds_btnClick_statee((p) => p = true)
         let video_slider = document.getElementsByClassName('video_slider')[0]
         let video_stop_traker = setInterval(() => {
-            console.log("Interval");
             let ads_header__close_ad = document.getElementsByClassName('ads_header__close-ad')[0].children[0].innerText
             if (ads_header__close_ad === 'Close ad') {
-                console.log("success");
                 clearInterval(video_stop_traker)
                 document.getElementById('onClicka_video_ads_div').innerHTML = ''
                 document.querySelector(iframe).remove()
@@ -111,16 +109,25 @@ const WatchVideo = () => {
             // Append the script to the div
             div.appendChild(script);
         }
+        let count = 0;
         let interval = setInterval(() => {
+            count++
             let vpaid_video_flash_tester_el = document.getElementById('vpaid_video_flash_tester_el')
             let HilltopVideoAdsObject_parent = document.getElementById('HilltopVideoAdsObject_parent')
-            let startedVideoCheck = document.getElementsByClassName('▶ started')
-            console.log(startedVideoCheck);
-            console.log(startedVideoCheck.tagName);
-            if (vpaid_video_flash_tester_el.tagName === 'OBJECT') {
+            let startedVideoCheck = document.getElementsByClassName('▶ started')[0]
+            if (vpaid_video_flash_tester_el?.tagName === 'OBJECT' && startedVideoCheck?.tagName === 'DIV') {
                 clearInterval(interval)
                 HilltopVideoAdsObject_parent.appendChild(vpaid_video_flash_tester_el)
+                HilltopVideoAdsObject_parent.appendChild(startedVideoCheck)
                 sethandle_videoAds_btnClick_state_state((p) => p = false)
+                setProcessing_state((p) => p = false)
+            } else if (count === 10) {
+                clearInterval(interval)
+                setBottomAlert_state((p) => p = 'ooh Please Try again!')
+                sethandle_videoAds_btnClick_state_state((p) => p = false)
+                setTimeout(() => setBottomAlert_state((p) => p = false), 2000)
+                vpaid_video_flash_tester_el?.remove()
+                setProcessing_state((p) => p = false)
             }
         }, 500);
     }
@@ -150,8 +157,8 @@ const WatchVideo = () => {
                             OnClickaVideoAds('https://js.wpadmngr.com/static/adManager.js', '287339')
                         }}><span>Watch Video 2</span><span>₹0.001</span></button>
                         <button disabled={handle_videoAds_btnClick_state ? true : false} className={`${handle_videoAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={() => {
-                            sethandle_videoAds_btnClick_state_state(false)
-                            // setProcessing_state((p) => p = true)
+                            sethandle_videoAds_btnClick_state_state(true)
+                            setProcessing_state((p) => p = true)
                             handle_HilltopAds()
                         }}><span>Watch Video 3</span><span>₹0.001</span></button>
 
