@@ -141,6 +141,81 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
                         <img src={FillSurvey} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
                     </div>
                 </div>
+                <div className='flex justify-around'>
+                    <div id="frame" style={{ width: '300px', height: 'auto' }}>
+                        <iframe
+                            data-aa="2379444"
+                            src="//ad.a-ads.com/2379444?size=300x250"
+                            style={{
+                                width: '300px',
+                                height: '250px',
+                                border: '0px',
+                                padding: '0',
+                                overflow: 'hidden',
+                                backgroundColor: 'transparent',
+                            }}
+                        ></iframe>
+                        <a
+                            style={{
+                                display: 'block',
+                                textAlign: 'right',
+                                fontSize: '12px',
+                            }}
+                            id="preview-link"
+                            href="https://aads.com/campaigns/new/?source_id=2379444&source_type=ad_unit&partner=2379444"
+                        >
+                            Advertise here
+                        </a>
+                    </div>
+                    <div id="frame" style={{ width: '200px', height: 'auto' }}>
+                        <iframe
+                            data-aa="2379500"
+                            src="//ad.a-ads.com/2379500?size=200x200"
+                            style={{
+                                width: '200px',
+                                height: '200px',
+                                border: '0px',
+                                padding: '0',
+                                overflow: 'hidden',
+                                backgroundColor: 'transparent'
+                            }}
+                            title="Advertisement"
+                        ></iframe>
+                        <a
+                            style={{ display: 'block', textAlign: 'right', fontSize: '12px' }}
+                            id="preview-link"
+                            href="https://aads.com/campaigns/new/?source_id=2379500&source_type=ad_unit&partner=2379500"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Advertise here
+                        </a>
+                    </div>
+                    <div id="frame" style={{ width: '250px', height: 'auto' }}>
+                        <iframe
+                            data-aa="2379499"
+                            src="//ad.a-ads.com/2379499?size=250x250"
+                            style={{
+                                width: '250px',
+                                height: '250px',
+                                border: '0px',
+                                padding: '0',
+                                overflow: 'hidden',
+                                backgroundColor: 'transparent'
+                            }}
+                            title="Advertisement"
+                        ></iframe>
+                        <a
+                            style={{ display: 'block', textAlign: 'right', fontSize: '12px' }}
+                            id="preview-link"
+                            href="https://aads.com/campaigns/new/?source_id=2379499&source_type=ad_unit&partner=2379499"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Advertise here
+                        </a>
+                    </div>
+                </div>
                 <div className="w-full mt-4 bg-white border border-blue-500 rounded-lg shadow-md mb-4">
                     <div className="bg-red-800 text-white p-4 rounded-t-lg flex items-center space-x-2">
                         <i className="fa fa-bullhorn"></i>
