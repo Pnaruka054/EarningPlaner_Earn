@@ -375,18 +375,35 @@ const ViewAds = () => {
                             setProcessing_state((p) => p = true)
                         }}><span>Click On Ads 8</span><span>₹0.01</span></button>
                         <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click('https://poawooptugroo.com/4/8238196')}>
-                            <span>Click On Ads 1</span><span>₹0.01</span>
+                            <span>Click On Ads 9</span><span>₹0.01</span>
                         </button>
                         <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click('https://poawooptugroo.com/4/8238196')}>
-                            <span>Click On Ads 2</span><span>₹0.01</span>
+                            <span>Click On Ads 10</span><span>₹0.01</span>
                         </button>
                         <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click('https://poawooptugroo.com/4/8868626')}>
-                            <span>Click On Ads 3</span><span>₹0.01</span>
+                            <span>Click On Ads 11</span><span>₹0.01</span>
                         </button>
                         <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click('https://poawooptugroo.com/4/8585876')}>
-                            <span>Click On Ads 4</span><span>₹0.01</span>
+                            <span>Click On Ads 12</span><span>₹0.01</span>
                         </button>
-                        {/* <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`}><span>Click On Ads 5</span><span>₹0.02</span></button> */}
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click('https://poawooptugroo.com/4/8886349')}>
+                            <span>Click On Ads 13</span><span>₹0.01</span>
+                        </button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click('https://poawooptugroo.com/4/8886361')}>
+                            <span>Click On Ads 14</span><span>₹0.01</span>
+                        </button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click('https://poawooptugroo.com/4/8886370')}>
+                            <span>Click On Ads 15</span><span>₹0.01</span>
+                        </button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click('https://poawooptugroo.com/4/8886375')}>
+                            <span>Click On Ads 16</span><span>₹0.01</span>
+                        </button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click('https://loupush.com/9lMCqrCwt70=?')}>
+                            <span>Click On Ads 17</span><span>₹0.01</span>
+                        </button>
+                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click('https://pertlouv.com/iUyUq55zfnw=?')}>
+                            <span>Click On Ads 18</span><span>₹0.01</span>
+                        </button>
                         {bottomAlert_state && <BottomAlert text={bottomAlert_state} />}
                     </div>
                 </div>
