@@ -1,10 +1,11 @@
 import './App.css';
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import Login from './website/client/auth/login/login';
 import NavBar from './website/client/components/navBar/navBar';
 import SignUp from './website/client/auth/signUp/signUp';
 import DashBoard from './website/client/dashBoard/dashBoard';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Deposit from './website/client/deposit/deposit';
 import SideMenu from './website/client/components/sideMenu/sideMenu';
 import { createPortal } from 'react-dom'
@@ -17,13 +18,15 @@ import Profile from './website/client/profile/profile';
 import Setting from './website/client/setting/setting';
 import ViewAds from './website/client/EarningSourses/viewAds/viewAds';
 import WaitRedirecting from './website/client/EarningSourses/viewAds/waitRedirecting';
+import Home from './website/client/home/home';
+import ContactUs from './website/client/components/contactUs/contactUs';
+import PageNotFound from './website/client/components/pageNotFound/pageNotFound';
 
 const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
+  const [show_Full_navBar_state, setshow_Full_NavBar_state] = useState(false);
   const [showPopUp_onLogOut_btn_state, setShowPopUp_onLogOut_btn_state] = useState(false);
-  const [sideMenu_state, setSideMenu_state] = useState('menu-outline');
   const [showBottomAlert_state, setShowBottomAlert_state] = useState(false);
-  const [showSideMenu_navBar_state, setShowSideMenu_navBar_state] = useState(true);
   const [isOffline_state, setIsOffline_state] = useState(navigator.onLine ? false : true);
   const location = useLocation();
   const networkStatusRef = useRef(null);
@@ -65,25 +68,37 @@ const App = () => {
     };
   }, [isOffline_state]);
 
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (
       location.pathname === '/' ||
       location.pathname === '/login' ||
       location.pathname === '/register'
     ) {
-      setshow_NavBar_state(true)
+      setshow_NavBar_state((p) => p = true)
+      setshow_Full_NavBar_state((p) => p = false)
+    } else if (
+      location.pathname === '/member/dashboard' ||
+      location.pathname === '/member/deposit' ||
+      location.pathname === '/member/withdraw' ||
+      location.pathname === '/member/refer-and-earn' ||
+      location.pathname === '/member/support' ||
+      location.pathname === '/member/settings' ||
+      location.pathname === '/member/view-ads'
+    ) {
+      setshow_NavBar_state((p) => p = false)
+      setshow_Full_NavBar_state((p) => p = false)
+    } else if (
+      location.pathname.includes('/waitRedirecting')
+    ) {
+      setshow_Full_NavBar_state((p) => p = true)
     }
-    if (location.pathname.includes('/waitRedirecting')) {
-      setShowSideMenu_navBar_state(false)
-    }
-  }, []);
+  }, [location.pathname]);
 
   return (
     <>
       {
-        showSideMenu_navBar_state && createPortal(
-          <NavBar sideMenu_show={{ sideMenu_state, setSideMenu_state }} show={show_navBar_state} />,
+        !show_Full_navBar_state && createPortal(
+          <NavBar show={show_navBar_state} />,
           document.getElementById('navBar')
         )
       }
@@ -99,21 +114,31 @@ const App = () => {
           document.getElementById('showBottomAlert')
         )
       }
-      {showSideMenu_navBar_state && !show_navBar_state && <SideMenu sideMenu_show={{ sideMenu_state, setSideMenu_state }} />}
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/member/dashboard" element={<DashBoard getLogOut_btnClicked={showPopUp_onLogOut_btn_state} setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state} />} />
-        <Route path="/member/deposit" element={<Deposit setShowBottomAlert_state={setShowBottomAlert_state} />} />
-        <Route path="/member/withdraw" element={<Withdraw setShowBottomAlert_state={setShowBottomAlert_state} />} />
-        <Route path="/member/refer-and-earn" element={<ReferEarn />} />
-        <Route path="/member/support" element={<Support />} />
-        <Route path="/member/settings" element={<Setting />} />
-        <Route path="/member/profile" element={<Profile />} />
-        {/* Earning Sourse */}
-        <Route path="/member/view-ads" element={<ViewAds />} />
-        <Route path="/waitRedirecting" element={<WaitRedirecting />} />
-      </Routes>
+      <TransitionGroup>
+        <CSSTransition
+          timeout={300}
+          classNames="page-fade"
+          key={window.location.pathname} 
+        >
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/contact-us" element={<ContactUs />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/member/dashboard" element={<DashBoard getLogOut_btnClicked={showPopUp_onLogOut_btn_state} setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state} />} />
+            <Route path="/member/deposit" element={<Deposit setShowBottomAlert_state={setShowBottomAlert_state} />} />
+            <Route path="/member/withdraw" element={<Withdraw setShowBottomAlert_state={setShowBottomAlert_state} />} />
+            <Route path="/member/refer-and-earn" element={<ReferEarn />} />
+            <Route path="/member/support" element={<Support />} />
+            <Route path="/member/settings" element={<Setting />} />
+            <Route path="/member/profile" element={<Profile />} />
+            {/* Earning Sourse */}
+            <Route path="/member/view-ads" element={<ViewAds />} />
+            <Route path="/waitRedirecting" element={<WaitRedirecting />} />
+            <Route path="/*" element={<PageNotFound setshow_NavBar_state={setshow_NavBar_state} />} />
+          </Routes>
+        </CSSTransition>
+      </TransitionGroup>
       <div id="networkStatus" ref={networkStatusRef} className='hidden' />
     </>
   );

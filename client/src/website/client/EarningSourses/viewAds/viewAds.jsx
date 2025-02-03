@@ -336,6 +336,146 @@ const ViewAds = () => {
         };
     }, []);
 
+    let buttonsObj = [
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: () => {
+                OnClickaVideoAds('https://js.onclckmn.com/static/onclicka.js', '234995')
+                setHandle_clickAds_btnClick_state(true)
+                handelClick()
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: () => {
+                OnClickaVideoAds('https://js.wpadmngr.com/static/adManager.js', '288449')
+                setHandle_clickAds_btnClick_state(true)
+                handelClick()
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: () => {
+                const adSterrakeys = ['9053e4594f6f11cc52b1a92378164206', 'f897c99fe416f65a488b750d0f978646'];
+                let randomNumber = Math.floor(Math.random() * adSterrakeys.length)
+                handelAdsDiv_for_adSterra(adSterrakeys[randomNumber])
+                setHandle_clickAds_btnClick_state(true)
+                handelClick()
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: () => {
+                handelAdsDiv_for_aAds()
+                setHandle_clickAds_btnClick_state(true)
+                handelClick()
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: () => {
+                handelAdsDiv_for_HilltopAds()
+                setHandle_clickAds_btnClick_state(true)
+                handelClick()
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: () => {
+                setHandle_clickAds_btnClick_state(true)
+                setProcessing_state((p) => p = true)
+                setOnClicka_clickadilla_state('onClicka')
+                OnClickaVideoAds('https://js.onclckmn.com/static/onclicka.js', '287247')
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: () => {
+                setHandle_clickAds_btnClick_state(true)
+                setProcessing_state((p) => p = true)
+                setOnClicka_clickadilla_state('clickAdilla')
+                OnClickaVideoAds('https://js.wpadmngr.com/static/adManager.js', '287339')
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: (e) => {
+                handle_link_click(e, 'https://poawooptugroo.com/4/8238196')
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: (e) => {
+                handle_link_click(e, 'https://poawooptugroo.com/4/8238196')
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: (e) => {
+                handle_link_click(e, 'https://poawooptugroo.com/4/8868626')
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: (e) => {
+                handle_link_click(e, 'https://poawooptugroo.com/4/8585876')
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: (e) => {
+                handle_link_click(e, 'https://poawooptugroo.com/4/8886349')
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: (e) => {
+                handle_link_click(e, 'https://poawooptugroo.com/4/8886361')
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: (e) => {
+                handle_link_click(e, 'https://poawooptugroo.com/4/8886370')
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: (e) => {
+                handle_link_click(e, 'https://poawooptugroo.com/4/8886375')
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: (e) => {
+                handle_link_click(e, 'https://loupush.com/9lMCqrCwt70=?')
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: (e) => {
+                handle_link_click(e, 'https://pertlouv.com/iUyUq55zfnw=?')
+            },
+        },
+    ]
+
     return (
         <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
             <div className='px-2 py-2'>
@@ -349,75 +489,13 @@ const ViewAds = () => {
                         <div className='bg-purple-700 px-2 py-1 shadow font-bold text-white rounded-t-2xl'>Income - ₹2.548</div>
                     </div>
                     <div className='gap-2 justify-center bg-white px-6 py-3 shadow flex flex-wrap'>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
-                            OnClickaVideoAds('https://js.onclckmn.com/static/onclicka.js', '234995')
-                            setHandle_clickAds_btnClick_state(true)
-                            handelClick()
-                        }}><span>Click On Ads 1</span><span>₹0.01</span></button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
-                            OnClickaVideoAds('https://js.wpadmngr.com/static/adManager.js', '288449')
-                            setHandle_clickAds_btnClick_state(true)
-                            handelClick()
-                        }}><span>Click On Ads 2</span><span>₹0.01</span></button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
-                            const adSterrakeys = ['9053e4594f6f11cc52b1a92378164206', 'f897c99fe416f65a488b750d0f978646'];
-                            let randomNumber = Math.floor(Math.random() * adSterrakeys.length)
-                            handelAdsDiv_for_adSterra('9053e4594f6f11cc52b1a92378164206')
-                            setHandle_clickAds_btnClick_state(true)
-                            handelClick()
-                        }}><span>Click On Ads 3</span><span>₹0.01</span></button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
-                            handelAdsDiv_for_aAds()
-                            setHandle_clickAds_btnClick_state(true)
-                            handelClick()
-                        }}><span>Click On Ads 4</span><span>₹0.01</span></button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
-                            handelAdsDiv_for_HilltopAds()
-                            setHandle_clickAds_btnClick_state(true)
-                            handelClick()
-                        }}><span>Click On Ads 5</span><span>₹0.01</span></button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
-                            setHandle_clickAds_btnClick_state(true)
-                            setProcessing_state((p) => p = true)
-                            setOnClicka_clickadilla_state('onClicka')
-                            OnClickaVideoAds('https://js.onclckmn.com/static/onclicka.js', '287247')
-                        }}><span>Click On Ads 6</span><span>₹0.01</span></button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={() => {
-                            setHandle_clickAds_btnClick_state(true)
-                            setProcessing_state((p) => p = true)
-                            setOnClicka_clickadilla_state('clickAdilla')
-                            OnClickaVideoAds('https://js.wpadmngr.com/static/adManager.js', '287339')
-                        }}><span>Click On Ads 7</span><span>₹0.01</span></button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click(e, 'https://poawooptugroo.com/4/8238196')}>
-                            <span>Click On Ads 8</span><span>₹0.01</span>
-                        </button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click(e, 'https://poawooptugroo.com/4/8238196')}>
-                            <span>Click On Ads 9</span><span>₹0.01</span>
-                        </button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click(e, 'https://poawooptugroo.com/4/8868626')}>
-                            <span>Click On Ads 10</span><span>₹0.01</span>
-                        </button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click(e, 'https://poawooptugroo.com/4/8585876')}>
-                            <span>Click On Ads 11</span><span>₹0.01</span>
-                        </button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click(e, 'https://poawooptugroo.com/4/8886349')}>
-                            <span>Click On Ads 12</span><span>₹0.01</span>
-                        </button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click(e, 'https://poawooptugroo.com/4/8886361')}>
-                            <span>Click On Ads 13</span><span>₹0.01</span>
-                        </button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click(e, 'https://poawooptugroo.com/4/8886370')}>
-                            <span>Click On Ads 14</span><span>₹0.01</span>
-                        </button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click(e, 'https://poawooptugroo.com/4/8886375')}>
-                            <span>Click On Ads 15</span><span>₹0.01</span>
-                        </button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click(e, 'https://loupush.com/9lMCqrCwt70=?')}>
-                            <span>Click On Ads 16</span><span>₹0.01</span>
-                        </button>
-                        <button disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => handle_link_click(e, 'https://pertlouv.com/iUyUq55zfnw=?')}>
-                            <span>Click On Ads 17</span><span>₹0.01</span>
-                        </button>
+                        {
+                            buttonsObj.map((values, index) => (
+                                <button key={index} disabled={handle_clickAds_btnClick_state ? true : false} className={`${handle_clickAds_btnClick_state ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
+                                    values.handelButtonClick(e)
+                                }}><span>{values.buttonTitle} {index + 1}</span><span>₹{values.amount}</span></button>
+                            ))
+                        }
                     </div>
                 </div>
                 <div id="container-f2e76b1a9af84306102d9f8675c030e8"></div>

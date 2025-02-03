@@ -71,10 +71,12 @@ const ReferEarn = () => {
                         The DropLink.co | Earn money on short links referral program is a great way to spread the word of this great service and earn more money with your short links! Refer friends and receive 25% of their earnings for life!
                     </p>
                     <div className="flex items-center space-x-2">
-                        <pre className="bg-gray-100 p-2 rounded-md text-gray-800 font-bold">{referralLink}</pre>
+                        <div className='overflow-auto bg-gray-100 p-2'>
+                            <pre className="rounded-md text-gray-800 font-bold">{referralLink}</pre>
+                        </div>
                         <button
                             className="btn btn-outline-primary text-sm bg-blue-500 hover:bg-blue-600 text-white rounded p-2"
-                            onClick={() => copyToClipboard(referralLink)} 
+                            onClick={() => copyToClipboard(referralLink)}
                         >
                             <i className="fa fa-copy"></i>
                         </button>

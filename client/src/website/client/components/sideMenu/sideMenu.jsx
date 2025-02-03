@@ -7,7 +7,7 @@ const SideMenu = ({ sideMenu_show }) => {
             e.stopPropagation()
             e.currentTarget.classList.add('hidden')
             sideMenu_show.setSideMenu_state((prev) => prev = 'menu-outline')
-        }} className={`${sideMenu_show.sideMenu_state === 'close' ? 'block' : 'hidden'} select-none md:block bg-slate-800 absolute z-[2] md:fixed bottom-0 left-0 px-2 py-4 top-12 w-full sm:w-52 md:w-[25%] lg:w-[20%] text-white`}>
+        }} className={`${sideMenu_show.sideMenu_state === 'close' ? 'block' : 'hidden'} select-none md:block bg-slate-800 absolute z-[2] md:fixed h-[100vh] left-0 px-2 py-4 top-12 w-full sm:w-52 md:w-[25%] lg:w-[20%] text-white`}>
             <Link to="/member/dashboard" className='space-x-1 block px-3 py-2 rounded-lg hover:bg-slate-950'>
                 <span className="align-middle">
                     <ion-icon name="bar-chart-outline"></ion-icon>

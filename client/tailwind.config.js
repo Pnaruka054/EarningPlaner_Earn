@@ -8,7 +8,8 @@ export default {
     extend: {
       fontFamily: {
         poppins: ["Poppins", 'serif'],
-        lexend: ["Lexend Giga", 'serif']
+        lexend: ["Lexend Giga", 'serif'],
+        source_code_pro: ["Source Code Pro", 'serif']
       }
     },
   },
