@@ -1,9 +1,9 @@
 
 const Footer = () => {
     return (
-        <div className='w-full bg-blue-600 text-white'>
-            <div className="flex justify-center pt-8">
-                <ul className="flex space-x-9">
+        <div className='w-full bg-blue-600 text-white p-4 justify-center'>
+            <div className="flex flex-wrap pt-8 justify-center">
+                <ul className="flex flex-wrap space-x-9 justify-center gap-2">
                     <li>
                         <a className="underline hover:text-yellow-300" href="">Privacy Policy</a>
                     </li>

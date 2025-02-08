@@ -13,7 +13,7 @@ const Deposit = ({ setShowBottomAlert_state }) => {
     };
 
     const handleDeposit_btn = () => {
-        
+
     }
 
     function deposit_amount_btn(e) {
@@ -24,6 +24,9 @@ const Deposit = ({ setShowBottomAlert_state }) => {
             <div className='px-2 py-2'>
                 <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
                     Deposit Amount
+                </div>
+                <div className='text-center bg-gradient-to-r from-transparent via-teal-500 to-transparent py-2 text-white font-lexend mb-3'>
+                    Deposit Balance - ₹100
                 </div>
                 <div className='flex justify-center'>
                     <ul className='flex flex-wrap justify-center gap-5'>
@@ -69,7 +72,7 @@ const Deposit = ({ setShowBottomAlert_state }) => {
                 <div className='my-5 pb-5'>
                     <p className='text-center text-lg my-3'>Deposit History</p>
                     <hr className='w-full m-auto border border-gray-300 shadow-lg' />
-                    <ul>
+                    <ul className='mt-4 space-y-4'>
                         <li className='bg-white px-3 py-5 rounded-lg text-[14px] sm:text-[16px] shadow-md mt-4'>
                             <div className='flex justify-between'>
                                 <p className='px-3 cursor-pointer py-1 rounded-md text-white bg-red-500'>Deposit</p>

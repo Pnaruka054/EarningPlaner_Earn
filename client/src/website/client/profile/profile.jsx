@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
+import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
+import Swal from 'sweetalert2'
 
 const Profile = () => {
-    const [userData, setUserData] = useState(null);
-    const [success, setSuccess] = useState('');
     const [formData, setFormData] = useState({
         name: '',
         address: '',
         city: '',
-        place_state: '',
+        state: '',
         zip_code: '',
         country: '',
         mobile_number: '',
         withdrawal_method: '',
         withdrawal_account_information: '',
     });
+
+    const navigation = useNavigate();
 
     // let withdrawal_countryes_state = [
     //     {
@@ -45,6 +47,70 @@ const Profile = () => {
         { withdrawal_method: 'Perfect Money', minimum_amount: '$2.0000' }
     ];
 
+    let [data_process_state, setData_process_state] = useState(false);
+    let [submit_process_state, setSubmit_process_state] = useState(false);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setData_process_state(true);
+            try {
+                const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userProfileData_get`, {
+                    withCredentials: true
+                });
+                setFormData((prev) => ({ ...prev, ...response.data.msg }));
+            } catch (error) {
+                if (error.response.data.jwtMiddleware_token_not_found_error) {
+                    navigation('/login');
+                } else if (error.response.data.jwtMiddleware_error) {
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'Your session has expired. Please log in again.',
+                        icon: 'error',
+                        timer: 5000,
+                        timerProgressBar: true,
+                        confirmButtonText: 'OK',
+                        didClose: () => {
+                            navigation('/login');
+                        }
+                    });
+                }
+                console.error(error);
+            } finally {
+                setData_process_state(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    let dataBase_patch_userData = async (obj) => {
+        try {
+            await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userRoute/userProfileData_patch`, obj, {
+                withCredentials: true
+            });
+
+            setSubmit_process_state(false);
+
+            Swal.fire({
+                title: "Success!",
+                icon: "success",
+                timer: 5000,
+                timerProgressBar: true,
+            });
+
+
+        } catch (error) {
+            setSubmit_process_state(false);
+            console.error(error);
+
+            Swal.fire({
+                title: "Error!",
+                text: "There was an issue updating your profile.",
+                icon: "error"
+            });
+        }
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevFormData) => ({
@@ -55,14 +121,14 @@ const Profile = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
+        setSubmit_process_state(true);
+        dataBase_patch_userData(formData);
     };
 
     return (
         <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
             <form method="post" onSubmit={handleSubmit} className='pt-4 px-4 pb-5'>
                 <legend className="text-2xl text-blue-600 font-semibold my-4 mx-1 select-none flex justify-between">Profile & Billing Section</legend>
-                {success && <div className="bg-green-500 text-white p-4 mb-4 rounded-md">{success}</div>}
                 <div className="mb-4">
                     <label htmlFor="name" className="block text-gray-700">Full Name</label>
                     <input
@@ -101,13 +167,13 @@ const Profile = () => {
                         />
                     </div>
                     <div className="mb-4">
-                        <label htmlFor="place_state" className="block text-gray-700">State</label>
+                        <label htmlFor="state" className="block text-gray-700">State</label>
                         <input
                             type="text"
-                            name="place_state"
+                            name="state"
                             className="w-full p-2 border border-gray-300 rounded-md"
-                            id="place_state"
-                            value={formData.place_state}
+                            id="state"
+                            value={formData.state}
                             onChange={handleChange}
                             required
                         />
@@ -227,16 +293,11 @@ const Profile = () => {
                         required
                     ></textarea>
                 </div>
-                <button
-                    // disabled={!submit_process_state}
-                    // className={`w-full py-3 mt-4 text-white rounded-md ${!submit_process_state ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"}`}
-                    className={`w-full py-3 mt-4 text-white rounded-md bg-blue-600 hover:bg-blue-700"}`}
-                    type="submit"
-                >
-                    {/* {submit_process_state ? "Submit" : <i className="fa-solid fa-spinner fa-spin"></i>} */}
-                    "Submit"
+                <button type="submit" disabled={submit_process_state} className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"} w-full py-3 mt-4 text-white rounded mb-2 transition`}>
+                    {!submit_process_state ? "Submit" : <i className="fa-solid fa-spinner fa-spin"></i>}
                 </button>
             </form >
+            {(data_process_state || submit_process_state) && <ProcessBgBlack />}
         </div >
     );
 };

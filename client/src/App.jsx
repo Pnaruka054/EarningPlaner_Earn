@@ -21,6 +21,7 @@ import WaitRedirecting from './website/client/EarningSourses/viewAds/waitRedirec
 import Home from './website/client/home/home';
 import ContactUs from './website/client/components/contactUs/contactUs';
 import PageNotFound from './website/client/components/pageNotFound/pageNotFound';
+import ShortLink from './website/client/EarningSourses/shortLink/shortLink';
 
 const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
@@ -72,7 +73,8 @@ const App = () => {
     if (
       location.pathname === '/' ||
       location.pathname === '/login' ||
-      location.pathname === '/register'
+      location.pathname === '/signup' ||
+      location.pathname.includes('/signup/ref')
     ) {
       setshow_NavBar_state((p) => p = true)
       setshow_Full_NavBar_state((p) => p = false)
@@ -83,6 +85,7 @@ const App = () => {
       location.pathname === '/member/refer-and-earn' ||
       location.pathname === '/member/support' ||
       location.pathname === '/member/settings' ||
+      location.pathname === '/member/profile' ||
       location.pathname === '/member/view-ads'
     ) {
       setshow_NavBar_state((p) => p = false)
@@ -118,13 +121,14 @@ const App = () => {
         <CSSTransition
           timeout={300}
           classNames="page-fade"
-          key={window.location.pathname} 
+          key={window.location.pathname}
         >
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/contact-us" element={<ContactUs />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/signup/ref/:id" element={<SignUp referral_status="true" />} />
             <Route path="/member/dashboard" element={<DashBoard getLogOut_btnClicked={showPopUp_onLogOut_btn_state} setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state} />} />
             <Route path="/member/deposit" element={<Deposit setShowBottomAlert_state={setShowBottomAlert_state} />} />
             <Route path="/member/withdraw" element={<Withdraw setShowBottomAlert_state={setShowBottomAlert_state} />} />
@@ -135,6 +139,7 @@ const App = () => {
             {/* Earning Sourse */}
             <Route path="/member/view-ads" element={<ViewAds />} />
             <Route path="/waitRedirecting" element={<WaitRedirecting />} />
+            <Route path="/member/short-link" element={<ShortLink setShowBottomAlert_state={setShowBottomAlert_state} />} />
             <Route path="/*" element={<PageNotFound setshow_NavBar_state={setshow_NavBar_state} />} />
           </Routes>
         </CSSTransition>

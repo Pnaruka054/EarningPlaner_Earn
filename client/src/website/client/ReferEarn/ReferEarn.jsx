@@ -1,46 +1,56 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
 import Footer from '../components/footer/footer';
+import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 
 const ReferEarn = () => {
     const [currentPage_state, setCurrentPage_state] = useState(1);
-    const [referralRecords_state, setReferralRecords] = useState([
-        {
-            username: "1",
-            income: "0",
-            date: "658476"
-        },
-        {
-            username: "2",
-            income: "0",
-            date: "658476"
-        },
-        {
-            username: "3",
-            income: "41",
-            date: "658476"
-        },
-        {
-            username: "4",
-            income: "20",
-            date: "658476"
-        },
-        {
-            username: "5",
-            income: "50",
-            date: "658476"
-        },
-    ]);
+    const [referralRecords_state, setReferralRecords] = useState([]);
     const linksPerPage = 10;
-
+    let [data_process_state, setData_process_state] = useState(false);
+    const navigation = useNavigate();
     const indexOfLastReferral = currentPage_state * linksPerPage;
     const indexOfFirstReferral = indexOfLastReferral - linksPerPage;
-    const currentReferrals = referralRecords_state.slice(indexOfFirstReferral, indexOfLastReferral);
-    const totalPages = Math.ceil(referralRecords_state.length / linksPerPage);
+    const currentReferrals = referralRecords_state.referral_data?.slice(indexOfFirstReferral, indexOfLastReferral);
+    const totalPages = Math.ceil(referralRecords_state.referral_data?.length / linksPerPage);
 
     const handlePageChange = (pageNumber) => {
         setCurrentPage_state(pageNumber);
     };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setData_process_state(true);
+            try {
+                const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userReferral_record_get`, {
+                    withCredentials: true
+                });
+                setReferralRecords(response.data.msg);
+            } catch (error) {
+                if (error.response.data.jwtMiddleware_token_not_found_error) {
+                    navigation('/login');
+                } else if (error.response.data.jwtMiddleware_error) {
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'Your session has expired. Please log in again.',
+                        icon: 'error',
+                        timer: 5000,
+                        timerProgressBar: true,
+                        confirmButtonText: 'OK',
+                        didClose: () => {
+                            navigation('/login');
+                        }
+                    });
+                }
+                console.error(error);
+            } finally {
+                setData_process_state(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text).then(() => {
@@ -50,8 +60,7 @@ const ReferEarn = () => {
         });
     };
 
-    // const referralLink = `${window.location.origin}/signup/ref/${userData.userName}`;
-    const referralLink = `${window.location.origin}/signup/ref/sdfgsdfgfdg`;
+    const referralLink = `${window.location.origin}/signup/ref/${referralRecords_state.userName}`;
 
     return (
         <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
@@ -94,10 +103,10 @@ const ReferEarn = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {currentReferrals.map((referral, index) => (
+                                {currentReferrals?.map((referral, index) => (
                                     <tr key={index}>
-                                        <td className="px-4 py-2 border-l">{referral.username}</td>
-                                        <td className="px-4 py-2">{referral.income}</td>
+                                        <td className="px-4 py-2 border-l">{referral.userName}</td>
+                                        <td className="px-4 py-2">₹{referral.Income || '0.000'}</td>
                                         <td className="px-4 py-2">{referral.date}</td>
                                     </tr>
                                 ))}
@@ -113,7 +122,7 @@ const ReferEarn = () => {
                             {Array.from({ length: totalPages }, (_, index) => (
                                 <li key={index}>
                                     <button
-                                        className={`px-4 py-2 rounded-md ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"} hover:bg-blue-600 hover:text-white`}
+                                        className={`px-4 py-2 rounded-md ${currentPage_state === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"} hover:bg-blue-600 hover:text-white`}
                                         onClick={(e) => {
                                             e.preventDefault();
                                             handlePageChange(index + 1);
@@ -127,6 +136,7 @@ const ReferEarn = () => {
                     </div>
                 )}
             </div>
+            {data_process_state && <ProcessBgBlack />}
             <div className='mt-3'>
                 <Footer />
             </div>
