@@ -2,9 +2,7 @@ const userSignUp_module = require('../../model/userSignUp/userSignUp_module')
 const withdrawal_records_module = require('../../model/withdraw/withdrawal_records_module')
 const withdrawal_methods_module = require('../../model/withdraw/withdraw_methods_module')
 const current_time_get = require('../../helper/currentTimeUTC')
-const generateOrderID = require('../../helper/generateOrderID')
 const mongoose = require('mongoose')
-
 
 const userBalanceData_get = async (req, res) => {
     try {
@@ -69,7 +67,7 @@ const userWithdrawal_record_post = async (req, res) => {
         }
 
         // Check if the user has sufficient balance for withdrawal
-        if (parseInt(userSignUpData.withdrawable_amount) < parseInt(balance)) {
+        if (Number(userSignUpData.withdrawable_amount) < Number(balance)) {
             return res.status(400).json({
                 success: false,
                 msg: "Insufficient funds."
@@ -78,16 +76,15 @@ const userWithdrawal_record_post = async (req, res) => {
 
         // Generate order number and time
         const time = current_time_get();
-        const orderNumber = generateOrderID();
 
         // Update the withdrawable amount
-        userSignUpData.withdrawable_amount = (parseInt(userSignUpData.withdrawable_amount) - parseInt(balance)).toFixed(3).toString();
+        userSignUpData.withdrawable_amount = (Number(userSignUpData.withdrawable_amount) - Number(balance)).toFixed(3).toString();
 
         // Save the updated user data
         await userSignUpData.save({ session });
 
         // Save the withdrawal record
-        await new withdrawal_records_module({ userDB_id, balance, type, time, orderNumber, withdrawal_method: userSignUpData.withdrawal_method, withdrawal_account_information: userSignUpData.withdrawal_account_information }).save({ session });
+        await new withdrawal_records_module({ userDB_id, balance, type, time, withdrawal_method: userSignUpData.withdrawal_method, withdrawal_account_information: userSignUpData.withdrawal_account_information }).save({ session });
 
         // Commit the transaction
         await session.commitTransaction();
@@ -125,7 +122,7 @@ const userBalanceConvertPatch = async (req, res) => {
         }
 
         // Update the withdrawable amount
-        userSignUpData.deposit_amount = (parseInt(userSignUpData.deposit_amount) - parseInt(balance)).toFixed(3).toString();
+        userSignUpData.deposit_amount = (Number(userSignUpData.deposit_amount) - Number(balance)).toFixed(3).toString();
 
         // Save the updated user data
         await userSignUpData.save({ session });

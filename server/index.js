@@ -19,9 +19,18 @@ const { createCurrentMonthDocuments } = require("./controllers/dashboardStatisti
 const middleware = require('./middlewares/jwt_to_userData_middleware')
 const userRouter = require('./routes/user_router');
 const userWithdraw = require('./routes/userWIthdraw_router');
-
+const allowedOrigins = [
+    'https://earningplaner-earn.onrender.com',
+    'http://localhost:5173' 
+];
 const corsOptions = {
-    origin: 'https://earningplaner-earn.onrender.com',  // Allow only this origin
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);  // Allow request
+        } else {
+            callback(new Error('Not allowed by CORS'));  // Block request
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,  // Allow credentials (cookies, authorization headers, etc.)
 };

@@ -4,12 +4,14 @@ import Footer from '../components/footer/footer';
 import axios from 'axios'
 import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import { useNavigate } from 'react-router-dom'
+import Pagination from '../components/pagination/pagination';
 
 const Withdraw = ({ setShowBottomAlert_state }) => {
     const [withdraw_amount_state, setWithdraw_amount_state] = useState(0);
     let [data_process_state, setData_process_state] = useState(false);
     let [submit_process_state, setSubmit_process_state] = useState(false);
     const navigation = useNavigate();
+    const [currentPage_state, setCurrentPage_state] = useState(1);
     let [balanceData_state, setBalanceData_state] = useState({
         withdrawable_amount: '0.000',
         deposit_amount: '0.000',
@@ -119,7 +121,7 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
             footer: `<span style="color: gray;">Note: A 5% conversion charge will be deducted from the amount you enter.</span>`
         }).then((result) => {
             if (result.isConfirmed) {
-                const balanceToConvert = parseFloat(result.value); // Convert input to a float
+                const balanceToConvert = parseInt(result.value); // Convert input to a float
 
                 // Validate if it's a number and greater than 0
                 if (!isNaN(balanceToConvert) && balanceToConvert > 0) {
@@ -133,7 +135,7 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                         Swal.fire({
                             title: "Conversion Details",
                             html: `
-                                You are converting ₹${balanceToConvert}.<br>
+                                You are converting ₹${balanceToConvert}<br>
                                 Conversion Charge (5%): ₹${charge.toFixed(2)}<br>
                                 Final Amount after Charges: ₹${finalAmount.toFixed(2)}<br>
                                 Are you sure you want to proceed with this conversion?`,
@@ -241,7 +243,7 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
 
         // Check if withdrawal amount is above the minimum
         const selectedMethod = balanceData_state.withdrawal_methodsData.find((value) => value.withdrawal_method === balanceData_state.withdrawal_method);
-        if (parseInt(withdraw_amount_state) < parseInt(selectedMethod.minimum_amount)) {
+        if (Number(withdraw_amount_state) < Number(selectedMethod.minimum_amount)) {
             return Swal.fire({
                 icon: 'warning',
                 title: 'Invalid Amount',
@@ -251,7 +253,7 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
         }
 
         // Check if withdrawal amount exceeds available balance
-        if (parseInt(withdraw_amount_state) > parseInt(balanceData_state.withdrawable_amount)) {
+        if (Number(withdraw_amount_state) > Number(balanceData_state.withdrawable_amount)) {
             return Swal.fire({
                 icon: 'warning',
                 title: 'Insufficient Balance',
@@ -281,6 +283,11 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
             }
         });
     };
+    const itemsPerPage = 5
+    const indexOfLastReferral = currentPage_state * itemsPerPage;
+    const indexOfFirstReferral = indexOfLastReferral - itemsPerPage;
+    const currentReferrals = balanceData_state.withdrawal_Records.reverse()?.slice(indexOfFirstReferral, indexOfLastReferral);
+    const totalPages = Math.ceil(balanceData_state.withdrawal_Records?.length / itemsPerPage);
 
     return (
         <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
@@ -288,7 +295,7 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                 <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
                     Withdraw Amount
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5 mb-4">
+                <div className="sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5 mb-4 sm:space-y-0 space-y-5">
                     <div className="bg-teal-500 p-6 rounded-lg shadow-md text-white relative hover_on_image_with_div">
                         <div className="flex flex-col justify-between h-full">
                             <h3 className="text-3xl font-semibold">₹{balanceData_state.deposit_amount}</h3>
@@ -307,9 +314,9 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                             <i className="fa-duotone fa-light fa-money-from-bracket hover_on_image"></i>
                         </div>
                     </div>
-                    <div className="bg-cyan-500 p-6 rounded-lg hidden lg:block shadow-md text-white relative row-span-3 hover_on_image_with_div">
-                        <div className="flex flex-col justify-center items-center h-full">
-                            <h3 className="text-5xl font-semibold">₹{
+                    <div className="bg-cyan-500 p-6 rounded-lg block sm:hidden lg:block shadow-md text-white relative row-span-3 hover_on_image_with_div">
+                        <div className="flex flex-col justify-center sm:items-center h-full">
+                            <h3 className="text-3xl xl:text-4xl font-semibold">₹{
                                 isNaN(parseFloat(balanceData_state.available_amount))
                                     ? (parseFloat(balanceData_state.deposit_amount) || parseFloat(balanceData_state.withdrawable_amount) || "0.000")
                                     : parseFloat(balanceData_state.available_amount).toFixed(3)
@@ -324,9 +331,9 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                     <div className="p-2 rounded-lg relative col-span-2 flex justify-center text-2xl">
                         <button onClick={handelDeposit_to_withdrawal} className='bg-blue-500 hover:bg-blue-600 px-4 py-2 text-white convertbtn_hover'><i className="fa-solid fa-rotate"></i> <span>Convert to withdrawable Balance</span></button>
                     </div>
-                    <div className="bg-cyan-500 p-6 max-h-60 block lg:hidden rounded-lg shadow-md text-white relative row-span-3 hover_on_image_with_div">
+                    <div className="bg-cyan-500 p-6 max-h-60 hidden sm:block lg:hidden rounded-lg shadow-md text-white relative row-span-3 hover_on_image_with_div">
                         <div className="flex flex-col justify-center items-center h-full">
-                            <h3 className="text-5xl font-semibold">₹{
+                            <h3 className="text-3xl font-semibold">₹{
                                 isNaN(parseFloat(balanceData_state.available_amount))
                                     ? (parseFloat(balanceData_state.deposit_amount) || parseFloat(balanceData_state.withdrawable_amount) || "0.000")
                                     : parseFloat(balanceData_state.available_amount).toFixed(3)
@@ -358,7 +365,18 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                     </div>
                 </div>
                 <div className='px-5'>
-                    <input type="number" value={withdraw_amount_state} onFocus={(e) => setWithdraw_amount_state((prev) => prev = '')} onBlur={(e) => setWithdraw_amount_state((prev) => prev === '' ? prev = 0 : prev = prev)} onChange={(e) => setWithdraw_amount_state((prev) => prev = e.target.value)} pattern='^[0-9]' required className='block w-full my-3 pl-10 py-2 px-3 outline-none text-blue-600 no-arrows rounded-md rupees_symbol bg-no-repeat' />
+                    <input
+                        type="text" // "number" type ka default behavior issue create kar sakta hai
+                        value={withdraw_amount_state}
+                        onFocus={() => setWithdraw_amount_state('')}
+                        onBlur={() => setWithdraw_amount_state((prev) => prev === '' ? '0' : prev)}
+                        onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, ''); // Only digits (0-9) allowed
+                            setWithdraw_amount_state(val);
+                        }}
+                        required
+                        className="block w-full my-3 pl-10 py-2 px-3 outline-none text-blue-600 no-arrows rounded-md rupees_symbol bg-no-repeat"
+                    />
                     <div className='space-x-5 flex justify-center'>
                         <button onClick={() => handleUserWithdrawals()} className='w-full py-2 bg-green-600 text-white'>Withdraw Now</button>
                         <button onClick={() => setWithdraw_amount_state(0)} className='w-full py-2 bg-red-600 text-white'>Clear</button>
@@ -379,7 +397,7 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                     <hr className='m-auto border border-gray-300 shadow-lg' />
                     <ul className='mt-4 space-y-4'>
                         {
-                            balanceData_state.withdrawal_Records?.reverse().map((record, index) => (
+                            currentReferrals?.map((record, index) => (
                                 <li key={index} className='bg-white px-3 py-5 rounded-lg shadow-md text-[14px] sm:text-[16px]'>
                                     <div className='flex justify-between'>
                                         <p className='px-3 cursor-pointer py-1 rounded-md text-white bg-red-500'>Withdraw</p>
@@ -401,7 +419,7 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                                         <div className='flex justify-between px-2'>
                                             <span className='text-gray-500 font-medium'>Order number</span>
                                             <span className='text-gray-500 font-medium space-x-1'>
-                                                <span id='copyText'>{record.orderNumber}</span>
+                                                <span id='copyText'>{record._id.toUpperCase()}</span>
                                                 <i onClick={(e) => {
                                                     handleCopy()
                                                     console.log("sdfh");
@@ -418,6 +436,11 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                         }
                     </ul>
                 </div>
+                {totalPages > 1 && <Pagination
+                    totalPages={totalPages}
+                    currentPage={currentPage_state}
+                    onPageChange={setCurrentPage_state}
+                />}
             </div>
             {(data_process_state || submit_process_state) && <ProcessBgBlack />}
             <div className='mt-3'>

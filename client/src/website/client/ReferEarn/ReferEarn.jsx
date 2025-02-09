@@ -3,21 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
 import Footer from '../components/footer/footer';
 import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
+import Pagination from '../components/pagination/pagination';
 
 const ReferEarn = () => {
     const [currentPage_state, setCurrentPage_state] = useState(1);
     const [referralRecords_state, setReferralRecords] = useState([]);
-    const linksPerPage = 10;
     let [data_process_state, setData_process_state] = useState(false);
     const navigation = useNavigate();
-    const indexOfLastReferral = currentPage_state * linksPerPage;
-    const indexOfFirstReferral = indexOfLastReferral - linksPerPage;
-    const currentReferrals = referralRecords_state.referral_data?.slice(indexOfFirstReferral, indexOfLastReferral);
-    const totalPages = Math.ceil(referralRecords_state.referral_data?.length / linksPerPage);
-
-    const handlePageChange = (pageNumber) => {
-        setCurrentPage_state(pageNumber);
-    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -59,6 +51,12 @@ const ReferEarn = () => {
             console.error('Error copying text: ', err);
         });
     };
+
+    const itemsPerPage = 5
+    const indexOfLastReferral = currentPage_state * itemsPerPage;
+    const indexOfFirstReferral = indexOfLastReferral - itemsPerPage;
+    const currentReferrals = referralRecords_state.referral_data?.slice(indexOfFirstReferral, indexOfLastReferral);
+    const totalPages = Math.ceil(referralRecords_state.referral_data?.length / itemsPerPage);
 
     const referralLink = `${window.location.origin}/signup/ref/${referralRecords_state.userName}`;
 
@@ -114,27 +112,11 @@ const ReferEarn = () => {
                         </table>
                     </div>
                 </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="mt-4 flex justify-center">
-                        <ul className="flex space-x-2">
-                            {Array.from({ length: totalPages }, (_, index) => (
-                                <li key={index}>
-                                    <button
-                                        className={`px-4 py-2 rounded-md ${currentPage_state === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"} hover:bg-blue-600 hover:text-white`}
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            handlePageChange(index + 1);
-                                        }}
-                                    >
-                                        {index + 1}
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
+                {totalPages > 1 && <Pagination
+                    totalPages={totalPages}
+                    currentPage={currentPage_state}
+                    onPageChange={setCurrentPage_state}
+                />}
             </div>
             {data_process_state && <ProcessBgBlack />}
             <div className='mt-3'>

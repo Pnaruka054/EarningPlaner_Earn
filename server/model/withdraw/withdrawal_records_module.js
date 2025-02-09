@@ -5,7 +5,6 @@ const withdrawalRecordSchema = new mongoose.Schema({
     balance: { type: String },
     type: { type: String },
     time: { type: String },
-    orderNumber: { type: String },
     withdrawal_status: { type: String, default: "Pending" },
     withdrawal_method: { type: String },
     withdrawal_account_information: { type: String },
