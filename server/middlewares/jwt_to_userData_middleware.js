@@ -5,10 +5,10 @@ const middleware_userLogin_check = async (req, res, next) => {
         if (req.originalUrl === '/userRoute/login' || req.originalUrl === '/userRoute/signUp') {
             return next(); // Skip middleware for this route
         }
-        
+
         // Retrieve the token from cookies (assuming it's named 'jwtToken')
         const token = req.cookies.jwtToken; // 'jwtToken' is the cookie name you set in the login route
-
+        console.log(token);
         if (!token) {
             return res.status(401).json({
                 success: false,
