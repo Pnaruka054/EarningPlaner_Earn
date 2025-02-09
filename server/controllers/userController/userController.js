@@ -116,7 +116,7 @@ const userLogin = async (req, res) => {
         // Set the JWT token in an HttpOnly cookie
         res.cookie('jwtToken', jwt_token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: false,
             sameSite: 'Strict',
             maxAge: 3600000 // 1 hour
         });
