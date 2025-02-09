@@ -9,7 +9,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: 'http://localhost:5173', // Allow your frontend URL here
+        origin: 'https://earningplaner-earn.onrender.com/login', // Allow your frontend URL here
         methods: ['GET', 'POST'],
         credentials: true, // Allow cookies if needed
     }
