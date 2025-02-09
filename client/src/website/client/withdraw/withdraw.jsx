@@ -23,11 +23,16 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
         withdrawal_Records: [],
         withdrawal_methodsData: []
     });
-    const handleCopy = () => {
-        const textToCopy = document.getElementById('copyText');
-        navigator.clipboard.writeText(textToCopy.textContent).then(() => {
-            setShowBottomAlert_state(true);
-            setTimeout(() => setShowBottomAlert_state(false), 2000);
+    const handleCopy = (e) => {
+        const textToCopy = e.target.parentElement.children[0].innerText;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Copied!',
+                text: 'Text has been copied to clipboard.',
+                timer: 1000,
+                showConfirmButton: false,
+            });
         });
     };
 
@@ -273,21 +278,16 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
             if (result.isConfirmed) {
                 // Proceed with the withdrawal if user confirms
                 dataBase_post_newWithdrawal({ balance: withdraw_amount_state, type: balanceData_state.withdrawal_method });
-            } else {
-                // Optionally, you can show a message when the user cancels
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Cancelled',
-                    text: 'Your withdrawal has been cancelled.',
-                });
             }
         });
     };
+
+    const withdrawArray = balanceData_state.withdrawal_Records.reverse()
     const itemsPerPage = 5
     const indexOfLastReferral = currentPage_state * itemsPerPage;
     const indexOfFirstReferral = indexOfLastReferral - itemsPerPage;
-    const currentReferrals = balanceData_state.withdrawal_Records.reverse()?.slice(indexOfFirstReferral, indexOfLastReferral);
-    const totalPages = Math.ceil(balanceData_state.withdrawal_Records?.length / itemsPerPage);
+    const currentReferrals = withdrawArray?.slice(indexOfFirstReferral, indexOfLastReferral);
+    const totalPages = Math.ceil(withdrawArray?.length / itemsPerPage);
 
     return (
         <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
@@ -314,7 +314,7 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                             <i className="fa-duotone fa-light fa-money-from-bracket hover_on_image"></i>
                         </div>
                     </div>
-                    <div className="bg-cyan-500 p-6 rounded-lg block sm:hidden lg:block shadow-md text-white relative row-span-3 hover_on_image_with_div">
+                    <div className="bg-cyan-500 p-6 rounded-lg hidden lg:block shadow-md text-white relative row-span-3 hover_on_image_with_div">
                         <div className="flex flex-col justify-center sm:items-center h-full">
                             <h3 className="text-3xl xl:text-4xl font-semibold">₹{
                                 isNaN(parseFloat(balanceData_state.available_amount))
@@ -328,11 +328,11 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                             <i className="fa-solid fa-wallet hover_on_image"></i>
                         </div>
                     </div>
-                    <div className="p-2 rounded-lg relative col-span-2 flex justify-center text-2xl">
+                    <div className="p-2 rounded-lg relative col-span-2 flex justify-center text-xl">
                         <button onClick={handelDeposit_to_withdrawal} className='bg-blue-500 hover:bg-blue-600 px-4 py-2 text-white convertbtn_hover'><i className="fa-solid fa-rotate"></i> <span>Convert to withdrawable Balance</span></button>
                     </div>
-                    <div className="bg-cyan-500 p-6 max-h-60 hidden sm:block lg:hidden rounded-lg shadow-md text-white relative row-span-3 hover_on_image_with_div">
-                        <div className="flex flex-col justify-center items-center h-full">
+                    <div className="bg-cyan-500 p-6 max-h-60 block lg:hidden rounded-lg shadow-md text-white relative row-span-3 hover_on_image_with_div">
+                        <div className="flex flex-col justify-center sm:items-center h-full">
                             <h3 className="text-3xl font-semibold">₹{
                                 isNaN(parseFloat(balanceData_state.available_amount))
                                     ? (parseFloat(balanceData_state.deposit_amount) || parseFloat(balanceData_state.withdrawable_amount) || "0.000")
@@ -401,8 +401,12 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                                 <li key={index} className='bg-white px-3 py-5 rounded-lg shadow-md text-[14px] sm:text-[16px]'>
                                     <div className='flex justify-between'>
                                         <p className='px-3 cursor-pointer py-1 rounded-md text-white bg-red-500'>Withdraw</p>
-                                        <p className='text-green-600 font-bold'>{record.withdrawal_status}</p>
+                                        <p className={`font-bold ${record.withdrawal_status === 'Pending' ? 'text-yellow-500' :
+                                            record.withdrawal_status === 'Success' ? 'text-green-600' :
+                                                record.withdrawal_status === 'Reject' ? 'text-red-600' : ''
+                                            }`}>{record.withdrawal_status}</p>
                                     </div>
+
                                     <div className='mt-2'>
                                         <div className='flex justify-between px-2'>
                                             <span className='text-gray-500 font-medium'>Balance</span>
@@ -419,10 +423,9 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                                         <div className='flex justify-between px-2'>
                                             <span className='text-gray-500 font-medium'>Order number</span>
                                             <span className='text-gray-500 font-medium space-x-1'>
-                                                <span id='copyText'>{record._id.toUpperCase()}</span>
+                                                <span>{record._id.toUpperCase()}</span>
                                                 <i onClick={(e) => {
-                                                    handleCopy()
-                                                    console.log("sdfh");
+                                                    handleCopy(e)
                                                     e.target.className = 'fa-solid fa-clipboard cursor-pointer'
                                                     setTimeout(() => {
                                                         e.target.className = 'fa-regular fa-clipboard cursor-pointer'
@@ -435,6 +438,9 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                             ))
                         }
                     </ul>
+                    {currentReferrals.length === 0 && <div className='h-48 rounded-lg flex items-center justify-center'>
+                        No Record
+                    </div>}
                 </div>
                 {totalPages > 1 && <Pagination
                     totalPages={totalPages}

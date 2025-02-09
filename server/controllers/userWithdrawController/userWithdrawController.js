@@ -79,6 +79,7 @@ const userWithdrawal_record_post = async (req, res) => {
 
         // Update the withdrawable amount
         userSignUpData.withdrawable_amount = (Number(userSignUpData.withdrawable_amount) - Number(balance)).toFixed(3).toString();
+        userSignUpData.pending_withdrawal_amount = ((Number(userSignUpData.pending_withdrawal_amount) || 0) + Number(balance)).toString();
 
         // Save the updated user data
         await userSignUpData.save({ session });

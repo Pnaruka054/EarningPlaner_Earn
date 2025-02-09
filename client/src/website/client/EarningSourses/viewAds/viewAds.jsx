@@ -305,9 +305,11 @@ const ViewAds = () => {
         }
         newTab.close();
         const newTab2 = window.open(`/waitRedirecting/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
-        if (!newTab2) {
-            alert("Please Allow Popup in Your Browse to Earn Money!!");
-        }
+        setTimeout(() => {
+            if (newTab2) {
+                alert("Please Allow Popup in Your Browse to Earn Money!!");
+            }
+        }, 500);
     };
 
     useEffect(() => {
