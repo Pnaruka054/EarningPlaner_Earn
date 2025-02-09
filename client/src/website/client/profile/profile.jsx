@@ -15,41 +15,11 @@ const Profile = () => {
         mobile_number: '',
         withdrawal_method: '',
         withdrawal_account_information: '',
+        withdrawal_methods_data: []
     });
-
     const navigation = useNavigate();
-
-    // let withdrawal_countryes_state = [
-    //     {
-    //         country_code: 'IND',
-    //         country_name: 'India'
-    //     }
-    // ]
-
-    const withdrawalMethods_state = [
-        { withdrawal_method: 'MoMo', minimum_amount: '$2.0000' },
-        { withdrawal_method: 'Payeer', minimum_amount: '$2.0000' },
-        { withdrawal_method: 'OVO', minimum_amount: '$5.0000' },
-        { withdrawal_method: 'DANA', minimum_amount: '$5.0000' },
-        { withdrawal_method: 'bKash', minimum_amount: '$5.0000' },
-        { withdrawal_method: 'Nagad', minimum_amount: '$5.0000' },
-        { withdrawal_method: 'Airtm', minimum_amount: '$5.0000' },
-        { withdrawal_method: 'UPI', minimum_amount: '$5.0000' },
-        { withdrawal_method: 'Paytm', minimum_amount: '$10.0000' },
-        { withdrawal_method: 'PayPal', minimum_amount: '$10.0000' },
-        { withdrawal_method: 'Bitcoin', minimum_amount: '$10.0000' },
-        { withdrawal_method: 'USDT', minimum_amount: '$5.0000' },
-        { withdrawal_method: 'ShopeePay (Indonesia)', minimum_amount: '$5.0000' },
-        { withdrawal_method: 'Bank Transfer for (Vietnam)', minimum_amount: '$5.0000' },
-        { withdrawal_method: 'Bank Transfer for (India)', minimum_amount: '$10.0000' },
-        { withdrawal_method: 'Bank Transfer for (Indonesia)', minimum_amount: '$5.0000' },
-        { withdrawal_method: 'WebMoney', minimum_amount: '$2.0000' },
-        { withdrawal_method: 'Perfect Money', minimum_amount: '$2.0000' }
-    ];
-
     let [data_process_state, setData_process_state] = useState(false);
     let [submit_process_state, setSubmit_process_state] = useState(false);
-
     useEffect(() => {
         const fetchData = async () => {
             setData_process_state(true);
@@ -82,7 +52,6 @@ const Profile = () => {
 
         fetchData();
     }, []);
-
     let dataBase_patch_userData = async (obj) => {
         try {
             await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userRoute/userProfileData_patch`, obj, {
@@ -238,31 +207,18 @@ const Profile = () => {
                                 required
                             >
                                 <option value="">Choose</option>
-                                {withdrawalMethods_state.map((method, index) => (
+                                {formData.withdrawal_methods_data?.map((method, index) => (
                                     <option key={index} value={method.withdrawal_method}>{method.withdrawal_method}</option>
                                 ))}
                             </select>
                         </div>
-                        <div className='mt-3 leading-[2.5] sm:mb-0 mb-4' style={{ fontSize: "14px" }}>
-                            <p>- For Payeer add your Account number. (Example: P123***)</p>
-                            <p>- For MM, add phone number.</p>
-                            <p>- For OVO, add OVO number.</p>
-                            <p>- For DANA, add DANA number.</p>
-                            <p>- For bKash, add your bKash number</p>
-                            <p>- For Airtm, add your email or Airtm username.</p>
-                            <p>- For UPI, add your UPI id</p>
-                            <p>- For Paytm, add your phone number</p>
-                            <p>- For PayPal, add your email.</p>
-                            <p>- For Bitcoin, add your wallet address or Binance account email address.</p>
-                            <p>- For USDT, add your USDT wallet address + network name or Binance account email address.</p>
-                            <p>- For ShopeePay, add phone number.</p>
-                            <p>- For bank transfer add your account holder name, Bank Name and Account number</p>
-                            <p>- For bank transfer (India) add your First name, Last name, Account number and IFSC code</p>
-                            <p>- For bank transfer (Indonesia) add your Bank Account Number and Bank Name</p>
-                            <p>- For Web Money, add your purse. (Example: Z123***)</p>
-                        </div>
+                        <ul className='mt-3 space-y-5 sm:mb-0 mb-4' style={{ fontSize: "14px" }}>
+                            {formData.withdrawal_methods_data?.map((method, index) => (
+                                <li className='purple-right-list-image' key={index}> {method.description}</li>
+                            ))}
+                        </ul>
                     </div>
-                    <div className="mb-4 -mt-5 bg-white">
+                    <div className="mt-4 bg-white flex">
                         <table className="min-w-full table-auto">
                             <thead>
                                 <tr>
@@ -271,7 +227,7 @@ const Profile = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {withdrawalMethods_state.map((method, index) => (
+                                {formData.withdrawal_methods_data?.map((method, index) => (
                                     <tr key={index} className="border-t">
                                         <td className="p-2">{method.withdrawal_method}</td>
                                         <td className="p-2">{method.minimum_amount}</td>
@@ -281,7 +237,7 @@ const Profile = () => {
                         </table>
                     </div>
                 </div>
-                <div className="mb-4">
+                <div className="my-4">
                     <label htmlFor="withdrawal_account_information" className="block text-gray-700">Withdrawal Account</label>
                     <textarea
                         name="withdrawal_account_information"

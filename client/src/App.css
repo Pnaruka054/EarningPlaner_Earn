@@ -19,8 +19,16 @@
     background-position: 10px 50%;
 }
 
-.deposit-list-image {
-    background-image: url('./assets/depositInstructionsList.png');
+.blue-right-list-image {
+    background-image: url('./assets/blue-right-list-image.png');
+    background-size: 20px 20px;
+    background-repeat: no-repeat;
+    background-position: 0.5% 50%;
+    padding-left: 30px;
+}
+
+.purple-right-list-image {
+    background-image: url('./assets/purple-right-list-image.png');
     background-size: 20px 20px;
     background-repeat: no-repeat;
     background-position: 0.5% 50%;

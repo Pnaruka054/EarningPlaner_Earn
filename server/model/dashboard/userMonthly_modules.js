@@ -7,11 +7,11 @@ const monthSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now, expires: '1y' } // Data will expire after 1 year
 });
 
-const userMonthly_modules = mongoose.model('Monthly_records', monthSchema);
+const userMonthly_records_module = mongoose.model('Monthly_records', monthSchema);
 
 async function saveUserMonthlyData(data) {
     try {
-        const savedData = await new userMonthly_modules(data).save();
+        const savedData = await new userMonthly_records_module(data).save();
         return savedData;
     } catch (error) {
         console.error('Error saving data:', error);
@@ -19,4 +19,4 @@ async function saveUserMonthlyData(data) {
     }
 }
 
-module.exports = { userMonthly_modules, saveUserMonthlyData };
+module.exports = { userMonthly_records_module, saveUserMonthlyData };

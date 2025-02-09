@@ -16,7 +16,10 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
         pending_withdrawal_amount: '0.000',
         total_withdrawal_amount: '0.000',
         available_amount: '0.000',
-        Withdrawal_Records: []
+        withdrawal_method: '',
+        withdrawal_account_information: '',
+        withdrawal_Records: [],
+        withdrawal_methodsData: []
     });
     const handleCopy = () => {
         const textToCopy = document.getElementById('copyText');
@@ -26,69 +29,17 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
         });
     };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setData_process_state(true);
-            try {
-                const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userBalanceData_get`, {
-                    withCredentials: true
-                });
-                setBalanceData_state((prev) => ({
-                    ...prev,
-                    ...response.data.msg,
-                    available_amount: (parseFloat(response.data.msg.withdrawable_amount) + parseFloat(response.data.msg.deposit_amount)).toFixed(3)  // Calculate and update available_amount
-                }));
-            } catch (error) {
-                console.error(error);
-                if (error.response.data.jwtMiddleware_token_not_found_error) {
-                    navigation('/login');
-                } else if (error.response.data.jwtMiddleware_error) {
-                    Swal.fire({
-                        title: 'Session Expired',
-                        text: 'Your session has expired. Please log in again.',
-                        icon: 'error',
-                        timer: 5000,
-                        timerProgressBar: true,
-                        confirmButtonText: 'OK',
-                        didClose: () => {
-                            navigation('/login');
-                        }
-                    });
-                }
-            } finally {
-                setData_process_state(false);
-            }
-        };
-
-        fetchData();
-    }, []);
-
-    function handelDeposit_to_withdrawal() {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "You won't be able to revert this!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, Convert it!"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({
-                    title: "Success!",
-                    text: "Your Balance has been converted.",
-                    icon: "success"
-                });
-            }
-        });
-    }
-
-    let dataBase_post_newWithdrawal = async (obj) => {
-        setSubmit_process_state(true);
+    const fetchData = async () => {
+        setData_process_state(true);
         try {
-            await axios.post(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userWithdrawal_record_post`, obj, {
+            const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userBalanceData_get`, {
                 withCredentials: true
             });
+            setBalanceData_state((prev) => ({
+                ...prev,
+                ...response.data.msg,
+                available_amount: (parseFloat(response.data.msg.withdrawable_amount) + parseFloat(response.data.msg.deposit_amount)).toFixed(3)  // Calculate and update available_amount
+            }));
         } catch (error) {
             console.error(error);
             if (error.response.data.jwtMiddleware_token_not_found_error) {
@@ -107,9 +58,229 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                 });
             }
         } finally {
+            setData_process_state(false);
+        }
+    };
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    function handelDeposit_to_withdrawal() {
+        let dataBase_balance_convert_patch = async (balanceToConvert) => {
+            setSubmit_process_state(true);
+            try {
+                const response = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userBalanceConvertPatch`, { balance: balanceToConvert }, {
+                    withCredentials: true,
+                });
+
+                if (response.status === 200) {
+                    fetchData()
+                    Swal.fire({
+                        title: "Success!",
+                        text: "Your balance has been successfully converted.",
+                        icon: "success",
+                        timer: 5000,
+                        timerProgressBar: true,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Error",
+                        text: "There was an issue with the conversion process. Please try again later.",
+                        icon: "error"
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    title: "Error",
+                    text: "Network error or server issue. Please try again later.",
+                    icon: "error"
+                });
+            } finally {
+                setSubmit_process_state(false);
+            }
+        }
+
+        // Show input prompt with the current balance displayed
+        Swal.fire({
+            title: "Are you sure?",
+            text: `You currently have ₹${balanceData_state.deposit_amount} in your account. Enter the amount you want to convert.`,
+            icon: "warning",
+            input: 'text',
+            inputLabel: 'Enter the amount you want to convert',
+            inputPlaceholder: 'Enter amount',
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, Convert it!",
+            footer: `<span style="color: gray;">Note: A 5% conversion charge will be deducted from the amount you enter.</span>`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const balanceToConvert = parseFloat(result.value); // Convert input to a float
+
+                // Validate if it's a number and greater than 0
+                if (!isNaN(balanceToConvert) && balanceToConvert > 0) {
+                    // Check if the entered amount is valid (less than or equal to available balance)
+                    if (balanceToConvert <= balanceData_state.deposit_amount) {
+                        // Calculate 5% charge
+                        const charge = balanceToConvert * 0.05;
+                        const finalAmount = balanceToConvert - charge;
+
+                        // Show a confirmation with the breakdown of the charges
+                        Swal.fire({
+                            title: "Conversion Details",
+                            html: `
+                                You are converting ₹${balanceToConvert}.<br>
+                                Conversion Charge (5%): ₹${charge.toFixed(2)}<br>
+                                Final Amount after Charges: ₹${finalAmount.toFixed(2)}<br>
+                                Are you sure you want to proceed with this conversion?`,
+                            icon: "question",
+                            showCancelButton: true,
+                            confirmButtonText: "Yes, Convert it!",
+                            cancelButtonText: "Cancel"
+                        }).then((confirmationResult) => {
+                            if (confirmationResult.isConfirmed) {
+                                dataBase_balance_convert_patch(finalAmount);
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Insufficient Balance',
+                            timerProgressBar: true,
+                            text: `Your requested amount exceeds your deposit balance of ₹${balanceData_state.deposit_amount}. Please enter a valid amount.`
+                        });
+                    }
+                } else {
+                    Swal.fire({
+                        title: 'Invalid Amount',
+                        text: "Please enter a valid positive amount to convert.",
+                        icon: "error"
+                    });
+                }
+            }
+        });
+    }
+
+    let dataBase_post_newWithdrawal = async (obj) => {
+        setSubmit_process_state(true);
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userWithdrawal_record_post`, obj, {
+                withCredentials: true
+            });
+
+            if (response.status === 200) {
+                fetchData();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Withdrawal Successful',
+                    text: `Your withdrawal of ₹${obj.balance} has been successfully processed.`,
+                    timer: 5000,
+                    timerProgressBar: true,
+                    confirmButtonText: 'OK',
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            if (error.response.data.jwtMiddleware_token_not_found_error) {
+                Swal.fire({
+                    title: 'Authentication Error',
+                    text: 'Please log in again to continue.',
+                    icon: 'error',
+                    timer: 5000,
+                    timerProgressBar: true,
+                    confirmButtonText: 'OK',
+                    didClose: () => {
+                        navigation('/login');
+                    }
+                });
+            } else if (error.response.data.jwtMiddleware_error) {
+                Swal.fire({
+                    title: 'Session Expired',
+                    text: 'Your session has expired. Please log in again.',
+                    icon: 'error',
+                    timer: 5000,
+                    timerProgressBar: true,
+                    confirmButtonText: 'OK',
+                    didClose: () => {
+                        navigation('/login');
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Something went wrong with your withdrawal. Please try again later.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        } finally {
             setSubmit_process_state(false);
         }
-    }
+    };
+
+    let handleUserWithdrawals = () => {
+        // Check if payment info is bound
+        if (balanceData_state.withdrawal_method === '' && balanceData_state.withdrawal_account_information === '') {
+            return Swal.fire({
+                icon: 'warning',
+                title: 'Bind Payment Info',
+                text: 'Please bind your payment information to proceed with withdrawals.',
+                timerProgressBar: true,
+                timer: 5000,
+                didClose: () => {
+                    navigation('/member/profile');
+                },
+                showConfirmButton: false,
+                showCancelButton: false,
+            });
+        }
+
+        // Check if withdrawal amount is above the minimum
+        const selectedMethod = balanceData_state.withdrawal_methodsData.find((value) => value.withdrawal_method === balanceData_state.withdrawal_method);
+        if (parseInt(withdraw_amount_state) < parseInt(selectedMethod.minimum_amount)) {
+            return Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Amount',
+                timerProgressBar: 5000,
+                text: `The minimum withdrawal amount for ${selectedMethod.withdrawal_method} is ₹${selectedMethod.minimum_amount}. Please enter a valid amount.`
+            });
+        }
+
+        // Check if withdrawal amount exceeds available balance
+        if (parseInt(withdraw_amount_state) > parseInt(balanceData_state.withdrawable_amount)) {
+            return Swal.fire({
+                icon: 'warning',
+                title: 'Insufficient Balance',
+                text: `Your withdrawal amount exceeds your available balance of ₹${balanceData_state.withdrawable_amount}. Please enter a valid amount.`
+            });
+        }
+
+        // Show confirmation dialog to the user
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `You are about to withdraw ₹${withdraw_amount_state} via ${balanceData_state.withdrawal_method}. Do you want to proceed?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Withdraw',
+            cancelButtonText: 'No, Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Proceed with the withdrawal if user confirms
+                dataBase_post_newWithdrawal({ balance: withdraw_amount_state, type: balanceData_state.withdrawal_method });
+            } else {
+                // Optionally, you can show a message when the user cancels
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Cancelled',
+                    text: 'Your withdrawal has been cancelled.',
+                });
+            }
+        });
+    };
 
     return (
         <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
@@ -189,7 +360,7 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                 <div className='px-5'>
                     <input type="number" value={withdraw_amount_state} onFocus={(e) => setWithdraw_amount_state((prev) => prev = '')} onBlur={(e) => setWithdraw_amount_state((prev) => prev === '' ? prev = 0 : prev = prev)} onChange={(e) => setWithdraw_amount_state((prev) => prev = e.target.value)} pattern='^[0-9]' required className='block w-full my-3 pl-10 py-2 px-3 outline-none text-blue-600 no-arrows rounded-md rupees_symbol bg-no-repeat' />
                     <div className='space-x-5 flex justify-center'>
-                        <button onClick={() => dataBase_post_newWithdrawal({ balance: withdraw_amount_state, type: "BANK CARD" })} className='w-full py-2 bg-green-600 text-white'>Withdraw Now</button>
+                        <button onClick={() => handleUserWithdrawals()} className='w-full py-2 bg-green-600 text-white'>Withdraw Now</button>
                         <button onClick={() => setWithdraw_amount_state(0)} className='w-full py-2 bg-red-600 text-white'>Clear</button>
                     </div>
                 </div>
@@ -197,10 +368,10 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                     <p className='text-center text-lg my-3'>Withdraw Instructions</p>
                     <hr className='w-[95%] m-auto border' />
                     <ul className='px-6 mt-2'>
-                        <li className='deposit-list-image'>If the transfer time is up, please fill out the deposit form again.</li>
-                        <li className='deposit-list-image'>The transfer amount must match the order you create, otherwise the money connot be credited successfully.</li>
-                        <li className='deposit-list-image'>If you transfer the wrong amount, our company will not be respnsible for the lost amount!</li>
-                        <li className='deposit-list-image'>Note: do not cancel the deposit order after the money has been transferred.</li>
+                        <li className='blue-right-list-image'>If the transfer time is up, please fill out the form again.</li>
+                        <li className='blue-right-list-image'>The transfer amount must match the order you create, otherwise the money connot be credited successfully.</li>
+                        <li className='blue-right-list-image'>If you transfer the wrong amount, our company will not be respnsible for the lost amount!</li>
+                        <li className='blue-right-list-image'>Note: do not cancel the deposit order after the money has been transferred.</li>
                     </ul>
                 </div>
                 <div className='my-5 pb-5'>
@@ -208,7 +379,7 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                     <hr className='m-auto border border-gray-300 shadow-lg' />
                     <ul className='mt-4 space-y-4'>
                         {
-                            balanceData_state.Withdrawal_Records.map((record, index) => (
+                            balanceData_state.withdrawal_Records?.reverse().map((record, index) => (
                                 <li key={index} className='bg-white px-3 py-5 rounded-lg shadow-md text-[14px] sm:text-[16px]'>
                                     <div className='flex justify-between'>
                                         <p className='px-3 cursor-pointer py-1 rounded-md text-white bg-red-500'>Withdraw</p>

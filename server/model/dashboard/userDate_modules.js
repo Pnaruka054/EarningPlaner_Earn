@@ -10,6 +10,6 @@ const monthSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now, expires: '1y' }
 });
 
-const userDate_records = mongoose.model('userDate_records', monthSchema);
+const userDate_records_module = mongoose.model('userDate_records', monthSchema);
 
-module.exports = userDate_records
+module.exports = userDate_records_module

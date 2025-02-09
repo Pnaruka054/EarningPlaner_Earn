@@ -6,10 +6,11 @@ const jwt = require('jsonwebtoken')
 // const oauth2Client = require("../helper/oauth2Client")
 
 const userSignUp_module = require('../../model/userSignUp/userSignUp_module')
-const referral_records = require('../../model/referralRecords/referral_records_module')
+const referral_records_module = require('../../model/referralRecords/referral_records_module')
 const { createCurrentMonthDocuments } = require('../dashboardStatistics/dashboardStatistics')
-const { userMonthly_modules, saveUserMonthlyData } = require("../../model/dashboard/userMonthly_modules");
-const userDate_records = require("../../model/dashboard/userDate_modules");
+const { userMonthly_records_module, saveUserMonthlyData } = require("../../model/dashboard/userMonthly_modules");
+const userDate_records_module = require("../../model/dashboard/userDate_modules");
+const withdrawal_methods_module = require('../../model/withdraw/withdraw_methods_module')
 const current_time_get = require('../../helper/currentTimeUTC')
 
 function jwt_accessToken(user) {
@@ -53,7 +54,7 @@ let userSignUp = async (req, res) => {
                     error_msg: 'Your Registration Link is invalid'
                 })
             }
-            await new referral_records({
+            await new referral_records_module({
                 userDB_id: referred_by_userData._id,
                 date: current_time_get(),
                 userName: email_address.split('@')[0]
@@ -147,8 +148,8 @@ const userDataGet = async (req, res) => {
             });
         }
 
-        const user_month_records = await userMonthly_modules.find({ userDB_id: user_new_Data._id.toString() });
-        const user_date_records = await userDate_records.find({ userDB_id: user_new_Data._id });
+        const user_month_records = await userMonthly_records_module.find({ userDB_id: user_new_Data._id.toString() });
+        const user_date_records = await userDate_records_module.find({ userDB_id: user_new_Data._id });
 
         return res.status(200).json({
             success: true,
@@ -176,7 +177,7 @@ const userReferral_record_get = async (req, res) => {
             });
         }
 
-        const user_DB_referral_record_get = await referral_records.find({ userDB_id: userData._id });
+        const user_DB_referral_record_get = await referral_records_module.find({ userDB_id: userData._id });
 
         const resData = {
             userName: user_DB_Data.userName,
@@ -201,6 +202,7 @@ const userProfileData_get = async (req, res) => {
         const userData = req.user;
 
         const user_DB_Data = await userSignUp_module.findById(userData._id);
+        const withdrawal_methods_data = await withdrawal_methods_module.find()
 
         if (!user_DB_Data) {
             return res.status(404).json({
@@ -209,9 +211,11 @@ const userProfileData_get = async (req, res) => {
             });
         }
 
+        const userProfile = { ...user_DB_Data.toObject(), withdrawal_methods_data };
+
         return res.status(200).json({
             success: true,
-            msg: user_DB_Data
+            msg: userProfile
         });
     } catch (error) {
         console.error('Error fetching user profile data:', error);

@@ -63,10 +63,10 @@ const Deposit = ({ setShowBottomAlert_state }) => {
                     <p className='text-center text-lg my-3'>Deposit Instructions</p>
                     <hr className='w-[95%] m-auto border' />
                     <ul className='px-6 mt-2'>
-                        <li className='deposit-list-image'>If the transfer time is up, please fill out the deposit form again.</li>
-                        <li className='deposit-list-image'>The transfer amount must match the order you create, otherwise the money connot be credited successfully.</li>
-                        <li className='deposit-list-image'>If you transfer the wrong amount, our company will not be respnsible for the lost amount!</li>
-                        <li className='deposit-list-image'>Note: do not cancel the deposit order after the money has been transferred.</li>
+                        <li className='blue-right-list-image'>If the transfer time is up, please fill out the deposit form again.</li>
+                        <li className='blue-right-list-image'>The transfer amount must match the order you create, otherwise the money connot be credited successfully.</li>
+                        <li className='blue-right-list-image'>If you transfer the wrong amount, our company will not be respnsible for the lost amount!</li>
+                        <li className='blue-right-list-image'>Note: do not cancel the deposit order after the money has been transferred.</li>
                     </ul>
                 </div>
                 <div className='my-5 pb-5'>

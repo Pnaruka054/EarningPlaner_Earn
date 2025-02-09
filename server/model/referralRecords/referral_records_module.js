@@ -7,6 +7,6 @@ const referralRecordSchema = new mongoose.Schema({
     income: { type: String, require: true },
 })
 
-const referral_records = mongoose.model('referral_record', referralRecordSchema)
+const referral_records_module = mongoose.model('referral_record', referralRecordSchema)
 
-module.exports = referral_records
+module.exports = referral_records_module

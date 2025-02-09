@@ -1,4 +1,4 @@
-const { userMonthly_modules } = require("../../model/dashboard/userMonthly_modules");
+const { userMonthly_records_module } = require("../../model/dashboard/userMonthly_modules");
 const userDate_records = require('../../model/dashboard/userDate_modules');
 const userSignUp_module = require('../../model/userSignUp/userSignUp_module');
 
@@ -31,14 +31,14 @@ async function createCurrentMonthDocuments() {
 
     // For each user, check if they already have a record for this month
     for (let userID of userIDs) {
-        const existingMonth = await userMonthly_modules.findOne({
+        const existingMonth = await userMonthly_records_module.findOne({
             monthName: monthName,
             userDB_id: userID
         });
 
         // If no record exists for the current month, create a new record
         if (!existingMonth) {
-            const newMonthlyRecord = new userMonthly_modules({
+            const newMonthlyRecord = new userMonthly_records_module({
                 monthName: monthName, // Include the year in the monthName
                 userDB_id: userID
             });
