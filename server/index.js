@@ -21,12 +21,9 @@ const userRouter = require('./routes/user_router');
 const userWithdraw = require('./routes/userWIthdraw_router');
 
 const corsOptions = {
-    origin: function (origin, callback) {
-        // Make sure requests from your frontend are allowed
-        callback(null, true);
-    },
+    origin: 'https://earningplaner-earn.onrender.com',  // Allow only this origin
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+    credentials: true,  // Allow credentials (cookies, authorization headers, etc.)
 };
 
 app.use((req, res, next) => {
