@@ -117,8 +117,8 @@ const userLogin = async (req, res) => {
         res.cookie('jwtToken', jwt_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
-            // sameSite: 'None', 
+            // sameSite: 'Strict',
+            sameSite: 'None', 
             maxAge: 3600000 // 1 hour
         });
 
