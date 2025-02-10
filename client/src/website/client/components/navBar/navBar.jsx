@@ -4,7 +4,7 @@ import navBar_logo from '../../../../assets/EarningPlanerLogo.png'
 import SideMenu from '../sideMenu/sideMenu';
 import { io } from 'socket.io-client';
 
-const NavBar = ({ show }) => {
+const NavBar = ({ show, availableBalance_forNavBar_state }) => {
     const [sideMenu_state, setSideMenu_state] = useState('menu-outline');
     const [toggelMenu_state, setToggelMenu_state] = useState("reorder-three");
     const [navBarBalance_state, setNavBarBalance_state] = useState("reorder-three");
@@ -104,7 +104,7 @@ const NavBar = ({ show }) => {
                 </span>
                 <ul className='flex items-center space-x-4 text-white'>
                     <li className='hover:bg-blue-700 px-3 h-12 flex items-center'>
-                        <Link to="/member/withdraw"><span className='sm:inline-block hidden'>Available Balance:</span> ₹0.0120</Link>
+                        <Link to="/member/withdraw"><span className='sm:inline-block hidden'>Available Balance:</span> ₹{availableBalance_forNavBar_state}</Link>
                     </li>
                     <li className='hover:bg-blue-700 px-3 h-12 flex items-center'>
                         <Link to='/member/profile'><ion-icon name="person"></ion-icon> Profile</Link>

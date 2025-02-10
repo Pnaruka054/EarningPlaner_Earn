@@ -17,7 +17,7 @@ import { Link } from 'react-router-dom';
 import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import axios from 'axios';
 
-const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
+const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBalance_forNavBar_state }) => {
     const [userData_state, setUserData_state] = useState([]);
     let [data_process_state, setData_process_state] = useState(false);
     let dropdownRef = useRef(null)
@@ -47,6 +47,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked }) => {
                 });
                 setUserData_state(response.data.userData);
                 setDropdownButtonValue_state(response.data.userData[1][0].monthName)
+                setAvailableBalance_forNavBar_state(Number(response.data.userData[0].deposit_amount) + Number(response.data.userData[0].withdrawable_amount));
             } catch (error) {
                 if (error.response.data.jwtMiddleware_token_not_found_error) {
                     navigation('/login');

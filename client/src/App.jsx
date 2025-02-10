@@ -29,6 +29,7 @@ const App = () => {
   const [showPopUp_onLogOut_btn_state, setShowPopUp_onLogOut_btn_state] = useState(false);
   const [showBottomAlert_state, setShowBottomAlert_state] = useState(false);
   const [isOffline_state, setIsOffline_state] = useState(navigator.onLine ? false : true);
+  const [availableBalance_forNavBar_state, setAvailableBalance_forNavBar_state] = useState(0.000);
   const location = useLocation();
   const networkStatusRef = useRef(null);
   const updateNetworkStatus = (message, classes, status) => {
@@ -101,7 +102,7 @@ const App = () => {
     <>
       {
         !show_Full_navBar_state && createPortal(
-          <NavBar show={show_navBar_state} />,
+          <NavBar show={show_navBar_state} availableBalance_forNavBar_state={availableBalance_forNavBar_state} />,
           document.getElementById('navBar')
         )
       }
@@ -129,15 +130,15 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/signup/ref/:id" element={<SignUp referral_status="true" />} />
-            <Route path="/member/dashboard" element={<DashBoard getLogOut_btnClicked={showPopUp_onLogOut_btn_state} setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state} />} />
-            <Route path="/member/deposit" element={<Deposit setShowBottomAlert_state={setShowBottomAlert_state} />} />
-            <Route path="/member/withdraw" element={<Withdraw setShowBottomAlert_state={setShowBottomAlert_state} />} />
-            <Route path="/member/refer-and-earn" element={<ReferEarn />} />
-            <Route path="/member/support" element={<Support />} />
-            <Route path="/member/settings" element={<Setting />} />
-            <Route path="/member/profile" element={<Profile />} />
+            <Route path="/member/dashboard" element={<DashBoard setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} getLogOut_btnClicked={showPopUp_onLogOut_btn_state} setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state} />} />
+            <Route path="/member/deposit" element={<Deposit setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} setShowBottomAlert_state={setShowBottomAlert_state} />} />
+            <Route path="/member/withdraw" element={<Withdraw setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} setShowBottomAlert_state={setShowBottomAlert_state} />} />
+            <Route path="/member/refer-and-earn" element={<ReferEarn setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
+            <Route path="/member/support" element={<Support setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
+            <Route path="/member/settings" element={<Setting setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
+            <Route path="/member/profile" element={<Profile setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
             {/* Earning Sourse */}
-            <Route path="/member/view-ads" element={<ViewAds />} />
+            <Route path="/member/view-ads" element={<ViewAds setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
             <Route path="/waitRedirecting" element={<WaitRedirecting />} />
             <Route path="/member/short-link" element={<ShortLink setShowBottomAlert_state={setShowBottomAlert_state} />} />
             <Route path="/*" element={<PageNotFound setshow_NavBar_state={setshow_NavBar_state} />} />

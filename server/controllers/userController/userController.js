@@ -182,7 +182,8 @@ const userReferral_record_get = async (req, res) => {
 
         const resData = {
             userName: user_DB_Data.userName,
-            referral_data: user_DB_referral_record_get
+            referral_data: user_DB_referral_record_get,
+            available_balance: Number(user_DB_Data.deposit_amount) + Number(user_DB_Data.withdrawable_amount)
         };
 
         return res.status(200).json({

@@ -3,7 +3,12 @@ const mongoose = require('mongoose');
 const monthSchema = new mongoose.Schema({
     userDB_id: { type: String, required: true },
     monthName: { type: String, required: true },
-    earningSources: { type: mongoose.Schema.Types.Mixed }, 
+    earningSources: {
+        view_ads: {
+            income: { type: Number },
+            clickBalance: { type: Number },
+        },
+    },
     createdAt: { type: Date, default: Date.now, expires: '1y' } // Data will expire after 1 year
 });
 

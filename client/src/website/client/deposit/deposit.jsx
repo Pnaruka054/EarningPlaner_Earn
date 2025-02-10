@@ -1,9 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Footer from '../components/footer/footer';
+import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-const Deposit = ({ setShowBottomAlert_state }) => {
+const Deposit = ({ setShowBottomAlert_state, setAvailableBalance_forNavBar_state }) => {
     const [deposit_amount_state, setDeposit_amount_state] = useState(0);
-
+    let [data_process_state, setData_process_state] = useState(false);
+    let [submit_process_state, setSubmit_process_state] = useState(false);
+    const navigation = useNavigate();
+    let [balanceData_state, setBalanceData_state] = useState({
+        withdrawable_amount: '0.000',
+        deposit_amount: '0.000',
+        pending_withdrawal_amount: '0.000',
+        total_withdrawal_amount: '0.000',
+        available_amount: '0.000',
+        withdrawal_method: '',
+        withdrawal_account_information: '',
+        withdrawal_Records: [],
+        withdrawal_methodsData: []
+    });
     const handleCopy = () => {
         const textToCopy = document.getElementById('copyText');
         navigator.clipboard.writeText(textToCopy.textContent).then(() => {
@@ -11,6 +28,44 @@ const Deposit = ({ setShowBottomAlert_state }) => {
             setTimeout(() => setShowBottomAlert_state(false), 2000);
         });
     };
+
+    const fetchData = async () => {
+        setData_process_state(true);
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userBalanceData_get`, {
+                withCredentials: true
+            });
+            setBalanceData_state((prev) => ({
+                ...prev,
+                ...response.data.msg,
+                available_amount: (parseFloat(response.data.msg.withdrawable_amount) + parseFloat(response.data.msg.deposit_amount)).toFixed(3)  // Calculate and update available_amount
+            }));
+            setAvailableBalance_forNavBar_state((parseFloat(response.data.msg.withdrawable_amount) + parseFloat(response.data.msg.deposit_amount)).toFixed(3))
+        } catch (error) {
+            console.error(error);
+            if (error.response.data.jwtMiddleware_token_not_found_error) {
+                navigation('/login');
+            } else if (error.response.data.jwtMiddleware_error) {
+                Swal.fire({
+                    title: 'Session Expired',
+                    text: 'Your session has expired. Please log in again.',
+                    icon: 'error',
+                    timer: 5000,
+                    timerProgressBar: true,
+                    confirmButtonText: 'OK',
+                    didClose: () => {
+                        navigation('/login');
+                    }
+                });
+            }
+        } finally {
+            setData_process_state(false);
+        }
+    };
+    useEffect(() => {
+        fetchData();
+    }, []);
+
 
     const handleDeposit_btn = () => {
 
@@ -25,8 +80,8 @@ const Deposit = ({ setShowBottomAlert_state }) => {
                 <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
                     Deposit Amount
                 </div>
-                <div className='text-center bg-gradient-to-r from-transparent via-teal-500 to-transparent py-2 text-white font-lexend mb-3'>
-                    Deposit Balance - ₹100
+                <div className='text-center bg-gradient-to-r from-teal-400 via-teal-600 to-teal-400 py-3 px-6 rounded-lg shadow-lg text-white font-lexend mb-4'>
+                    Deposit Balance - ₹{balanceData_state.deposit_amount || 0.000}
                 </div>
                 <div className='flex justify-center'>
                     <ul className='flex flex-wrap justify-center gap-5'>
@@ -109,6 +164,7 @@ const Deposit = ({ setShowBottomAlert_state }) => {
                     </ul>
                 </div>
             </div>
+            {(data_process_state || submit_process_state) && <ProcessBgBlack />}
             <div className='mt-3'>
                 <Footer />
             </div>

@@ -19,10 +19,13 @@ const { createCurrentMonthDocuments } = require("./controllers/dashboardStatisti
 const middleware = require('./middlewares/jwt_to_userData_middleware')
 const userRouter = require('./routes/user_router');
 const userWithdraw = require('./routes/userWIthdraw_router');
+const userIncomeRoute = require('./routes/userIncome_router');
 const allowedOrigins = [
     'https://earningplaner-earn.onrender.com',
-    'http://localhost:5173' 
+    'http://localhost:5173',
+    'http://192.168.1.7:5173'
 ];
+app.set('trust proxy', true);
 const corsOptions = {
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.includes(origin)) {
@@ -57,6 +60,7 @@ Database_connection();
 app.use(middleware.middleware_userLogin_check)
 app.use('/userRoute', userRouter);
 app.use('/userWithdraw', userWithdraw);
+app.use('/userIncomeRoute', userIncomeRoute);
 
 // Scheduled task
 cron.schedule('0 0 1 * *', () => {

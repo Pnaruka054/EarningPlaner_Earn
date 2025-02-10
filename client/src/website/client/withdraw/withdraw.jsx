@@ -6,7 +6,7 @@ import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import { useNavigate } from 'react-router-dom'
 import Pagination from '../components/pagination/pagination';
 
-const Withdraw = ({ setShowBottomAlert_state }) => {
+const Withdraw = ({ setShowBottomAlert_state, setAvailableBalance_forNavBar_state }) => {
     const [withdraw_amount_state, setWithdraw_amount_state] = useState(0);
     let [data_process_state, setData_process_state] = useState(false);
     let [submit_process_state, setSubmit_process_state] = useState(false);
@@ -47,6 +47,7 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
                 ...response.data.msg,
                 available_amount: (parseFloat(response.data.msg.withdrawable_amount) + parseFloat(response.data.msg.deposit_amount)).toFixed(3)  // Calculate and update available_amount
             }));
+            setAvailableBalance_forNavBar_state((parseFloat(response.data.msg.withdrawable_amount) + parseFloat(response.data.msg.deposit_amount)).toFixed(3))
         } catch (error) {
             console.error(error);
             if (error.response.data.jwtMiddleware_token_not_found_error) {
@@ -114,7 +115,7 @@ const Withdraw = ({ setShowBottomAlert_state }) => {
         // Show input prompt with the current balance displayed
         Swal.fire({
             title: "Are you sure?",
-            text: `You currently have ₹${balanceData_state.deposit_amount} in your account. Enter the amount you want to convert.`,
+            text: `You currently have ₹${balanceData_state.deposit_amount} in your deposit wallet. Enter the amount you want to convert.`,
             icon: "warning",
             input: 'text',
             inputLabel: 'Enter the amount you want to convert',

@@ -59,5 +59,6 @@ async function createCurrentMonthDocuments() {
 }
 
 module.exports = {
-    createCurrentMonthDocuments
+    createCurrentMonthDocuments,
+    getAllDatesOfCurrentMonth
 }

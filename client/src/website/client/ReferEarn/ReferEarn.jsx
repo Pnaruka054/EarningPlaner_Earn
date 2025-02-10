@@ -5,7 +5,7 @@ import Footer from '../components/footer/footer';
 import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import Pagination from '../components/pagination/pagination';
 
-const ReferEarn = () => {
+const ReferEarn = ({ setAvailableBalance_forNavBar_state }) => {
     const [currentPage_state, setCurrentPage_state] = useState(1);
     const [referralRecords_state, setReferralRecords] = useState([]);
     let [data_process_state, setData_process_state] = useState(false);
@@ -19,6 +19,7 @@ const ReferEarn = () => {
                     withCredentials: true
                 });
                 setReferralRecords(response.data.msg);
+                setAvailableBalance_forNavBar_state(response.data.msg.available_balance);
             } catch (error) {
                 if (error.response.data.jwtMiddleware_token_not_found_error) {
                     navigation('/login');
