@@ -26,6 +26,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             });
             setViewAds_firstTimeLoad_state(response.data.msg)
             setAvailableBalance_forNavBar_state((parseFloat(response.data.msg.withdrawable_amount) + parseFloat(response.data.msg.deposit_amount)).toFixed(3))
+            setDisabledButtons_state(response.data.msg.buttonNames)
         } catch (error) {
             console.error(error);
             if (error.response.data.jwtMiddleware_token_not_found_error) {
@@ -281,15 +282,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         }, 500);
     }
 
-    function handelbtnClick(id) {
-        setDisabledButtons_state((prevDisabled) => {
-            if (!prevDisabled.includes(id)) {
-                return [...prevDisabled, id];
-            }
-            return prevDisabled;
-        });
-    }
-
     function handle_onClickaAds(iframe, script) {
         let onClicka_video_ads_div = document.getElementById('onClicka_video_ads_div')
         setShowAdsDiv_state((p) => p = true)
@@ -341,7 +333,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         setProcessing_state((p) => p = false)
     }
 
-    const handle_link_click = (e, link) => {
+    const handle_link_click = (link, btnName, amount) => {
         setHandle_clickAds_btnClick_state(true);
         const newTab = window.open("", '_blank');
         if (!newTab) {
@@ -349,22 +341,47 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         }
         newTab.close();
         window.open(link, '_blank');
-        window.open(`/waitRedirecting/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
+        window.open(`/waitRedirecting/?link=${encodeURIComponent(link + '||' + btnName + '||' + amount)}`, '_blank', 'noopener noreferrer');
     };
 
     useEffect(() => {
         const handleStorageChange = () => {
             const clickSuccessStatus = localStorage.getItem('isSuccess');
-            if (clickSuccessStatus === 'true') {
-                localStorage.removeItem('isSuccess')
-                setHandle_clickAds_btnClick_state(false)
-                Swal.fire({
-                    title: "Success!",
-                    icon: "success",
-                });
+            if (clickSuccessStatus && clickSuccessStatus.includes('btn')) {
+                localStorage.removeItem('isSuccess');
+                setHandle_clickAds_btnClick_state(false);
+
+                if (viewAds_firstTimeLoad_state && viewAds_firstTimeLoad_state.clickBalance) {
+                    const btnName = clickSuccessStatus.split('||')[0];
+
+                    setDisabledButtons_state((prevDisabled) => {
+                        if (!prevDisabled.includes(btnName)) {
+                            return [...prevDisabled, btnName];
+                        }
+                        return prevDisabled;
+                    });
+
+                    const amount = clickSuccessStatus.split('||')[1];
+                    const obj = {
+                        disabledButtons_state: [...disabledButtons_state, btnName],
+                        clickBalance: (Number(viewAds_firstTimeLoad_state.clickBalance.split('/')[0]) + 1).toString() + "/" + viewAds_firstTimeLoad_state.clickBalance.split('/')[1],
+                        btnClickEarn: amount
+                    };
+
+                    user_adsView_income_patch(obj)
+                        .then(() => {
+                            Swal.fire({
+                                title: "Success!",
+                                icon: "success",
+                            });
+                        })
+                        .catch((error) => {
+                            console.error("Error updating income:", error);
+                        });
+                }
             } else if (clickSuccessStatus === 'false') {
-                localStorage.removeItem('isSuccess')
-                setHandle_clickAds_btnClick_state(false)
+                localStorage.removeItem('isSuccess');
+                setHandle_clickAds_btnClick_state(false);
                 Swal.fire({
                     icon: "error",
                     title: "Success!",
@@ -372,173 +389,188 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 });
             }
         };
-        window.addEventListener('storage', handleStorageChange)
+
+        window.addEventListener('storage', handleStorageChange);
         return () => {
             window.removeEventListener('storage', handleStorageChange);
         };
-    }, []);
+    }, [viewAds_firstTimeLoad_state]);
 
     let buttonsObj = [
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: () => {
+            handelButtonClick: function () {
                 OnClickaVideoAds('https://js.onclckmn.com/static/onclicka.js', '234995')
                 setHandle_clickAds_btnClick_state(true)
                 setShowAdsDiv_state(true)
                 setProcessing_state((p) => p = true)
-                handelbtnClick('btn1')
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: () => {
+            handelButtonClick: function () {
                 OnClickaVideoAds('https://js.wpadmngr.com/static/adManager.js', '288449')
                 setHandle_clickAds_btnClick_state(true)
                 setShowAdsDiv_state(true)
                 setProcessing_state((p) => p = true)
-                handelbtnClick('btn2')
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: () => {
+            handelButtonClick: function () {
                 const adSterrakeys = ['9053e4594f6f11cc52b1a92378164206', 'f897c99fe416f65a488b750d0f978646'];
                 let randomNumber = Math.floor(Math.random() * adSterrakeys.length)
                 handelAdsDiv_for_adSterra(adSterrakeys[randomNumber])
                 setHandle_clickAds_btnClick_state(true)
                 setShowAdsDiv_state(true)
                 setProcessing_state((p) => p = true)
-                handelbtnClick('btn3')
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: () => {
+            handelButtonClick: function () {
                 handelAdsDiv_for_aAds()
                 setHandle_clickAds_btnClick_state(true)
                 setShowAdsDiv_state(true)
                 setProcessing_state((p) => p = true)
-                handelbtnClick('btn4')
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: () => {
+            handelButtonClick: function () {
                 handelAdsDiv_for_HilltopAds()
                 setHandle_clickAds_btnClick_state(true)
                 setShowAdsDiv_state(true)
                 setProcessing_state((p) => p = true)
-                handelbtnClick('btn5')
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: () => {
+            handelButtonClick: function () {
                 setHandle_clickAds_btnClick_state(true)
                 setProcessing_state((p) => p = true)
                 setOnClicka_clickadilla_state('onClicka')
                 OnClickaVideoAds('https://js.onclckmn.com/static/onclicka.js', '287247')
-                handelbtnClick('btn6')
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: () => {
+            handelButtonClick: function () {
                 setHandle_clickAds_btnClick_state(true)
                 setProcessing_state((p) => p = true)
                 setOnClicka_clickadilla_state('clickAdilla')
                 OnClickaVideoAds('https://js.wpadmngr.com/static/adManager.js', '287339')
-                handelbtnClick('btn7')
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: (e) => {
-                handle_link_click(e, 'https://poawooptugroo.com/4/8238196')
-                handelbtnClick('btn8')
+            handelButtonClick: function (e) {
+                handle_link_click('https://poawooptugroo.com/4/8238196', 'btn8', this.amount)
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: (e) => {
-                handle_link_click(e, 'https://poawooptugroo.com/4/8238196')
-                handelbtnClick('btn9')
+            handelButtonClick: function (e) {
+                handle_link_click('https://poawooptugroo.com/4/8238196', 'btn9', this.amount)
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: (e) => {
-                handle_link_click(e, 'https://poawooptugroo.com/4/8868626')
-                handelbtnClick('btn10')
+            handelButtonClick: function (e) {
+                handle_link_click('https://poawooptugroo.com/4/8868626', 'btn10', this.amount)
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: (e) => {
-                handle_link_click(e, 'https://poawooptugroo.com/4/8585876')
-                handelbtnClick('btn11')
+            handelButtonClick: function (e) {
+                handle_link_click('https://poawooptugroo.com/4/8585876', 'btn11', this.amount)
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: (e) => {
-                handle_link_click(e, 'https://poawooptugroo.com/4/8886349')
-                handelbtnClick('btn12')
+            handelButtonClick: function (e) {
+                handle_link_click('https://poawooptugroo.com/4/8886349', 'btn12', this.amount)
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: (e) => {
-                handle_link_click(e, 'https://poawooptugroo.com/4/8886361')
-                handelbtnClick('btn13')
+            handelButtonClick: function (e) {
+                handle_link_click('https://poawooptugroo.com/4/8886361', 'btn13', this.amount)
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: (e) => {
-                handle_link_click(e, 'https://poawooptugroo.com/4/8886370')
-                handelbtnClick('btn14')
+            handelButtonClick: function (e) {
+                handle_link_click('https://poawooptugroo.com/4/8886370', 'btn14', this.amount)
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: (e) => {
-                handle_link_click(e, 'https://poawooptugroo.com/4/8886375')
-                handelbtnClick('btn15')
+            handelButtonClick: function (e) {
+                handle_link_click('https://poawooptugroo.com/4/8886375', 'btn15', this.amount)
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: (e) => {
-                handle_link_click(e, 'https://loupush.com/9lMCqrCwt70=?')
-                handelbtnClick('btn16')
+            handelButtonClick: function (e) {
+                handle_link_click('https://loupush.com/9lMCqrCwt70=?', 'btn16', this.amount)
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: (e) => {
-                handle_link_click(e, 'https://pertlouv.com/iUyUq55zfnw=?')
-                handelbtnClick('btn17')
+            handelButtonClick: function (e) {
+                handle_link_click('https://pertlouv.com/iUyUq55zfnw=?', 'btn17', this.amount)
             },
         },
     ]
+
+    let user_adsView_income_patch = async (obj) => {
+        setData_process_state(true);
+        try {
+            const response = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_adsView_income_patch`, obj, {
+                withCredentials: true
+            });
+            setViewAds_firstTimeLoad_state(response.data.msg)
+            setAvailableBalance_forNavBar_state((parseFloat(response.data.msg.withdrawable_amount) + parseFloat(response.data.msg.deposit_amount)).toFixed(3))
+            setDisabledButtons_state(response.data.msg.buttonNames)
+        } catch (error) {
+            console.error(error);
+            if (error.response.data.jwtMiddleware_token_not_found_error) {
+                navigation('/login');
+            } else if (error.response.data.jwtMiddleware_error) {
+                Swal.fire({
+                    title: 'Session Expired',
+                    text: 'Your session has expired. Please log in again.',
+                    icon: 'error',
+                    timer: 5000,
+                    timerProgressBar: true,
+                    confirmButtonText: 'OK',
+                    didClose: () => {
+                        navigation('/login');
+                    }
+                });
+            }
+        } finally {
+            setData_process_state(false);
+        }
+    }
 
     return (
         <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
@@ -549,7 +581,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 <div data-banner-id="6056470"></div>
                 <div className='flex flex-col items-center my-6'>
                     <div className='flex gap-4'>
-                        <div className='bg-purple-700 px-2 py-1 shadow font-bold text-white rounded-t-2xl'>Click Balance - {viewAds_firstTimeLoad_state.clickBalance}/{buttonsObj.length * 3}</div>
+                        <div className='bg-purple-700 px-2 py-1 shadow font-bold text-white rounded-t-2xl'>Click Balance - {viewAds_firstTimeLoad_state.clickBalance}</div>
                         <div className='bg-purple-700 px-2 py-1 shadow font-bold text-white rounded-t-2xl'>Income - ₹{viewAds_firstTimeLoad_state.income}</div>
                     </div>
                     <div className='gap-2 justify-center bg-white px-6 py-3 shadow flex flex-wrap'>

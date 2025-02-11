@@ -5,8 +5,8 @@ const monthSchema = new mongoose.Schema({
     monthName: { type: String, required: true },
     earningSources: {
         view_ads: {
-            income: { type: Number },
-            clickBalance: { type: Number },
+            income: { type: String },
+            clickBalance: { type: String },
         },
     },
     createdAt: { type: Date, default: Date.now, expires: '1y' } // Data will expire after 1 year

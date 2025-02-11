@@ -14,7 +14,7 @@ const withdrawal_methods_module = require('../../model/withdraw/withdraw_methods
 const current_time_get = require('../../helper/currentTimeUTC')
 
 function jwt_accessToken(user) {
-    return jwt.sign({ jwtUser: user }, process.env.JWT_ACCESS_KEY, { expiresIn: '59m' })
+    return jwt.sign({ jwtUser: user }, process.env.JWT_ACCESS_KEY, { expiresIn: '2h' })
 }
 
 let userSignUp = async (req, res) => {
@@ -119,7 +119,7 @@ const userLogin = async (req, res) => {
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
             // sameSite: 'None', 
-            maxAge: 3600000 // 1 hour
+            maxAge: 7200000 // 1 hour
         });
 
         return res.status(200).json({

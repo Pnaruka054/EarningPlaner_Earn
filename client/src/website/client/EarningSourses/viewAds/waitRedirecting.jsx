@@ -20,9 +20,9 @@ const WaitRedirecting = () => {
         }, 1000);
 
         if (waitingTimer_state === randomNumber && redirectLink) {
-            localStorage.setItem('isSuccess', 'true');
+            localStorage.setItem('isSuccess', redirectLink.split('||')[1] + '||' + redirectLink.split('||')[2]);
             clearInterval(interval);
-            window.location.href = redirectLink;
+            window.location.href = redirectLink.split('||')[0];
         }
 
         return () => {
@@ -32,8 +32,7 @@ const WaitRedirecting = () => {
 
     useEffect(() => {
         const handleBeforeUnload = (event) => {
-            console.log(event);
-            if (localStorage.getItem('isSuccess') !== 'true') {
+            if (!localStorage.getItem('isSuccess').includes('btn')) {
                 localStorage.setItem('isSuccess', 'false');
             }
         };
