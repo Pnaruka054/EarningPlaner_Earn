@@ -4,9 +4,15 @@ const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const cron = require('node-cron');
 const app = express();
 const server = http.createServer(app);
+const cookieParser = require('cookie-parser');
+const middleware = require('./middlewares/jwt_to_userData_middleware')
+const userRouter = require('./routes/user_router');
+const userWithdraw = require('./routes/userWIthdraw_router');
+const userIncomeRoute = require('./routes/userIncome_router');
+const { cronForDaily_MonthlyData_Update, cronForMonthly_DataCreateFor_EveryUser } = require('./helper/cronForDailyDataUpdate')
+
 const io = socketIo(server, {
     cors: {
         origin: 'https://earningplaner-earn.onrender.com/login', // Allow your frontend URL here
@@ -14,12 +20,6 @@ const io = socketIo(server, {
         credentials: true, // Allow cookies if needed
     }
 });
-const cookieParser = require('cookie-parser');
-const { createCurrentMonthDocuments } = require("./controllers/dashboardStatistics/dashboardStatistics");
-const middleware = require('./middlewares/jwt_to_userData_middleware')
-const userRouter = require('./routes/user_router');
-const userWithdraw = require('./routes/userWIthdraw_router');
-const userIncomeRoute = require('./routes/userIncome_router');
 const allowedOrigins = [
     'https://earningplaner-earn.onrender.com',
     'http://localhost:5173',
@@ -38,6 +38,8 @@ const corsOptions = {
     credentials: true,  // Allow credentials (cookies, authorization headers, etc.)
 };
 
+
+// middlewares
 app.use((req, res, next) => {
     req.io = io;
     next();
@@ -57,16 +59,16 @@ async function Database_connection() {
 }
 Database_connection();
 
+
+// route middlewares
 app.use(middleware.middleware_userLogin_check)
 app.use('/userRoute', userRouter);
 app.use('/userWithdraw', userWithdraw);
 app.use('/userIncomeRoute', userIncomeRoute);
 
-// Scheduled task
-cron.schedule('0 0 1 * *', () => {
-    createCurrentMonthDocuments();
-    console.log('Monthly check for document creation executed');
-});
+// Scheduled cron tasks
+cronForDaily_MonthlyData_Update()
+cronForMonthly_DataCreateFor_EveryUser()
 
 // Server listen
 const PORT = process.env.PORT || 3000;

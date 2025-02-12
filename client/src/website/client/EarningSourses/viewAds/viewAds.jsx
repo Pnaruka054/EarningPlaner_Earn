@@ -4,7 +4,6 @@ import ProcessBgBlack from '../../components/processBgBlack/processBgBlack';
 import Swal from 'sweetalert2'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import HillTopBannerAds from '../../components/hillTopAds/hillTopAds';
 import CountdownTimer from '../../components/countDownTimer/countDownTimer';
 
 const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {

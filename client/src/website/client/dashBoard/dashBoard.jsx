@@ -169,50 +169,6 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                     </Link>
                 </div>
                 <div className='flex justify-around flex-wrap gap-4'>
-                    <div id="frame" style={{ width: '300px', height: 'auto' }}>
-                        <iframe
-                            data-aa="2379444"
-                            src="//ad.a-ads.com/2379444?size=300x250"
-                            style={{
-                                width: '300px',
-                                height: '250px',
-                                border: '0px',
-                                padding: '0',
-                                overflow: 'hidden',
-                                backgroundColor: 'transparent',
-                            }}
-                        ></iframe>
-                    </div>
-                    <div id="frame" style={{ width: '200px', height: 'auto' }}>
-                        <iframe
-                            data-aa="2379500"
-                            src="//ad.a-ads.com/2379500?size=200x200"
-                            style={{
-                                width: '200px',
-                                height: '200px',
-                                border: '0px',
-                                padding: '0',
-                                overflow: 'hidden',
-                                backgroundColor: 'transparent'
-                            }}
-                            title="Advertisement"
-                        ></iframe>
-                    </div>
-                    <div id="frame" style={{ width: '250px', height: 'auto' }}>
-                        <iframe
-                            data-aa="2379499"
-                            src="//ad.a-ads.com/2379499?size=250x250"
-                            style={{
-                                width: '250px',
-                                height: '250px',
-                                border: '0px',
-                                padding: '0',
-                                overflow: 'hidden',
-                                backgroundColor: 'transparent'
-                            }}
-                            title="Advertisement"
-                        ></iframe>
-                    </div>
                 </div>
                 <div className="w-full mt-4 bg-white border border-blue-500 rounded-lg shadow-md mb-4">
                     <div className="bg-red-800 text-white p-4 rounded-t-lg flex items-center space-x-2">
