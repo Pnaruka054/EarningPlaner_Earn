@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const userSignUp_module = require('../model/userSignUp/userSignUp_module')
 
 const middleware_userLogin_check = async (req, res, next) => {
     try {
@@ -16,10 +17,17 @@ const middleware_userLogin_check = async (req, res, next) => {
         }
 
         // Verify the token using your JWT secret key
-        const decoded = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+        const decoded = await jwt.verify(token, process.env.JWT_ACCESS_KEY);
+        let decodedData_fromDB = await userSignUp_module.findById(decoded.jwtUser._id)
+        if(!decodedData_fromDB){
+            return res.status(404).json({
+                success: false,
+                jwtMiddleware_user_not_found_error: 'Authorization token invalid or user not found'
+            });
+        }
 
         // Attach the decoded user info to the request object
-        req.user = decoded.jwtUser;
+        req.user = decodedData_fromDB;
 
         // Proceed to the next middleware or route handler
         next();

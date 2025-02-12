@@ -32,7 +32,7 @@ const WaitRedirecting = () => {
 
     useEffect(() => {
         const handleBeforeUnload = (event) => {
-            if (!localStorage.getItem('isSuccess').includes('btn')) {
+            if (!redirectLink.split('||')[1] + '||' + redirectLink.split('||')[2]) {
                 localStorage.setItem('isSuccess', 'false');
             }
         };

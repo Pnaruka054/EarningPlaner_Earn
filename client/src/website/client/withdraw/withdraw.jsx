@@ -45,12 +45,12 @@ const Withdraw = ({ setShowBottomAlert_state, setAvailableBalance_forNavBar_stat
             setBalanceData_state((prev) => ({
                 ...prev,
                 ...response.data.msg,
-                available_amount: (parseFloat(response.data.msg.withdrawable_amount) + parseFloat(response.data.msg.deposit_amount)).toFixed(3)  // Calculate and update available_amount
+                available_amount: (parseFloat(response.data.msg.withdrawable_amount || 0) + parseFloat(response.data.msg.deposit_amount || 0)).toFixed(3)  // Calculate and update available_amount
             }));
-            setAvailableBalance_forNavBar_state((parseFloat(response.data.msg.withdrawable_amount) + parseFloat(response.data.msg.deposit_amount)).toFixed(3))
+            setAvailableBalance_forNavBar_state((parseFloat(response.data.msg.withdrawable_amount || 0) + parseFloat(response.data.msg.deposit_amount || 0)).toFixed(3))
         } catch (error) {
             console.error(error);
-            if (error.response.data.jwtMiddleware_token_not_found_error) {
+            if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
                 navigation('/login');
             } else if (error.response.data.jwtMiddleware_error) {
                 Swal.fire({
@@ -127,7 +127,7 @@ const Withdraw = ({ setShowBottomAlert_state, setAvailableBalance_forNavBar_stat
             footer: `<span style="color: gray;">Note: A 5% conversion charge will be deducted from the amount you enter.</span>`
         }).then((result) => {
             if (result.isConfirmed) {
-                const balanceToConvert = parseInt(result.value); // Convert input to a float
+                const balanceToConvert = parseFloat(result.value); // Convert input to a float
 
                 // Validate if it's a number and greater than 0
                 if (!isNaN(balanceToConvert) && balanceToConvert > 0) {
@@ -249,7 +249,7 @@ const Withdraw = ({ setShowBottomAlert_state, setAvailableBalance_forNavBar_stat
 
         // Check if withdrawal amount is above the minimum
         const selectedMethod = balanceData_state.withdrawal_methodsData.find((value) => value.withdrawal_method === balanceData_state.withdrawal_method);
-        if (Number(withdraw_amount_state) < Number(selectedMethod.minimum_amount)) {
+        if (parseFloat(withdraw_amount_state) < parseFloat(selectedMethod.minimum_amount)) {
             return Swal.fire({
                 icon: 'warning',
                 title: 'Invalid Amount',
@@ -259,7 +259,7 @@ const Withdraw = ({ setShowBottomAlert_state, setAvailableBalance_forNavBar_stat
         }
 
         // Check if withdrawal amount exceeds available balance
-        if (Number(withdraw_amount_state) > Number(balanceData_state.withdrawable_amount)) {
+        if (parseFloat(withdraw_amount_state) > parseFloat(balanceData_state.withdrawable_amount)) {
             return Swal.fire({
                 icon: 'warning',
                 title: 'Insufficient Balance',

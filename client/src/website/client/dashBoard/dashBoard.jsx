@@ -18,7 +18,7 @@ import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import axios from 'axios';
 
 const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBalance_forNavBar_state }) => {
-    const [userData_state, setUserData_state] = useState([]);
+    const [userData_state, setUserData_state] = useState([[]]);
     let [data_process_state, setData_process_state] = useState(false);
     let dropdownRef = useRef(null)
     let logOut_btnRef = useRef(null)
@@ -47,9 +47,9 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                 });
                 setUserData_state(response.data.userData);
                 setDropdownButtonValue_state(response.data.userData[1][0].monthName)
-                setAvailableBalance_forNavBar_state(Number(response.data.userData[0].deposit_amount) + Number(response.data.userData[0].withdrawable_amount));
+                setAvailableBalance_forNavBar_state((parseFloat(response.data.userData[0].deposit_amount || 0) + parseFloat(response.data.userData[0].withdrawable_amount || 0)).toFixed(3));
             } catch (error) {
-                if (error.response.data.jwtMiddleware_token_not_found_error) {
+                if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
                     navigation('/login');
                 } else if (error.response.data.jwtMiddleware_error) {
                     Swal.fire({
@@ -109,7 +109,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                     </Link> */}
                     <Link to="/member/view-ads" className="bg-green-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>View Ads</div>
-                        <div className='z-[1]'>₹{userData_state.viewAds || '0.0000'}</div>
+                        <div className='z-[1]'>₹{Array.isArray(userData_state[1]) && userData_state[1][0] ? userData_state[1][0].earningSources?.view_ads.income || '0.000' : '0.0000'}</div>
                         <img src={ViewAds} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </Link>
                     {/* bg-purple-500 */}  <div className=" text-white bg-gray-500 relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
@@ -297,7 +297,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                             </svg>
                         </button>
-                        <div ref={dropdownRef} id="dropdown" className="bg-white hidden rounded-md absolute left-0 right-0 max-h-52 overflow-auto">
+                        <div ref={dropdownRef} id="dropdown" className="bg-white hidden z-[1] rounded-md absolute left-0 right-0 max-h-52 overflow-auto">
                             <ul onClick={dropdownButtonValue} className="py-2 text-sm dark:text-gray-200">
                                 {
                                     userData_state[1]?.map((monthlyData, index) => (
@@ -312,7 +312,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                 </div>
                 <div className="overflow-auto mt-3 max-h-[300px]">
                     <table className="table-auto border-collapse min-w-[633px] sm:min-w-full">
-                        <thead className="bg-gray-100 sticky top-0">
+                        <thead className="bg-gray-100 z-0 sticky top-0">
                             <tr>
                                 <th className="text-start px-4 py-2 border border-gray-300">Date</th>
                                 <th className="text-start px-4 py-2 border border-gray-300">Self Earnings</th>

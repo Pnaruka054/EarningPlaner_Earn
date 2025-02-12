@@ -21,7 +21,7 @@ const ReferEarn = ({ setAvailableBalance_forNavBar_state }) => {
                 setReferralRecords(response.data.msg);
                 setAvailableBalance_forNavBar_state(response.data.msg.available_balance);
             } catch (error) {
-                if (error.response.data.jwtMiddleware_token_not_found_error) {
+                if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
                     navigation('/login');
                 } else if (error.response.data.jwtMiddleware_error) {
                     Swal.fire({
@@ -105,7 +105,7 @@ const ReferEarn = ({ setAvailableBalance_forNavBar_state }) => {
                                 {currentReferrals?.map((referral, index) => (
                                     <tr key={index}>
                                         <td className="px-4 py-2 border-l">{referral.userName}</td>
-                                        <td className="px-4 py-2">₹{referral.Income || '0.000'}</td>
+                                        <td className="px-4 py-2">₹{referral.income || '0.000'}</td>
                                         <td className="px-4 py-2">{referral.date}</td>
                                     </tr>
                                 ))}

@@ -38,12 +38,12 @@ const Deposit = ({ setShowBottomAlert_state, setAvailableBalance_forNavBar_state
             setBalanceData_state((prev) => ({
                 ...prev,
                 ...response.data.msg,
-                available_amount: (parseFloat(response.data.msg.withdrawable_amount) + parseFloat(response.data.msg.deposit_amount)).toFixed(3)  // Calculate and update available_amount
+                available_amount: (parseFloat(response.data.msg.withdrawable_amount || 0) + parseFloat(response.data.msg.deposit_amount || 0)).toFixed(3)  // Calculate and update available_amount
             }));
-            setAvailableBalance_forNavBar_state((parseFloat(response.data.msg.withdrawable_amount) + parseFloat(response.data.msg.deposit_amount)).toFixed(3))
+            setAvailableBalance_forNavBar_state((parseFloat(response.data.msg.withdrawable_amount || 0) + parseFloat(response.data.msg.deposit_amount || 0)).toFixed(3))
         } catch (error) {
             console.error(error);
-            if (error.response.data.jwtMiddleware_token_not_found_error) {
+            if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
                 navigation('/login');
             } else if (error.response.data.jwtMiddleware_error) {
                 Swal.fire({

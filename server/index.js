@@ -23,7 +23,7 @@ const userIncomeRoute = require('./routes/userIncome_router');
 const allowedOrigins = [
     'https://earningplaner-earn.onrender.com',
     'http://localhost:5173',
-    'http://192.168.1.7:5173'
+    'http://192.168.1.2:5173'
 ];
 app.set('trust proxy', true);
 const corsOptions = {

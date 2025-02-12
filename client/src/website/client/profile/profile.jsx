@@ -11,7 +11,6 @@ const Profile = () => {
         city: '',
         state: '',
         zip_code: '',
-        country: '',
         mobile_number: '',
         withdrawal_method: '',
         withdrawal_account_information: '',
@@ -29,7 +28,7 @@ const Profile = () => {
                 });
                 setFormData((prev) => ({ ...prev, ...response.data.msg }));
             } catch (error) {
-                if (error.response.data.jwtMiddleware_token_not_found_error) {
+                if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
                     navigation('/login');
                 } else if (error.response.data.jwtMiddleware_error) {
                     Swal.fire({
@@ -91,7 +90,17 @@ const Profile = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         setSubmit_process_state(true);
-        dataBase_patch_userData(formData);
+        let obj = {
+            name: formData.name,
+            address: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zip_code: formData.zip_code,
+            mobile_number: formData.mobile_number,
+            withdrawal_method: formData.withdrawal_method,
+            withdrawal_account_information: formData.withdrawal_account_information,
+        }
+        dataBase_patch_userData(obj);
     };
 
     return (

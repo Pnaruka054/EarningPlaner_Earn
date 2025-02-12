@@ -54,7 +54,7 @@ const Signup = ({ referral_status }) => {
 
         let obj = {
             name: formData.name,
-            mobile_number: Number(formData.mobile_number),
+            mobile_number: parseInt(formData.mobile_number),
             email_address: formData.email_address,
             password: formData.password,
             ...(referral_status && { refer_by: id }),
@@ -82,7 +82,7 @@ const Signup = ({ referral_status }) => {
                     <input type="password" id="password" value={formData.password} onChange={handleInputChange} placeholder='Enter your password' required className='w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400' />
                     <input type="text" id="reenterPassword" value={formData.reenterPassword} onChange={handleInputChange} placeholder='Re-enter your password' required className='w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400' />
                     <div className='mb-2 space-x-2'>
-                        <input type="checkbox" id="signupTerms" checked={formData.signupTerms} onChange={handleInputChange} className='size-3' />
+                        <input type="checkbox" required id="signupTerms" checked={formData.signupTerms} onChange={handleInputChange} className='size-3' />
                         <label className='select-none cursor-pointer' htmlFor="signupTerms">I agree to the Terms of Use and Privacy Policy.</label>
                     </div>
                     <button type="submit" disabled={submit_process_state} className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"} w-full text-white rounded py-1 mb-2 transition`}>

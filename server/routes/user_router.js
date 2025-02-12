@@ -9,6 +9,7 @@ route.get('/userProfileData_get', userController.userProfileData_get)
 
 route.post('/signUp', validator.signUpValidator, userController.userSignUp)
 route.post('/login', userController.userLogin)
+route.post('/logout', userController.userLogOut)
 
 route.patch('/userProfileData_patch', userController.userProfileData_patch)
 

@@ -119,7 +119,7 @@ const userLogin = async (req, res) => {
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
             // sameSite: 'None', 
-            maxAge: 7200000 // 1 hour
+            maxAge: 7200000 // 2 hour
         });
 
         return res.status(200).json({
@@ -135,26 +135,37 @@ const userLogin = async (req, res) => {
     }
 };
 
+const userLogOut = async (req, res) => {
+    try {
+        // Clear the jwtToken cookie from the browser
+        res.clearCookie('jwtToken', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
+        });
+
+        // Send a response back to the client
+        return res.status(200).json({
+            message: 'User logged out successfully'
+        });
+    } catch (error) {
+        console.error('Error during logout:', error);
+        return res.status(500).json({
+            message: 'Logout failed due to an error'
+        });
+    }
+};
+
 const userDataGet = async (req, res) => {
     try {
         const userData = req.user;
-        const user_gmail_address = userData.gmail_address;
 
-        const user_new_Data = await userSignUp_module.findOne({ gmail_address: user_gmail_address });
-
-        if (!user_new_Data) {
-            return res.status(400).json({
-                success: false,
-                msg: 'User not found'
-            });
-        }
-
-        const user_month_records = await userMonthly_records_module.find({ userDB_id: user_new_Data._id.toString() });
-        const user_date_records = await userDate_records_module.find({ userDB_id: user_new_Data._id });
+        const user_month_records = await userMonthly_records_module.find({ userDB_id: userData._id.toString() });
+        const user_date_records = await userDate_records_module.find({ userDB_id: userData._id });
 
         return res.status(200).json({
             success: true,
-            userData: [user_new_Data, user_month_records, user_date_records]
+            userData: [userData, user_month_records, user_date_records]
         });
     } catch (error) {
         console.error(error);
@@ -169,21 +180,12 @@ const userReferral_record_get = async (req, res) => {
     try {
         const userData = req.user;
 
-        const user_DB_Data = await userSignUp_module.findById(userData._id);
-
-        if (!user_DB_Data) {
-            return res.status(400).json({
-                success: false,
-                msg: 'User not found'
-            });
-        }
-
         const user_DB_referral_record_get = await referral_records_module.find({ userDB_id: userData._id });
 
         const resData = {
-            userName: user_DB_Data.userName,
+            userName: userData.userName,
             referral_data: user_DB_referral_record_get,
-            available_balance: Number(user_DB_Data.deposit_amount) + Number(user_DB_Data.withdrawable_amount)
+            available_balance: (parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)).toFixed(3)
         };
 
         return res.status(200).json({
@@ -203,17 +205,9 @@ const userProfileData_get = async (req, res) => {
     try {
         const userData = req.user;
 
-        const user_DB_Data = await userSignUp_module.findById(userData._id);
         const withdrawal_methods_data = await withdrawal_methods_module.find()
 
-        if (!user_DB_Data) {
-            return res.status(404).json({
-                success: false,
-                msg: 'User not found'
-            });
-        }
-
-        const userProfile = { ...user_DB_Data.toObject(), withdrawal_methods_data };
+        const userProfile = { ...userData.toObject(), withdrawal_methods_data };
 
         return res.status(200).json({
             success: true,
@@ -266,5 +260,6 @@ module.exports = {
     userDataGet,
     userReferral_record_get,
     userProfileData_get,
-    userProfileData_patch
+    userProfileData_patch,
+    userLogOut
 }

@@ -7,6 +7,7 @@ const monthSchema = new mongoose.Schema({
         view_ads: {
             income: { type: String },
             clickBalance: { type: String },
+            timerStart: { type: Date }, // Timer start time added
         },
     },
     createdAt: { type: Date, default: Date.now, expires: '1y' } // Data will expire after 1 year

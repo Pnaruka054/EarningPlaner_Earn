@@ -67,7 +67,7 @@ const userWithdrawal_record_post = async (req, res) => {
         }
 
         // Check if the user has sufficient balance for withdrawal
-        if (Number(userSignUpData.withdrawable_amount) < Number(balance)) {
+        if (parseInt(userSignUpData.withdrawable_amount) < parseInt(balance)) {
             return res.status(400).json({
                 success: false,
                 msg: "Insufficient funds."
@@ -78,8 +78,8 @@ const userWithdrawal_record_post = async (req, res) => {
         const time = current_time_get();
 
         // Update the withdrawable amount
-        userSignUpData.withdrawable_amount = (Number(userSignUpData.withdrawable_amount) - Number(balance)).toFixed(3).toString();
-        userSignUpData.pending_withdrawal_amount = ((Number(userSignUpData.pending_withdrawal_amount) || 0) + Number(balance)).toString();
+        userSignUpData.withdrawable_amount = (parseInt(userSignUpData.withdrawable_amount) - parseInt(balance)).toFixed(3).toString();
+        userSignUpData.pending_withdrawal_amount = ((parseInt(userSignUpData.pending_withdrawal_amount) || 0) + parseInt(balance)).toString();
 
         // Save the updated user data
         await userSignUpData.save({ session });
@@ -123,7 +123,7 @@ const userBalanceConvertPatch = async (req, res) => {
         }
 
         // Update the withdrawable amount
-        userSignUpData.deposit_amount = (Number(userSignUpData.deposit_amount) - Number(balance)).toFixed(3).toString();
+        userSignUpData.deposit_amount = (parseInt(userSignUpData.deposit_amount) - parseInt(balance)).toFixed(3).toString();
 
         // Save the updated user data
         await userSignUpData.save({ session });
