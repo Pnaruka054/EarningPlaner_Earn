@@ -22,6 +22,7 @@ import Home from './website/client/home/home';
 import ContactUs from './website/client/components/contactUs/contactUs';
 import PageNotFound from './website/client/components/pageNotFound/pageNotFound';
 import ShortLink from './website/client/EarningSourses/shortLink/shortLink';
+import ExtensionUninstalled from './website/client/extensionUninstalled/extensionUninstalled';
 
 const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
@@ -142,6 +143,8 @@ const App = () => {
             <Route path="/waitRedirecting" element={<WaitRedirecting />} />
             <Route path="/member/short-link" element={<ShortLink setShowBottomAlert_state={setShowBottomAlert_state} />} />
             <Route path="/*" element={<PageNotFound setshow_NavBar_state={setshow_NavBar_state} />} />
+
+            <Route path="/extension/uninstalled" element={<ExtensionUninstalled setshow_NavBar_state={setshow_NavBar_state} />} />
           </Routes>
         </CSSTransition>
       </TransitionGroup>

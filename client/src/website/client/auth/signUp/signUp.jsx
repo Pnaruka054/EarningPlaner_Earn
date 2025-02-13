@@ -41,23 +41,6 @@ const Signup = ({ referral_status }) => {
                     }
                 });
             }
-        } catch (error) {
-            console.error(error);
-            if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
-                navigation('/login');
-            } else if (error.response.data.jwtMiddleware_error) {
-                Swal.fire({
-                    title: 'Session Expired',
-                    text: 'Your session has expired. Please log in again.',
-                    icon: 'error',
-                    timer: 5000,
-                    timerProgressBar: true,
-                    confirmButtonText: 'OK',
-                    didClose: () => {
-                        navigation('/login');
-                    }
-                });
-            }
         } finally {
             setData_process_state(false);
         }

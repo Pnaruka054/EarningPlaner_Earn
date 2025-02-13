@@ -12,6 +12,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const navigation = useNavigate();
     const [viewAds_firstTimeLoad_state, setViewAds_firstTimeLoad_state] = useState('');
     const [disabledButtons_state, setDisabledButtons_state] = useState([]);
+    const [isExtension_state, setIsExtension_state] = useState(false);
+    const [currentBtnName_and_amount_For_extension_adoperator_state, setCurrentBtnName_and_amount_For_extension_adoperator_state] = useState([]);
 
     const fetchData = async () => {
         setData_process_state(true);
@@ -72,10 +74,30 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         window.open(`/waitRedirecting/?link=${encodeURIComponent(link + '||' + btnName + '||' + amount)}`, '_blank', 'noopener noreferrer');
     };
 
+    const handle_link_click2 = (link, btnName, amount) => {
+        setHandle_clickAds_btnClick_state(true);
+        setCurrentBtnName_and_amount_For_extension_adoperator_state([btnName, amount]);
+
+        // Dispatch custom event with the updated values
+        window.dispatchEvent(new CustomEvent("isExtensionUpdated", {
+            detail: { btnName, amount }
+        }));
+
+        const newTab = window.open("", '_blank');
+        if (!newTab) {
+            return alert("Please Allow Popup in Your Browser to Earn Money!");
+        }
+        newTab.close();
+        let isExtension = localStorage.getItem('isExtension');
+        if (isExtension !== 'true') {
+            return alert('please install extension');
+        }
+        window.open(link, '_blank');
+    };
+
     useEffect(() => {
         const handleStorageChange = () => {
             const clickSuccessStatus = localStorage.getItem('isSuccess');
-            console.log(clickSuccessStatus);
             if (clickSuccessStatus && clickSuccessStatus.includes('btn')) {
                 localStorage.removeItem('isSuccess');
                 setHandle_clickAds_btnClick_state(false);
@@ -117,13 +139,77 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     text: "Something went wrong!",
                 });
             }
+
+            if (isExtension === 'true') {
+                setIsExtension_state(true)
+            } else {
+                setIsExtension_state(false)
+            }
         };
 
+        const isExtension = localStorage.getItem('isExtension');
+        if (isExtension === 'true') {
+            setIsExtension_state(true)
+        } else {
+            setIsExtension_state(false)
+        }
         window.addEventListener('storage', handleStorageChange);
         return () => {
             window.removeEventListener('storage', handleStorageChange);
         };
     }, [viewAds_firstTimeLoad_state]);
+
+    useEffect(() => {
+        const handleIsExtensionUpdated = (e) => {
+            const { btnName, amount } = e.detail || {};
+            const extension_adoperator = localStorage.getItem('extension_adoperator');
+
+            if (viewAds_firstTimeLoad_state && viewAds_firstTimeLoad_state.clickBalance) {
+                if (extension_adoperator === 'true' && btnName && amount) {
+                    localStorage.removeItem('extension_adoperator');
+                    setHandle_clickAds_btnClick_state(false);
+
+                    setDisabledButtons_state((prevDisabled) => {
+                        if (!prevDisabled.includes(btnName)) {
+                            return [...prevDisabled, btnName];
+                        }
+                        return prevDisabled;
+                    });
+
+                    const obj = {
+                        disabledButtons_state: [...disabledButtons_state, btnName],
+                        clickBalance: (parseFloat(viewAds_firstTimeLoad_state.clickBalance.split('/')[0]) + 1).toString() +
+                            "/" +
+                            viewAds_firstTimeLoad_state.clickBalance.split('/')[1],
+                        btnClickEarn: amount,
+                    };
+
+                    user_adsView_income_patch(obj)
+                        .then(() => {
+                            Swal.fire({
+                                title: "Success!",
+                                icon: "success",
+                            });
+                        })
+                        .catch((error) => {
+                            console.error("Error updating income:", error);
+                        });
+                }
+            }
+
+            const isExtension = localStorage.getItem('isExtension');
+            if (isExtension === 'true') {
+                setIsExtension_state(true);
+            } else {
+                setIsExtension_state(false);
+            }
+        };
+
+        window.addEventListener("isExtensionUpdated", handleIsExtensionUpdated);
+        return () => {
+            window.removeEventListener("isExtensionUpdated", handleIsExtensionUpdated);
+        };
+    }, [viewAds_firstTimeLoad_state, disabledButtons_state]);
 
     let buttonsObj = [
         {
@@ -296,6 +382,89 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         },
     ]
 
+    let buttonsObj2 = [
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.1',
+            handelButtonClick: function (e) {
+                // adoperator
+                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn1', this.amount)
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.1',
+            handelButtonClick: function (e) {
+                // adoperator
+                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn2', this.amount)
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.1',
+            handelButtonClick: function (e) {
+                // adoperator
+                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn3', this.amount)
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.1',
+            handelButtonClick: function (e) {
+                // adoperator
+                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn4', this.amount)
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.1',
+            handelButtonClick: function (e) {
+                // adoperator
+                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn5', this.amount)
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.1',
+            handelButtonClick: function (e) {
+                // adoperator
+                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn6', this.amount)
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.1',
+            handelButtonClick: function (e) {
+                // adoperator
+                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn7', this.amount)
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.1',
+            handelButtonClick: function (e) {
+                // adoperator
+                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn8', this.amount)
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.1',
+            handelButtonClick: function (e) {
+                // adoperator
+                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn9', this.amount)
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.1',
+            handelButtonClick: function (e) {
+                // adoperator
+                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn10', this.amount)
+            },
+        },
+    ]
+
     let user_adsView_income_patch = async (obj) => {
         setData_process_state(true);
         try {
@@ -327,6 +496,67 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         }
     }
 
+    const ExtensionInstallPopup = () => {
+        Swal.fire({
+            title: 'Extension Installation Instructions',
+            html: `
+              <div class="text-left" style="font-family: sans-serif;">
+                <div class="mb-4">
+                  <p class="font-bold text-lg">📌 Step 1: Download the ZIP File</p>
+                  <p class="text-sm text-gray-700 mt-1">
+                    To boost your income, you need to install our extension. Click the download button below to download the extension file.
+                 </p>
+                  <a 
+                    href="https://example.com/extension.zip" 
+                    download 
+                    style="display: inline-block; margin-top: 8px; background-color: #3B82F6; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none;">
+                    Download Extension ZIP
+                  </a>
+                </div>
+        
+                <div class="mb-4">
+                  <p class="font-bold text-lg">📌 Step 2: How to Install the Extension</p>
+                  <p class="text-sm text-gray-700 mt-1">
+                    Follow these steps to manually install the extension in your Chrome browser:
+                  </p>
+                  <ol class="list-decimal ml-5 mt-2 text-sm text-gray-700">
+                    <li>Open your Chrome browser.</li>
+                    <li>Go to <code>chrome://extensions/</code> in the address bar.</li>
+                    <li>Enable Developer Mode (toggle switch at the top-right).</li>
+                    <li>Click on "Load Unpacked".</li>
+                    <li>Select the extracted folder from the downloaded ZIP file.</li>
+                    <li>The extension will be installed successfully! 🎉</li>
+                  </ol>
+                  <p class="mt-2 text-sm text-gray-700">
+                    <strong>Tip:</strong> You can provide the ZIP file download link on your website or Google Drive.
+                  </p>
+                </div>
+        
+                <div class="mb-4">
+                  <p class="font-bold text-lg">📌 Step 3: Video Tutorial</p>
+                  <p class="text-sm text-gray-700 mt-1">
+                    Watch the video below for a visual guide on installing the extension:
+                  </p>
+                  <div style="margin-top: 8px; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 4px;">
+                    <iframe 
+                      src="https://www.youtube.com/embed/VIDEO_ID" 
+                      frameborder="0" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                      allowfullscreen 
+                      style="position: absolute; top:0; left: 0; width: 100%; height: 100%;">
+                    </iframe>
+                  </div>
+                </div>
+              </div>
+            `,
+            showCloseButton: true,
+            confirmButtonText: 'Close',
+            customClass: {
+                popup: 'rounded-lg'
+            }
+        });
+    }
+
     return (
         <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
             <div className='px-2 py-2'>
@@ -339,8 +569,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         <div className='bg-purple-700 px-2 py-1 shadow font-bold text-white rounded-t-2xl'>Click Balance - {viewAds_firstTimeLoad_state.clickBalance}</div>
                         <div className='bg-purple-700 px-2 py-1 shadow font-bold text-white rounded-t-2xl'>Income - ₹{viewAds_firstTimeLoad_state.income}</div>
                     </div>
-                    <div className='gap-2 justify-center bg-white px-6 py-3 shadow flex flex-wrap relative'>
-                        <div className={`${viewAds_firstTimeLoad_state.ViewAdsexpireTImer? 'flex':'hidden'} absolute top-0 bottom-0 left-0 right-0 bg-white bg-opacity-60 justify-center items-center`}>
+                    <div className=' bg-white px-6 py-3 shadow relative'>
+                        <div className={`${viewAds_firstTimeLoad_state.ViewAdsexpireTImer ? 'flex' : 'hidden'} absolute top-0 bottom-0 left-0 right-0 bg-white bg-opacity-60 justify-center items-center`}>
                             <div className='flex flex-col items-center font-lexend text-2xl'>
                                 <div className='text-center'>Come Back After</div>
                                 <div className='text-4xl font-bold drop-shadow'>
@@ -348,13 +578,33 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                 </div>
                             </div>
                         </div>
-                        {
-                            buttonsObj.map((values, index) => (
-                                <button key={index} disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1)) ? true : false} className={`${handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1)) ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
-                                    values.handelButtonClick(e)
-                                }}><span>{values.buttonTitle} {index + 1}</span><span>₹{values.amount}</span></button>
-                            ))
-                        }
+                        <div className='gap-2 justify-center flex flex-wrap'>
+                            {
+                                buttonsObj.map((values, index) => (
+                                    <button key={index} disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1)) ? true : false} className={`${handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1)) ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
+                                        values.handelButtonClick(e)
+                                    }}><span>{values.buttonTitle} {index + 1}</span><span>₹{values.amount}</span></button>
+                                ))
+                            }
+                        </div>
+                        <div className='my-5 text-center text-xl'>---- Boost Your Earnings: Install Our Extension ----</div>
+                        <div className='gap-2 justify-center flex flex-wrap relative'>
+                            <div className={`${isExtension_state ? 'hidden' : 'flex'} absolute top-0 left-0 right-0 bottom-0 bg-white bg-opacity-60 justify-center items-center`}>
+                                <button
+                                    onClick={ExtensionInstallPopup}
+                                    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition duration-200 shadow-lg"
+                                >
+                                    What Happened?
+                                </button>
+                            </div>
+                            {
+                                buttonsObj2.map((values, index) => (
+                                    <button key={index} disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1)) ? true : false} className={`${handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1)) ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
+                                        values.handelButtonClick(e)
+                                    }}><span>{values.buttonTitle} {index + 1}</span><span>₹{values.amount}</span></button>
+                                ))
+                            }
+                        </div>
                     </div>
                 </div>
                 {/* adsterra Native Banner start */}
