@@ -179,11 +179,12 @@ const user_adsView_income_patch = async (req, res) => {
 
 
         // Agar clickBalance exactly equal ho jaye to VIEW_ADS_CLICK_BALANCE/VIEW_ADS_CLICK_BALANCE
+        let idTimer_recordsData = null
         if (
             userMonthlyRecord?.earningSources?.view_ads?.clickBalance ===
             `${process.env.VIEW_ADS_CLICK_BALANCE}/${process.env.VIEW_ADS_CLICK_BALANCE}`
         ) {
-            let idTimer_recordsData = await idTimer_records_module.findOne({ userDB_id: userData._id }).session(session);
+            idTimer_recordsData = await idTimer_records_module.findOne({ userDB_id: userData._id }).session(session);
 
             if (!idTimer_recordsData) {
                 idTimer_recordsData = new idTimer_records_module({ userDB_id: userData._id });
@@ -248,11 +249,20 @@ const user_adsView_income_patch = async (req, res) => {
             msg: resData
         });
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
+        try {
+            // Agar session abhi bhi transaction mein hai, tabhi abort karein
+            if (session.inTransaction()) {
+                await session.abortTransaction();
+            }
+        } catch (abortError) {
+            console.error("Error aborting transaction:", abortError);
+        } finally {
+            session.endSession();
+        }
         console.error("Error in updating user data:", error);
         return res.status(500).json({ message: 'An error occurred while processing the request.' });
     }
+    
 };
 
 module.exports = {
