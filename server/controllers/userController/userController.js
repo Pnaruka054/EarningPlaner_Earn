@@ -119,7 +119,7 @@ const userLogin = async (req, res) => {
             secure: true,
             // secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
-            sameSite: 'None', 
+            sameSite: 'None',
             maxAge: 7200000 // 2 hour
         });
 
@@ -132,6 +132,31 @@ const userLogin = async (req, res) => {
         return res.status(400).json({
             success: false,
             msg: error.message
+        });
+    }
+};
+
+const userLoginCheckGet = async (req, res) => {
+    try {
+        const userData = req.user;
+
+        if (userData) {
+            return res.status(200).json({
+                success: true,
+                message: 'User Already Logged In. Please Continue.'
+            });
+        }
+
+        // If no user data, handle the case where the user is not logged in
+        return res.status(401).json({
+            success: false,
+            message: 'User not logged in.'
+        });
+    } catch (error) {
+        console.error("Error in userLoginCheckGet:", error); // Log the error for debugging
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error.'
         });
     }
 };
@@ -262,5 +287,6 @@ module.exports = {
     userReferral_record_get,
     userProfileData_get,
     userProfileData_patch,
-    userLogOut
+    userLogOut,
+    userLoginCheckGet
 }

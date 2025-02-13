@@ -239,6 +239,10 @@ const user_adsView_income_patch = async (req, res) => {
                 `0/${process.env.VIEW_ADS_CLICK_BALANCE}`
         };
 
+        if (idTimer_recordsData?.ViewAdsexpireTImer) {
+            resData = { ...resData, ViewAdsexpireTImer: idTimer_recordsData.ViewAdsexpireTImer }
+        }
+
         return res.status(200).json({
             success: true,
             msg: resData

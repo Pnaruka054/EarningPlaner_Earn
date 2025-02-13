@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ProcessBgBlack from '../../components/processBgBlack/processBgBlack';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const Login = () => {
     const [email_userName_state, setEmail_userName_state] = useState('');
@@ -9,8 +10,54 @@ const Login = () => {
     const [loginRemember_state, setLoginRemember_state] = useState(false);
     const [error, setError] = useState([]);
     let [submit_process_state, setSubmit_process_state] = useState(false);
+    let [data_process_state, setData_process_state] = useState(false);
     const navigation = useNavigate();
 
+    const fetchData = async () => {
+        setData_process_state(true);
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userLoginCheckGet`, {
+                withCredentials: true
+            });
+            if (response.data.success && response.data.message) {
+                // If the user is already logged in
+                Swal.fire({
+                    title: 'You Already Logged In',
+                    text: 'Please Continue Earning',
+                    icon: 'error',
+                    timer: 5000,
+                    timerProgressBar: true,
+                    confirmButtonText: 'OK',
+                    didClose: () => {
+                        // Navigate to the dashboard after the modal closes
+                        navigation('/member/dashboard');
+                    }
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
+                navigation('/login');
+            } else if (error.response.data.jwtMiddleware_error) {
+                Swal.fire({
+                    title: 'Session Expired',
+                    text: 'Your session has expired. Please log in again.',
+                    icon: 'error',
+                    timer: 5000,
+                    timerProgressBar: true,
+                    confirmButtonText: 'OK',
+                    didClose: () => {
+                        navigation('/login');
+                    }
+                });
+            }
+        } finally {
+            setData_process_state(false);
+        }
+    };
+    useEffect(() => {
+        fetchData();
+    }, []);
     let dataBase_post_login = async (obj) => {
         try {
             let response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/userRoute/login`, obj, {
@@ -61,7 +108,7 @@ const Login = () => {
                     Don’t have an account? <Link to="/signup" className='text-blue-600 underline' >Register a New Account</Link>
                 </p>
             </div>
-            {submit_process_state && <ProcessBgBlack />}
+            {(submit_process_state || data_process_state) && <ProcessBgBlack />}
             {error.length > 0 && error.map((value, index) => (
                 <Error key={index} color="yellow" text={value} />
             ))}
