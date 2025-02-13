@@ -291,7 +291,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.01',
             handelButtonClick: function (e) {
                 // bitcotasks 
-                handle_link_click('https://bitcotasks.com/promote/44879', 'btn21', this.amount)
+                handle_link_click('https://bitcotasks.com/promote/44907', 'btn21', this.amount)
             },
         },
     ]
