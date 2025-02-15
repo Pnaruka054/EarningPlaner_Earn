@@ -7,7 +7,6 @@ import SignUp from './website/client/auth/signUp/signUp';
 import DashBoard from './website/client/dashBoard/dashBoard';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Deposit from './website/client/deposit/deposit';
-import SideMenu from './website/client/components/sideMenu/sideMenu';
 import { createPortal } from 'react-dom'
 import PopUp from './website/client/components/popUp/popUp';
 import Withdraw from './website/client/withdraw/withdraw';
@@ -18,6 +17,7 @@ import Profile from './website/client/profile/profile';
 import Setting from './website/client/setting/setting';
 import ViewAds from './website/client/EarningSourses/viewAds/viewAds';
 import WaitRedirecting from './website/client/EarningSourses/viewAds/waitRedirecting';
+import WaitRedirecting1 from './website/client/EarningSourses/viewAds/waitRedirecting1';
 import Home from './website/client/home/home';
 import ContactUs from './website/client/components/contactUs/contactUs';
 import PageNotFound from './website/client/components/pageNotFound/pageNotFound';
@@ -141,6 +141,7 @@ const App = () => {
             {/* Earning Sourse */}
             <Route path="/member/view-ads" element={<ViewAds setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
             <Route path="/waitRedirecting" element={<WaitRedirecting />} />
+            <Route path="/waitRedirecting1" element={<WaitRedirecting1 />} />
             <Route path="/member/short-link" element={<ShortLink setShowBottomAlert_state={setShowBottomAlert_state} />} />
             <Route path="/*" element={<PageNotFound setshow_NavBar_state={setshow_NavBar_state} />} />
 

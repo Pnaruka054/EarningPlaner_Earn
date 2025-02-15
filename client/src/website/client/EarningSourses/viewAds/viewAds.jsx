@@ -78,11 +78,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         setHandle_clickAds_btnClick_state(true);
         setCurrentBtnName_and_amount_For_extension_adoperator_state([btnName, amount]);
 
-        // Dispatch custom event with the updated values
-        window.dispatchEvent(new CustomEvent("isExtensionUpdated", {
-            detail: { btnName, amount }
-        }));
-
         const newTab = window.open("", '_blank');
         if (!newTab) {
             return alert("Please Allow Popup in Your Browser to Earn Money!");
@@ -92,7 +87,12 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         if (isExtension !== 'true') {
             return alert('please install extension');
         }
-        window.open(link, '_blank');
+
+        if (link.includes('https://bitcotasks.com')) {
+            window.open(`/waitRedirecting1/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
+        } else {
+            window.open(link, '_blank');
+        }
     };
 
     useEffect(() => {
@@ -161,12 +161,15 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
     useEffect(() => {
         const handleIsExtensionUpdated = (e) => {
-            const { btnName, amount } = e.detail || {};
+            const [btnName, amount] = currentBtnName_and_amount_For_extension_adoperator_state;
             const extension_adoperator = localStorage.getItem('extension_adoperator');
+            const extension_bitcoTask = localStorage.getItem('extension_bitcoTask');
 
             if (viewAds_firstTimeLoad_state && viewAds_firstTimeLoad_state.clickBalance) {
-                if (extension_adoperator === 'true' && btnName && amount) {
+                if ((extension_adoperator === 'true' || extension_bitcoTask === 'true') && btnName && amount) {
                     localStorage.removeItem('extension_adoperator');
+                    localStorage.removeItem('extension_bitcoTask');
+
                     setHandle_clickAds_btnClick_state(false);
 
                     setDisabledButtons_state((prevDisabled) => {
@@ -194,6 +197,15 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         .catch((error) => {
                             console.error("Error updating income:", error);
                         });
+                } else if (extension_adoperator === 'false' || extension_bitcoTask === 'false') {
+                    localStorage.removeItem('extension_adoperator');
+                    localStorage.removeItem('extension_bitcoTask');
+                    setHandle_clickAds_btnClick_state(false);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Success!",
+                        text: "Something went wrong!",
+                    });
                 }
             }
 
@@ -206,10 +218,18 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         };
 
         window.addEventListener("isExtensionUpdated", handleIsExtensionUpdated);
+        window.addEventListener("beforeunload", () => {
+            localStorage.removeItem('extension_adoperator');
+            localStorage.removeItem('extension_bitcoTask');
+        });
         return () => {
             window.removeEventListener("isExtensionUpdated", handleIsExtensionUpdated);
+            window.removeEventListener("beforeunload", () => {
+                localStorage.removeItem('extension_adoperator');
+                localStorage.removeItem('extension_bitcoTask');
+            });
         };
-    }, [viewAds_firstTimeLoad_state, disabledButtons_state]);
+    }, [viewAds_firstTimeLoad_state, currentBtnName_and_amount_For_extension_adoperator_state]);
 
     let buttonsObj = [
         {
@@ -364,22 +384,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 handle_link_click('https://wwp.aisorc.com/redirect-zone/20cf34cc', 'btn19', this.amount)
             },
         },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            handelButtonClick: function (e) {
-                // bitcotasks 
-                handle_link_click('https://bitcotasks.com/promote/44879', 'btn20', this.amount)
-            },
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            handelButtonClick: function (e) {
-                // bitcotasks 
-                handle_link_click('https://bitcotasks.com/promote/44907', 'btn21', this.amount)
-            },
-        },
     ]
 
     let buttonsObj2 = [
@@ -388,7 +392,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn1', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn1', this.amount)
             },
         },
         {
@@ -396,7 +400,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn2', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn2', this.amount)
             },
         },
         {
@@ -404,7 +408,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn3', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn3', this.amount)
             },
         },
         {
@@ -412,7 +416,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn4', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn4', this.amount)
             },
         },
         {
@@ -420,7 +424,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn5', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn5', this.amount)
             },
         },
         {
@@ -428,7 +432,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn6', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn6', this.amount)
             },
         },
         {
@@ -436,7 +440,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn7', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn7', this.amount)
             },
         },
         {
@@ -444,7 +448,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn8', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn8', this.amount)
             },
         },
         {
@@ -452,7 +456,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn9', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn9', this.amount)
             },
         },
         {
@@ -460,7 +464,15 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', '1btn10', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn10', this.amount)
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.1',
+            handelButtonClick: function (e) {
+                // bitcotasks 
+                handle_link_click2('https://bitcotasks.com/promote/44907', '1btn11', this.amount)
             },
         },
     ]
