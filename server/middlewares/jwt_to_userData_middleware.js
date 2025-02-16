@@ -3,7 +3,7 @@ const userSignUp_module = require('../model/userSignUp/userSignUp_module')
 
 const middleware_userLogin_check = async (req, res, next) => {
     try {
-        if (req.originalUrl === '/userRoute/login' || req.originalUrl === '/userRoute/signUp') {
+        if (req.originalUrl === '/userRoute/login' || req.originalUrl === '/userRoute/signUp' || req.originalUrl.includes('/userRoute/user_signUp_login_google')) {
             return next(); // Skip middleware for this route
         }
 
@@ -19,7 +19,7 @@ const middleware_userLogin_check = async (req, res, next) => {
         // Verify the token using your JWT secret key
         const decoded = await jwt.verify(token, process.env.JWT_ACCESS_KEY);
         let decodedData_fromDB = await userSignUp_module.findById(decoded.jwtUser._id)
-        if(!decodedData_fromDB){
+        if (!decodedData_fromDB) {
             return res.status(404).json({
                 success: false,
                 jwtMiddleware_user_not_found_error: 'Authorization token invalid or user not found'

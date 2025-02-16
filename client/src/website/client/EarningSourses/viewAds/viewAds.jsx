@@ -15,6 +15,9 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [isExtension_state, setIsExtension_state] = useState(false);
     const [currentBtnName_and_amount_For_extension_adoperator_state, setCurrentBtnName_and_amount_For_extension_adoperator_state] = useState([]);
 
+    const channel = new BroadcastChannel("viewAds_channel");
+
+
     const fetchData = async () => {
         setData_process_state(true);
         try {
@@ -47,6 +50,26 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     };
     useEffect(() => {
         fetchData();
+        channel.onmessage = (event) => {
+            if (event.data === "handle_clickAds_btnClick_state_true") {
+                setHandle_clickAds_btnClick_state(true);
+            } else if (event.data === "handle_clickAds_btnClick_state_false") {
+                setHandle_clickAds_btnClick_state(false);
+            }
+
+            if (event.data === "show_success_swal_alert1" || event.data === "show_success_swal_alert1") {
+                if (!document.hidden) {
+                    Swal.fire({
+                        title: "Success!",
+                        icon: "success",
+                    });
+                }
+            }
+        };
+
+        return () => {
+            channel.close(); // Cleanup channel on unmount
+        };
     }, []);
 
     let Instructions = [
@@ -65,6 +88,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
     const handle_link_click = (link, btnName, amount) => {
         setHandle_clickAds_btnClick_state(true);
+        channel.postMessage("handle_clickAds_btnClick_state_true");
         const newTab = window.open("", '_blank');
         if (!newTab) {
             return alert("Please Allow Popup in Your Browse to Earn Money!");
@@ -76,6 +100,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
     const handle_link_click2 = (link, btnName, amount) => {
         setHandle_clickAds_btnClick_state(true);
+        channel.postMessage("handle_clickAds_btnClick_state_true");
         setCurrentBtnName_and_amount_For_extension_adoperator_state([btnName, amount]);
 
         const newTab = window.open("", '_blank');
@@ -101,6 +126,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             if (clickSuccessStatus && clickSuccessStatus.includes('btn')) {
                 localStorage.removeItem('isSuccess');
                 setHandle_clickAds_btnClick_state(false);
+                channel.postMessage("handle_clickAds_btnClick_state_false");
 
                 if (viewAds_firstTimeLoad_state && viewAds_firstTimeLoad_state.clickBalance) {
                     const btnName = clickSuccessStatus.split('||')[0];
@@ -121,10 +147,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
                     user_adsView_income_patch(obj)
                         .then(() => {
-                            Swal.fire({
-                                title: "Success!",
-                                icon: "success",
-                            });
+                            // Sirf ek tab me Swal show karne ke liye signal send karo
+                            channel.postMessage("show_success_swal_alert1");
                         })
                         .catch((error) => {
                             console.error("Error updating income:", error);
@@ -133,6 +157,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             } else if (clickSuccessStatus === 'false') {
                 localStorage.removeItem('isSuccess');
                 setHandle_clickAds_btnClick_state(false);
+                channel.postMessage("handle_clickAds_btnClick_state_false");
                 Swal.fire({
                     icon: "error",
                     title: "Success!",
@@ -171,6 +196,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     localStorage.removeItem('extension_bitcoTask');
 
                     setHandle_clickAds_btnClick_state(false);
+                    channel.postMessage("handle_clickAds_btnClick_state_false");
 
                     setDisabledButtons_state((prevDisabled) => {
                         if (!prevDisabled.includes(btnName)) {
@@ -189,10 +215,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
                     user_adsView_income_patch(obj)
                         .then(() => {
-                            Swal.fire({
-                                title: "Success!",
-                                icon: "success",
-                            });
+                            // Sirf ek tab me Swal show karne ke liye signal send karo
+                            channel.postMessage("show_success_swal_alert2");
                         })
                         .catch((error) => {
                             console.error("Error updating income:", error);
@@ -201,6 +225,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     localStorage.removeItem('extension_adoperator');
                     localStorage.removeItem('extension_bitcoTask');
                     setHandle_clickAds_btnClick_state(false);
+                    channel.postMessage("handle_clickAds_btnClick_state_false");
                     Swal.fire({
                         icon: "error",
                         title: "Success!",
@@ -400,7 +425,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn2', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/20cf34cc', '1btn2', this.amount)
             },
         },
         {
@@ -416,7 +441,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn4', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/20cf34cc', '1btn4', this.amount)
             },
         },
         {
@@ -424,7 +449,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn5', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/d5d92d72', '1btn5', this.amount)
             },
         },
         {
@@ -432,7 +457,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn6', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/b57c2eb0', '1btn6', this.amount)
             },
         },
         {
@@ -440,7 +465,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn7', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/d5d92d72', '1btn7', this.amount)
             },
         },
         {
@@ -448,23 +473,15 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn8', this.amount)
+                handle_link_click2('https://wwp.aisorc.com/redirect-zone/b57c2eb0', '1btn8', this.amount)
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.1',
             handelButtonClick: function (e) {
-                // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn9', this.amount)
-            },
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.1',
-            handelButtonClick: function (e) {
-                // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn10', this.amount)
+                // bitcotasks
+                handle_link_click2('https://bitcotasks.com/promote/44879', '1btn9', this.amount)
             },
         },
         {
@@ -472,7 +489,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.1',
             handelButtonClick: function (e) {
                 // bitcotasks 
-                handle_link_click2('https://bitcotasks.com/promote/44907', '1btn11', this.amount)
+                handle_link_click2('https://bitcotasks.com/promote/44907', '1btn10', this.amount)
             },
         },
     ]
@@ -519,7 +536,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     To boost your income, you need to install our extension. Click the download button below to download the extension file.
                  </p>
                   <a 
-                    href="https://drive.google.com/uc?export=download&id=10-9d8n4MBknqPn_Ckg6Shmc9COoJVXDE" 
+                    href="https://drive.google.com/uc?export=download&id=1pz2538vWbMUcq0pqBzikY1n_4KB3_XTg" 
                     download 
                     style="display: inline-block; margin-top: 8px; background-color: #3B82F6; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none;">
                     Download Extension ZIP

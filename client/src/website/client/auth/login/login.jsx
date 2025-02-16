@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import ProcessBgBlack from '../../components/processBgBlack/processBgBlack';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { useGoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
     const [email_userName_state, setEmail_userName_state] = useState('');
@@ -85,6 +86,37 @@ const Login = () => {
         setSubmit_process_state(true)
     };
 
+    const responseGoogle = async (authResult) => {
+        try {
+            if (authResult["code"]) {
+                let response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/user_signUp_login_google?google_code=${authResult.code}&referral_id_signup=undefined`, {
+                    withCredentials: true // This ensures cookies are sent with the request
+                });
+                if (response) {
+                    navigation('/member/dashboard')
+                }
+                setSubmit_process_state(false)
+            } else {
+                throw new Error(authResult);
+            }
+        } catch (error) {
+            setSubmit_process_state(false)
+            console.log(error);
+        }
+    };
+
+    const googleLogin = useGoogleLogin({
+        onSuccess: responseGoogle,
+        onError: responseGoogle,
+        flow: "auth-code",
+    });
+
+    const handleGoogleLogin = async (e) => {
+        e.preventDefault();
+        googleLogin();
+        setSubmit_process_state(true)
+    };
+
     return (
         <div className='flex h-[90vh] items-center justify-center'>
             <div className='md:w-[45%] sm:w-[90%] w-[97%]'>
@@ -100,7 +132,7 @@ const Login = () => {
                         {!submit_process_state ? "Login" : <i className="fa-solid fa-spinner fa-spin"></i>}
                     </button>
                 </form>
-                <button className='w-full mb-2 bg-transparent hover:bg-black transition hover:text-white py-1 rounded border-2 border-black flex items-center justify-center space-x-2'>
+                <button onClick={handleGoogleLogin} className='w-full mb-2 bg-transparent hover:bg-black transition hover:text-white py-1 rounded border-2 border-black flex items-center justify-center space-x-2'>
                     <ion-icon name="logo-google"></ion-icon> <span>Login With Google</span>
                 </button>
                 <Link to="/forget-password" className='text-blue-600 underline'>I Forgot My Password</Link>

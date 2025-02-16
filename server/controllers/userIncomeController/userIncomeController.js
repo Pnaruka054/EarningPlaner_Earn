@@ -3,21 +3,16 @@ const ipAddress_records_module = require('../../model/IPAddress/useripAddresses_
 const { userMonthly_records_module, saveUserMonthlyData } = require("../../model/dashboard/userMonthly_modules");
 const userDate_records_module = require("../../model/dashboard/userDate_modules");
 const userSignUp_module = require('../../model/userSignUp/userSignUp_module')
-const { getAllDatesOfCurrentMonth } = require('../dashboardStatistics/dashboardStatistics')
 const referral_records_module = require('../../model/referralRecords/referral_records_module')
 const idTimer_records_module = require('../../model/id_timer/id_timer_records_module')
 const getFormattedDate = require('../../helper/getFormattedDate')
+const getFormattedMonth = require("../../helper/getFormattedMonth")
 
 const user_adsView_home_get = async (req, res) => {
     const session = await mongoose.startSession(); // Start a session
     session.startTransaction(); // Begin a transaction
     try {
-        // Format current month and year (e.g., "January 2024")
-        const date = new Date();
-        const currentMonthName = date.toLocaleString('default', { month: 'long' });
-        const currentYear = date.getFullYear();
-        const monthName = `${currentMonthName} ${currentYear}`;
-
+        const monthName = getFormattedMonth()
         const userData = req.user;
         const user_ip = req.ip;
 
@@ -41,9 +36,9 @@ const user_adsView_home_get = async (req, res) => {
             .session(session);
 
         // Safely extract income and clickBalance
-        const income = userMonthly_recordData.earningSources?.view_ads?.income || 0;
+        const income = userMonthly_recordData?.earningSources?.view_ads?.income || 0;
         let clickBalance =
-            userMonthly_recordData.earningSources?.view_ads?.clickBalance ||
+            userMonthly_recordData?.earningSources?.view_ads?.clickBalance ||
             `0/${process.env.VIEW_ADS_CLICK_BALANCE}`;
 
         // Prepare response data
@@ -88,13 +83,7 @@ const user_adsView_income_patch = async (req, res) => {
     try {
         // Start transaction
         session.startTransaction();
-
-        // Format current month and year (e.g., "January 2024")
-        const now = new Date();
-        const currentMonthName = now.toLocaleString('default', { month: 'long' });
-        const currentYear = now.getFullYear();
-        const monthName = `${currentMonthName} ${currentYear}`;
-
+        const monthName = getFormattedMonth()
         // Destructure request body and get user IP
         const { disabledButtons_state, clickBalance, btnClickEarn } = req.body;
         const userIp = req.ip;
@@ -106,10 +95,26 @@ const user_adsView_income_patch = async (req, res) => {
         const today = getFormattedDate();
 
         // Fetch user's daily record
-        const dateRecords = await userDate_records_module
+        let dateRecords = await userDate_records_module
             .findOne({ userDB_id: userData._id, date: today })
             .session(session);
-
+        let userMonthlyRecord = await userMonthly_records_module
+            .findOne({ userDB_id: userData._id, monthName })
+            .session(session);
+        if (!dateRecords) {
+            dateRecords = new userDate_records_module({
+                userDB_id: userData._id,
+                monthName,
+                date: today,
+                self_earnings: "0",
+            });
+        }
+        if (!userMonthlyRecord) {
+            userMonthlyRecord = new userMonthly_records_module({
+                userDB_id: userData._id,
+                monthName,
+            });
+        }
         // Initialize referred user variables
         let referredUser = null;
         let referralRecord = null;
@@ -135,17 +140,22 @@ const user_adsView_income_patch = async (req, res) => {
             dateRecords.self_earnings = (
                 parseFloat(dateRecords.self_earnings || 0) + parseFloat(btnClickEarn)
             ).toFixed(3);
+
+            dateRecords.Total_earnings = (
+                parseFloat(dateRecords.Total_earnings || 0) + parseFloat(btnClickEarn)
+            ).toFixed(3);
         }
+
         if (dateRecords_referBy) {
             dateRecords_referBy.referral_earnings = (
                 parseFloat(dateRecords_referBy.referral_earnings || 0) + referralIncrement
             ).toFixed(3);
+
+            dateRecords_referBy.Total_earnings = (
+                parseFloat(dateRecords_referBy.Total_earnings || 0) + referralIncrement
+            ).toFixed(3);
         }
 
-        // Fetch monthly record and IP address record for the user
-        const userMonthlyRecord = await userMonthly_records_module
-            .findOne({ userDB_id: userData._id, monthName })
-            .session(session);
         const ipAddressRecord = await ipAddress_records_module
             .findOne({ ipAddress: userIp })
             .session(session);
@@ -262,7 +272,7 @@ const user_adsView_income_patch = async (req, res) => {
         console.error("Error in updating user data:", error);
         return res.status(500).json({ message: 'An error occurred while processing the request.' });
     }
-    
+
 };
 
 module.exports = {

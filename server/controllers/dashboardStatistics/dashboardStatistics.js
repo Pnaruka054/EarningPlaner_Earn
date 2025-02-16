@@ -18,47 +18,6 @@ function getAllDatesOfCurrentMonth() {
     return dates;
 }
 
-async function createCurrentMonthDocuments() {
-    const date = new Date();
-    const currentMonthName = date.toLocaleString('default', { month: 'long' });
-    const currentYear = date.getFullYear();
-    const monthName = `${currentMonthName} ${currentYear}`; // Format: "January 2024"
-
-    const allUsers = await userSignUp_module.find();
-
-    // Get all userSignUpData object IDs
-    const userIDs = allUsers.map(user => user._id);
-
-    // For each user, check if they already have a record for this month
-    for (let userID of userIDs) {
-        const existingMonth = await userMonthly_records_module.findOne({
-            monthName: monthName,
-            userDB_id: userID
-        });
-
-        // If no record exists for the current month, create a new record
-        if (!existingMonth) {
-            const newMonthlyRecord = new userMonthly_records_module({
-                monthName: monthName, // Include the year in the monthName
-                userDB_id: userID
-            });
-            await newMonthlyRecord.save();
-
-            // Create date_records entries for all users, with separate documents for each date of the current month
-            const datesOfCurrentMonth = getAllDatesOfCurrentMonth();
-            for (let date of datesOfCurrentMonth) {
-                const newDateRecord = new userDate_records({
-                    userDB_id: userID,
-                    date: date,
-                    monthName: monthName // Include the year in the monthName
-                });
-                await newDateRecord.save();
-            }
-        }
-    }
-}
-
 module.exports = {
-    createCurrentMonthDocuments,
     getAllDatesOfCurrentMonth
 }

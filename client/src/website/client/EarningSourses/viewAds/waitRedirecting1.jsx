@@ -4,6 +4,7 @@ const randomNumber = Math.floor(Math.random() * 7) + 1;
 const WaitRedirecting = () => {
     const [redirectLink, setRedirectLink] = useState('');
     const [waitingTimer_state, setWaitingTimer_state] = useState(10);
+    const [isRedirecting, setIsRedirecting] = useState(false);
 
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
@@ -19,7 +20,7 @@ const WaitRedirecting = () => {
         }, 1000);
 
         if (waitingTimer_state === randomNumber && redirectLink) {
-            redirectLink.split('||')[1] + '||' + redirectLink.split('||')[2];
+            setIsRedirecting(true);
             clearInterval(interval);
             window.location.href = redirectLink.split('||')[0];
         }
@@ -28,6 +29,22 @@ const WaitRedirecting = () => {
             clearInterval(interval);
         };
     }, [waitingTimer_state, redirectLink]);
+
+    useEffect(() => {
+        sessionStorage.setItem("isUserClosed", "false");
+
+        const handleBeforeUnload = (event) => {
+            if (!isRedirecting) {
+                localStorage.setItem('isSuccess', 'false');
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [isRedirecting]);
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-blue-50">

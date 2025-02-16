@@ -25,7 +25,7 @@ const WaitRedirecting = () => {
             window.location.href = redirectLink.split('||')[0];
         }
 
-        return () => {
+        return () => { 
             clearInterval(interval);
         };
     }, [waitingTimer_state, redirectLink]);

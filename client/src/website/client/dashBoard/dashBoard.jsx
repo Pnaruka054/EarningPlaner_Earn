@@ -45,6 +45,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                 const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userDataGet`, {
                     withCredentials: true
                 });
+                console.log(response.data);
                 setUserData_state(response.data.userData);
                 setDropdownButtonValue_state(response.data.userData[1][0].monthName)
                 setAvailableBalance_forNavBar_state((parseFloat(response.data.userData[0].deposit_amount || 0) + parseFloat(response.data.userData[0].withdrawable_amount || 0)).toFixed(3));

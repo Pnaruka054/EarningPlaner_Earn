@@ -1,7 +1,6 @@
 const cron = require('node-cron');
 const userSignUp_module = require('../model/userSignUp/userSignUp_module')
 const { userMonthly_records_module } = require('../model/dashboard/userMonthly_modules')
-const { createCurrentMonthDocuments } = require("../controllers/dashboardStatistics/dashboardStatistics");
 
 
 const cronForDaily_MonthlyData_Update = async () => {
@@ -53,13 +52,6 @@ const cronForDaily_MonthlyData_Update = async () => {
     });
 };
 
-const cronForMonthly_DataCreateFor_EveryUser = () => {
-    cron.schedule('0 0 1 * *', () => {
-        createCurrentMonthDocuments();
-    });
-}
-
 module.exports = {
     cronForDaily_MonthlyData_Update,
-    cronForMonthly_DataCreateFor_EveryUser
 }

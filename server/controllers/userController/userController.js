@@ -1,17 +1,17 @@
 const bcrypt = require('bcrypt')
 // const sendMail = require('../helper/mailer')
 const { validationResult } = require('express-validator')
-const randomString = require('randomstring')
 const jwt = require('jsonwebtoken')
-// const oauth2Client = require("../helper/oauth2Client")
-
+const oauth2Client = require("../../helper/oauth2Client")
+const axios = require("axios")
 const userSignUp_module = require('../../model/userSignUp/userSignUp_module')
 const referral_records_module = require('../../model/referralRecords/referral_records_module')
-const { createCurrentMonthDocuments } = require('../dashboardStatistics/dashboardStatistics')
 const { userMonthly_records_module, saveUserMonthlyData } = require("../../model/dashboard/userMonthly_modules");
 const userDate_records_module = require("../../model/dashboard/userDate_modules");
 const withdrawal_methods_module = require('../../model/withdraw/withdraw_methods_module')
 const current_time_get = require('../../helper/currentTimeUTC')
+const getFormattedMonth = require("../../helper/getFormattedMonth")
+
 
 function jwt_accessToken(user) {
     return jwt.sign({ jwtUser: user }, process.env.JWT_ACCESS_KEY, { expiresIn: '2h' })
@@ -26,6 +26,8 @@ let userSignUp = async (req, res) => {
                 error_msg: errors.array()
             })
         }
+
+        const monthName = getFormattedMonth()
 
         const { name, mobile_number, email_address, password, refer_by } = req.body
 
@@ -64,7 +66,11 @@ let userSignUp = async (req, res) => {
 
         const userSignUp_savedData = await new userSignUp_module(signUp_Data).save();
 
-        await createCurrentMonthDocuments()
+
+        await new userMonthly_records_module({
+            userDB_id: userData._id,
+            monthName,
+        }).save()
 
         res.status(200).json({
             success: true,
@@ -133,6 +139,98 @@ const userLogin = async (req, res) => {
             success: false,
             msg: error.message
         });
+    }
+};
+
+const user_signUp_login_google = async (req, res) => {
+    try {
+        const google_code = req.query.google_code;
+        const referral_id_signup = req.query.referral_id_signup
+        const monthName = getFormattedMonth()
+        if (!google_code) {
+            return res.status(400).json({ message: 'Missing google_code' });
+        }
+        const googleRes = await oauth2Client.getToken(google_code);
+        oauth2Client.setCredentials(googleRes.tokens);
+
+        const userRes = await axios.get(
+            `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`
+        );
+
+        const { email, name, id } = userRes.data;
+
+        const isExists = await userSignUp_module.findOne({ email_address: email })
+        if (!isExists?.google_id && isExists) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Please Login With Password"
+            })
+        }
+
+        let userData = {
+            name,
+            email_address: email,
+            userName: email.split('@')[0],
+            google_id: id
+        };
+
+        if (referral_id_signup !== 'undefined') {
+            const referred_by_userData = await userSignUp_module.findOne({ userName: referral_id_signup })
+            if (!referred_by_userData) {
+                return res.status(400).json({
+                    success: false,
+                    error_msg: 'Your Registration Link is invalid'
+                })
+            }
+            let referral_recorded_data = new referral_records_module({
+                userDB_id: referred_by_userData._id,
+                date: current_time_get(),
+                userName: email.split('@')[0]
+            })
+
+            await referral_recorded_data.save()
+
+            userData = {
+                name,
+                email_address: email,
+                userName: email.split('@')[0],
+                google_id: id,
+                refer_by: referral_id_signup
+            };
+        }
+
+        let jwt_token;
+        if (!isExists) {
+            const user_data = await new userSignUp_module(userData).save()
+            await new userMonthly_records_module({
+                userDB_id: user_data._id,
+                monthName,
+            }).save()
+            jwt_token = jwt_accessToken(user_data)
+        } else {
+            jwt_token = jwt_accessToken(isExists)
+        }
+
+        // Set the JWT token in an HttpOnly cookie
+        res.cookie('jwtToken', jwt_token, {
+            httpOnly: true,
+            secure: true,
+            // secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
+            sameSite: 'None',
+            maxAge: 7200000 // 2 hour
+        });
+
+        return res.status(200).json({
+            success: true,
+            msg: "succcess"
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({
+            success: false,
+            error_msg: error.message
+        })
     }
 };
 
@@ -288,5 +386,6 @@ module.exports = {
     userProfileData_get,
     userProfileData_patch,
     userLogOut,
-    userLoginCheckGet
+    userLoginCheckGet,
+    user_signUp_login_google
 }

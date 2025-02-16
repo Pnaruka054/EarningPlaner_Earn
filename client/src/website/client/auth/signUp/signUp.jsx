@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Error from '../../components/error/error';
 import ProcessBgBlack from '../../components/processBgBlack/processBgBlack';
 import Swal from 'sweetalert2';
+import { useGoogleLogin } from "@react-oauth/google";
+
 
 const Signup = ({ referral_status }) => {
     const [formData, setFormData] = useState({
@@ -102,6 +104,37 @@ const Signup = ({ referral_status }) => {
         }));
     };
 
+    const responseGoogle = async (authResult) => {
+        try {
+            if (authResult["code"]) {
+                let response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/user_signUp_login_google?google_code=${authResult.code}&referral_id_signup=${id}`, {
+                    withCredentials: true // This ensures cookies are sent with the request
+                });
+                if (response) {
+                    navigation('/member/dashboard')
+                }
+                setSubmit_process_state(false)
+            } else {
+                throw new Error(authResult);
+            }
+        } catch (error) {
+            setSubmit_process_state(false)
+            console.log(error);
+        }
+    };
+
+    const googleLogin = useGoogleLogin({
+        onSuccess: responseGoogle,
+        onError: responseGoogle,
+        flow: "auth-code",
+    });
+
+    const handleGoogleLogin = async (e) => {
+        e.preventDefault();
+        googleLogin();
+        setSubmit_process_state(true)
+    };
+
     return (
         <div className='flex h-[90vh] items-center justify-center'>
             <div className='md:w-[45%] sm:w-[90%] w-[97%]'>
@@ -125,7 +158,7 @@ const Signup = ({ referral_status }) => {
                     <span className="bg-white px-2 relative -top-3">or</span>
                     <hr className="absolute border-slate-400" style={{ top: '0%', width: '45%', right: "0" }} />
                 </div>
-                <button className='w-full mb-2 bg-red-500 text-white hover:bg-black transition py-1 rounded flex items-center justify-center space-x-2'>
+                <button onClick={handleGoogleLogin} className='w-full mb-2 bg-red-500 text-white hover:bg-black transition py-1 rounded flex items-center justify-center space-x-2'>
                     <ion-icon name="logo-google"></ion-icon> <span>Sign Up With Google</span>
                 </button>
                 <Link to="/forget-password" className='text-blue-600 underline'>I Forgot My Password</Link>

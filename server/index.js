@@ -68,7 +68,6 @@ app.use('/userIncomeRoute', userIncomeRoute);
 
 // Scheduled cron tasks
 cronForDaily_MonthlyData_Update()
-cronForMonthly_DataCreateFor_EveryUser()
 
 // Server listen
 const PORT = process.env.PORT || 3000;

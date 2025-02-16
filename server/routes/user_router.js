@@ -7,6 +7,7 @@ route.get('/userDataGet', userController.userDataGet)
 route.get('/userReferral_record_get', userController.userReferral_record_get)
 route.get('/userProfileData_get', userController.userProfileData_get)
 route.get('/userLoginCheckGet', userController.userLoginCheckGet)
+route.get('/user_signUp_login_google', userController.user_signUp_login_google)
 
 route.post('/signUp', validator.signUpValidator, userController.userSignUp)
 route.post('/login', userController.userLogin)
