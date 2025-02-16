@@ -14,6 +14,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [disabledButtons_state, setDisabledButtons_state] = useState([]);
     const [isExtension_state, setIsExtension_state] = useState(false);
     const [currentBtnName_and_amount_For_extension_adoperator_state, setCurrentBtnName_and_amount_For_extension_adoperator_state] = useState([]);
+    const [originalTitle] = useState(document.title);
 
     const channel = new BroadcastChannel("viewAds_channel");
 
@@ -53,11 +54,11 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         channel.onmessage = (event) => {
             if (event.data === "handle_clickAds_btnClick_state_true") {
                 setHandle_clickAds_btnClick_state(true);
-            }else if (event.data === "handle_clickAds_btnClick_state_false") {
+            } else if (event.data === "handle_clickAds_btnClick_state_false") {
                 setHandle_clickAds_btnClick_state(false);
             }
         };
-    
+
         return () => {
             channel.close(); // Cleanup channel on unmount
         };
@@ -142,6 +143,10 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                 title: "Success!",
                                 icon: "success",
                             });
+                            document.title = "✅ success!"
+                            setTimeout(() => {
+                                document.title = originalTitle
+                            }, 4000);
                         })
                         .catch((error) => {
                             console.error("Error updating income:", error);
@@ -156,6 +161,10 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     title: "Success!",
                     text: "Something went wrong!",
                 });
+                document.title = "❌ failed"
+                setTimeout(() => {
+                    document.title = originalTitle
+                }, 4000);
             }
 
             if (isExtension === 'true') {
@@ -212,6 +221,10 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                 title: "Success!",
                                 icon: "success",
                             });
+                            document.title = "✅ success!"
+                            setTimeout(() => {
+                                document.title = originalTitle
+                            }, 4000);
                         })
                         .catch((error) => {
                             console.error("Error updating income:", error);
@@ -226,6 +239,10 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         title: "Success!",
                         text: "Something went wrong!",
                     });
+                    document.title = "❌ failed"
+                    setTimeout(() => {
+                        document.title = originalTitle
+                    }, 4000);
                 }
             }
 
