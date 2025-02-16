@@ -53,20 +53,11 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         channel.onmessage = (event) => {
             if (event.data === "handle_clickAds_btnClick_state_true") {
                 setHandle_clickAds_btnClick_state(true);
-            } else if (event.data === "handle_clickAds_btnClick_state_false") {
+            }else if (event.data === "handle_clickAds_btnClick_state_false") {
                 setHandle_clickAds_btnClick_state(false);
             }
-
-            if (event.data === "show_success_swal_alert1" || event.data === "show_success_swal_alert1") {
-                if (!document.hidden) {
-                    Swal.fire({
-                        title: "Success!",
-                        icon: "success",
-                    });
-                }
-            }
         };
-
+    
         return () => {
             channel.close(); // Cleanup channel on unmount
         };
@@ -147,8 +138,10 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
                     user_adsView_income_patch(obj)
                         .then(() => {
-                            // Sirf ek tab me Swal show karne ke liye signal send karo
-                            channel.postMessage("show_success_swal_alert1");
+                            Swal.fire({
+                                title: "Success!",
+                                icon: "success",
+                            });
                         })
                         .catch((error) => {
                             console.error("Error updating income:", error);
@@ -215,8 +208,10 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
                     user_adsView_income_patch(obj)
                         .then(() => {
-                            // Sirf ek tab me Swal show karne ke liye signal send karo
-                            channel.postMessage("show_success_swal_alert2");
+                            Swal.fire({
+                                title: "Success!",
+                                icon: "success",
+                            });
                         })
                         .catch((error) => {
                             console.error("Error updating income:", error);
