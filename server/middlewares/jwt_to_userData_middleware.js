@@ -3,7 +3,14 @@ const userSignUp_module = require('../model/userSignUp/userSignUp_module')
 
 const middleware_userLogin_check = async (req, res, next) => {
     try {
-        if (req.originalUrl === '/userRoute/login' || req.originalUrl === '/userRoute/signUp' || req.originalUrl.includes('/userRoute/user_signUp_login_google')) {
+        if (
+            req.originalUrl === '/userRoute/login'
+            || req.originalUrl === '/userRoute/signUp'
+            || req.originalUrl.includes('/userRoute/user_signUp_login_google')
+            || req.originalUrl.includes('/userRoute/userLoginforgot_password_send_mail')
+            || req.originalUrl.includes('/userRoute/reset_password_form_post')
+            || req.originalUrl.includes('/userRoute/verify_reset_token')
+        ) {
             return next(); // Skip middleware for this route
         }
 
@@ -23,6 +30,13 @@ const middleware_userLogin_check = async (req, res, next) => {
             return res.status(404).json({
                 success: false,
                 jwtMiddleware_user_not_found_error: 'Authorization token invalid or user not found'
+            });
+        }
+
+        if (decoded.jwtUser.password !== decodedData_fromDB.password) {
+            return res.status(404).json({
+                success: false,
+                jwtMiddleware_user_not_found_error: 'password mismatch please login again'
             });
         }
 

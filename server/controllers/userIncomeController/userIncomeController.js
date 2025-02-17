@@ -134,7 +134,7 @@ const user_adsView_income_patch = async (req, res) => {
             });
         } else {
             userMonthlyRecord.earningSources.view_ads.clickBalance =
-                `${(parseFloat(clickBalance?.split('/')[0]) + 1).toString()}/${process.env.VIEW_ADS_CLICK_BALANCE}`;
+                `${(parseFloat(clickBalance.split('/')[0]) + 1).toString()}/${process.env.VIEW_ADS_CLICK_BALANCE}`;
         }
 
         // Initialize referred user variables
@@ -193,7 +193,8 @@ const user_adsView_income_patch = async (req, res) => {
             userMonthlyRecord.earningSources.view_ads.income = (
                 currentIncome + parseFloat(btnClickEarn)
             ).toFixed(3);
-            userMonthlyRecord.earningSources.view_ads.clickBalance = clickBalance;
+            userMonthlyRecord.earningSources.view_ads.clickBalance =
+                `${(parseFloat(clickBalance.split('/')[0]) + 1).toString()}/${process.env.VIEW_ADS_CLICK_BALANCE}`;
 
             // Update user's withdrawable amount
             const currentWithdrawable = parseFloat(userData.withdrawable_amount || 0);

@@ -117,6 +117,43 @@ const Login = () => {
         setSubmit_process_state(true)
     };
 
+    const handleForgotPassword = () => {
+        Swal.fire({
+            title: "Forgot Password",
+            input: "email",
+            inputLabel: "Enter your email",
+            inputPlaceholder: "Enter your email address",
+            showCancelButton: true,
+            confirmButtonText: "Send Reset Link",
+            preConfirm: (email) => {
+                if (!email) {
+                    Swal.showValidationMessage("Email is required!");
+                }
+                return fetch(`${import.meta.env.VITE_SERVER_URL}/userRoute/userLoginforgot_password_send_mail`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ email }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (!data.success) {
+                            throw new Error(data.message || "Something went wrong");
+                        }
+                        return data;
+                    })
+                    .catch((error) => {
+                        Swal.showValidationMessage(`Request failed: ${error.message}`);
+                    });
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire("Success!", "Password reset link sent successfully.", "success");
+            }
+        });
+    };
+
     return (
         <div className='flex h-[90vh] items-center justify-center'>
             <div className='md:w-[45%] sm:w-[90%] w-[97%]'>
@@ -135,7 +172,7 @@ const Login = () => {
                 <button onClick={handleGoogleLogin} className='w-full mb-2 bg-transparent hover:bg-black transition hover:text-white py-1 rounded border-2 border-black flex items-center justify-center space-x-2'>
                     <ion-icon name="logo-google"></ion-icon> <span>Login With Google</span>
                 </button>
-                <Link to="/forget-password" className='text-blue-600 underline'>I Forgot My Password</Link>
+                <p onClick={handleForgotPassword} className='text-blue-600 underline cursor-pointer'>I Forgot My Password</p>
                 <p className='mt-2 select-none'>
                     Don’t have an account? <Link to="/signup" className='text-blue-600 underline' >Register a New Account</Link>
                 </p>

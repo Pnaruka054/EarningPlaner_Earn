@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt')
-// const sendMail = require('../helper/mailer')
+const mailSender = require('../../helper/mailSender')
+const randomString = require('randomstring')
 const { validationResult } = require('express-validator')
 const jwt = require('jsonwebtoken')
 const oauth2Client = require("../../helper/oauth2Client")
@@ -11,6 +12,7 @@ const userDate_records_module = require("../../model/dashboard/userDate_modules"
 const withdrawal_methods_module = require('../../model/withdraw/withdraw_methods_module')
 const current_time_get = require('../../helper/currentTimeUTC')
 const getFormattedMonth = require("../../helper/getFormattedMonth")
+const resetPassword_req_data = require('../../model/resetPassword_req_data/resetPassword_req_data')
 
 
 function jwt_accessToken(user) {
@@ -234,6 +236,128 @@ const user_signUp_login_google = async (req, res) => {
     }
 };
 
+const userLoginforgot_password_send_mail = async (req, res) => {
+    try {
+        let { email } = req.body;
+        email = email.toLowerCase();
+        let email_userName = null
+        if (email.includes('@')) {
+            email_userName = email.split("@")[0];
+        }
+        console.log(email);
+        const isExists = await userSignUp_module.findOne({
+            $and: [
+                { email_address: email },
+                { userName: email_userName }
+            ]
+        });
+
+        if (!isExists) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is Not Register"
+            });
+        }
+
+        const fullUrl = req.headers.origin || `${req.protocol}://${req.get('host')}`;
+        let token = randomString.generate()
+        let obj = {
+            userDB_id: isExists._id,
+            token
+        }
+
+        const msg = `<p>Hello ${isExists.name} Welcome To Earning Planer, Click <a href="${fullUrl}/password-reset-form/${token}"> here </a> To Reset Your Password</p>`
+        mailSender(isExists.email_address, 'Reset/update Password', msg)
+        await new resetPassword_req_data(obj).save()
+
+        return res.status(200).json(
+            { success: true, message: "Reset link sent successfully" }
+        )
+
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            msg: error.message
+        });
+    }
+};
+
+const reset_password_form_post = async (req, res) => {
+    try {
+        let { token, password } = req.body;
+        const errors = validationResult(req)
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                error_msg: errors.array()
+            })
+        }
+        
+        if (!token || !password) {
+            return res.status(400).json({ success: false, message: "Token and password are required!" });
+        }
+        const user = await resetPassword_req_data.findOne({ token });
+        if (!user) {
+            return res.status(400).json({ success: false, message: "Invalid or expired token!" });
+        }
+
+        const bcryptPassword = await bcrypt.hash(password, 10);
+
+        let updatedData = await userSignUp_module.findOneAndUpdate(
+            { _id: user.userDB_id },
+            {
+                password: bcryptPassword,
+                $unset: { google_id: "" }
+            },
+            { new: true }
+        );
+
+        await resetPassword_req_data.deleteMany({ userDB_id: updatedData._id });
+
+        return res.status(200).json({ success: true, message: "Password reset successfully!" });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Internal Server Error",
+        });
+    }
+};
+
+const verify_reset_token = async (req, res) => {
+    const { token } = req.query; // Get the token from query parameter
+
+    if (!token) {
+        return res.status(400).json({
+            success: false,
+            message: "Token is required.",
+        });
+    }
+
+    try {
+        // Step 1: Check if the token exists in the database
+        const tokenData = await resetPassword_req_data.findOne({ token });
+
+        if (!tokenData) {
+            return res.status(404).json({
+                success: false,
+                message: "Invalid or expired token.",
+            });
+        }
+
+        // If token is valid, continue
+        return res.status(200).json({
+            success: true,
+            message: "Token is valid.",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Internal Server Error",
+        });
+    }
+};
+
 const userLoginCheckGet = async (req, res) => {
     try {
         const userData = req.user;
@@ -387,5 +511,8 @@ module.exports = {
     userProfileData_patch,
     userLogOut,
     userLoginCheckGet,
-    user_signUp_login_google
+    user_signUp_login_google,
+    userLoginforgot_password_send_mail,
+    reset_password_form_post,
+    verify_reset_token
 }

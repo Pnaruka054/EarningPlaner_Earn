@@ -163,7 +163,7 @@ const Signup = ({ referral_status }) => {
                 </button>
                 <Link to="/forget-password" className='text-blue-600 underline'>I Forgot My Password</Link>
                 <p className='mt-2 select-none'>
-                    Don’t have an account? <Link to="/signup" className='text-blue-600 underline' >Register a New Account</Link>
+                    I Already have an account? <Link to="/login" className='text-blue-600 underline' >Login Now</Link>
                 </p>
             </div>
             {(submit_process_state || data_process_state) && <ProcessBgBlack />}

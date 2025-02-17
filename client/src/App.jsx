@@ -23,6 +23,7 @@ import ContactUs from './website/client/components/contactUs/contactUs';
 import PageNotFound from './website/client/components/pageNotFound/pageNotFound';
 import ShortLink from './website/client/EarningSourses/shortLink/shortLink';
 import ExtensionUninstalled from './website/client/extensionUninstalled/extensionUninstalled';
+import PasswordResetForm from './website/client/passwordResetForm/passwordResetForm';
 
 const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
@@ -76,7 +77,8 @@ const App = () => {
       location.pathname === '/' ||
       location.pathname === '/login' ||
       location.pathname === '/signup' ||
-      location.pathname.includes('/signup/ref')
+      location.pathname.includes('/signup/ref') ||
+      location.pathname.includes('/password-reset-form')
     ) {
       setshow_NavBar_state((p) => p = true)
       setshow_Full_NavBar_state((p) => p = false)
@@ -129,6 +131,7 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/contact-us" element={<ContactUs />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/password-reset-form/:token" element={<PasswordResetForm />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/signup/ref/:id" element={<SignUp referral_status="true" />} />
             <Route path="/member/dashboard" element={<DashBoard setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} getLogOut_btnClicked={showPopUp_onLogOut_btn_state} setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state} />} />

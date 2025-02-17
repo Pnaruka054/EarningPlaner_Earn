@@ -21,20 +21,13 @@ const WaitRedirecting = () => {
 
         if (waitingTimer_state === randomNumber && redirectLink) {
             setIsRedirecting(true);
+            sessionStorage.setItem('isUserClosed', 'true')
             clearInterval(interval);
             window.location.href = redirectLink.split('||')[0];
         }
-
-        return () => {
-            clearInterval(interval);
-        };
-    }, [waitingTimer_state, redirectLink]);
-
-    useEffect(() => {
-        sessionStorage.setItem("isUserClosed", "false");
-
+        let isUserClosed = sessionStorage.getItem('isUserClosed')
         const handleBeforeUnload = (event) => {
-            if (!isRedirecting) {
+            if (!isUserClosed) {
                 localStorage.setItem('isSuccess', 'false');
             }
         };
@@ -42,9 +35,10 @@ const WaitRedirecting = () => {
         window.addEventListener('beforeunload', handleBeforeUnload);
 
         return () => {
+            clearInterval(interval);
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [isRedirecting]);
+    }, [waitingTimer_state, redirectLink]);
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-blue-50">

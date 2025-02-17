@@ -9,21 +9,11 @@ const signUpValidator = [
         gmail_lowercase: true,
         gmail_remove_dots: true,
     }),
-    check('password', 'Password must contain min 8 character(min[1 number, 1 speciel character, 1 word]').isStrongPassword({
-        minLength: 8,
-        minUppercase: 1,
-        minSymbols: 1,
-        minNumbers: 1
-    })
+    check('password', 'Password must contain min 8 characters').isLength({ min: 8 })
 ]
 
 const passwordValidator = [
-    check('password', 'Password must contain min 8 character(min[1 number, 1 speciel character, 1 word]').isStrongPassword({
-        minLength: 8,
-        minUppercase: 1,
-        minSymbols: 1,
-        minNumbers: 1
-    })
+    check('password', 'Password must contain min 8 characters').isLength({ min: 8 })
 ]
 
 const otpValidator = [

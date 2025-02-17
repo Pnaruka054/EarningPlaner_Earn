@@ -16,6 +16,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [currentBtnName_and_amount_For_extension_adoperator_state, setCurrentBtnName_and_amount_For_extension_adoperator_state] = useState([]);
     const [originalTitle] = useState(document.title);
     const [isUserActiveOnPage, setIsUserActiveOnPage] = useState(false);
+    const [count_state, setCount_state] = useState(30);
+    const [count_handle_state, setCount_handle_state] = useState(false);
     const channel = new BroadcastChannel("viewAds_channel");
 
     useEffect(() => {
@@ -79,6 +81,23 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         };
     }, []);
 
+    useEffect(() => {
+        let timerId;
+        if (count_handle_state) {
+            timerId = setInterval(() => {
+                setCount_state((prev) => {
+                    const newCount = prev - 1;
+                    document.title = newCount; // Update document title with the latest count
+                    return newCount;
+                });
+            }, 1000);
+        } else if (!count_handle_state) {
+            setCount_state(30)
+            clearInterval(timerId);
+        }
+        return () => clearInterval(timerId);
+    }, [count_handle_state]);
+
     let Instructions = [
         'Each user gets 5 Ads clicks to earn money per IP address.',
         'Clicking All Ads allows users to earn money.',
@@ -90,7 +109,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         'Users can maximize their income by clicking Ads and changing IPs carefully.',
         'The cycle resets every day to allow users to earn again.',
         'As more users join the platform, the limits on ad clicks and IP changes will gradually increase, allowing users to earn even more as the platform grows.',
-        'Please do not attempt to cheat or hack the website, as this could lead to your account being permanently banned. We are working hard to increase your income opportunities, so please follow the rules and earn money fairly. Any attempts to exploit scripts or find income tricks will result in both you and us being unable to earn. Follow the guidelines to maximize your earnings.'
+        'Please do not attempt to cheat or hack the website, as this could lead to your account_state being permanently banned. We are working hard to increase your income opportunities, so please follow the rules and earn money fairly. Any attempts to exploit scripts or find income tricks will result in both you and us being unable to earn. Follow the guidelines to maximize your earnings.'
     ];
 
     const handle_link_click = (link, btnName, amount) => {
@@ -125,6 +144,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         } else {
             window.open(link, '_blank');
         }
+        setCount_handle_state(true)
     };
 
     useEffect(() => {
@@ -174,7 +194,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         text: "Something went wrong!",
                     });
                     document.title = "❌ failed";
-                    setTimeout(() => document.title = originalTitle, 4000);
+                    setTimeout(() => document.title = originalTitle, 2000);
                 }
             } else {
                 setIsUserActiveOnPage(false);
@@ -189,7 +209,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     text: "Something went wrong!",
                 });
                 document.title = "❌ failed";
-                setTimeout(() => document.title = originalTitle, 4000);
+                setTimeout(() => document.title = originalTitle, 2000);
             }
 
             setIsExtension_state(isExtension === 'true');
@@ -255,6 +275,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                 title: "Success!",
                                 icon: "success",
                             });
+                            setCount_handle_state(false)
                             document.title = "✅ success!"
                             setTimeout(() => {
                                 document.title = originalTitle
@@ -273,6 +294,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         title: "Success!",
                         text: "Something went wrong!",
                     });
+                    setCount_handle_state(false)
                     document.title = "❌ failed"
                     setTimeout(() => {
                         document.title = originalTitle
@@ -451,7 +473,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
             handelButtonClick: function (e) {
-                // yllix 
+                // evadav 
                 handle_link_click('https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=', 'btn17', this.amount)
             },
         },
