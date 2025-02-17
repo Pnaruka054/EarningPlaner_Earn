@@ -115,6 +115,28 @@ const user_adsView_income_patch = async (req, res) => {
                 monthName,
             });
         }
+
+        // Agar clickBalance exactly equal ho jaye to VIEW_ADS_CLICK_BALANCE/VIEW_ADS_CLICK_BALANCE
+        let idTimer_recordsData = null
+        if (
+            userMonthlyRecord?.earningSources?.view_ads?.clickBalance ===
+            `${process.env.VIEW_ADS_CLICK_BALANCE}/${process.env.VIEW_ADS_CLICK_BALANCE}`
+        ) {
+            idTimer_recordsData = await idTimer_records_module.findOne({ userDB_id: userData._id }).session(session);
+
+            if (!idTimer_recordsData) {
+                idTimer_recordsData = new idTimer_records_module({ userDB_id: userData._id, ViewAdsexpireTImer: new Date(Date.now() + (24 * 60 * 60 * 1000)) });
+                await idTimer_recordsData.save({ session }); // Save the new record to the database
+            }
+            return res.status(500).json({
+                success: false,
+                msg: "Not Record"
+            });
+        } else {
+            userMonthlyRecord.earningSources.view_ads.clickBalance =
+                `${(parseFloat(clickBalance?.split('/')[0]) + 1).toString()}/${process.env.VIEW_ADS_CLICK_BALANCE}`;
+        }
+
         // Initialize referred user variables
         let referredUser = null;
         let referralRecord = null;
@@ -187,25 +209,6 @@ const user_adsView_income_patch = async (req, res) => {
             });
         }
 
-
-        // Agar clickBalance exactly equal ho jaye to VIEW_ADS_CLICK_BALANCE/VIEW_ADS_CLICK_BALANCE
-        let idTimer_recordsData = null
-        if (
-            userMonthlyRecord?.earningSources?.view_ads?.clickBalance ===
-            `${process.env.VIEW_ADS_CLICK_BALANCE}/${process.env.VIEW_ADS_CLICK_BALANCE}`
-        ) {
-            idTimer_recordsData = await idTimer_records_module.findOne({ userDB_id: userData._id }).session(session);
-
-            if (!idTimer_recordsData) {
-                idTimer_recordsData = new idTimer_records_module({ userDB_id: userData._id });
-                await idTimer_recordsData.save({ session }); // Save the new record to the database
-            }
-
-            idTimer_recordsData.ViewAdsexpireTImer = new Date(Date.now() + (24 * 60 * 60 * 1000));
-            await idTimer_recordsData.save({ session });
-
-        }
-
         // Save updated documents concurrently
         const saveOperations = [
             userMonthlyRecord.save({ session }),
@@ -239,7 +242,7 @@ const user_adsView_income_patch = async (req, res) => {
         session.endSession();
 
         // Prepare response data
-        const resData = {
+        let resData = {
             ipAddress_recordData: ipAddressRecord,
             income: userMonthlyRecord.earningSources.view_ads.income || 0,
             deposit_amount: userData.deposit_amount,

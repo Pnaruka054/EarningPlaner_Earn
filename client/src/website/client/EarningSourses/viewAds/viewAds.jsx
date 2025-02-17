@@ -15,9 +15,24 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [isExtension_state, setIsExtension_state] = useState(false);
     const [currentBtnName_and_amount_For_extension_adoperator_state, setCurrentBtnName_and_amount_For_extension_adoperator_state] = useState([]);
     const [originalTitle] = useState(document.title);
-
+    const [isUserActiveOnPage, setIsUserActiveOnPage] = useState(false);
     const channel = new BroadcastChannel("viewAds_channel");
 
+    useEffect(() => {
+        if (typeof document.hidden !== "undefined" && handle_clickAds_btnClick_state) {
+            const handleVisibilityChange = () => {
+                if (!document.hidden) {
+                    setIsUserActiveOnPage(true)
+                }
+            };
+
+            document.addEventListener("visibilitychange", handleVisibilityChange);
+
+            return () => {
+                document.removeEventListener("visibilitychange", handleVisibilityChange);
+            };
+        }
+    }, [handle_clickAds_btnClick_state]);
 
     const fetchData = async () => {
         setData_process_state(true);
@@ -115,45 +130,57 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     useEffect(() => {
         const handleStorageChange = () => {
             const clickSuccessStatus = localStorage.getItem('isSuccess');
-            if (clickSuccessStatus && clickSuccessStatus.includes('btn')) {
-                localStorage.removeItem('isSuccess');
-                setHandle_clickAds_btnClick_state(false);
-                channel.postMessage("handle_clickAds_btnClick_state_false");
 
-                if (viewAds_firstTimeLoad_state && viewAds_firstTimeLoad_state.clickBalance) {
-                    const btnName = clickSuccessStatus.split('||')[0];
+            if (!isUserActiveOnPage) {
+                if (clickSuccessStatus && clickSuccessStatus.includes('btn')) {
+                    localStorage.removeItem('isSuccess');
+                    setHandle_clickAds_btnClick_state(false);
+                    channel.postMessage("handle_clickAds_btnClick_state_false");
 
-                    setDisabledButtons_state((prevDisabled) => {
-                        if (!prevDisabled.includes(btnName)) {
-                            return [...prevDisabled, btnName];
-                        }
-                        return prevDisabled;
-                    });
+                    if (viewAds_firstTimeLoad_state?.clickBalance) {
+                        const [btnName, amount] = clickSuccessStatus.split('||');
 
-                    const amount = clickSuccessStatus.split('||')[1];
-                    const obj = {
-                        disabledButtons_state: [...disabledButtons_state, btnName],
-                        clickBalance: (parseFloat(viewAds_firstTimeLoad_state.clickBalance.split('/')[0]) + 1).toString() + "/" + viewAds_firstTimeLoad_state.clickBalance.split('/')[1],
-                        btnClickEarn: amount
-                    };
-
-                    user_adsView_income_patch(obj)
-                        .then(() => {
-                            Swal.fire({
-                                title: "Success!",
-                                icon: "success",
-                            });
-                            document.title = "✅ success!"
-                            setTimeout(() => {
-                                document.title = originalTitle
-                            }, 4000);
-                        })
-                        .catch((error) => {
-                            console.error("Error updating income:", error);
+                        setDisabledButtons_state((prevDisabled) => {
+                            if (!prevDisabled.includes(btnName)) {
+                                return [...prevDisabled, btnName];
+                            }
+                            return prevDisabled;
                         });
+
+                        const obj = {
+                            disabledButtons_state: [...disabledButtons_state, btnName],
+                            clickBalance: `${parseFloat(viewAds_firstTimeLoad_state.clickBalance.split('/')[0])}/${viewAds_firstTimeLoad_state.clickBalance.split('/')[1]}`,
+                            btnClickEarn: amount
+                        };
+
+                        user_adsView_income_patch(obj)
+                            .then(() => {
+                                Swal.fire({
+                                    title: "Success!",
+                                    icon: "success",
+                                });
+                                document.title = "✅ success!";
+                                setTimeout(() => document.title = originalTitle, 4000);
+                            })
+                            .catch((error) => console.error("Error updating income:", error));
+                    }
+                } else if (clickSuccessStatus === 'false') {
+                    localStorage.removeItem('isSuccess');
+                    setHandle_clickAds_btnClick_state(false);
+                    channel.postMessage("handle_clickAds_btnClick_state_false");
+                    Swal.fire({
+                        icon: "error",
+                        title: "Success!",
+                        text: "Something went wrong!",
+                    });
+                    document.title = "❌ failed";
+                    setTimeout(() => document.title = originalTitle, 4000);
                 }
-            } else if (clickSuccessStatus === 'false') {
-                localStorage.removeItem('isSuccess');
+            } else {
+                setIsUserActiveOnPage(false);
+                if (clickSuccessStatus) {
+                    localStorage.removeItem('isSuccess');
+                }
                 setHandle_clickAds_btnClick_state(false);
                 channel.postMessage("handle_clickAds_btnClick_state_false");
                 Swal.fire({
@@ -161,30 +188,37 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     title: "Success!",
                     text: "Something went wrong!",
                 });
-                document.title = "❌ failed"
-                setTimeout(() => {
-                    document.title = originalTitle
-                }, 4000);
+                document.title = "❌ failed";
+                setTimeout(() => document.title = originalTitle, 4000);
             }
 
-            if (isExtension === 'true') {
-                setIsExtension_state(true)
-            } else {
-                setIsExtension_state(false)
-            }
+            setIsExtension_state(isExtension === 'true');
         };
 
+        // Initial state setup
         const isExtension = localStorage.getItem('isExtension');
-        if (isExtension === 'true') {
-            setIsExtension_state(true)
-        } else {
-            setIsExtension_state(false)
-        }
+        setIsExtension_state(isExtension === 'true');
+
+        // Event listeners for storage and beforeunload
         window.addEventListener('storage', handleStorageChange);
+        window.addEventListener('beforeunload', () => {
+            const clickSuccessStatus = localStorage.getItem('isSuccess');
+            if (clickSuccessStatus) {
+                localStorage.removeItem('isSuccess');
+            }
+        });
+
+        // Cleanup event listeners
         return () => {
             window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('beforeunload', () => {
+                const clickSuccessStatus = localStorage.getItem('isSuccess');
+                if (clickSuccessStatus) {
+                    localStorage.removeItem('isSuccess');
+                }
+            });
         };
-    }, [viewAds_firstTimeLoad_state]);
+    }, [viewAds_firstTimeLoad_state, isUserActiveOnPage]);
 
     useEffect(() => {
         const handleIsExtensionUpdated = (e) => {
@@ -405,22 +439,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 handle_link_click('https://vdbaa.com/fullpage.php?section=General&pub=186424&ga=g', 'btn17', this.amount)
             },
         },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            handelButtonClick: function (e) {
-                // adoperator 
-                handle_link_click('https://wwp.aisorc.com/redirect-zone/cad9dc8e', 'btn18', this.amount)
-            },
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            handelButtonClick: function (e) {
-                // adoperator 
-                handle_link_click('https://wwp.aisorc.com/redirect-zone/20cf34cc', 'btn19', this.amount)
-            },
-        },
     ]
 
     let buttonsObj2 = [
@@ -611,7 +629,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         <div className='bg-purple-700 px-2 py-1 shadow font-bold text-white rounded-t-2xl'>Income - ₹{viewAds_firstTimeLoad_state.income}</div>
                     </div>
                     <div className=' bg-white px-6 py-3 shadow relative'>
-                        <div className={`${viewAds_firstTimeLoad_state.ViewAdsexpireTImer ? 'flex' : 'hidden'} absolute top-0 bottom-0 left-0 right-0 bg-white bg-opacity-60 justify-center items-center`}>
+                        <div className={`${viewAds_firstTimeLoad_state.ViewAdsexpireTImer ? 'flex' : 'hidden'} absolute z-[1] top-0 bottom-0 left-0 right-0 bg-white bg-opacity-60 justify-center items-center`}>
                             <div className='flex flex-col items-center font-lexend text-2xl'>
                                 <div className='text-center'>Come Back After</div>
                                 <div className='text-4xl font-bold drop-shadow'>

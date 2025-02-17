@@ -24,15 +24,9 @@ const WaitRedirecting = () => {
             clearInterval(interval);
             window.location.href = redirectLink.split('||')[0];
         }
-
-        return () => { 
-            clearInterval(interval);
-        };
-    }, [waitingTimer_state, redirectLink]);
-
-    useEffect(() => {
+        let isSuccess = localStorage.getItem('isSuccess')
         const handleBeforeUnload = (event) => {
-            if (!redirectLink.split('||')[1] + '||' + redirectLink.split('||')[2]) {
+            if (!isSuccess) {
                 localStorage.setItem('isSuccess', 'false');
             }
         };
@@ -40,9 +34,11 @@ const WaitRedirecting = () => {
         window.addEventListener('beforeunload', handleBeforeUnload);
 
         return () => {
+            clearInterval(interval);
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, []);
+    }, [waitingTimer_state, redirectLink]);
+
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-blue-50">
