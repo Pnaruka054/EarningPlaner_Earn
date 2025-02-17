@@ -439,6 +439,22 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 handle_link_click('https://vdbaa.com/fullpage.php?section=General&pub=186424&ga=g', 'btn17', this.amount)
             },
         },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: function (e) {
+                // yllix 
+                handle_link_click('https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=', 'btn17', this.amount)
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: function (e) {
+                // yllix 
+                handle_link_click('https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=', 'btn17', this.amount)
+            },
+        },
     ]
 
     let buttonsObj2 = [
