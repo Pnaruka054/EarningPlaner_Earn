@@ -466,7 +466,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.01',
             handelButtonClick: function (e) {
                 // yllix 
-                handle_link_click('https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=', 'btn17', this.amount)
+                handle_link_click('https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=', 'btn18', this.amount)
             },
         },
         {
@@ -474,7 +474,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             amount: '0.01',
             handelButtonClick: function (e) {
                 // evadav 
-                handle_link_click('https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=', 'btn17', this.amount)
+                handle_link_click('https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=', 'btn19', this.amount)
             },
         },
     ]

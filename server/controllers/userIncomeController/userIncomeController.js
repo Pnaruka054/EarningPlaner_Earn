@@ -106,7 +106,6 @@ const user_adsView_income_patch = async (req, res) => {
                 userDB_id: userData._id,
                 monthName,
                 date: today,
-                self_earnings: "0",
             });
         }
         if (!userMonthlyRecord) {
@@ -116,25 +115,33 @@ const user_adsView_income_patch = async (req, res) => {
             });
         }
 
+        if (
+            userMonthlyRecord?.earningSources?.view_ads?.clickBalance !==
+            `${process.env.VIEW_ADS_CLICK_BALANCE}/${process.env.VIEW_ADS_CLICK_BALANCE}`
+        ) {
+            userMonthlyRecord.earningSources.view_ads.clickBalance =
+                `${(parseFloat(clickBalance.split('/')[0]) + 1).toString()}/${process.env.VIEW_ADS_CLICK_BALANCE}`;
+        }
+
         // Agar clickBalance exactly equal ho jaye to VIEW_ADS_CLICK_BALANCE/VIEW_ADS_CLICK_BALANCE
         let idTimer_recordsData = null
+        let idTimer_recordsData_status = null
         if (
             userMonthlyRecord?.earningSources?.view_ads?.clickBalance ===
             `${process.env.VIEW_ADS_CLICK_BALANCE}/${process.env.VIEW_ADS_CLICK_BALANCE}`
         ) {
-            idTimer_recordsData = await idTimer_records_module.findOne({ userDB_id: userData._id }).session(session);
+            idTimer_recordsData_status = idTimer_recordsData = await idTimer_records_module.findOne({ userDB_id: userData._id }).session(session);
 
             if (!idTimer_recordsData) {
-                idTimer_recordsData = new idTimer_records_module({ userDB_id: userData._id, ViewAdsexpireTImer: new Date(Date.now() + (24 * 60 * 60 * 1000)) });
-                await idTimer_recordsData.save({ session }); // Save the new record to the database
+                idTimer_recordsData = await new idTimer_records_module({ userDB_id: userData._id, ViewAdsexpireTImer: new Date(Date.now() + (24 * 60 * 60 * 1000)) }).save({ session }); // Save the new record to the database;
             }
+        }
+
+        if (idTimer_recordsData_status) {
             return res.status(500).json({
                 success: false,
-                msg: "Not Record"
+                msg: "Not Recorded",
             });
-        } else {
-            userMonthlyRecord.earningSources.view_ads.clickBalance =
-                `${(parseFloat(clickBalance.split('/')[0]) + 1).toString()}/${process.env.VIEW_ADS_CLICK_BALANCE}`;
         }
 
         // Initialize referred user variables
@@ -154,6 +161,13 @@ const user_adsView_income_patch = async (req, res) => {
                 dateRecords_referBy = await userDate_records_module
                     .findOne({ userDB_id: referredUser._id, date: today })
                     .session(session);
+                if (!dateRecords_referBy) {
+                    dateRecords_referBy = await new userDate_records_module({
+                        userDB_id: referredUser._id,
+                        monthName,
+                        date: today,
+                    })
+                }
             }
         }
 
