@@ -45,7 +45,6 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                 const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userDataGet`, {
                     withCredentials: true
                 });
-                console.log(response.data);
                 setUserData_state(response.data.userData);
                 setDropdownButtonValue_state(response.data.userData[1][0].monthName)
                 setAvailableBalance_forNavBar_state((parseFloat(response.data.userData[0].deposit_amount || 0) + parseFloat(response.data.userData[0].withdrawable_amount || 0)).toFixed(3));
@@ -102,7 +101,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                     <h1>Dashboard</h1>
                     <button ref={logOut_btnRef} onClick={() => setLogOut_btnClicked(true)} className='text-lg border border-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg text-red-500'>LogOut</button>
                 </div>
-                <div className="grid grid-cols-2 grid-rows-5 sm:grid-cols-3 sm:grid-rows-3 grid-flow-col gap-2 font-poppins mb-5 text-lg sm:text-xl text-center">
+                <div className="grid grid-cols-2 grid-rows-3 sm:grid-cols-3 sm:grid-rows-2 grid-flow-col gap-2 font-poppins mb-5 text-lg sm:text-xl text-center">
                     {/* <Link to="/member/watch-video" className="bg-blue-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Watch Video</div>
                         <div className='z-[1]'>₹0.2155</div>
@@ -133,21 +132,21 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                         <div className='z-[1]'>₹{userData_state.clickShortenLink || '0.0000'}</div>
                         <img src={ClickShortenLink_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </div>
-                    {/* bg-yellow-500 */} <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
+                    {/* bg-yellow-500 <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Play Quiz</div>
                         <div>Null</div>
                         <img src={Quiz} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
-                    </div>
-                    {/* bg-indigo-500 */} <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
+                    </div> */}
+                    {/* bg-indigo-500 <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Pool Trading</div>
                         <div>Null</div>
                         <img src={poolTrading} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
-                    </div>
-                    <Link to="/member/short-link" className="bg-pink-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
+                    </div> */}
+                    {/* <Link to="/member/short-link" className="bg-pink-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Short Link</div>
                         <div className='z-[1]'>₹{userData_state.shortLink || '0.0000'}</div>
                         <img src={ShortLink_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
-                    </Link>
+                    </Link> */}
                     <div className="bg-green-700 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Mining</div>
                         <div className='z-[1]'>₹{userData_state.mining || '0.0000'}</div>

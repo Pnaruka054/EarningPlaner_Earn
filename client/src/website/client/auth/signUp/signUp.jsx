@@ -59,6 +59,7 @@ const Signup = ({ referral_status }) => {
                 navigation('/login');
             }
         } catch (error) {
+            console.log(error);
             setSubmit_process_state(false);
             if (typeof (error.response.data.error_msg) === 'object') {
                 let error_array = [];

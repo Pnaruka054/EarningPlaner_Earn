@@ -58,6 +58,7 @@ let userSignUp = async (req, res) => {
                     error_msg: 'Your Registration Link is invalid'
                 })
             }
+
             await new referral_records_module({
                 userDB_id: referred_by_userData._id,
                 date: current_time_get(),
@@ -68,9 +69,8 @@ let userSignUp = async (req, res) => {
 
         const userSignUp_savedData = await new userSignUp_module(signUp_Data).save();
 
-
         await new userMonthly_records_module({
-            userDB_id: userData._id,
+            userDB_id: userSignUp_savedData._id,
             monthName,
         }).save()
 
@@ -292,7 +292,7 @@ const reset_password_form_post = async (req, res) => {
                 error_msg: errors.array()
             })
         }
-        
+
         if (!token || !password) {
             return res.status(400).json({ success: false, message: "Token and password are required!" });
         }
