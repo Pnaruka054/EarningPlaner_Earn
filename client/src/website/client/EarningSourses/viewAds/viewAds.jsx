@@ -13,7 +13,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [viewAds_firstTimeLoad_state, setViewAds_firstTimeLoad_state] = useState('');
     const [disabledButtons_state, setDisabledButtons_state] = useState([]);
     const [isExtension_state, setIsExtension_state] = useState(false);
-    const [currentBtnName_and_amount_For_extension_adoperator_state, setCurrentBtnName_and_amount_For_extension_adoperator_state] = useState([]);
+    const [currentBtnName_and_amount_For_extension_storedValue_state, setCurrentBtnName_and_amount_For_extension_storedValue_state] = useState([]);
     const [originalTitle] = useState(document.title);
     const [isUserActiveOnPage, setIsUserActiveOnPage] = useState(false);
     const [count_state, setCount_state] = useState(30);
@@ -127,7 +127,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const handle_link_click2 = (link, btnName, amount) => {
         setHandle_clickAds_btnClick_state(true);
         channel.postMessage("handle_clickAds_btnClick_state_true");
-        setCurrentBtnName_and_amount_For_extension_adoperator_state([btnName, amount]);
+        setCurrentBtnName_and_amount_For_extension_storedValue_state([btnName, amount]);
 
         const newTab = window.open("", '_blank');
         if (!newTab) {
@@ -242,14 +242,12 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
     useEffect(() => {
         const handleIsExtensionUpdated = (e) => {
-            const [btnName, amount] = currentBtnName_and_amount_For_extension_adoperator_state;
-            const extension_adoperator = localStorage.getItem('extension_adoperator');
-            const extension_bitcoTask = localStorage.getItem('extension_bitcoTask');
+            const [btnName, amount] = currentBtnName_and_amount_For_extension_storedValue_state;
+            const extension_storedValue = localStorage.getItem('extension_storedValue');
 
             if (viewAds_firstTimeLoad_state && viewAds_firstTimeLoad_state.clickBalance) {
-                if ((extension_adoperator === 'true' || extension_bitcoTask === 'true') && btnName && amount) {
-                    localStorage.removeItem('extension_adoperator');
-                    localStorage.removeItem('extension_bitcoTask');
+                if ((extension_storedValue === 'true') && btnName && amount) {
+                    localStorage.removeItem('extension_storedValue');
 
                     setHandle_clickAds_btnClick_state(false);
                     channel.postMessage("handle_clickAds_btnClick_state_false");
@@ -284,9 +282,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         .catch((error) => {
                             console.error("Error updating income:", error);
                         });
-                } else if (extension_adoperator === 'false' || extension_bitcoTask === 'false') {
-                    localStorage.removeItem('extension_adoperator');
-                    localStorage.removeItem('extension_bitcoTask');
+                } else if (extension_storedValue === 'false') {
+                    localStorage.removeItem('extension_storedValue');
                     setHandle_clickAds_btnClick_state(false);
                     channel.postMessage("handle_clickAds_btnClick_state_false");
                     Swal.fire({
@@ -312,188 +309,123 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
         window.addEventListener("isExtensionUpdated", handleIsExtensionUpdated);
         window.addEventListener("beforeunload", () => {
-            localStorage.removeItem('extension_adoperator');
-            localStorage.removeItem('extension_bitcoTask');
+            localStorage.removeItem('extension_storedValue');
         });
         return () => {
             window.removeEventListener("isExtensionUpdated", handleIsExtensionUpdated);
             window.removeEventListener("beforeunload", () => {
-                localStorage.removeItem('extension_adoperator');
-                localStorage.removeItem('extension_bitcoTask');
+                localStorage.removeItem('extension_storedValue');
             });
         };
-    }, [viewAds_firstTimeLoad_state, currentBtnName_and_amount_For_extension_adoperator_state]);
+    }, [viewAds_firstTimeLoad_state, currentBtnName_and_amount_For_extension_storedValue_state]);
 
     let buttonsObj = [
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // hilltopads
-                handle_link_click('https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO', 'btn1', this.amount)
-            },
+            url: 'https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // hilltopads
-                handle_link_click('https://grounded-flight.com/bj3.V/0/Pj3vpYvYbem/V/JvZyDk0M2/M_Dlgl4XNRjxgL2NLITJYdw/OaDRgg2XOwDScK', 'btn2', this.amount)
-            },
+            url: 'https://grounded-flight.com/bj3.V/0/Pj3vpYvYbem/V/JvZyDk0M2/M_Dlgl4XNRjxgL2NLITJYdw/OaDRgg2XOwDScK',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // hilltopads
-                handle_link_click('https://firmopposite.com/b/3/V.0kPA3/pavNbfmdVUJOZ-DC0A2MM/DPgI4sN/jqk/0fLMTsYHwfO/DSg/2/OqT/UT', 'btn3', this.amount)
-            },
+            url: 'https://firmopposite.com/b/3/V.0kPA3/pavNbfmdVUJOZ-DC0A2MM/DPgI4sN/jqk/0fLMTsYHwfO/DSg/2/OqT/UT',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // moneTagAds
-                handle_link_click('https://poawooptugroo.com/4/8238196', 'btn4', this.amount)
-            },
+            url: 'https://poawooptugroo.com/4/8238196',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // moneTagAds
-                handle_link_click('https://poawooptugroo.com/4/8238196', 'btn5', this.amount)
-            },
+            url: 'https://poawooptugroo.com/4/8238196',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // moneTagAds
-                handle_link_click('https://poawooptugroo.com/4/8868626', 'btn6', this.amount)
-            },
+            url: 'https://poawooptugroo.com/4/8868626',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // moneTagAds
-                handle_link_click('https://poawooptugroo.com/4/8585876', 'btn7', this.amount)
-            },
+            url: 'https://poawooptugroo.com/4/8585876',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // moneTagAds
-                handle_link_click('https://poawooptugroo.com/4/8886349', 'btn8', this.amount)
-            },
+            url: 'https://poawooptugroo.com/4/8886349',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // moneTagAds
-                handle_link_click('https://poawooptugroo.com/4/8886361', 'btn9', this.amount)
-            },
+            url: 'https://poawooptugroo.com/4/8886361',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // moneTagAds
-                handle_link_click('https://poawooptugroo.com/4/8886370', 'btn10', this.amount)
-            },
+            url: 'https://poawooptugroo.com/4/8886370',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // moneTagAds
-                handle_link_click('https://poawooptugroo.com/4/8886375', 'btn11', this.amount)
-            },
+            url: 'https://poawooptugroo.com/4/8886375',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // onClicka direct link
-                handle_link_click('https://adclickad.com/get/?spot_id=6058864&cat=24&subid=1993887599', 'btn12', this.amount)
-            },
+            url: 'https://adclickad.com/get/?spot_id=6058864&cat=24&subid=1993887599',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // clickadilla direct link
-                handle_link_click('https://pertlouv.com/iUyUq55zfnw=?', 'btn13', this.amount)
-            },
+            url: 'https://pertlouv.com/iUyUq55zfnw=?',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // adsterra Landings
-                handle_link_click('https://www.effectiveratecpm.com/q5jtvigi?key=6ce245352a591a2584abf7a89393e668', 'btn14', this.amount)
-            },
+            url: 'https://www.effectiveratecpm.com/q5jtvigi?key=6ce245352a591a2584abf7a89393e668',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // adsterra Landings
-                handle_link_click('https://www.effectiveratecpm.com/nnwrv5ztgk?key=115124ac92e9fd26b74eabc48c298b1b', 'btn15', this.amount)
-            },
+            url: 'https://www.effectiveratecpm.com/nnwrv5ztgk?key=115124ac92e9fd26b74eabc48c298b1b',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // adsterra Landings
-                handle_link_click('https://www.effectiveratecpm.com/fhp0is9j?key=20050f2539da92b9243bbc662b5c12bf', 'btn16', this.amount)
-            },
+            url: 'https://www.effectiveratecpm.com/fhp0is9j?key=20050f2539da92b9243bbc662b5c12bf',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // yllix 
-                handle_link_click('https://vdbaa.com/fullpage.php?section=General&pub=186424&ga=g', 'btn17', this.amount)
-            },
+            url: 'https://vdbaa.com/fullpage.php?section=General&pub=186424&ga=g',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // evadav 
-                handle_link_click('https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=', 'btn18', this.amount)
-            },
+            url: 'https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // evadav 
-                handle_link_click('https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=', 'btn19', this.amount)
-            },
+            url: 'https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // ritchads 
-                handle_link_click('https://11745.xml.4armn.com/direct-link?pubid=960147&siteid=[SITE_ID]', 'btn20', this.amount)
-            },
+            url: 'https://11745.xml.4armn.com/direct-link?pubid=960147&siteid=[SITE_ID]',
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
-            handelButtonClick: function (e) {
-                // advertica 
-                handle_link_click('https://125700.shop/0e0647c0aecf2f2d20a7/2a95ae2235/?placementName=default', 'btn21', this.amount)
-            },
+            url: 'https://125700.shop/0e0647c0aecf2f2d20a7/2a95ae2235/?placementName=default',
         },
-    ]
+    ];
 
     let buttonsObj2 = [
         {
@@ -695,7 +627,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                             {
                                 buttonsObj.map((values, index) => (
                                     <button key={index} disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1)) ? true : false} className={`${handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1)) ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
-                                        values.handelButtonClick(e)
+                                        handle_link_click(values.url, `btn${index+1}`, values.amount)
                                     }}><span>{values.buttonTitle} {index + 1}</span><span>₹{values.amount}</span></button>
                                 ))
                             }

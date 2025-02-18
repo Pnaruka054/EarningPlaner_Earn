@@ -20,6 +20,15 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
             setToggelMenu_state('reorder-three')
             menuIcon.classList.add("hidden")
         }
+
+        if (toggleMenu_icon.current) {
+            toggleMenu_icon.current.querySelectorAll('a').forEach(anchor => {
+                anchor.addEventListener('click', () => {
+                    setToggelMenu_state('reorder-three')
+                    menuIcon.classList.add("hidden");
+                });
+            });
+        }
     }
     useEffect(() => {
         const menuIcon = toggleMenu_icon.current;
@@ -40,17 +49,7 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
             window.removeEventListener("click", handleNavMenuClick);
             window.removeEventListener("click", handleSideMenuClick);
         };
-    }, []);
-
-    // useEffect(() => {
-    //     const socket = io(`${import.meta.env.VITE_SERVER_URL}`, {
-    //         withCredentials: true, 
-    //     });
-
-    //     socket.on('realTimeBalanceUpdate', (data) => {
-    //         setNavBarBalance_state(data)
-    //     });
-    // }, []);
+    }, [toggleMenu_icon.current]);
 
     if (show) {
         return (
