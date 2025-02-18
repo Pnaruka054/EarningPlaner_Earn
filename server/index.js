@@ -11,7 +11,7 @@ const middleware = require('./middlewares/jwt_to_userData_middleware')
 const userRouter = require('./routes/user_router');
 const userWithdraw = require('./routes/userWIthdraw_router');
 const userIncomeRoute = require('./routes/userIncome_router');
-const { cronForDaily_MonthlyData_Update, cronForMonthly_DataCreateFor_EveryUser } = require('./helper/cronForDailyDataUpdate')
+const { cronForDaily_MonthlyData_Update } = require('./helper/cronJobs')
 
 const io = socketIo(server, {
     cors: {

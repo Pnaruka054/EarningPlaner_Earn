@@ -1,16 +1,14 @@
 const cron = require('node-cron');
 const userSignUp_module = require('../model/userSignUp/userSignUp_module')
 const { userMonthly_records_module } = require('../model/dashboard/userMonthly_modules')
+const getFormattedMonth = require('./getFormattedMonth')
 
 
 const cronForDaily_MonthlyData_Update = async () => {
     cron.schedule('0 0 * * *', async () => {
         try {
             // Get current month and year (e.g., "January 2024")
-            const now = new Date();
-            const currentMonthName = now.toLocaleString('default', { month: 'long' });
-            const currentYear = now.getFullYear();
-            const monthName = `${currentMonthName} ${currentYear}`;
+            const monthName = getFormattedMonth()
 
             // Fetch all monthly data for the current month
             const AllMonthlyData = await userMonthly_records_module.find({ monthName });
@@ -42,7 +40,7 @@ const cronForDaily_MonthlyData_Update = async () => {
                     console.log(`Skipping update for data with missing earningSources: ${data._id}`);
                 }
             });
-
+            console.log("done");
             // Wait for all update operations to complete
             await Promise.all(updatePromises);
             console.log("successfully updated daily monthlydata");
