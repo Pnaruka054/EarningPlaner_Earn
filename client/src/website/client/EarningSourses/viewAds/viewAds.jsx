@@ -417,15 +417,15 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
             handelButtonClick: function (e) {
-                // onClicka Landings
-                handle_link_click('https://loupush.com/9lMCqrCwt70=?', 'btn12', this.amount)
+                // onClicka direct link
+                handle_link_click('https://adclickad.com/get/?spot_id=6058864&cat=24&subid=1993887599', 'btn12', this.amount)
             },
         },
         {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
             handelButtonClick: function (e) {
-                // clickadilla Landings
+                // clickadilla direct link
                 handle_link_click('https://pertlouv.com/iUyUq55zfnw=?', 'btn13', this.amount)
             },
         },
@@ -465,7 +465,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             buttonTitle: 'Click On Ads',
             amount: '0.01',
             handelButtonClick: function (e) {
-                // yllix 
+                // evadav 
                 handle_link_click('https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=', 'btn18', this.amount)
             },
         },
@@ -475,6 +475,22 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             handelButtonClick: function (e) {
                 // evadav 
                 handle_link_click('https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=', 'btn19', this.amount)
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: function (e) {
+                // ritchads 
+                handle_link_click('https://11745.xml.4armn.com/direct-link?pubid=960147&siteid=[SITE_ID]', 'btn20', this.amount)
+            },
+        },
+        {
+            buttonTitle: 'Click On Ads',
+            amount: '0.01',
+            handelButtonClick: function (e) {
+                // advertica 
+                handle_link_click('https://125700.shop/0e0647c0aecf2f2d20a7/2a95ae2235/?placementName=default', 'btn21', this.amount)
             },
         },
     ]
