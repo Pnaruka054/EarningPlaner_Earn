@@ -5,6 +5,8 @@ import Swal from 'sweetalert2'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CountdownTimer from '../../components/countDownTimer/countDownTimer';
+import success_sound from '../../../../assets/success_earn.mp3'
+import not_success_sound from '../../../../assets/not_success_earn.mp3'
 
 const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [handle_clickAds_btnClick_state, setHandle_clickAds_btnClick_state] = useState(false);
@@ -16,9 +18,20 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [currentBtnName_and_amount_For_extension_storedValue_state, setCurrentBtnName_and_amount_For_extension_storedValue_state] = useState([]);
     const [originalTitle] = useState(document.title);
     const [isUserActiveOnPage, setIsUserActiveOnPage] = useState(false);
-    const [count_state, setCount_state] = useState(30);
-    const [count_handle_state, setCount_handle_state] = useState(false);
+    // const [count_state, setCount_state] = useState(30);
+    // const [count_handle_state, setCount_handle_state] = useState(false);
     const channel = new BroadcastChannel("viewAds_channel");
+
+    const playSound = (track) => {
+        if(track){
+            const audio = new Audio(success_sound); 
+            audio.play();
+        }else{
+            const audio = new Audio(not_success_sound); 
+            audio.play();
+        }
+    };
+    
 
     useEffect(() => {
         if (typeof document.hidden !== "undefined" && handle_clickAds_btnClick_state) {
@@ -81,22 +94,22 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         };
     }, []);
 
-    useEffect(() => {
-        let timerId;
-        if (count_handle_state) {
-            timerId = setInterval(() => {
-                setCount_state((prev) => {
-                    const newCount = prev - 1;
-                    document.title = newCount; // Update document title with the latest count
-                    return newCount;
-                });
-            }, 1000);
-        } else if (!count_handle_state) {
-            setCount_state(30)
-            clearInterval(timerId);
-        }
-        return () => clearInterval(timerId);
-    }, [count_handle_state]);
+    // useEffect(() => {
+    //     let timerId;
+    //     if (count_handle_state) {
+    //         timerId = setInterval(() => {
+    //             setCount_state((prev) => {
+    //                 const newCount = prev - 1;
+    //                 document.title = newCount; // Update document title with the latest count
+    //                 return newCount;
+    //             });
+    //         }, 1000);
+    //     } else if (!count_handle_state) {
+    //         setCount_state(30)
+    //         clearInterval(timerId);
+    //     }
+    //     return () => clearInterval(timerId);
+    // }, [count_handle_state]);
 
     let Instructions = [
         'Each user gets 5 Ads clicks to earn money per IP address.',
@@ -141,8 +154,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         }
 
         window.open(`/waitRedirecting1/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
-
-        setCount_handle_state(true)
     };
 
     useEffect(() => {
@@ -178,6 +189,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                     icon: "success",
                                 });
                                 document.title = "✅ success!";
+                                playSound(true)
                                 setTimeout(() => document.title = originalTitle, 4000);
                             })
                             .catch((error) => console.error("Error updating income:", error));
@@ -192,6 +204,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         text: "Something went wrong!",
                     });
                     document.title = "❌ failed";
+                    playSound(false)
                     setTimeout(() => document.title = originalTitle, 2000);
                 }
             } else {
@@ -207,6 +220,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     text: "Something went wrong!",
                 });
                 document.title = "❌ failed";
+                playSound(false)
                 setTimeout(() => document.title = originalTitle, 2000);
             }
 
@@ -271,8 +285,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                 title: "Success!",
                                 icon: "success",
                             });
-                            setCount_handle_state(false)
                             document.title = "✅ success!"
+                            playSound(true)
                             setTimeout(() => {
                                 document.title = originalTitle
                             }, 4000);
@@ -289,8 +303,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         title: "Success!",
                         text: "Something went wrong!",
                     });
-                    setCount_handle_state(false)
                     document.title = "❌ failed"
+                    playSound(false)
                     setTimeout(() => {
                         document.title = originalTitle
                     }, 4000);

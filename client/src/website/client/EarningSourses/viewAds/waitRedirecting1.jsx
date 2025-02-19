@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
-const randomNumber = Math.floor(Math.random() * 7) + 1;
+const randomNumber = Math.floor(Math.random() * 3) + 1;
 const WaitRedirecting = () => {
     const [redirectLink, setRedirectLink] = useState('');
-    const [waitingTimer_state, setWaitingTimer_state] = useState(10);
+    const [waitingTimer_state, setWaitingTimer_state] = useState(5);
     const [isRedirecting, setIsRedirecting] = useState(false);
 
     useEffect(() => {
