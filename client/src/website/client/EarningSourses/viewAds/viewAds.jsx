@@ -125,6 +125,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     };
 
     const handle_link_click2 = (link, btnName, amount) => {
+        window.postMessage({ action: "startExtension", data: true }, "*");
         setHandle_clickAds_btnClick_state(true);
         channel.postMessage("handle_clickAds_btnClick_state_true");
         setCurrentBtnName_and_amount_For_extension_storedValue_state([btnName, amount]);
@@ -139,11 +140,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             return alert('please install extension');
         }
 
-        if (link.includes('https://bitcotasks.com')) {
-            window.open(`/waitRedirecting1/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
-        } else {
-            window.open(link, '_blank');
-        }
+        window.open(`/waitRedirecting1/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
+
         setCount_handle_state(true)
     };
 
@@ -244,7 +242,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         const handleIsExtensionUpdated = (e) => {
             const [btnName, amount] = currentBtnName_and_amount_For_extension_storedValue_state;
             const extension_storedValue = localStorage.getItem('extension_storedValue');
-
+            console.log(extension_storedValue);
             if (viewAds_firstTimeLoad_state && viewAds_firstTimeLoad_state.clickBalance) {
                 if ((extension_storedValue === 'true') && btnName && amount) {
                     localStorage.removeItem('extension_storedValue');
@@ -627,7 +625,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                             {
                                 buttonsObj.map((values, index) => (
                                     <button key={index} disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1)) ? true : false} className={`${handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1)) ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
-                                        handle_link_click(values.url, `btn${index+1}`, values.amount)
+                                        handle_link_click(values.url, `btn${index + 1}`, values.amount)
                                     }}><span>{values.buttonTitle} {index + 1}</span><span>₹{values.amount}</span></button>
                                 ))
                             }

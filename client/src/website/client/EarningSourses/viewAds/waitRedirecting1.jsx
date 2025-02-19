@@ -23,6 +23,7 @@ const WaitRedirecting = () => {
             setIsRedirecting(true);
             sessionStorage.setItem('isUserClosed', 'true')
             clearInterval(interval);
+            window.postMessage({ action: "takeTab", data: true }, "*");
             window.location.href = redirectLink.split('||')[0];
         }
         let isUserClosed = sessionStorage.getItem('isUserClosed')
