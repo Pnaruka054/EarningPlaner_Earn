@@ -7,6 +7,7 @@ const referral_records_module = require('../../model/referralRecords/referral_re
 const idTimer_records_module = require('../../model/id_timer/id_timer_records_module')
 const getFormattedDate = require('../../helper/getFormattedDate')
 const getFormattedMonth = require("../../helper/getFormattedMonth")
+const shortedLinksData_module = require('../../model/shortLinks/shortedLinksData_module')
 
 const user_adsView_home_get = async (req, res) => {
     const session = await mongoose.startSession(); // Start a session
@@ -200,7 +201,6 @@ const user_adsView_income_patch = async (req, res) => {
         if (ipAddressRecord.ipAddress === userIp) {
             // Update dynamic button state
             ipAddressRecord.buttonNames = disabledButtons_state;
-            ipAddressRecord.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
             // Update monthly income and click balance for view_ads
             const currentIncome = parseFloat(userMonthlyRecord.earningSources.view_ads.income || 0);
@@ -220,7 +220,6 @@ const user_adsView_income_patch = async (req, res) => {
                 userDB_id: userData._id,
                 buttonNames: disabledButtons_state,
                 ipAddress: userIp,
-                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
             });
         }
 
@@ -293,7 +292,212 @@ const user_adsView_income_patch = async (req, res) => {
 
 };
 
+const user_shortlink_data_get = async (req, res) => {
+    try {
+        // User data
+        const userData = req.user;
+
+        const userIp = req.ip;
+
+        // Fetch shorted links
+        let shortedLinksData = await shortedLinksData_module.find();
+
+        // Fetch user's click records
+        let ipAddress_records = await ipAddress_records_module.find({ userDB_id: userData._id, ipAddress: userIp });
+
+        // Get all clicked URLs
+        const clickedUrls = new Set(ipAddress_records.map(record => record.shortUrl));
+
+        // Mark matched shorted links as isDisable: true
+        shortedLinksData = shortedLinksData.map(link => ({
+            ...link.toObject(),
+            isDisable: (clickedUrls.has(link.startUrl) && clickedUrls.status) // True if match found
+        }));
+
+        // Prepare response data
+        let resData = {
+            userAvailableBalance: (parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)).toFixed(3),
+            shortedLinksData
+        };
+
+        // Send response
+        res.json(resData);
+    } catch (error) {
+        console.error("Error fetching user shortlink data:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+const user_shortlink_firstPage_data_patch = async (req, res) => {
+    try {
+        const userData = req.user;
+        const userIp = req.ip;
+        const { startUrl } = req.body; // frontend se startUrl receive karega
+
+        if (!userData || !userData._id || !startUrl) {
+            return res.status(400).json({ message: "Invalid data received" });
+        }
+
+        // Pehle check karega ki record exist karta hai ya nahi
+        const existingRecord = await ipAddress_records_module.findOne({
+            userDB_id: userData._id,
+            ipAddress: userIp
+        });
+
+        if (existingRecord) {
+            if (existingRecord.status === true && existingRecord.processCount === 1) {
+                return res.status(500).json({ message: "Record already processed, no update required" });
+            }
+
+            // Agar status false hai ya processCount > 1 hai, to processCount badhakar update karo
+            existingRecord.processCount = 1;
+            existingRecord.status = false; // Status ko false set karna
+            await existingRecord.save();
+
+            return res.status(200).json({ message: "Record updated successfully", data: existingRecord });
+        }
+
+        // Agar record na mile, to naya record create karo
+        const newRecord = new ipAddress_records_module({
+            userDB_id: userData._id,
+            shortUrl: startUrl,
+            status: false, // Initially false
+            processCount: 1, // Start process count from 1
+            ipAddress: userIp
+        });
+
+        await newRecord.save();
+
+        res.status(200).json({ message: "New record added successfully", data: newRecord });
+
+    } catch (error) {
+        console.error("Error in user_shortlink_firstPage_data_patch:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+const user_shortlink_lastPage_data_patch = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        let { referrerUrl } = req.body;
+        const userData = req.user;
+        const userIp = req.ip;
+
+        if (!userData || !userData._id || !referrerUrl) {
+            return res.status(400).json({ message: "Invalid data received" });
+        }
+
+        // 1️⃣ `shortedLinksData_module` se `referrerUrl` ka document find karo
+        const shortedLink = await shortedLinksData_module.findOne({ endUrl: referrerUrl }).session(session);
+        if (!shortedLink) {
+            return res.status(404).json({ message: "Shortened link not found" });
+        }
+        const startUrl = shortedLink.startUrl;
+        const amount = parseFloat(shortedLink.amount) || 0;
+
+        // 2️⃣ `ipAddress_records_module` se user record find karo
+        const userRecord = await ipAddress_records_module.findOne({
+            userDB_id: userData._id,
+            ipAddress: userIp,
+            shortUrl: startUrl
+        }).session(session);
+
+        if (!userRecord) {
+            return res.status(404).json({ message: "User record not found" });
+        }
+
+        // `processCount` ko 2 karo aur `status` ko `true`
+        userRecord.processCount = 2;
+        userRecord.status = true;
+        await userRecord.save({ session });
+
+        // 3️⃣ `userData.withdrawable_amount` me `amount` add karo
+        userData.withdrawable_amount = (parseFloat(userData.withdrawable_amount) || 0) + amount;
+        await userData.save({ session });
+
+        // 4️⃣ Agar `refer_by` property available hai to referral earning process karo
+        if (userData.refer_by) {
+            const referrer = await userSignUp_module.findOne({ userName: userData.refer_by }).session(session);
+            if (referrer) {
+                const referralUserId = referrer._id;
+
+                // `referral_records_module` me referral income update karo
+                const referralRecord = await referral_records_module.findOne({ userDB_id: referralUserId, userName: userData.userName }).session(session);
+                if (referralRecord) {
+                    referralRecord.income += parseFloat(process.env.REFERRAL_RATE) * amount;
+                    await referralRecord.save({ session });
+                }
+
+                // 5️⃣ `userDate_records_module` me referral earnings update karo
+                const formattedDate = getFormattedDate();
+                const userDateRecord = await userDate_records_module.findOne({ userDB_id: referralUserId, date: formattedDate }).session(session);
+                if (userDateRecord) {
+                    userDateRecord.referral_earnings += parseFloat(process.env.REFERRAL_RATE) * amount;
+                    await userDateRecord.save({ session });
+                } else {
+                    await new userDate_records_module({
+                        userDB_id: referralUserId,
+                        date: formattedDate,
+                        referral_earnings: parseFloat(process.env.REFERRAL_RATE) * amount
+                    }).save({ session });
+                }
+            }
+        }
+
+        // 6️⃣ `userDate_records_module` me self earnings update karo
+        let userDateRecordSelf = await userDate_records_module.findOne({
+            userDB_id: userData._id,
+            date: getFormattedDate()
+        }).session(session);
+
+        if (userDateRecordSelf) {
+            userDateRecordSelf.self_earnings = (parseFloat(userDateRecordSelf.self_earnings) + parseFloat(amount)).toString();
+            await userDateRecordSelf.save({ session });
+        } else {
+            await userDate_records_module.create([{
+                userDB_id: userData._id,
+                date: getFormattedDate(),
+                self_earnings: amount.toString()
+            }], { session });
+        }
+
+
+        // 7️⃣ `userMonthly_records_module` me earnings update karo
+        const formattedMonth = getFormattedMonth();
+        const userMonthlyRecord = await userMonthly_records_module.findOne({ userDB_id: userData._id, month: formattedMonth }).session(session);
+        if (userMonthlyRecord) {
+            userMonthlyRecord.earningSources.click_short_link.income += amount;
+            await userMonthlyRecord.save({ session });
+        } else {
+            await new userMonthly_records_module({
+                userDB_id: userData._id,
+                month: formattedMonth,
+                earningSources: {
+                    click_short_link: { income: amount }
+                }
+            }).save({ session });
+        }
+
+        // Transaction commit karo
+        await session.commitTransaction();
+        session.endSession();
+
+        res.status(200).json({ message: "Data updated successfully!" });
+
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        console.error("Error in user_shortlink_lastPage_data_patch:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
 module.exports = {
     user_adsView_home_get,
-    user_adsView_income_patch
+    user_adsView_income_patch,
+    user_shortlink_data_get,
+    user_shortlink_firstPage_data_patch,
+    user_shortlink_lastPage_data_patch
 }

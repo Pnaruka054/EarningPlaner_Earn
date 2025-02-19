@@ -3,6 +3,10 @@ const route = express()
 const userIncomeController = require('../controllers/userIncomeController/userIncomeController')
 
 route.get('/user_adsView_home_get', userIncomeController.user_adsView_home_get)
+route.get('/user_shortlink_data_get', userIncomeController.user_shortlink_data_get)
+
 route.patch('/user_adsView_income_patch', userIncomeController.user_adsView_income_patch)
+route.patch('/user_shortlink_firstPage_data_patch', userIncomeController.user_shortlink_firstPage_data_patch)
+route.patch('/user_shortlink_lastPage_data_patch', userIncomeController.user_shortlink_lastPage_data_patch)
 
 module.exports = route
