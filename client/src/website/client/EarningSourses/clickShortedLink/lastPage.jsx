@@ -7,7 +7,7 @@ const LastPage = () => {
     const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
-        const referrer = window.parent.location.href; // User kaha se aaya hai?
+        const referrer = document.referrer; // User kaha se aaya hai?
         console.log(referrer);
         if (!referrer) {
             // Agar direct aaya hai to error message show karo
