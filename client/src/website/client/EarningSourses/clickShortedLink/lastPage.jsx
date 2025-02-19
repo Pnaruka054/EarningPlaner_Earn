@@ -8,13 +8,13 @@ const LastPage = () => {
 
     useEffect(() => {
         const referrer = window.parent.location.href; // User kaha se aaya hai?
-        
+        console.log(referrer);
         if (!referrer) {
             // Agar direct aaya hai to error message show karo
             setErrorMessage("Error: You cannot access this page directly!");
         } else {
             // Agar kisi URL se aaya hai, to uss URL ko server par patch request bhejo
-            axios.patch(`${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_shortlink_lastPage_data_patch`, { referrerUrl: referrer })
+            axios.patch(`${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_shortlink_lastPage_data_patch`, { referrerUrl: referrer }, { withCredentials: true })
                 .then(() => {
                     // Browser history remove karke back button ko disable karo
                     window.history.pushState(null, null, window.location.href);
