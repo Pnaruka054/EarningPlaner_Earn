@@ -3,13 +3,13 @@ const ipAddress_records_module = require('../../model/IPAddress/useripAddresses_
 const { userMonthly_records_module, saveUserMonthlyData } = require("../../model/dashboard/userMonthly_modules");
 const userDate_records_module = require("../../model/dashboard/userDate_modules");
 const userSignUp_module = require('../../model/userSignUp/userSignUp_module')
-const referral_records_module = require('../../model/referralRecords/referral_records_module')
 const idTimer_records_module = require('../../model/id_timer/id_timer_records_module')
 const getFormattedDate = require('../../helper/getFormattedDate')
 const getFormattedMonth = require("../../helper/getFormattedMonth")
 const shortedLinksData_module = require('../../model/shortLinks/shortedLinksData_module')
 const generateRandomString = require("../../helper/generateRandomString")
 const axios = require('axios')
+const { userReferByIncome_handle, userIncome_handle } = require('../../helper/usersEarningsUpdate_handle')
 
 const user_adsView_home_get = async (req, res) => {
     const session = await mongoose.startSession(); // Start a session
@@ -86,37 +86,17 @@ const user_adsView_income_patch = async (req, res) => {
     try {
         // Start transaction
         session.startTransaction();
-        const monthName = getFormattedMonth()
         // Destructure request body and get user IP
         const { disabledButtons_state, clickBalance, btnClickEarn } = req.body;
         const userIp = req.ip;
-        const referralIncrement = parseFloat(btnClickEarn) * parseFloat(process.env.REFERRAL_RATE);
         // Get user data (Assuming req.user is a valid Mongoose document)
         const userData = req.user;
 
-        // Get today's formatted date (Assuming getFormattedDate() is defined elsewhere)
-        const today = getFormattedDate();
-
-        // Fetch user's daily record
-        let dateRecords = await userDate_records_module
-            .findOne({ userDB_id: userData._id, date: today })
-            .session(session);
-        let userMonthlyRecord = await userMonthly_records_module
-            .findOne({ userDB_id: userData._id, monthName })
-            .session(session);
-        if (!dateRecords) {
-            dateRecords = new userDate_records_module({
-                userDB_id: userData._id,
-                monthName,
-                date: today,
-            });
+        let user_incomeUpdate = await userIncome_handle(session, userData, btnClickEarn)
+        if (!user_incomeUpdate.success) {
+            throw new Error(user_incomeUpdate.error);
         }
-        if (!userMonthlyRecord) {
-            userMonthlyRecord = new userMonthly_records_module({
-                userDB_id: userData._id,
-                monthName,
-            });
-        }
+        const { userMonthlyRecord } = user_incomeUpdate.values
 
         if (
             userMonthlyRecord?.earningSources?.view_ads?.clickBalance !==
@@ -147,52 +127,10 @@ const user_adsView_income_patch = async (req, res) => {
             });
         }
 
-        // Initialize referred user variables
-        let referredUser = null;
-        let referralRecord = null;
-        let dateRecords_referBy = null;
-
-        // If user was referred, fetch referred user, referral record, and their daily record
-        if (userData.refer_by) {
-            referredUser = await userSignUp_module
-                .findOne({ userName: userData.refer_by })
-                .session(session);
-            if (referredUser) {
-                referralRecord = await referral_records_module
-                    .findOne({ userDB_id: referredUser._id, userName: userData.userName })
-                    .session(session);
-                dateRecords_referBy = await userDate_records_module
-                    .findOne({ userDB_id: referredUser._id, date: today })
-                    .session(session);
-                if (!dateRecords_referBy) {
-                    dateRecords_referBy = await new userDate_records_module({
-                        userDB_id: referredUser._id,
-                        monthName,
-                        date: today,
-                    })
-                }
-            }
-        }
-
-        // Update daily earnings if referral exists
-        if (dateRecords) {
-            dateRecords.self_earnings = (
-                parseFloat(dateRecords.self_earnings || 0) + parseFloat(btnClickEarn)
-            ).toFixed(3);
-
-            dateRecords.Total_earnings = (
-                parseFloat(dateRecords.Total_earnings || 0) + parseFloat(btnClickEarn)
-            ).toFixed(3);
-        }
-
-        if (dateRecords_referBy) {
-            dateRecords_referBy.referral_earnings = (
-                parseFloat(dateRecords_referBy.referral_earnings || 0) + referralIncrement
-            ).toFixed(3);
-
-            dateRecords_referBy.Total_earnings = (
-                parseFloat(dateRecords_referBy.Total_earnings || 0) + referralIncrement
-            ).toFixed(3);
+        // update user referral income
+        let refer_by_incomeupdate = await userReferByIncome_handle(session, userData, btnClickEarn)
+        if (!refer_by_incomeupdate.success) {
+            throw new Error(refer_by_incomeupdate.error);
         }
 
         const ipAddressRecord = await ipAddress_records_module
@@ -203,20 +141,6 @@ const user_adsView_income_patch = async (req, res) => {
         if (ipAddressRecord.ipAddress === userIp) {
             // Update dynamic button state
             ipAddressRecord.buttonNames = disabledButtons_state;
-
-            // Update monthly income and click balance for view_ads
-            const currentIncome = parseFloat(userMonthlyRecord.earningSources.view_ads.income || 0);
-            userMonthlyRecord.earningSources.view_ads.income = (
-                currentIncome + parseFloat(btnClickEarn)
-            ).toFixed(3);
-            userMonthlyRecord.earningSources.view_ads.clickBalance =
-                `${(parseFloat(clickBalance.split('/')[0]) + 1).toString()}/${process.env.VIEW_ADS_CLICK_BALANCE}`;
-
-            // Update user's withdrawable amount
-            const currentWithdrawable = parseFloat(userData.withdrawable_amount || 0);
-            userData.withdrawable_amount = (
-                currentWithdrawable + parseFloat(btnClickEarn)
-            ).toFixed(3);
         } else if (ipAddressRecord.ipAddress !== userIp) {
             ipAddressRecord = new ipAddress_records_module({
                 userDB_id: userData._id,
@@ -225,33 +149,23 @@ const user_adsView_income_patch = async (req, res) => {
             });
         }
 
+        // Update monthly income and click balance for view_ads
+        const currentIncome = parseFloat(userMonthlyRecord.earningSources.view_ads.income || 0);
+        userMonthlyRecord.earningSources.view_ads.income = (
+            currentIncome + parseFloat(btnClickEarn)
+        ).toFixed(3);
+        userMonthlyRecord.earningSources.view_ads.clickBalance =
+            `${(parseFloat(clickBalance.split('/')[0]) + 1).toString()}/${process.env.VIEW_ADS_CLICK_BALANCE}`;
+
+
         // Save updated documents concurrently
         const saveOperations = [
             userMonthlyRecord.save({ session }),
             ipAddressRecord.save({ session }),
             userData.save({ session })
         ];
-        if (dateRecords) saveOperations.push(dateRecords.save({ session }));
-        if (dateRecords_referBy) saveOperations.push(dateRecords_referBy.save({ session }));
 
         await Promise.all(saveOperations);
-
-        // Update referral data only if referred user and referral record exist
-        if (referredUser && referralRecord) {
-
-            // Update referred user's withdrawable amount
-            const currentRefWithdrawable = parseFloat(referredUser.withdrawable_amount || 0);
-            referredUser.withdrawable_amount = (currentRefWithdrawable + referralIncrement).toFixed(3);
-
-            // Update referral record income
-            const currentReferralIncome = parseFloat(referralRecord.income || 0);
-            referralRecord.income = (currentReferralIncome + referralIncrement).toFixed(3);
-
-            await Promise.all([
-                referralRecord.save({ session }),
-                referredUser.save({ session })
-            ]);
-        }
 
         // Commit transaction and end session
         await session.commitTransaction();
@@ -414,92 +328,68 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
             return res.status(400).json({ message: "Invalid data received" });
         }
 
-        const userRecord = await ipAddress_records_module.findOne({
+        const ipAddressRecord = await ipAddress_records_module.findOne({
             userDB_id: userData._id,
-            // ipAddress: userIp,
+            ipAddress: userIp,
             uniqueToken
         }).session(session);
 
-        if (!userRecord) {
+        if (!ipAddressRecord) {
             return res.status(404).json({ message: "User record not found" });
         }
 
         // ✅ Agar processCount already 2 hai, toh process skip karo aur error bhejo
-        if (userRecord.processCount === 2) {
+        if (!ipAddressRecord.processCount || ipAddressRecord.status || ipAddressRecord.processCount === 2 || ipAddressRecord.status) {
             await session.abortTransaction();
             session.endSession();
             return res.status(400).json({ message: "Already processed", amount: 0 });
         }
 
-        userRecord.processCount = 2;
-        userRecord.status = true;
-        await userRecord.save({ session });
+        ipAddressRecord.processCount = 2;
+        ipAddressRecord.status = true;
 
-        const shortedLink = await shortedLinksData_module.findOne({ shortnerDomain: userRecord.shortnerDomain }).session(session);
+        const shortedLink = await shortedLinksData_module.findOne({ shortnerDomain: ipAddressRecord.shortnerDomain }).session(session);
         if (!shortedLink) {
             return res.status(404).json({ message: "Shortened link not found" });
         }
         const amount = parseFloat(shortedLink.amount) || 0;
 
-        userData.withdrawable_amount = (parseFloat(userData.withdrawable_amount) || 0) + amount;
-        await userData.save({ session });
+        let user_incomeUpdate = await userIncome_handle(session, userData, amount)
+        if (!user_incomeUpdate.success) {
+            throw new Error(user_incomeUpdate.error);
+        }
+        const { userMonthlyRecord } = user_incomeUpdate.values
 
-        if (userData.refer_by) {
-            const referrer = await userSignUp_module.findOne({ userName: userData.refer_by }).session(session);
-            if (referrer) {
-                const referralUserId = referrer._id;
-
-                const referralRecord = await referral_records_module.findOne({ userDB_id: referralUserId, userName: userData.userName }).session(session);
-                if (referralRecord) {
-                    referralRecord.income += parseFloat(process.env.REFERRAL_RATE) * amount;
-                    await referralRecord.save({ session });
-                }
-
-                const formattedDate = getFormattedDate();
-                const userDateRecord = await userDate_records_module.findOne({ userDB_id: referralUserId, date: formattedDate }).session(session);
-                if (userDateRecord) {
-                    userDateRecord.referral_earnings += parseFloat(process.env.REFERRAL_RATE) * amount;
-                    await userDateRecord.save({ session });
-                } else {
-                    await new userDate_records_module({
-                        userDB_id: referralUserId,
-                        date: formattedDate,
-                        referral_earnings: parseFloat(process.env.REFERRAL_RATE) * amount
-                    }).save({ session });
-                }
-            }
+        let refer_by_incomeupdate = await userReferByIncome_handle(session, userData, amount)
+        if (!refer_by_incomeupdate.success) {
+            throw new Error(refer_by_incomeupdate.error);
         }
 
-        let userDateRecordSelf = await userDate_records_module.findOne({
-            userDB_id: userData._id,
-            date: getFormattedDate()
-        }).session(session);
-
-        if (userDateRecordSelf) {
-            userDateRecordSelf.self_earnings = (parseFloat(userDateRecordSelf.self_earnings) + parseFloat(amount)).toString();
-            await userDateRecordSelf.save({ session });
-        } else {
-            await userDate_records_module.create([{
-                userDB_id: userData._id,
-                date: getFormattedDate(),
-                self_earnings: amount.toString()
-            }], { session });
-        }
-
-        const formattedMonth = getFormattedMonth();
-        const userMonthlyRecord = await userMonthly_records_module.findOne({ userDB_id: userData._id, month: formattedMonth }).session(session);
         if (userMonthlyRecord) {
-            userMonthlyRecord.earningSources.click_short_link.income += amount;
+            // Agar `click_short_link` undefined hai toh initialize karo
+            if (!userMonthlyRecord.earningSources) {
+                userMonthlyRecord.earningSources = {};
+            }
+            if (!userMonthlyRecord.earningSources.click_short_link) {
+                userMonthlyRecord.earningSources.click_short_link = { income: 0 };
+            }
+
+            // ✅ Safe update
+            const currentIncome = parseFloat(userMonthlyRecord.earningSources.click_short_link.income || 0);
+            userMonthlyRecord.earningSources.click_short_link.income = (currentIncome + parseFloat(amount)).toFixed(3);
+
             await userMonthlyRecord.save({ session });
-        } else {
-            await new userMonthly_records_module({
-                userDB_id: userData._id,
-                monthName: formattedMonth,
-                earningSources: {
-                    click_short_link: { income: amount }
-                }
-            }).save({ session });
         }
+
+
+        // Save updated documents concurrently
+        const saveOperations = [
+            userMonthlyRecord.save({ session }),
+            ipAddressRecord.save({ session }),
+            userData.save({ session })
+        ];
+
+        await Promise.all(saveOperations);
 
         // ✅ Transaction commit karo
         await session.commitTransaction();
