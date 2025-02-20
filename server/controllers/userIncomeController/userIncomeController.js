@@ -298,23 +298,26 @@ const user_shortlink_data_get = async (req, res) => {
     try {
         // User data
         const userData = req.user;
-
         const userIp = req.ip;
 
         // Fetch shorted links
         let shortedLinksData = await shortedLinksData_module.find();
 
         // Fetch user's click records
-        let ipAddress_records = await ipAddress_records_module.findOne({ ipAddress: userIp });
+        let ipAddressRecords = await ipAddress_records_module.find({ ipAddress: userIp });
 
         // Get all clicked URLs
-        const clickedUrls = new Set(ipAddress_records?.shortnerDomain || '');
+        const clickedUrls = new Set(ipAddressRecords.map(record => record.shortnerDomain));
 
         // Mark matched shorted links as isDisable: true
-        shortedLinksData = shortedLinksData.map(link => ({
-            ...link.toObject(),
-            isDisable: (clickedUrls.has(link.shortnerDomain) && clickedUrls.status) // True if match found
-        }));
+        shortedLinksData = shortedLinksData.map(link => {
+            const isClicked = clickedUrls.has(link.shortnerDomain);
+            const isDisable = isClicked && ipAddressRecords.some(record => record.status === true);
+            return {
+                ...link.toObject(),
+                isDisable
+            };
+        });
 
         // Prepare response data
         let resData = {
@@ -341,7 +344,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
         }
 
         // Check if record already exists
-        const existingRecord = await ipAddress_records_module.findOne({ ipAddress: userIp });
+        const existingRecord = await ipAddress_records_module.findOne({ ipAddress: userIp, shortnerDomain });
 
         if (existingRecord) {
             if (existingRecord.status === true || existingRecord.processCount === 1) {
@@ -356,25 +359,23 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             return res.status(200).json({ message: "Record updated successfully", data: existingRecord });
         }
 
-        let uniqueRandomID = await "prem";
-        // let uniqueRandomID = await generateRandomString(10);
-        let shortedLink = 'https://droplink.co/8BKCeNd';
-        // let shortedLink = null;
+        let uniqueRandomID = await generateRandomString(10);
+        let shortedLink = null;
 
         // Fetch Shortener API data
         const shortnersData = await shortedLinksData_module.findOne({ shortnerDomain });
 
-        // if (shortnersData && shortnersData.apiLink) {
-        //     const fullUrl = `${clientOrigin}${endPageRoute}/${uniqueRandomID}`;
+        if (shortnersData && shortnersData.shortnerApiLink) {
+            // const fullUrl = `${clientOrigin}${endPageRoute}/${uniqueRandomID}`;
+            const fullUrl = `https://earningplaner-earn.onrender.com${endPageRoute}/${uniqueRandomID}`;
 
-        //     try {
-        //         let response = await axios.get(`${shortnersData.shortnerApiLink}${fullUrl}`);
-        //         console.log(response);
-        //         shortedLink = response.data?.shortenedUrl || null;
-        //     } catch (error) {
-        //         console.error("Error fetching shortened URL:", error.message);
-        //     }
-        // }
+            try {
+                let response = await axios.get(`${shortnersData.shortnerApiLink}${fullUrl}`);
+                shortedLink = response.data?.shortenedUrl || null;
+            } catch (error) {
+                console.error("Error fetching shortened URL:", error.message);
+            }
+        }
 
         // If shortedLink is null, return an error response
         if (!shortedLink) {
@@ -382,7 +383,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
         }
 
         // Create new record
-        const newRecord = new ipAddress_records_module({
+        await new ipAddress_records_module({
             userDB_id: userData._id,
             shortnerDomain,
             shortUrl: shortedLink,
@@ -390,11 +391,9 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             processCount: 1,
             uniqueToken: uniqueRandomID,
             ipAddress: userIp
-        });
+        }).save();
 
-        await newRecord.save();
-
-        res.status(200).json({ message: "New record added successfully", data: newRecord });
+        res.status(200).json({ message: "New record added successfully", shortedLink });
 
     } catch (error) {
         console.error("Error in user_shortlink_firstPage_data_patch:", error);
@@ -495,7 +494,7 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
         } else {
             await new userMonthly_records_module({
                 userDB_id: userData._id,
-                month: formattedMonth,
+                monthName: formattedMonth,
                 earningSources: {
                     click_short_link: { income: amount }
                 }
