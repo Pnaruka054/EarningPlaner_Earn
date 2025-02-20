@@ -109,7 +109,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                     </Link> */}
                     <Link to="/member/view-ads" className="bg-green-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>View Ads</div>
-                        <div className='z-[1]'>₹{Array.isArray(userData_state[1]) && userData_state[1][0] ? userData_state[1][0].earningSources?.view_ads.income || '0.000' : '0.0000'}</div>
+                        <div className='z-[1]'>₹{Array.isArray(userData_state[1]) && userData_state[1][0] ? userData_state[1][0].earningSources?.view_ads.income || '0.000' : '0.000'}</div>
                         <img src={ViewAds} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </Link>
                     {/* bg-purple-500 */}  <div className=" text-white bg-gray-500 relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
@@ -118,7 +118,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                         <img src={Betting_games_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
                     </div>
                     {/* bg-red-500 */} <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Play Games</div>
+                        <div>Play Normal Games</div>
                         <div>Null</div>
                         <img src={Games} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
                     </div>
@@ -129,7 +129,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                     </Link> */}
                     <Link to="/member/click-shorten-link" className="bg-cyan-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Click Shorten Link</div>
-                        <div className='z-[1]'>₹{userData_state.clickShortenLink || '0.0000'}</div>
+                        <div className='z-[1]'>₹{Array.isArray(userData_state[1]) && userData_state[1][0] ? userData_state[1][0].earningSources?.click_short_link?.income || '0.000' : '0.000'}</div>
                         <img src={ClickShortenLink_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </Link>
                     {/* bg-yellow-500 <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
@@ -147,11 +147,11 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                         <div className='z-[1]'>₹{userData_state.shortLink || '0.0000'}</div>
                         <img src={ShortLink_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </Link> */}
-                    <div className="bg-green-700 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
+                    {/* <div className="bg-green-700 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Mining</div>
                         <div className='z-[1]'>₹{userData_state.mining || '0.0000'}</div>
                         <img src={Mining} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
-                    </div>
+                    </div> */}
                     {/* bg-blue-300 <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Fill Survey</div>
                         <div>Null</div>
@@ -164,7 +164,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                     </Link> */}
                     <Link to="/member/refer-and-earn" className="bg-lime-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Referral Income</div>
-                        <div className='z-[1]'>₹{userData_state.referralIncome || '0.0000'}</div>
+                        <div className='z-[1]'>₹{Array.isArray(userData_state[1]) && userData_state[1][0] ? userData_state[1][0].earningSources?.referral_income?.income || '0.000' : '0.000'}</div>
                         <img src={Watch_Video_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </Link>
                 </div>

@@ -5,7 +5,6 @@ const referral_records_module = require('../model/referralRecords/referral_recor
 const userDate_records_module = require("../model/dashboard/userDate_modules");
 const { userMonthly_records_module, saveUserMonthlyData } = require("../model/dashboard/userMonthly_modules");
 
-
 const userReferByIncome_handle = async (session, userData, earningAmount) => {
     const monthName = getFormattedMonth();
     const today = getFormattedDate();
@@ -58,9 +57,23 @@ const userReferByIncome_handle = async (session, userData, earningAmount) => {
                 const currentReferralIncome = parseFloat(referralRecord.income || 0);
                 referralRecord.income = (currentReferralIncome + referralIncrement).toFixed(3);
 
+                let userMonthlyRecord = await userMonthly_records_module
+                .findOne({ userDB_id: dateRecords_referBy._id, monthName })
+                .session(session);
+                if (!userMonthlyRecord) {
+                    userMonthlyRecord = new userMonthly_records_module({
+                        userDB_id: dateRecords_referBy._id,
+                        monthName,
+                    });
+                }
+
+                let currentMonthlyReferralIncome = parseFloat(userMonthlyRecord.earningSources.referral_income.income || 0);
+                userMonthlyRecord.earningSources.referral_income.income = (currentMonthlyReferralIncome + referralIncrement).toFixed(3);
+
                 await Promise.all([
                     referralRecord.save({ session }),
-                    referredUser.save({ session })
+                    referredUser.save({ session }),
+                    userMonthlyRecord.save({session})
                 ]);
             }
 

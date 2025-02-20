@@ -9,6 +9,12 @@ const monthSchema = new mongoose.Schema({
             clickBalance: { type: String },
             timerStart: { type: Date }, // Timer start time added
         },
+        click_short_link: {
+            income: { type: String },
+        },
+        referral_income: {
+            income: { type: String },
+        },
     },
     createdAt: { type: Date, default: Date.now, expires: '1y' } // Data will expire after 1 year
 });

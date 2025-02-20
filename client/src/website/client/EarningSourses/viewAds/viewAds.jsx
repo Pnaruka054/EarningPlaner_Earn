@@ -442,85 +442,56 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     let buttonsObj2 = [
         {
             buttonTitle: 'Click On Ads',
-            amount: '0.1',
-            handelButtonClick: function (e) {
-                // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn1', this.amount)
-            },
+            amount: '0.01',
+            url: 'https://wwp.aisorc.com/redirect-zone/cad9dc8e',
         },
         {
             buttonTitle: 'Click On Ads',
-            amount: '0.1',
-            handelButtonClick: function (e) {
-                // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/20cf34cc', '1btn2', this.amount)
-            },
+            amount: '0.01',
+            url: 'https://wwp.aisorc.com/redirect-zone/20cf34cc',
         },
         {
             buttonTitle: 'Click On Ads',
-            amount: '0.1',
-            handelButtonClick: function (e) {
-                // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/cad9dc8e', '1btn3', this.amount)
-            },
+            amount: '0.01',
+            url: 'https://wwp.aisorc.com/redirect-zone/cad9dc8e',
         },
         {
             buttonTitle: 'Click On Ads',
-            amount: '0.1',
-            handelButtonClick: function (e) {
-                // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/20cf34cc', '1btn4', this.amount)
-            },
+            amount: '0.01',
+            url: 'https://wwp.aisorc.com/redirect-zone/20cf34cc',
         },
         {
             buttonTitle: 'Click On Ads',
-            amount: '0.1',
-            handelButtonClick: function (e) {
-                // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/d5d92d72', '1btn5', this.amount)
-            },
+            amount: '0.01',
+            url: 'https://wwp.aisorc.com/redirect-zone/d5d92d72',
         },
         {
             buttonTitle: 'Click On Ads',
-            amount: '0.1',
-            handelButtonClick: function (e) {
-                // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/b57c2eb0', '1btn6', this.amount)
-            },
+            amount: '0.01',
+            url: 'https://wwp.aisorc.com/redirect-zone/b57c2eb0',
         },
         {
             buttonTitle: 'Click On Ads',
-            amount: '0.1',
-            handelButtonClick: function (e) {
-                // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/d5d92d72', '1btn7', this.amount)
-            },
+            amount: '0.01',
+            url: 'https://wwp.aisorc.com/redirect-zone/d5d92d72',
         },
         {
             buttonTitle: 'Click On Ads',
-            amount: '0.1',
-            handelButtonClick: function (e) {
-                // adoperator
-                handle_link_click2('https://wwp.aisorc.com/redirect-zone/b57c2eb0', '1btn8', this.amount)
-            },
+            amount: '0.01',
+            url: 'https://wwp.aisorc.com/redirect-zone/b57c2eb0',
         },
         {
             buttonTitle: 'Click On Ads',
-            amount: '0.1',
-            handelButtonClick: function (e) {
-                // bitcotasks
-                handle_link_click2('https://bitcotasks.com/promote/44879', '1btn9', this.amount)
-            },
+            amount: '0.01',
+            url: 'https://bitcotasks.com/promote/44879',
         },
         {
             buttonTitle: 'Click On Ads',
-            amount: '0.1',
-            handelButtonClick: function (e) {
-                // bitcotasks 
-                handle_link_click2('https://bitcotasks.com/promote/44907', '1btn10', this.amount)
-            },
-        },
-    ]
+            amount: '0.01',
+            url: 'https://bitcotasks.com/promote/44907',
+        }
+    ];
+    
 
     let user_adsView_income_patch = async (obj) => {
         setData_process_state(true);
@@ -657,7 +628,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                             {
                                 buttonsObj2.map((values, index) => (
                                     <button key={index} disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1)) ? true : false} className={`${handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1)) ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
-                                        values.handelButtonClick(e)
+                                        handle_link_click2(values.url, `1btn${index + 1}`, values.amount)
                                     }}><span>{values.buttonTitle} {index + 1}</span><span>₹{values.amount}</span></button>
                                 ))
                             }
