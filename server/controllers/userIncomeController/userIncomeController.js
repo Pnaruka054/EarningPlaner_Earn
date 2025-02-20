@@ -367,6 +367,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
 
             try {
                 let response = await axios.get(`${shortnersData.shortnerApiLink}${fullUrl}`);
+                console.log(response);
                 shortedLink = response.data?.shortenedUrl || null;
             } catch (error) {
                 console.error("Error fetching shortened URL:", error.message);
