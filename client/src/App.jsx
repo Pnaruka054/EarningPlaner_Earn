@@ -162,7 +162,7 @@ const App = () => {
               <Route path="/waitRedirecting" element={<WaitRedirecting />} />
               <Route path="/waitRedirecting1" element={<WaitRedirecting1 />} />
               <Route path="/member/click-shorten-link" element={<ClickShortedLink setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
-              <Route path="/member/last-page" element={<LastPage />} />
+              <Route path="/member/last-page/:uniqueToken" element={<LastPage />} />
               <Route path="/*" element={<PageNotFound setshow_NavBar_state={setshow_NavBar_state} />} />
 
               <Route path="/extension/uninstalled" element={<ExtensionUninstalled setshow_NavBar_state={setshow_NavBar_state} />} />

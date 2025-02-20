@@ -18,7 +18,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                     `${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_shortlink_data_get`,
                     { withCredentials: true }
                 );
-
+                console.log(response);
                 setAvailableBalance_forNavBar_state(response.data.userAvailableBalance);
                 setShortLinks(response.data.shortedLinksData);
             } catch (error) {
@@ -49,11 +49,12 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
     }, []);
 
     // 🔄 **Update Link Status & Show Swal**
-    const user_linkClick_patch = async (startUrl) => {
+    const user_linkClick_patch = async (shortnerDomain) => {
         try {
+            const origin = `${window.location.origin}`;
             const response = await axios.patch(
                 `${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_shortlink_firstPage_data_patch`,
-                { startUrl },
+                { shortnerDomain, endPageRoute: import.meta.env.VITE_CLICK_SHORTEN_LINK_ENDPAGE_ROUTE, clientOrigin: origin },
                 { withCredentials: true }
             );
             return response
@@ -65,13 +66,12 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
 
     const handelLink_click = async (link) => {
         try {
-            const response = await user_linkClick_patch(link.startUrl); // ✅ API call ka response wait karein
+            const response = await user_linkClick_patch(link.shortnerDomain); // ✅ API call ka response wait karein
 
             if (!response || response.error) {
                 throw new Error("API request failed"); // ✅ Agar response me error ho to manually error throw karein
             }
-
-            window.open(link.startUrl, "_blank"); // ✅ Sirf successful API response pe open karein
+            window.open(response.data.data.shortUrl, "_blank"); // ✅ Sirf successful API response pe open karein
         } catch (error) {
             console.error("Error processing link click:", error);
 
@@ -153,7 +153,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                                         <h3 className="text-lg font-semibold text-gray-800">
                                             {link.shortName || "Short Link"}
                                         </h3>
-                                        <p className="text-sm text-gray-600 truncate">{link.startUrl}</p>
+                                        <p className="text-sm text-gray-600 truncate">{link.shortnerDomain}</p>
 
                                         {/* 🕒 Time Show Here */}
                                         <p className="text-gray-700 mt-2">

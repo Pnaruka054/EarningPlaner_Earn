@@ -5,6 +5,7 @@ const referralRecordSchema = new mongoose.Schema({
     date: { type: String, require: true },
     userName: { type: String, require: true },
     income: { type: String, require: true },
+    apiLink: { type: String, require: true },
 })
 
 const referral_records_module = mongoose.model('referral_record', referralRecordSchema)

@@ -8,6 +8,8 @@ const idTimer_records_module = require('../../model/id_timer/id_timer_records_mo
 const getFormattedDate = require('../../helper/getFormattedDate')
 const getFormattedMonth = require("../../helper/getFormattedMonth")
 const shortedLinksData_module = require('../../model/shortLinks/shortedLinksData_module')
+const generateRandomString = require("../../helper/generateRandomString")
+const axios = require('axios')
 
 const user_adsView_home_get = async (req, res) => {
     const session = await mongoose.startSession(); // Start a session
@@ -303,15 +305,15 @@ const user_shortlink_data_get = async (req, res) => {
         let shortedLinksData = await shortedLinksData_module.find();
 
         // Fetch user's click records
-        let ipAddress_records = await ipAddress_records_module.find({ userDB_id: userData._id, ipAddress: userIp });
+        let ipAddress_records = await ipAddress_records_module.findOne({ ipAddress: userIp });
 
         // Get all clicked URLs
-        const clickedUrls = new Set(ipAddress_records.map(record => record.shortUrl));
+        const clickedUrls = new Set(ipAddress_records?.shortnerDomain || '');
 
         // Mark matched shorted links as isDisable: true
         shortedLinksData = shortedLinksData.map(link => ({
             ...link.toObject(),
-            isDisable: (clickedUrls.has(link.startUrl) && clickedUrls.status) // True if match found
+            isDisable: (clickedUrls.has(link.shortnerDomain) && clickedUrls.status) // True if match found
         }));
 
         // Prepare response data
@@ -332,37 +334,58 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
     try {
         const userData = req.user;
         const userIp = req.ip;
-        const { startUrl } = req.body; // frontend se startUrl receive karega
+        const { shortnerDomain, endPageRoute, clientOrigin } = req.body;
 
-        if (!userData || !userData._id || !startUrl) {
+        if (!userData || !userData._id || !shortnerDomain || !clientOrigin) {
             return res.status(400).json({ message: "Invalid data received" });
         }
 
-        // Pehle check karega ki record exist karta hai ya nahi
-        const existingRecord = await ipAddress_records_module.findOne({
-            userDB_id: userData._id,
-            ipAddress: userIp
-        });
+        // Check if record already exists
+        const existingRecord = await ipAddress_records_module.findOne({ ipAddress: userIp });
 
         if (existingRecord) {
-            if (existingRecord.status === true && existingRecord.processCount === 1) {
-                return res.status(500).json({ message: "Record already processed, no update required" });
+            if (existingRecord.status === true || existingRecord.processCount === 1) {
+                return res.status(200).json({ message: "Record already processed, no update required" });
             }
 
-            // Agar status false hai ya processCount > 1 hai, to processCount badhakar update karo
+            // Update existing record
             existingRecord.processCount = 1;
-            existingRecord.status = false; // Status ko false set karna
+            existingRecord.status = false;
             await existingRecord.save();
 
             return res.status(200).json({ message: "Record updated successfully", data: existingRecord });
         }
 
-        // Agar record na mile, to naya record create karo
+        let uniqueRandomID = await generateRandomString(10);
+        let shortedLink = null;
+
+        // Fetch Shortener API data
+        const shortnersData = await shortedLinksData_module.findOne({ shortnerDomain });
+
+        if (shortnersData && shortnersData.apiLink) {
+            const fullUrl = `${clientOrigin}${endPageRoute}/${uniqueRandomID}`;
+
+            try {
+                let response = await axios.get(`${shortnersData.shortnerApiLink}${fullUrl}`);
+                shortedLink = response.data?.shortenedUrl || null;
+            } catch (error) {
+                console.error("Error fetching shortened URL:", error.message);
+            }
+        }
+
+        // If shortedLink is null, return an error response
+        if (!shortedLink) {
+            return res.status(422).json({ message: "Shortened link not generated. Process aborted." });
+        }
+
+        // Create new record
         const newRecord = new ipAddress_records_module({
             userDB_id: userData._id,
-            shortUrl: startUrl,
-            status: false, // Initially false
-            processCount: 1, // Start process count from 1
+            shortnerDomain,
+            shortUrl: shortedLink,
+            status: false,
+            processCount: 1,
+            uniqueToken: uniqueRandomID,
             ipAddress: userIp
         });
 
@@ -381,56 +404,48 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
     session.startTransaction();
 
     try {
-        let { referrerUrl } = req.body;
+        let { uniqueToken } = req.body;
         const userData = req.user;
         const userIp = req.ip;
 
-        if (!userData || !userData._id || !referrerUrl) {
+        if (!userData || !userData._id || !uniqueToken) {
             return res.status(400).json({ message: "Invalid data received" });
         }
 
-        // 1️⃣ `shortedLinksData_module` se `referrerUrl` ka document find karo
-        const shortedLink = await shortedLinksData_module.findOne({ endUrl: referrerUrl }).session(session);
-        if (!shortedLink) {
-            return res.status(404).json({ message: "Shortened link not found" });
-        }
-        const startUrl = shortedLink.startUrl;
-        const amount = parseFloat(shortedLink.amount) || 0;
-
-        // 2️⃣ `ipAddress_records_module` se user record find karo
         const userRecord = await ipAddress_records_module.findOne({
             userDB_id: userData._id,
             ipAddress: userIp,
-            shortUrl: startUrl
+            uniqueToken
         }).session(session);
 
         if (!userRecord) {
             return res.status(404).json({ message: "User record not found" });
         }
 
-        // `processCount` ko 2 karo aur `status` ko `true`
         userRecord.processCount = 2;
         userRecord.status = true;
         await userRecord.save({ session });
 
-        // 3️⃣ `userData.withdrawable_amount` me `amount` add karo
+        const shortedLink = await shortedLinksData_module.findOne({ shortnerDomain: userRecord.shortnerDomain }).session(session);
+        if (!shortedLink) {
+            return res.status(404).json({ message: "Shortened link not found" });
+        }
+        const amount = parseFloat(shortedLink.amount) || 0;
+
         userData.withdrawable_amount = (parseFloat(userData.withdrawable_amount) || 0) + amount;
         await userData.save({ session });
 
-        // 4️⃣ Agar `refer_by` property available hai to referral earning process karo
         if (userData.refer_by) {
             const referrer = await userSignUp_module.findOne({ userName: userData.refer_by }).session(session);
             if (referrer) {
                 const referralUserId = referrer._id;
 
-                // `referral_records_module` me referral income update karo
                 const referralRecord = await referral_records_module.findOne({ userDB_id: referralUserId, userName: userData.userName }).session(session);
                 if (referralRecord) {
                     referralRecord.income += parseFloat(process.env.REFERRAL_RATE) * amount;
                     await referralRecord.save({ session });
                 }
 
-                // 5️⃣ `userDate_records_module` me referral earnings update karo
                 const formattedDate = getFormattedDate();
                 const userDateRecord = await userDate_records_module.findOne({ userDB_id: referralUserId, date: formattedDate }).session(session);
                 if (userDateRecord) {
@@ -446,7 +461,6 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
             }
         }
 
-        // 6️⃣ `userDate_records_module` me self earnings update karo
         let userDateRecordSelf = await userDate_records_module.findOne({
             userDB_id: userData._id,
             date: getFormattedDate()
@@ -463,8 +477,6 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
             }], { session });
         }
 
-
-        // 7️⃣ `userMonthly_records_module` me earnings update karo
         const formattedMonth = getFormattedMonth();
         const userMonthlyRecord = await userMonthly_records_module.findOne({ userDB_id: userData._id, month: formattedMonth }).session(session);
         if (userMonthlyRecord) {
@@ -484,7 +496,7 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
         await session.commitTransaction();
         session.endSession();
 
-        res.status(200).json({ message: "Data updated successfully!" });
+        res.status(200).json({ message: "Data updated successfully!", amount });
 
     } catch (error) {
         await session.abortTransaction();
