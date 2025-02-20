@@ -53,64 +53,85 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
 
     if (show) {
         return (
-            <>
-                <nav className='bg-blue-600 select-none h-12 px-3 flex items-center justify-between shadow relative'>
-                    <Link to="/" className='h-[100%] flex items-center'>
-                        <img className='h-[90%]' src={navBar_logo} alt="hello prem" />
-                    </Link>
-                    <ul onClick={(e) => e.stopPropagation()} ref={toggleMenu_icon} className='hidden md:flex items-center md:space-x-4 text-white bg-blue-600 md:bg-transparent absolute md:relative md:top-0 md:left-0 md:right-0 top-12 left-0 right-0'>
-                        <li>
-                            <Link to="/" className='hover:bg-blue-700 px-3 h-10 rounded flex items-center'>Home</Link>
-                        </li>
-                        <li>
-                            <Link to='#' className='hover:bg-blue-700 px-3 h-10 rounded flex items-center'>FAQ</Link>
-                        </li>
-                        <li>
-                            <Link to='/contact-us' className='hover:bg-blue-700 px-3 h-10 rounded flex items-center'>Contact Us</Link>
-                        </li>
-                        <li>
-                            <Link to='#' className='hover:bg-blue-700 px-3 h-10 rounded flex items-center'>Income</Link>
-                        </li>
-                        <span className='h-12 px-2 md:px-0 flex items-center'>
-                            <Link to="/login" className='bg-transparent border-[1px] hover:bg-white hover:text-black transition rounded px-3 py-1'>Login</Link>
-                            <Link to="/signup" className='bg-transparent border-[1px] hover:bg-white hover:text-black transition rounded px-3 py-1'>SignUp</Link>
-                        </span>
-                    </ul>
-                    <p onClick={toggleMenu} className="md:hidden text-4xl text-white cursor-pointer">
-                        <ion-icon name={toggelMenu_state}></ion-icon>
-                    </p>
-                </nav>
-            </>
+            <nav className="bg-blue-800 select-none h-14 px-4 flex items-center justify-between shadow-lg text-white relative">
+                <Link to="/" className="h-full flex items-center">
+                    <img className="h-10" src={navBar_logo} alt="EarnWiz Logo" />
+                </Link>
+                <ul
+                    onClick={(e) => e.stopPropagation()}
+                    ref={toggleMenu_icon}
+                    className="hidden md:flex items-center md:space-x-6 text-white absolute md:relative md:top-0 md:left-0 md:right-0 top-14 left-0 right-0 bg-blue-800 md:bg-transparent py-2 md:py-0 rounded-lg shadow-lg md:shadow-none"
+                >
+                    <li>
+                        <Link className="hover:text-yellow-400 px-3 py-2 rounded-lg transition" to="/">
+                            Home
+                        </Link>
+                    </li>
+                    <li>
+                        <Link className="hover:text-yellow-400 px-3 py-2 rounded-lg transition" to="#">
+                            FAQ
+                        </Link>
+                    </li>
+                    <li>
+                        <Link className="hover:text-yellow-400 px-3 py-2 rounded-lg transition" to="/contact-us">
+                            Contact Us
+                        </Link>
+                    </li>
+                    <li>
+                        <Link className="hover:text-yellow-400 px-3 py-2 rounded-lg transition" to="#">
+                            Income
+                        </Link>
+                    </li>
+                    <span className="flex gap-2">
+                        <Link
+                            to="/login"
+                            className="border border-white text-white px-4 py-1 rounded-lg transition duration-300 hover:bg-white hover:text-blue-900 hover:shadow-md"
+                        >
+                            Login
+                        </Link>
+                        <Link
+                            to="/signup"
+                            className="bg-yellow-400 text-blue-900 font-semibold px-4 py-1 rounded-lg transition duration-300 hover:bg-yellow-600 hover:text-white hover:shadow-md"
+                        >
+                            Sign Up
+                        </Link>
+                    </span>
+                </ul>
+                <p onClick={toggleMenu} className="md:hidden text-3xl text-white cursor-pointer">
+                    <ion-icon name={toggelMenu_state}></ion-icon>
+                </p>
+            </nav>
         );
     }
 
     return (
-        <>
-            <nav className='bg-blue-600 select-none z-[2] h-12 px-3 flex items-center fixed top-0 left-0 right-0 justify-between shadow'>
-                <Link to="/" className='h-[100%] hidden md:flex items-center'>
-                    <img className='h-[90%]' src={navBar_logo} alt="hello prem" />
-                </Link>
-                <SideMenu sideMenu_show={{ sideMenu_state, setSideMenu_state }} />
-                <span onClick={(e) => {
-                    e.stopPropagation()
-                    if (e.target.name === 'menu-outline') {
-                        setSideMenu_state('close')
-                    } else {
-                        setSideMenu_state('menu-outline')
-                    }
-                }} className='h-[100%] text-4xl text-white cursor-pointer md:hidden flex items-center'>
-                    <ion-icon name={sideMenu_state}></ion-icon>
-                </span>
-                <ul className='flex items-center space-x-4 text-white'>
-                    <li className='hover:bg-blue-700 px-3 h-12 flex items-center'>
-                        <Link to="/member/withdraw"><span className='sm:inline-block hidden'>Available Balance:</span> ₹{availableBalance_forNavBar_state}</Link>
-                    </li>
-                    <li className='hover:bg-blue-700 px-3 h-12 flex items-center'>
-                        <Link to='/member/profile'><ion-icon name="person"></ion-icon> Profile</Link>
-                    </li>
-                </ul>
-            </nav>
-        </>
+        <nav className="bg-blue-800 select-none z-50 h-14 px-4 flex items-center fixed top-0 left-0 right-0 justify-between shadow-lg text-white">
+            <Link to="/" className="h-full hidden md:flex items-center">
+                <img className="h-10" src={navBar_logo} alt="EarnWiz Logo" />
+            </Link>
+            <SideMenu sideMenu_show={{ sideMenu_state, setSideMenu_state }} />
+            <span
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setSideMenu_state(sideMenu_state === "menu-outline" ? "close" : "menu-outline");
+                }}
+                className="h-full text-3xl text-white cursor-pointer md:hidden flex items-center"
+            >
+                <ion-icon name={sideMenu_state}></ion-icon>
+            </span>
+            <ul className="flex items-center space-x-4 text-white">
+                <li className="hover:text-yellow-400 px-3 py-2 rounded-lg transition">
+                    <Link to="/member/withdraw">
+                        <span className="sm:inline-block hidden">Available Balance:</span> ₹{availableBalance_forNavBar_state}
+                    </Link>
+                </li>
+                <li className="hover:text-yellow-400 px-3 py-2 rounded-lg transition">
+                    <Link to="/member/profile">
+                        <ion-icon name="person"></ion-icon> Profile
+                    </Link>
+                </li>
+            </ul>
+        </nav>
     );
 }
 

@@ -102,3 +102,17 @@
 .convertbtn_hover:hover i {
     transform: rotate(90deg);
 }
+
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #616161;
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #cbcbcb;
+}
