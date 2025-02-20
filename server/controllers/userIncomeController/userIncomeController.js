@@ -422,6 +422,13 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
             return res.status(404).json({ message: "User record not found" });
         }
 
+        // ✅ Agar processCount already 2 hai, toh process skip karo aur error bhejo
+        if (userRecord.processCount === 2) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({ message: "Already processed", amount: 0 });
+        }
+
         userRecord.processCount = 2;
         userRecord.status = true;
         await userRecord.save({ session });
@@ -492,7 +499,7 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
             }).save({ session });
         }
 
-        // Transaction commit karo
+        // ✅ Transaction commit karo
         await session.commitTransaction();
         session.endSession();
 
