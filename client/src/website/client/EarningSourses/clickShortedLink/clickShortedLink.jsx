@@ -71,6 +71,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
             if (!response || response.error) {
                 throw new Error("API request failed"); // ✅ Agar response me error ho to manually error throw karein
             }
+            console.log(response);
             window.open(response.data.data.shortUrl, "_blank"); // ✅ Sirf successful API response pe open karein
         } catch (error) {
             console.error("Error processing link click:", error);

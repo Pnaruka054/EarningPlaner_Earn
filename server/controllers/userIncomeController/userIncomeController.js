@@ -356,23 +356,25 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             return res.status(200).json({ message: "Record updated successfully", data: existingRecord });
         }
 
-        let uniqueRandomID = await generateRandomString(10);
-        let shortedLink = null;
+        let uniqueRandomID = await "prem";
+        // let uniqueRandomID = await generateRandomString(10);
+        let shortedLink = 'https://droplink.co/8BKCeNd';
+        // let shortedLink = null;
 
         // Fetch Shortener API data
         const shortnersData = await shortedLinksData_module.findOne({ shortnerDomain });
 
-        if (shortnersData && shortnersData.apiLink) {
-            const fullUrl = `${clientOrigin}${endPageRoute}/${uniqueRandomID}`;
+        // if (shortnersData && shortnersData.apiLink) {
+        //     const fullUrl = `${clientOrigin}${endPageRoute}/${uniqueRandomID}`;
 
-            try {
-                let response = await axios.get(`${shortnersData.shortnerApiLink}${fullUrl}`);
-                console.log(response);
-                shortedLink = response.data?.shortenedUrl || null;
-            } catch (error) {
-                console.error("Error fetching shortened URL:", error.message);
-            }
-        }
+        //     try {
+        //         let response = await axios.get(`${shortnersData.shortnerApiLink}${fullUrl}`);
+        //         console.log(response);
+        //         shortedLink = response.data?.shortenedUrl || null;
+        //     } catch (error) {
+        //         console.error("Error fetching shortened URL:", error.message);
+        //     }
+        // }
 
         // If shortedLink is null, return an error response
         if (!shortedLink) {
@@ -415,7 +417,7 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
 
         const userRecord = await ipAddress_records_module.findOne({
             userDB_id: userData._id,
-            ipAddress: userIp,
+            // ipAddress: userIp,
             uniqueToken
         }).session(session);
 

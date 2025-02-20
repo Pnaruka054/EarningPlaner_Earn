@@ -18,7 +18,7 @@ const LastPage = () => {
       navigate("/"); // ✅ Invalid token ho to home par redirect karo
       return;
     }
-
+    console.log(uniqueToken);
     axios
       .patch(
         `${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_shortlink_lastPage_data_patch`,
