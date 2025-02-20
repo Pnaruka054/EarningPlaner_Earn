@@ -9,6 +9,7 @@ const getFormattedMonth = require("../../helper/getFormattedMonth")
 const shortedLinksData_module = require('../../model/shortLinks/shortedLinksData_module')
 const generateRandomString = require("../../helper/generateRandomString")
 const axios = require('axios')
+const viewAds_directLinksData_module = require("../../model/view_ads_direct_links/viewAds_directLinksData_module");
 const { userReferByIncome_handle, userIncome_handle } = require('../../helper/usersEarningsUpdate_handle')
 
 const user_adsView_home_get = async (req, res) => {
@@ -18,6 +19,8 @@ const user_adsView_home_get = async (req, res) => {
         const monthName = getFormattedMonth()
         const userData = req.user;
         const user_ip = req.ip;
+
+        let viewAds_directLinksData = await viewAds_directLinksData_module.find()
 
         // Search for an existing record with the same ipAddress
         let ipAddress_recordData = await ipAddress_records_module
@@ -52,6 +55,7 @@ const user_adsView_home_get = async (req, res) => {
             deposit_amount: userData.deposit_amount,
             withdrawable_amount: userData.withdrawable_amount,
             buttonNames: ipAddress_recordData.buttonNames || [],
+            viewAds_directLinksData
         };
 
         let idTimer_recordsData = await idTimer_records_module.findOne({ userDB_id: userData._id }).session(session)

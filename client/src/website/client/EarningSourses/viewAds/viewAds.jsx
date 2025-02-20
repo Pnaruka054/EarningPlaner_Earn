@@ -18,20 +18,21 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [currentBtnName_and_amount_For_extension_storedValue_state, setCurrentBtnName_and_amount_For_extension_storedValue_state] = useState([]);
     const [originalTitle] = useState(document.title);
     const [isUserActiveOnPage, setIsUserActiveOnPage] = useState(false);
+    const [totalDirectLinkBtns_state, setTotalDirectLinkBtns_state] = useState([]);
     // const [count_state, setCount_state] = useState(30);
     // const [count_handle_state, setCount_handle_state] = useState(false);
     const channel = new BroadcastChannel("viewAds_channel");
 
     const playSound = (track) => {
-        if(track){
-            const audio = new Audio(success_sound); 
+        if (track) {
+            const audio = new Audio(success_sound);
             audio.play();
-        }else{
-            const audio = new Audio(not_success_sound); 
+        } else {
+            const audio = new Audio(not_success_sound);
             audio.play();
         }
     };
-    
+
 
     useEffect(() => {
         if (typeof document.hidden !== "undefined" && handle_clickAds_btnClick_state) {
@@ -55,6 +56,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_adsView_home_get`, {
                 withCredentials: true
             });
+            setTotalDirectLinkBtns_state(response.data.msg.viewAds_directLinksData);
             setViewAds_firstTimeLoad_state(response.data.msg)
             setAvailableBalance_forNavBar_state((parseFloat(response.data.msg.withdrawable_amount || 0) + parseFloat(response.data.msg.deposit_amount || 0)).toFixed(3))
             setDisabledButtons_state(response.data.msg.buttonNames)
@@ -256,7 +258,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         const handleIsExtensionUpdated = (e) => {
             const [btnName, amount] = currentBtnName_and_amount_For_extension_storedValue_state;
             const extension_storedValue = localStorage.getItem('extension_storedValue');
-            console.log(extension_storedValue);
             if (viewAds_firstTimeLoad_state && viewAds_firstTimeLoad_state.clickBalance) {
                 if ((extension_storedValue === 'true') && btnName && amount) {
                     localStorage.removeItem('extension_storedValue');
@@ -331,167 +332,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         };
     }, [viewAds_firstTimeLoad_state, currentBtnName_and_amount_For_extension_storedValue_state]);
 
-    let buttonsObj = [
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://grounded-flight.com/bB3.VV0oPx3nprvvbDm-VWJSZHDh0s2qM/DGg/4/NhjzY/y/L/TWY/w/OtD/gE2/NxjBMO',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://grounded-flight.com/bj3.V/0/Pj3vpYvYbem/V/JvZyDk0M2/M_Dlgl4XNRjxgL2NLITJYdw/OaDRgg2XOwDScK',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://firmopposite.com/b/3/V.0kPA3/pavNbfmdVUJOZ-DC0A2MM/DPgI4sN/jqk/0fLMTsYHwfO/DSg/2/OqT/UT',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://poawooptugroo.com/4/8238196',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://poawooptugroo.com/4/8238196',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://poawooptugroo.com/4/8868626',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://poawooptugroo.com/4/8585876',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://poawooptugroo.com/4/8886349',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://poawooptugroo.com/4/8886361',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://poawooptugroo.com/4/8886370',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://poawooptugroo.com/4/8886375',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://adclickad.com/get/?spot_id=6058864&cat=24&subid=1993887599',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://pertlouv.com/iUyUq55zfnw=?',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://www.effectiveratecpm.com/q5jtvigi?key=6ce245352a591a2584abf7a89393e668',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://www.effectiveratecpm.com/nnwrv5ztgk?key=115124ac92e9fd26b74eabc48c298b1b',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://www.effectiveratecpm.com/fhp0is9j?key=20050f2539da92b9243bbc662b5c12bf',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://vdbaa.com/fullpage.php?section=General&pub=186424&ga=g',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://yeromy.com/gosl/InNpZCI6MTQzNzc5NCwic21hcnRsaW5rIjp0cnVlfQ==eyJwaWQiOjExOTU5OTYs?si1=&si2=',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://11745.xml.4armn.com/direct-link?pubid=960147&siteid=[SITE_ID]',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://125700.shop/0e0647c0aecf2f2d20a7/2a95ae2235/?placementName=default',
-        },
-    ];
-
-    let buttonsObj2 = [
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://wwp.aisorc.com/redirect-zone/cad9dc8e',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://wwp.aisorc.com/redirect-zone/20cf34cc',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://wwp.aisorc.com/redirect-zone/cad9dc8e',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://wwp.aisorc.com/redirect-zone/20cf34cc',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://wwp.aisorc.com/redirect-zone/d5d92d72',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://wwp.aisorc.com/redirect-zone/b57c2eb0',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://wwp.aisorc.com/redirect-zone/d5d92d72',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://wwp.aisorc.com/redirect-zone/b57c2eb0',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://bitcotasks.com/promote/44879',
-        },
-        {
-            buttonTitle: 'Click On Ads',
-            amount: '0.01',
-            url: 'https://bitcotasks.com/promote/44907',
-        }
-    ];
-    
 
     let user_adsView_income_patch = async (obj) => {
         setData_process_state(true);
@@ -608,7 +448,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         </div>
                         <div className='gap-2 justify-center flex flex-wrap'>
                             {
-                                buttonsObj.map((values, index) => (
+                                totalDirectLinkBtns_state.filter((values) => values.isExtension).map((values, index) => (
                                     <button key={index} disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1)) ? true : false} className={`${handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1)) ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
                                         handle_link_click(values.url, `btn${index + 1}`, values.amount)
                                     }}><span>{values.buttonTitle} {index + 1}</span><span>₹{values.amount}</span></button>
@@ -626,7 +466,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                 </button>
                             </div>
                             {
-                                buttonsObj2.map((values, index) => (
+                                totalDirectLinkBtns_state.filter((values) => values.isExtension).map((values, index) => (
                                     <button key={index} disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1)) ? true : false} className={`${handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1)) ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
                                         handle_link_click2(values.url, `1btn${index + 1}`, values.amount)
                                     }}><span>{values.buttonTitle} {index + 1}</span><span>₹{values.amount}</span></button>
