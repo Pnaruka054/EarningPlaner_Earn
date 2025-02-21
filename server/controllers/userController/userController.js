@@ -502,6 +502,24 @@ const userProfileData_patch = async (req, res) => {
     }
 };
 
+const userWebstatisticsGet = async (req, res) => {
+    try {
+        // Pehle database se saare users ko fetch karo
+        let users = await userSignUp_module.find();
+        users = users.length
+
+        // Total users ka length check karo
+        if (users < 100) {
+            users = 542;
+        }
+        
+        // Agar 100 ya usse zyada hain, toh original data send karo
+        res.status(200).json({ users, fixed: true });
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
 module.exports = {
     userSignUp,
     userLogin,
@@ -514,5 +532,6 @@ module.exports = {
     user_signUp_login_google,
     userLoginforgot_password_send_mail,
     reset_password_form_post,
-    verify_reset_token
+    verify_reset_token,
+    userWebstatisticsGet
 }

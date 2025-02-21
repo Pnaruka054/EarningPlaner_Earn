@@ -9,10 +9,29 @@ const WebStatistics = () => {
     ];
 
     const [counts, setCounts] = useState(stats.map(stat => (stat.fixed ? stat.target : 0)));
+    const [stats_state, setStats_state] = useState(stats);
     const [isVisible, setIsVisible] = useState(false);
+
+    const fetchUserStatistics = async () => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/userRoute/userWebstatisticsGet`);
+            if (response.ok) {
+                const data = await response.json();
+                const updatedCounts = stats.map(stat =>
+                    stat.fixed ? { ...stat, target: data.users } : stat
+                );
+                setStats_state(updatedCounts);
+            } else {
+                console.log("Unexpected response:", response);
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
 
     const statsRef = useRef(null);
     useEffect(() => {
+        fetchUserStatistics()
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
@@ -36,7 +55,7 @@ const WebStatistics = () => {
     useEffect(() => {
         if (!isVisible) return;
 
-        const intervals = stats.map((stat, index) => {
+        const intervals = stats_state.map((stat, index) => {
             let start = 0;
             const increment = Math.ceil(stat.target / 100); // Increment speed
             const interval = setInterval(() => {
@@ -55,11 +74,11 @@ const WebStatistics = () => {
         });
 
         return () => intervals.forEach(interval => clearInterval(interval));
-    }, [isVisible]);
+    }, [isVisible, stats_state]);
 
 
     return (
-        <section ref={statsRef} className="my-5 mx-2 text-center rounded-md p-5 bg-white shadow-md">
+        <section ref={statsRef} className="my-5 mx-2 text-center rounded-md p-4 md:p-5 bg-white shadow-md">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                 {stats.map((stat, index) => (
                     <div key={index} className="p-5 bg-gray-100 rounded-lg shadow-md flex flex-col items-center">

@@ -15,9 +15,9 @@ const AvailableWithdrawMethods = () => {
   ];
 
     return (
-        <section className="my-5 mx-2 text-center rounded-md p-8 bg-white shadow-lg border border-gray-300">
+        <section className="my-5 mx-2 text-center rounded-md p-4 md:p-8 bg-white shadow-lg border border-gray-300">
             {/* Title */}
-            <h2 className="text-4xl font-bold mb-4 text-blue-900 relative inline-block">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-blue-900 relative inline-block">
                 Available <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-500">Payment Methods</span>
             </h2>
 

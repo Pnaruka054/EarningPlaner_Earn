@@ -9,6 +9,7 @@ route.get('/userProfileData_get', userController.userProfileData_get)
 route.get('/userLoginCheckGet', userController.userLoginCheckGet)
 route.get('/user_signUp_login_google', userController.user_signUp_login_google)
 route.get('/verify_reset_token', userController.verify_reset_token)
+route.get('/userWebstatisticsGet', userController.userWebstatisticsGet)
 
 route.post('/signUp', validator.signUpValidator, userController.userSignUp)
 route.post('/login', userController.userLogin)

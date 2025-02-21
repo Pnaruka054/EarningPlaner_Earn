@@ -26,6 +26,9 @@ import ExtensionUninstalled from './website/client/extensionUninstalled/extensio
 import PasswordResetForm from './website/client/passwordResetForm/passwordResetForm';
 import ClickShortedLink from './website/client/EarningSourses/clickShortedLink/clickShortedLink';
 import LastPage from './website/client/EarningSourses/clickShortedLink/lastPage';
+import PrivacyPolicy from './website/client/PrivacyPolicy/PrivacyPolicy';
+import Terms_of_Use from './website/client/Terms_of_Use/Terms_of_Use';
+import DMCA from './website/client/DMCA/DMCA';
 
 const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
@@ -81,8 +84,12 @@ const App = () => {
       location.pathname === '/' ||
       location.pathname === '/login' ||
       location.pathname === '/signup' ||
+      location.pathname === '/contact-us' ||
       location.pathname.includes('/signup/ref') ||
-      location.pathname.includes('/password-reset-form')
+      location.pathname.includes('/password-reset-form') ||
+      location.pathname.includes('/terms-of-use') ||
+      location.pathname.includes('/privacy-policy') ||
+      location.pathname.includes('/dmca')
     ) {
       setshow_NavBar_state((p) => p = true)
       setshow_Full_NavBar_state((p) => p = false)
@@ -145,7 +152,8 @@ const App = () => {
           <div ref={nodeRefMap.get(location.pathname)}>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/contact-us" element={<ContactUs />} />
+              <Route path="/contact-us" element={<ContactUs forMember={false} />} />
+              <Route path="/member/support" element={<ContactUs setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} forMember={true} />} />
               <Route path="/login" element={<Login />} />
               <Route path="/password-reset-form/:token" element={<PasswordResetForm />} />
               <Route path="/signup" element={<SignUp />} />
@@ -154,9 +162,11 @@ const App = () => {
               <Route path="/member/deposit" element={<Deposit setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} setShowBottomAlert_state={setShowBottomAlert_state} />} />
               <Route path="/member/withdraw" element={<Withdraw setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} setShowBottomAlert_state={setShowBottomAlert_state} />} />
               <Route path="/member/refer-and-earn" element={<ReferEarn setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
-              <Route path="/member/support" element={<Support setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
               <Route path="/member/settings" element={<Setting setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
               <Route path="/member/profile" element={<Profile setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-of-use" element={<Terms_of_Use />} />
+              <Route path="/dmca" element={<DMCA />} />
               {/* Earning Sourse */}
               <Route path="/member/view-ads" element={<ViewAds setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
               <Route path="/waitRedirecting" element={<WaitRedirecting />} />

@@ -1,7 +1,25 @@
 import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
 import EarnWiz from '../../../../assets/EarnWizLogo.png'
+import { Link, useNavigate } from "react-router-dom";
+
 
 const Footer = () => {
+    const navigate = useNavigate();
+
+    const handleClick = () => {
+        if (window.location.pathname !== "/") {
+            // If not on the "/" route, navigate to "/"
+            navigate("/");
+            // After navigating, scroll to the FAQ section
+            setTimeout(() => {
+                document.getElementById("FAQs")?.scrollIntoView({ behavior: "smooth" });
+            }, 300); // Delay to allow time for the route change
+        } else {
+            // If on "/" route, just scroll to the FAQ section
+            document.getElementById("FAQs")?.scrollIntoView({ behavior: "smooth" });
+        }
+    };
+    
     return (
         <footer className="w-full bg-gradient-to-r from-blue-700 to-blue-900 text-white py-8">
             {/* Footer Links */}
@@ -25,19 +43,19 @@ const Footer = () => {
                     <div className="w-full md:w-1/3 mb-6 md:mb-0">
                         <ul className="flex flex-wrap justify-center space-x-6">
                             <li>
-                                <a className="hover:text-yellow-300 transition duration-300" href="/">Privacy Policy</a>
+                                <Link to="/privacy-policy" className="hover:text-yellow-300 transition duration-300">Privacy Policy</Link>
                             </li>
                             <li>
-                                <a className="hover:text-yellow-300 transition duration-300" href="/">Terms of Use</a>
+                                <Link to="/terms-of-use" className="hover:text-yellow-300 transition duration-300">Terms of Use</Link>
                             </li>
                             <li>
-                                <a className="hover:text-yellow-300 transition duration-300" href="/">DMCA</a>
+                                <Link to="/dmca" className="hover:text-yellow-300 transition duration-300">DMCA</Link>
                             </li>
                             <li>
-                                <a className="hover:text-yellow-300 transition duration-300" href="/">Contact Us</a>
+                                <Link to="/contact-us" className="hover:text-yellow-300 transition duration-300">Contact Us</Link>
                             </li>
                             <li>
-                                <a className="hover:text-yellow-300 transition duration-300 cursor-pointer" onClick={() => document.getElementById("FAQs")?.scrollIntoView({ behavior: "smooth" })}>FAQ</a>
+                                <a className="hover:text-yellow-300 transition duration-300 cursor-pointer" onClick={handleClick}>FAQ</a>
                             </li>
                         </ul>
                     </div>

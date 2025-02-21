@@ -47,10 +47,10 @@ const FAQs = () => {
         setOpenIndex(openIndex === index ? null : index);
     };
     return (
-        <section id="FAQs" className="mt-5 mx-2 p-8">
+        <section id="FAQs" className="mt-5 mx-2 md:p-8">
             {/* Section Title */}
             <div className="text-center mb-8">
-                <h2 className="text-4xl font-bold text-blue-700">Frequently Asked Questions</h2>
+                <h2 className="text-3xl md:text-4xl font-bold text-blue-700">Frequently Asked Questions</h2>
                 <p className="text-gray-500 text-lg">Your most common questions answered!</p>
             </div>
 

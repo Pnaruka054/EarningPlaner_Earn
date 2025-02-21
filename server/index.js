@@ -11,6 +11,7 @@ const middleware = require('./middlewares/jwt_to_userData_middleware')
 const userRouter = require('./routes/user_router');
 const userWithdraw = require('./routes/userWIthdraw_router');
 const userIncomeRoute = require('./routes/userIncome_router');
+const userMessageRoute = require('./routes/userMessage_router');
 const { cronForDaily_MonthlyData_Update } = require('./helper/cronJobs')
 
 const io = socketIo(server, {
@@ -65,6 +66,7 @@ app.use(middleware.middleware_userLogin_check)
 app.use('/userRoute', userRouter);
 app.use('/userWithdraw', userWithdraw);
 app.use('/userIncomeRoute', userIncomeRoute);
+app.use('/userMessageRoute', userMessageRoute);
 
 // Scheduled cron tasks
 cronForDaily_MonthlyData_Update()

@@ -6,6 +6,8 @@ const middleware_userLogin_check = async (req, res, next) => {
         if (
             req.originalUrl === '/userRoute/login'
             || req.originalUrl === '/userRoute/signUp'
+            || req.originalUrl === '/userMessageRoute/userMessageSave_post'
+            || req.originalUrl === '/userRoute/userWebstatisticsGet'
             || req.originalUrl.includes('/userRoute/user_signUp_login_google')
             || req.originalUrl.includes('/userRoute/userLoginforgot_password_send_mail')
             || req.originalUrl.includes('/userRoute/reset_password_form_post')
@@ -31,6 +33,15 @@ const middleware_userLogin_check = async (req, res, next) => {
                 success: false,
                 jwtMiddleware_user_not_found_error: 'Authorization token invalid or user not found'
             });
+        }
+
+        if (
+            req.originalUrl === '/checkLogin_for_navBar'
+        ) {
+            return res.status(200).json({
+                success: true,
+                msg: "jwt Token is Correct"
+            })
         }
 
         if (decoded.jwtUser.password !== decodedData_fromDB.password) {

@@ -2,7 +2,7 @@ import React from 'react';
 
 const HeroSection = () => {
     return (
-        <section className="md:min-h-screen min-h-[80vh] flex flex-col justify-center items-center text-center px-4 bg-gradient-to-r from-blue-900 via-purple-800 to-blue-900 text-white">
+        <section className="md:min-h-[92.5vh] min-h-[80vh] flex flex-col justify-center items-center text-center px-4 bg-gradient-to-r from-blue-900 via-purple-800 to-blue-900 text-white">
             <h1 className="text-4xl sm:text-5xl font-extrabold mb-4 leading-tight">
                 Turn <span className="text-yellow-400">Your Time</span> into{' '}
                 <span className="text-green-400">Real Earnings</span>!

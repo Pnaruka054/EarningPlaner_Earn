@@ -25,10 +25,10 @@ const SubscribeOurChannel = () => {
         return newCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
     return (
-        <section className="mt-5 mx-2 bg-white shadow-md rounded-lg p-8 border border-gray-200">
+        <section className="mt-5 mx-2 bg-white shadow-md rounded-lg p-4 md:p-8 border border-gray-200">
             {/* Title */}
             <div className="text-center">
-                <h2 className="text-4xl font-bold text-blue-900 relative inline-block">
+                <h2 className="text-3xl md:text-4xl font-bold text-blue-900 relative inline-block">
                     Subscribe <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-500">Our Channel</span>
                 </h2>
             </div>
