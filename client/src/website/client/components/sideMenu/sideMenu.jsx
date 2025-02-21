@@ -1,13 +1,21 @@
 import { Link } from 'react-router-dom';
-import Support_icon from '../../../../assets/Support.png'
+import Support_icon from '../../../../assets/Support.png';
 
 const SideMenu = ({ sideMenu_show }) => {
     return (
-        <div onClick={(e) => {
-            e.stopPropagation()
-            e.currentTarget.classList.add('hidden')
-            sideMenu_show.setSideMenu_state((prev) => prev = 'menu-outline')
-        }} className={`${sideMenu_show.sideMenu_state === 'close' ? 'block' : 'hidden'} select-none md:block bg-slate-800 absolute z-[2] md:fixed h-[100vh] left-0 px-2 py-4 top-12 w-full sm:w-52 md:w-[25%] lg:w-[20%] text-white`}>
+        <div 
+            onClick={(e) => {
+                e.stopPropagation();
+                e.currentTarget.classList.add('hidden');
+                sideMenu_show.setSideMenu_state((prev) => prev = 'menu-outline');
+            }} 
+            className={`
+                ${sideMenu_show.sideMenu_state === 'close' ? 'translate-x-0 opacity-100' : 'translate-x-[-100%] opacity-0 md:translate-x-0 md:opacity-100'} 
+                select-none md:block bg-slate-800 absolute z-[2] md:fixed h-[100vh] mt-2 left-0 px-2 py-4 top-12 
+                w-full sm:w-52 md:w-[25%] lg:w-[20%] text-white 
+                transition-transform duration-300 ease-in-out
+            `}
+        >
             <Link to="/member/dashboard" className='space-x-1 block px-3 py-2 rounded-lg hover:bg-slate-950'>
                 <span className="align-middle">
                     <ion-icon name="bar-chart-outline"></ion-icon>

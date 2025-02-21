@@ -6,7 +6,7 @@ import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import { useNavigate } from 'react-router-dom'
 import Pagination from '../components/pagination/pagination';
 
-const Withdraw = ({ setShowBottomAlert_state, setAvailableBalance_forNavBar_state }) => {
+const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
     const [withdraw_amount_state, setWithdraw_amount_state] = useState(0);
     let [data_process_state, setData_process_state] = useState(false);
     let [submit_process_state, setSubmit_process_state] = useState(false);

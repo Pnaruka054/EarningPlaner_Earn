@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+import ContactUs_gif from '../../../../assets/ContactUs.gif'
+import ProcessBgBlack from "../processBgBlack/processBgBlack";
 
 const ContactUs = () => {
   const [formData_state, setFormData_state] = useState({
@@ -9,7 +11,8 @@ const ContactUs = () => {
     message: "",
     consent: false,
   });
-  const [submitProcessState, setSubmitProcessState] = useState(true);
+  const [submit_process_state, setSubmit_process_state] = useState(false);
+  let [data_process_state, setData_process_state] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -21,102 +24,128 @@ const ContactUs = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitProcessState(false); // Set to false when starting to submit
+    setSubmit_process_state(false); // Set to false when starting to submit
     try {
       await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/add_to_sheet`, formData_state);
-      setSubmitProcessState(true); // Set back to true if successful
+      setSubmit_process_state(true); // Set back to true if successful
     } catch (error) {
-      setSubmitProcessState(true); // Set back to true on error
+      setSubmit_process_state(true); // Set back to true on error
       console.log(error);
     }
   };
 
   return (
-    <div className="flex justify-center items-center">
-      <div className="w-full sm:w-10/12 md:w-8/12 lg:w-[95%] bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-center text-4xl font-semibold text-blue-600 mb-4">Contact Us</h2>
-        <p className="text-center text-yellow-500 mb-6">Get in touch!</p>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Your Name *</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              className="mt-2 w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData_state.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
+    <section id="contactForm" className="mt-5 mx-2 bg-white shadow-md rounded-lg p-8 border border-gray-200">
+      <div className="text-center">
+        <h2 className="text-4xl font-bold text-blue-900 relative inline-block">
+          Send Us A <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-500">Message</span>
+        </h2>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Have any questions? Fill out the form below, and we’ll get back to you as soon as possible.
+        </p>
+      </div>
 
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Your Email *</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className="mt-2 w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData_state.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
+      <div className="mt-12 flex flex-col lg:flex-row items-center gap-14">
+        {/* Contact Form */}
+        <div className="w-full lg:w-[60%] p-10 bg-gray-50 rounded-2xl">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="name" className="block font-semibold text-gray-700">Name:</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData_state.name}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none transition duration-300"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="block font-semibold text-gray-700">Email:</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData_state.email}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none transition duration-300"
+                  required
+                />
+              </div>
+            </div>
 
-          <div className="mb-4">
-            <label htmlFor="subject" className="block text-sm font-medium text-gray-700">Your Subject *</label>
-            <input
-              type="text"
-              id="subject"
-              name="subject"
-              className="mt-2 w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData_state.subject}
-              onChange={handleChange}
-              required
-            />
-          </div>
+            <div>
+              <label htmlFor="mobile" className="block font-semibold text-gray-700">Mobile Number:</label>
+              <input
+                type="tel"
+                id="mobile"
+                name="mobile"
+                value={formData_state.mobile}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none transition duration-300"
+                required
+              />
+            </div>
 
-          <div className="mb-4">
-            <label htmlFor="message" className="block text-sm font-medium text-gray-700">Your Message *</label>
-            <textarea
-              id="message"
-              name="message"
-              className="mt-2 w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData_state.message}
-              onChange={handleChange}
-              required
-            />
-          </div>
+            <div>
+              <label htmlFor="subject" className="block font-semibold text-gray-700">Subject:</label>
+              <input
+                type="text"
+                id="subject"
+                name="subject"
+                value={formData_state.subject}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none transition duration-300"
+                required
+              />
+            </div>
 
-          <div className="mb-4 flex items-center">
-            <input
-              type="checkbox"
-              id="consent"
-              name="consent"
-              className="mr-2"
-              checked={formData_state.consent}
-              onChange={handleChange}
-              required
-            />
-            <label htmlFor="consent" className="text-sm text-gray-600">
-              I consent to having this website store my submitted information so they can respond to my inquiry.
-            </label>
-          </div>
+            <div>
+              <label htmlFor="message" className="block font-semibold text-gray-700">Message:</label>
+              <textarea
+                id="message"
+                name="message"
+                value={formData_state.message}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3 h-36 focus:ring-2 focus:ring-blue-500 outline-none transition duration-300"
+                required
+              ></textarea>
+            </div>
 
-          <button
-            type="submit"
-            disabled={!submitProcessState}
-            className={`w-full py-3 rounded-lg text-white font-medium ${!submitProcessState ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"} transition`}
-          >
-            {submitProcessState ? "Send Message" : <i className="fas fa-spinner fa-spin"></i>}
-          </button>
-        </form>
+            <div className="flex items-start">
+              <input
+                type="checkbox"
+                id="consent"
+                name="consent"
+                checked={formData_state.consent}
+                onChange={handleChange}
+                className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                required
+              />
+              <label htmlFor="consent" className="ml-3 text-gray-700">
+                I agree to the <a href="/terms" className="text-blue-600 hover:underline">terms and conditions</a> and the <a href="/privacy" className="text-blue-600 hover:underline">privacy policy</a>.
+              </label>
+            </div>
 
-        <div className="mt-6 text-gray-600 italic text-sm">
-          Need help or have any questions? We’re here to assist you! Please fill out the contact form below with your details and message, and our support team will reach out to you as soon as possible. We strive to respond promptly and address all inquiries thoroughly. Your feedback is important to us, and we look forward to assisting you! Please note that by submitting this form, you may also receive announcements and promotional emails from us.
+            <button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-all duration-300 transform hover:scale-105"
+              disabled={!submit_process_state}
+            >
+              {submit_process_state ? "Submitting..." : "Submit"}
+            </button>
+          </form>
+        </div>
+
+        {/* Image Section */}
+        <div className="hidden lg:block w-[40%]">
+          <img src={ContactUs_gif} alt="Contact Us" className="w-full h-auto object-cover select-none" draggable="false" />
         </div>
       </div>
-    </div>
+      {(data_process_state || submit_process_state) && <ProcessBgBlack />}
+    </section>
   );
 };
 

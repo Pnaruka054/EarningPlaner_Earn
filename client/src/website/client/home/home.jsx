@@ -1,88 +1,114 @@
-import React from "react";
-import { FaPlayCircle, FaAd, FaLink, FaUsers, FaMoneyBillWave, FaTrophy } from "react-icons/fa";
+import React, { useEffect, useRef, useState } from "react";
+import { FaMoneyBillWave, FaTrophy } from "react-icons/fa";
+import ProcessBgBlack from "../components/processBgBlack/processBgBlack";
+import Footer from "../components/footer/footer";
+import HeroSection from "../components/heroSection/heroSection";
+import WebStatistics from "../components/webStatistics/webStatistics";
+import AvailableWithdrawMethods from "../components/availableWithdrawMethods/availableWithdrawMethods";
+import SubscribeOurChannel from "../components/subscribeOurChannel/subscribeOurChannel";
+import ContactUs from "../components/contactUs/contactUs";
+import FAQs from "../components/FAQs/FAQs";
 
 const Home = () => {
   return (
-    <div className="overflow-auto h-[94vh] bg-[#ecf0f5] custom-scrollbar select-none">
-      {/* Hero Section */}
-      <section className="min-h-screen flex flex-col justify-center items-center text-center px-4 bg-gradient-to-r from-blue-900 via-purple-800 to-blue-900 text-white">
-        <h1 className="text-4xl sm:text-5xl font-extrabold mb-4 leading-tight">
-          Turn <span className="text-yellow-400">Your Time</span> into{' '}
-          <span className="text-green-400">Real Earnings</span>!
-        </h1>
-        <p className="text-lg sm:text-xl max-w-2xl">
-          Join <span className="font-semibold text-yellow-400">EarnWiz</span> and start earning today by completing
-          simple tasks. <strong>No investment, no risk</strong> – just <strong>easy rewards & real cash</strong>!
-        </p>
-        <div className="mt-6 flex flex-col sm:flex-row gap-4">
-          <button className="bg-yellow-400 text-blue-900 px-6 py-3 rounded-full text-lg font-semibold shadow-lg hover:bg-yellow-500 transition-all duration-300">
-            Start Earning Now
-          </button>
-          <button className="bg-transparent border border-white px-6 py-3 rounded-full text-lg font-semibold shadow-lg hover:bg-white hover:text-blue-900 transition-all duration-300">
-            Learn More
-          </button>
-        </div>
-      </section>
+    <div className="overflow-auto h-[92.5vh] bg-[#ecf0f5] custom-scrollbar select-none">
+      <header>
+        <HeroSection />
+      </header>
+      <main className='px-2 py-2'>
+        <WebStatistics />
+        <section className="my-5 mx-2 text-center rounded-md py-5 bg-white shadow-md">
+          <h2 className="text-4xl font-bold mb-4 text-blue-900 relative inline-block">
+            How <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-500">EarnWiz</span> Works?
+          </h2>
+          <p className="text-lg text-gray-700">It’s easy to start earning! Just follow these simple steps:</p>
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6 px-6 max-w-6xl mx-auto">
+            {[
+              {
+                icon: <FaMoneyBillWave className="text-5xl text-green-500 mb-3" />,
+                title: "Register",
+                desc: "Sign up for free and get started instantly."
+              },
+              {
+                icon: <FaTrophy className="text-5xl text-yellow-500 mb-3" />,
+                title: "Complete Tasks",
+                desc: "Watch ads, play games, and complete offers."
+              },
+              {
+                icon: <FaMoneyBillWave className="text-5xl text-green-500 mb-3" />,
+                title: "Withdraw Earnings",
+                desc: "Cash out via PayPal, bank transfer, or gift cards."
+              }
+            ].map((item, index) => (
+              <div
+                key={index}
+                className="bg-white text-blue-900 p-6 rounded-xl shadow-lg text-center flex flex-col items-center cursor-default border border-transparent 
+                 transition-all duration-300 hover:border-blue-500"
+                style={{ borderImage: "linear-gradient(to right, #3b82f6, #10b981) 1" }}
+              >
+                {item.icon}
+                <h3 className="text-xl font-bold mt-2">{item.title}</h3>
+                <p className="text-base text-gray-600 mt-1">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mx-auto my-6 px-4">
+            <ul className="text-lg text-gray-800 text-left space-y-4 inline-block px-6">
 
-      {/* How It Works Section */}
-      <div className="my-5 mx-2 text-center rounded-md py-5 bg-white shadow-md">
-        <h2 className="text-4xl font-bold mb-6 text-blue-900">How EarnWiz Works?</h2>
-        <p className="text-lg text-gray-700">It’s easy to start earning! Just follow these simple steps:</p>
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6 px-6 max-w-6xl mx-auto">
-          {[{
-            icon: <FaMoneyBillWave className="text-5xl text-green-500 mb-3" />,
-            title: "Register",
-            desc: "Sign up for free and get started instantly."
-          }, {
-            icon: <FaTrophy className="text-5xl text-yellow-500 mb-3" />,
-            title: "Complete Tasks",
-            desc: "Watch ads, play games, and complete offers."
-          }, {
-            icon: <FaMoneyBillWave className="text-5xl text-green-500 mb-3" />,
-            title: "Withdraw Earnings",
-            desc: "Cash out via PayPal, bank transfer, or gift cards."
-          }].map((item, index) => (
-            <div key={index} className="bg-white text-blue-900 p-6 rounded-lg shadow-xl text-center flex flex-col items-center cursor-default">
-              {item.icon}
-              <h3 className="text-xl font-semibold">{item.title}</h3>
-              <p className="text-sm">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+              <li className="flex items-center space-x-3">
+                <span className="text-blue-600 text-xl"><i className="fas fa-user-plus"></i></span>
+                <span><strong>Sign Up for Free:</strong> Create your EarnWiz account in just a few seconds. No complicated forms—just enter your details and start earning instantly.</span>
+              </li>
 
-      {/* Earning Methods Section */}
-      <div className="my-5 mx-2 text-center rounded-md py-5 bg-white shadow-md">
-        <h2 className="text-4xl font-bold text-center mb-8 text-blue-900">Ways to Earn Money</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[{
-            icon: <FaAd className="text-5xl mb-3" />,
-            title: "Watch Ads",
-            desc: "Earn money by watching ads daily.",
-            bgColor: "bg-green-500"
-          }, {
-            icon: <FaPlayCircle className="text-5xl mb-3" />,
-            title: "Play Games",
-            desc: "Win rewards by playing fun games.",
-            bgColor: "bg-blue-500"
-          }, {
-            icon: <FaLink className="text-5xl mb-3" />,
-            title: "Short Links",
-            desc: "Complete link tasks to earn instant cash.",
-            bgColor: "bg-yellow-500"
-          }, {
-            icon: <FaUsers className="text-5xl mb-3" />,
-            title: "Refer & Earn",
-            desc: "Invite friends & earn commission.",
-            bgColor: "bg-indigo-500"
-          }].map((method, index) => (
-            <div key={index} className={`${method.bgColor} p-6 rounded-lg shadow-lg text-center flex flex-col items-center transition-transform transform hover:scale-105 text-white`}>
-              {method.icon}
-              <h2 className="text-xl font-semibold">{method.title}</h2>
-              <p className="text-sm">{method.desc}</p>
-            </div>
-          ))}
-        </div>
+              <li className="flex items-center space-x-3">
+                <span className="text-green-600 text-xl"><i className="fas fa-rocket"></i></span>
+                <span><strong>Start Earning from Day One:</strong> As soon as you register, you can start earning immediately by completing simple tasks. No waiting, no delays—start today!</span>
+              </li>
+
+              <li className="flex items-center space-x-3">
+                <span className="text-purple-600 text-xl"><i className="fas fa-tasks"></i></span>
+                <span><strong>Explore Earning Opportunities:</strong> Earn money by completing various simple tasks such as watching ads, playing games, taking surveys, click shorten links, direct links and etc.</span>
+              </li>
+
+              <li className="flex items-center space-x-3">
+                <span className="text-yellow-600 text-xl"><i className="fas fa-calendar-check"></i></span>
+                <span><strong>Daily New Tasks:</strong> Get access to fresh earning opportunities every day. The more tasks you complete, the more you earn!</span>
+              </li>
+
+              <li className="flex items-center space-x-3">
+                <span className="text-red-500 text-xl"><i className="fas fa-users"></i></span>
+                <span><strong>Refer & Earn:</strong> Invite your friends to EarnWiz and get a lifetime <strong>5% commission</strong> on their earnings. The more people you refer, the higher your passive income.</span>
+              </li>
+
+              <li className="flex items-center space-x-3">
+                <span className="text-indigo-500 text-xl"><i className="fas fa-chart-line"></i></span>
+                <span><strong>Track Your Progress:</strong> Use our easy-to-navigate dashboard to monitor your earnings, completed tasks, and referral bonuses in real-time.</span>
+              </li>
+
+              <li className="flex items-center space-x-3">
+                <span className="text-green-500 text-xl"><i className="fas fa-wallet"></i></span>
+                <span><strong>Low Payout Threshold:</strong> Unlike other platforms, EarnWiz allows you to withdraw your earnings easily, with different minimum amounts based on your preferred payout method.</span>
+              </li>
+
+              <li className="flex items-center space-x-3">
+                <span className="text-blue-500 text-xl"><i className="fas fa-lock"></i></span>
+                <span><strong>Secure & Reliable Payments:</strong> All transactions are secure, and we ensure timely payouts so you can withdraw your earnings without any hassle.</span>
+              </li>
+
+              <li className="flex items-center space-x-3">
+                <span className="text-orange-500 text-xl"><i className="fas fa-headset"></i></span>
+                <span><strong>24/7 Support:</strong> Have questions or need help? Our dedicated support team is available round the clock to assist you.</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+        <AvailableWithdrawMethods />
+        <SubscribeOurChannel />
+        <ContactUs />
+        <FAQs />
+      </main>
+      <div className='mt-3'>
+        <Footer />
       </div>
     </div>
   );

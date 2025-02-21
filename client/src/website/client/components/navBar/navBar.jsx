@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import navBar_logo from '../../../../assets/EarningPlanerLogo.png'
 import SideMenu from '../sideMenu/sideMenu';
+import EarnWizLogo from '../../../../assets/EarnWizLogo.png'
 import { io } from 'socket.io-client';
 
 const NavBar = ({ show, availableBalance_forNavBar_state }) => {
@@ -53,24 +53,30 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
 
     if (show) {
         return (
-            <nav className="bg-blue-800 select-none h-14 px-4 flex items-center justify-between shadow-lg text-white relative">
-                <Link to="/" className="h-full flex items-center">
-                    <img className="h-10" src={navBar_logo} alt="EarnWiz Logo" />
+            <nav className={`bg-blue-800 select-none h-14 px-4 flex items-center justify-between ${toggelMenu_state === 'close' ? '' : 'shadow-lg'} text-white relative`}>
+                <Link to="/" className="h-full flex items-center z-[1] select-none" draggable="false">
+                    <div
+                        className="h-10 w-40 bg-no-repeat bg-contain"
+                        style={{ backgroundImage: `url(${EarnWizLogo})` }}
+                        aria-label="EarnWiz Logo"
+                    ></div>
                 </Link>
                 <ul
                     onClick={(e) => e.stopPropagation()}
                     ref={toggleMenu_icon}
-                    className="hidden md:flex items-center md:space-x-6 text-white absolute md:relative md:top-0 md:left-0 md:right-0 top-14 left-0 right-0 bg-blue-800 md:bg-transparent py-2 md:py-0 rounded-lg shadow-lg md:shadow-none"
-                >
+                    className={`md:flex md:items-center md:space-x-6 text-white absolute md:relative md:top-0 md:left-0 md:right-0 
+                        bg-blue-800 md:bg-transparent py-2 md:py-0 shadow-lg md:shadow-none 
+                        transition-all duration-300 ease-in-out transform ${toggelMenu_state === 'close' ? 'translate-y-0 md:space-y-0 space-y-2 opacity-100' : 'translate-y-[-100%] opacity-0 md:translate-y-0 md:opacity-100'
+                        } w-full md:w-auto top-14 left-0 right-0`}                >
                     <li>
                         <Link className="hover:text-yellow-400 px-3 py-2 rounded-lg transition" to="/">
                             Home
                         </Link>
                     </li>
                     <li>
-                        <Link className="hover:text-yellow-400 px-3 py-2 rounded-lg transition" to="#">
+                        <a className="hover:text-yellow-400 px-3 py-2 rounded-lg transition cursor-pointer" onClick={() => document.getElementById("FAQs")?.scrollIntoView({ behavior: "smooth" })}>
                             FAQ
-                        </Link>
+                        </a>
                     </li>
                     <li>
                         <Link className="hover:text-yellow-400 px-3 py-2 rounded-lg transition" to="/contact-us">
@@ -105,9 +111,9 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
     }
 
     return (
-        <nav className="bg-blue-800 select-none z-50 h-14 px-4 flex items-center fixed top-0 left-0 right-0 justify-between shadow-lg text-white">
+        <nav className="bg-blue-800 select-none z-[2] h-14 px-4 flex items-center fixed top-0 left-0 right-0 justify-between shadow-lg text-white">
             <Link to="/" className="h-full hidden md:flex items-center">
-                <img className="h-10" src={navBar_logo} alt="EarnWiz Logo" />
+                <img className="h-10" src={EarnWizLogo} alt="EarnWiz Logo" />
             </Link>
             <SideMenu sideMenu_show={{ sideMenu_state, setSideMenu_state }} />
             <span
