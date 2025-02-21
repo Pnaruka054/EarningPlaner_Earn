@@ -135,7 +135,7 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
                         {isUserLogin_state ? (
                             <Link
                                 to="/member/dashboard"
-                                className="border border-green-200 text-green-200 px-4 py-1 rounded-lg transition duration-300 hover:bg-green-200 hover:text-blue-900 hover:shadow-md"
+                                className="border inline-block m-2 md:m-auto border-green-200 text-green-200 px-4 py-1 rounded-lg transition duration-300 hover:bg-green-200 hover:text-blue-900 hover:shadow-md"
                             >
                                 Dashboard
                             </Link>
