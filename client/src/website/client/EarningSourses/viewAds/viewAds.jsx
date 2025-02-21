@@ -448,7 +448,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         </div>
                         <div className='gap-2 justify-center flex flex-wrap'>
                             {
-                                totalDirectLinkBtns_state.filter((values) => values.isExtension).map((values, index) => (
+                                totalDirectLinkBtns_state.filter((values) => !values.isExtension).map((values, index) => (
                                     <button key={index} disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1)) ? true : false} className={`${handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1)) ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
                                         handle_link_click(values.url, `btn${index + 1}`, values.amount)
                                     }}><span>{values.buttonTitle} {index + 1}</span><span>₹{values.amount}</span></button>
