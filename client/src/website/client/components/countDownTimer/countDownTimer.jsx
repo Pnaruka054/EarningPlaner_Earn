@@ -6,6 +6,9 @@ const CountdownTimer = ({ expireTime }) => {
     useEffect(() => {
         const targetTime = new Date(expireTime).getTime();
 
+        // Declare intervalId here
+        let intervalId;
+
         // Function to update the countdown every second
         const countdown = () => {
             const currentTime = new Date().getTime();
@@ -23,7 +26,7 @@ const CountdownTimer = ({ expireTime }) => {
         countdown();
 
         // Update countdown every 1000ms (1 second)
-        const intervalId = setInterval(countdown, 1000);
+        intervalId = setInterval(countdown, 1000);
 
         // Cleanup interval on component unmount
         return () => clearInterval(intervalId);

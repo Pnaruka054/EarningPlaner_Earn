@@ -58,8 +58,8 @@ const userReferByIncome_handle = async (session, userData, earningAmount) => {
                 referralRecord.income = (currentReferralIncome + referralIncrement).toFixed(3);
 
                 let userMonthlyRecord = await userMonthly_records_module
-                .findOne({ userDB_id: dateRecords_referBy._id, monthName })
-                .session(session);
+                    .findOne({ userDB_id: dateRecords_referBy._id, monthName })
+                    .session(session);
                 if (!userMonthlyRecord) {
                     userMonthlyRecord = new userMonthly_records_module({
                         userDB_id: dateRecords_referBy._id,
@@ -73,12 +73,11 @@ const userReferByIncome_handle = async (session, userData, earningAmount) => {
                 await Promise.all([
                     referralRecord.save({ session }),
                     referredUser.save({ session }),
-                    userMonthlyRecord.save({session})
+                    userMonthlyRecord.save({ session })
                 ]);
             }
-
-            return { success: true, msg: "Earnings updated successfully" };
         }
+        return { success: true, msg: "Earnings updated successfully" };
     } catch (error) {
         console.error("Error in updateEarnings function:", error);
         return { success: false, msg: "Error updating earnings" };
