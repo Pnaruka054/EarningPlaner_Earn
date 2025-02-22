@@ -29,6 +29,7 @@ import LastPage from './website/client/EarningSourses/clickShortedLink/lastPage'
 import PrivacyPolicy from './website/client/PrivacyPolicy/PrivacyPolicy';
 import Terms_of_Use from './website/client/Terms_of_Use/Terms_of_Use';
 import DMCA from './website/client/DMCA/DMCA';
+import checkClientIP from './website/client/components/checkClientIP/checkClientIP';
 
 const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
@@ -113,6 +114,38 @@ const App = () => {
       setshow_Full_NavBar_state((p) => p = true)
     }
   }, [location.pathname]);
+
+
+  useEffect(() => {
+
+    // Example usage:
+    checkClientIP().then(isReal => {
+      console.log("Is user IP real?", isReal);
+    });
+
+    async function callCheckIP() {
+      try {
+        // Server URL aur endpoint ko specify karen (yahan localhost:3000 assume kiya gaya hai)
+        const response = await fetch(`http://localhost:8000/`);
+
+        // Server se JSON response mil raha hai, use parse karen.
+        const data = await response.json();
+
+        // Data me aapko server side function ka result mil jayega.
+        console.log("Server result:", data);
+
+        // Agar aapko sirf boolean result chahiye:
+        if (data.isReal !== undefined) {
+          console.log("Is IP real? ", data.isReal);
+        }
+
+        // Aap is result ke hisaab se aage ka logic implement kar sakte hain.
+      } catch (error) {
+        console.error("Error calling server:", error);
+      }
+    }
+    callCheckIP();
+  }, []);
 
   return (
     <>
