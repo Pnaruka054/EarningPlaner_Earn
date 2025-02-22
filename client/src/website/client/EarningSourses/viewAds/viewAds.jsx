@@ -136,6 +136,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         }
         newTab.close();
         window.open(link, '_blank');
+        window.open(link, '_blank');
         window.open(`/waitRedirecting/?link=${encodeURIComponent(link + '||' + btnName + '||' + amount)}`, '_blank', 'noopener noreferrer');
     };
 

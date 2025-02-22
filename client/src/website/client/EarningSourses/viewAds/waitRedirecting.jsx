@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
-const randomNumber = Math.floor(Math.random() * 7) + 1;
+const randomNumber = Math.floor(Math.random() * 2) + 1;
 const WaitRedirecting = () => {
     const [redirectLink, setRedirectLink] = useState('');
-    const [waitingTimer_state, setWaitingTimer_state] = useState(10);
+    const [waitingTimer_state, setWaitingTimer_state] = useState(8);
 
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);

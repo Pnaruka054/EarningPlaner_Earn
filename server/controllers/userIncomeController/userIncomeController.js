@@ -431,15 +431,11 @@ const user_survey_available_get = async (req, res) => {
         const surveysWebsites = [
             {
                 surveyNetworkName: "TheoremReach",
-                url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}`
+                url: `https://theoremreach.com/respondent_entry/direct?api_key=aded5d2fcb4e683c0f60034c8c5e&user_id=${userId}`
             },
             {
                 surveyNetworkName: "CPX Research",
-                url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}&secure_hash=SECURITY_HASH`
-            },
-            {
-                surveyNetworkName: "YourSurveys (Cint)",
-                url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}&secure_hash=SECURITY_HASH`
+                url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}`
             },
             {
                 surveyNetworkName: "BitLabs",

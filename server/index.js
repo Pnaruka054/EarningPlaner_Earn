@@ -62,7 +62,7 @@ Database_connection();
 
 
 // route middlewares
-app.use(middleware.middleware_userLogin_check)
+app.use(cors(corsOptions), middleware.middleware_userLogin_check)
 app.use('/userRoute', cors(corsOptions), userRouter);
 app.use('/userWithdraw', cors(corsOptions), userWithdraw);
 app.use('/userIncomeRoute', cors(corsOptions), userIncomeRoute);
