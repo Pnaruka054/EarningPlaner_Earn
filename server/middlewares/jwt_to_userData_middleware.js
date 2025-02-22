@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const userSignUp_module = require('../model/userSignUp/userSignUp_module')
-const IP_proxyDetector = require('../helper/IP_proxyDetector')
 
 const middleware_userLogin_check = async (req, res, next) => {
     try {
@@ -16,14 +15,6 @@ const middleware_userLogin_check = async (req, res, next) => {
         ) {
             return next(); // Skip middleware for this route
         }
-
-        console.log(req.ip);
-        // Example usage:
-        checkServerIP(req.ip).then(isReal => {
-            console.log("Is provided IP real?", isReal);
-        });
-
-
 
         // Retrieve the token from cookies (assuming it's named 'jwtToken')
         const token = req.cookies.jwtToken; // 'jwtToken' is the cookie name you set in the login route

@@ -182,10 +182,10 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                     </div>
                 </div>
             </div>
-
-            <Footer />
-
             {data_process_state && <ProcessBgBlack />}
+            <div className='mt-3'>
+                <Footer />
+            </div>
         </div>
     );
 };

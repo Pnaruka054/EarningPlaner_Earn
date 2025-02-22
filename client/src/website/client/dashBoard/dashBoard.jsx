@@ -152,11 +152,11 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                         <div className='z-[1]'>₹{userData_state.mining || '0.0000'}</div>
                         <img src={Mining} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
                     </div> */}
-                    {/* bg-blue-300 <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
+                    <Link to="/member/fill-survey" className="bg-blue-300 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Fill Survey</div>
                         <div>Null</div>
-                        <img src={FillSurvey} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
-                    </div> */}
+                        <img src={FillSurvey} className='self-end mr-2 absolute bottom-3 right-1 hover_on_image opacity-[0.2]' />
+                    </Link>
                     {/* <Link to="/member/click-to-earn" className="bg-teal-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
                         <div>Click to Earn</div>
                         <div className='z-[1]'>₹0.2155</div>

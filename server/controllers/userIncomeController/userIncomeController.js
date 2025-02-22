@@ -11,6 +11,7 @@ const generateRandomString = require("../../helper/generateRandomString")
 const axios = require('axios')
 const viewAds_directLinksData_module = require("../../model/view_ads_direct_links/viewAds_directLinksData_module");
 const { userReferByIncome_handle, userIncome_handle } = require('../../helper/usersEarningsUpdate_handle')
+const userID_data_for_survey_module = require('../../model/userID_data_for_survey/userID_data_for_survey_module')
 
 const user_adsView_home_get = async (req, res) => {
     const session = await mongoose.startSession(); // Start a session
@@ -409,10 +410,122 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
     }
 };
 
+const user_survey_available_get = async (req, res) => {
+    try {
+        const userData = req.user;
+
+        let isUserIdDataFound = await userID_data_for_survey_module.findOne({ userDB_id: userData._id });
+
+        if (!isUserIdDataFound) {
+            const RandomString = generateRandomString(userData.userName.length);
+            isUserIdDataFound = new userID_data_for_survey_module({
+                userDB_id: userData._id,
+                userId: RandomString
+            });
+
+            await isUserIdDataFound.save(); // Save the new record
+        }
+
+        const userId = isUserIdDataFound.userId;
+
+        const surveysWebsites = [
+            {
+                surveyNetworkName: "TheoremReach",
+                url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}`
+            },
+            {
+                surveyNetworkName: "CPX Research",
+                url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}&secure_hash=SECURITY_HASH`
+            },
+            {
+                surveyNetworkName: "YourSurveys (Cint)",
+                url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}&secure_hash=SECURITY_HASH`
+            },
+            {
+                surveyNetworkName: "BitLabs",
+                url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}&secure_hash=SECURITY_HASH`
+            },
+            {
+                surveyNetworkName: "OfferToro",
+                url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}&secure_hash=SECURITY_HASH`
+            },
+            {
+                surveyNetworkName: "Peanut Labs",
+                url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}&secure_hash=SECURITY_HASH`
+            }
+        ];
+
+        const available_balance = (parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)).toFixed(3);
+
+        return res.status(200).json({
+            success: true,
+            msg: { available_balance, surveysWebsites }
+        });
+
+    } catch (error) {
+        console.error("Survey availability check error:", error);
+        return res.status(500).json({ success: false, message: "Survey check failed" });
+    }
+};
+
+const postback_patch = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const { mainPostback, bonus, status, trans_id, user_id, amount_local, amount_usd } = req.query;
+
+        if ((mainPostback === 'true' || bonus === 'true') && status === "1" && user_id) {
+            console.log(`💰 User ${user_id} earned INR ${amount_local} (USD: ${amount_usd})`);
+
+            const user_id_Found = await userID_data_for_survey_module.findOne({ userId: user_id }).session(session);
+            if (!user_id_Found) throw new Error(`User ID not found: ${user_id}`);
+
+            const userData = await userSignUp_module.findById(user_id_Found.userDB_id).session(session);
+            if (!userData) throw new Error(`User data not found for ID: ${user_id_Found.userDB_id}`);
+
+            const user_incomeUpdate = await userIncome_handle(session, userData, amount_local);
+            if (!user_incomeUpdate.success) throw new Error(user_incomeUpdate.error);
+
+            const refer_by_incomeupdate = await userReferByIncome_handle(session, userData, amount_local);
+            if (!refer_by_incomeupdate.success) throw new Error(refer_by_incomeupdate.error);
+
+            const { userMonthlyRecord } = user_incomeUpdate.values;
+            if (userMonthlyRecord) {
+                userMonthlyRecord.earningSources ||= {};
+                userMonthlyRecord.earningSources.fill_survey ||= { income: 0 };
+
+                userMonthlyRecord.earningSources.fill_survey.income = (
+                    parseFloat(userMonthlyRecord.earningSources.fill_survey.income || 0) + parseFloat(amount_local)
+                ).toFixed(3);
+            }
+
+            await Promise.all([
+                userMonthlyRecord?.save({ session }),
+                userData.save({ session })
+            ]);
+
+            await session.commitTransaction();
+            console.log("✅ Transaction committed successfully!");
+        } else if (status === "2") {
+            console.log(`❌ Transaction ${trans_id} (User: ${user_id}) reversed!`);
+        }
+
+        res.status(200).send("Postback received");
+    } catch (error) {
+        console.error("🚨 Postback error:", error.message);
+        await session.abortTransaction();
+        res.status(500).json({ success: false, message: error.message || "Postback processing failed" });
+    } finally {
+        session.endSession();
+    }
+};
+
 module.exports = {
     user_adsView_home_get,
     user_adsView_income_patch,
     user_shortlink_data_get,
     user_shortlink_firstPage_data_patch,
-    user_shortlink_lastPage_data_patch
+    user_shortlink_lastPage_data_patch,
+    user_survey_available_get,
+    postback_patch
 }
