@@ -126,7 +126,7 @@ const App = () => {
     async function callCheckIP() {
       try {
         // Server URL aur endpoint ko specify karen (yahan localhost:3000 assume kiya gaya hai)
-        const response = await fetch(`http://localhost:8000/`);
+        const response = await fetch(import.meta.env.VITE_SERVER_URL);
 
         // Server se JSON response mil raha hai, use parse karen.
         const data = await response.json();
