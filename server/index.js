@@ -12,6 +12,7 @@ const userRouter = require('./routes/user_router');
 const userWithdraw = require('./routes/userWIthdraw_router');
 const userIncomeRoute = require('./routes/userIncome_router');
 const userMessageRoute = require('./routes/userMessage_router');
+const postBack = require('./routes/postBack')
 const { cronForDaily_MonthlyData_Update } = require('./helper/cronJobs')
 
 const io = socketIo(server, {
@@ -45,7 +46,6 @@ app.use((req, res, next) => {
     req.io = io;
     next();
 });
-app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
 
@@ -63,10 +63,11 @@ Database_connection();
 
 // route middlewares
 app.use(middleware.middleware_userLogin_check)
-app.use('/userRoute', userRouter);
-app.use('/userWithdraw', userWithdraw);
-app.use('/userIncomeRoute', userIncomeRoute);
-app.use('/userMessageRoute', userMessageRoute);
+app.use('/userRoute', cors(corsOptions), userRouter);
+app.use('/userWithdraw', cors(corsOptions), userWithdraw);
+app.use('/userIncomeRoute', cors(corsOptions), userIncomeRoute);
+app.use('/userMessageRoute', cors(corsOptions), userMessageRoute);
+app.use('/postBack', postBack);
 
 // Scheduled cron tasks
 cronForDaily_MonthlyData_Update()
