@@ -10,21 +10,31 @@ const LastPage = () => {
   const [message, setMessage] = useState("Processing your request...");
   const [icon, setIcon] = useState(null);
   const [amount, setAmount] = useState(null);
+  const [countdown, setCountdown] = useState(10);
 
   useEffect(() => {
-    // 🛑 User ka back history clear karna
     window.history.replaceState(null, "", location.pathname);
 
     if (!uniqueToken) {
-      Swal.fire({
-        icon: "error",
-        title: "Invalid Request",
-        text: "Unique token is missing.",
-      });
-      navigate("/");
+      showSwal("error", "Invalid Request", "Unique token is missing.");
+      navigateAndClearHistory("/member/click-shorten-link");
       return;
     }
 
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === 1) {
+          clearInterval(timer);
+          sendRequest();
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [uniqueToken, navigate]);
+
+  const sendRequest = () => {
     axios
       .patch(
         `${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_shortlink_lastPage_data_patch`,
@@ -38,13 +48,11 @@ const LastPage = () => {
           setAmount(amountEarned);
           setIcon("🎉");
           setMessage(`You have earned ₹${amountEarned}!`);
-          setTimeout(() => {
-            window.history.replaceState(null, "", "/member/click-shorten-link");
-            navigate("/member/click-shorten-link");
-          }, 3000);
+          showSwal("success", "Earnings Added!", `₹${amountEarned} successfully added!`);
         } else {
           setIcon("⚠️");
           setMessage(response.data.message || "Something went wrong!");
+          showSwal("warning", "Error!", response.data.message || "Something went wrong!");
         }
       })
       .catch((error) => {
@@ -52,16 +60,41 @@ const LastPage = () => {
         setIcon("🚨");
         setMessage("Request failed. Please try again.");
         console.error("Error in sending patch request:", error);
+        showSwal("error", "Request Failed", "Please try again.");
+      })
+      .finally(() => {
+        // ✅ ✅ ✅ **Navigate and Clear History**
+        setTimeout(() => {
+          navigateAndClearHistory("/member/click-shorten-link");
+        }, 3000);
       });
-  }, [uniqueToken, navigate]);
+  };
+
+  const showSwal = (icon, title, text) => {
+    Swal.fire({
+      icon,
+      title,
+      text,
+      toast: true,
+      position: "top",
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      customClass: { popup: "swal-auto-position" },
+    });
+  };
+
+  const navigateAndClearHistory = (path) => {
+    window.location.replace(path); // ✅ Direct replace, no history
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-gray-200 p-6">
       <div className="bg-white shadow-xl rounded-lg p-8 max-w-md w-full text-center">
         {loading ? (
           <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-14 w-14 border-t-4 border-blue-600 border-opacity-75"></div>
-            <p className="mt-4 text-gray-700 text-lg font-semibold">{message}</p>
+            <p className="text-3xl font-bold text-blue-600">{countdown}</p>
+            <p className="mt-2 text-gray-700 text-lg font-semibold">Please wait...</p>
           </div>
         ) : (
           <div className="flex flex-col items-center">

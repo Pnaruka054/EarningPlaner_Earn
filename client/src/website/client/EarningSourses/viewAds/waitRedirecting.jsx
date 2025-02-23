@@ -14,31 +14,31 @@ const WaitRedirecting = () => {
     }, []);
 
     useEffect(() => {
-            const scripts = [
-                { src: "https://kulroakonsu.net/88/tag.min.js", attributes: { 'data-zone': '132939', 'data-cfasync': 'false' } },
-                { src: "https://js.onclckmn.com/static/onclicka.js", attributes: { 'data-admpid': '287247' } },
-                { src: "https://js.wpadmngr.com/static/adManager.js", attributes: { 'data-admpid': '287339' } }
-            ];
-        
-            const scriptElements = scripts.map(({ src, attributes }) => {
-                const script = document.createElement('script');
-                script.src = src;
-                script.async = true;
-        
-                // Additional attributes set karna
-                Object.entries(attributes).forEach(([key, value]) => {
-                    script.setAttribute(key, value);
-                });
-        
-                document.body.appendChild(script);
-                return script;
+        const scripts = [
+            { src: "https://kulroakonsu.net/88/tag.min.js", attributes: { 'data-zone': '132939', 'data-cfasync': 'false' } },
+            { src: "https://js.onclckmn.com/static/onclicka.js", attributes: { 'data-admpid': '287247' } },
+            { src: "https://js.wpadmngr.com/static/adManager.js", attributes: { 'data-admpid': '287339' } }
+        ];
+
+        const scriptElements = scripts.map(({ src, attributes }) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.async = true;
+
+            // Additional attributes set karna
+            Object.entries(attributes).forEach(([key, value]) => {
+                script.setAttribute(key, value);
             });
-        
-            // Cleanup function to remove all scripts on unmount
-            return () => {
-                scriptElements.forEach(script => document.body.removeChild(script));
-            };
-        }, []);  
+
+            document.body.appendChild(script);
+            return script;
+        });
+
+        // Cleanup function to remove all scripts on unmount
+        return () => {
+            scriptElements.forEach(script => document.body.removeChild(script));
+        };
+    }, []);
 
     useEffect(() => {
         let interval = setInterval(() => {

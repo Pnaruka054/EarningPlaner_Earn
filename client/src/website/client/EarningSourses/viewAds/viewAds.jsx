@@ -5,8 +5,7 @@ import Swal from 'sweetalert2'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CountdownTimer from '../../components/countDownTimer/countDownTimer';
-import success_sound from '../../../../assets/success_earn.mp3'
-import not_success_sound from '../../../../assets/not_success_earn.mp3'
+import earningSound from '../../components/earningSound'
 
 const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [handle_clickAds_btnClick_state, setHandle_clickAds_btnClick_state] = useState(false);
@@ -22,17 +21,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     // const [count_state, setCount_state] = useState(30);
     // const [count_handle_state, setCount_handle_state] = useState(false);
     const channel = new BroadcastChannel("viewAds_channel");
-
-    const playSound = (track) => {
-        if (track) {
-            const audio = new Audio(success_sound);
-            audio.play();
-        } else {
-            const audio = new Audio(not_success_sound);
-            audio.play();
-        }
-    };
-
 
     useEffect(() => {
         if (typeof document.hidden !== "undefined" && handle_clickAds_btnClick_state) {
@@ -200,7 +188,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                     icon: "success",
                                 });
                                 document.title = "✅ success!";
-                                playSound(true)
+                                earningSound(true)
                                 setTimeout(() => document.title = originalTitle, 4000);
                             })
                             .catch((error) => console.error("Error updating income:", error));
@@ -215,7 +203,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         text: "Something went wrong!",
                     });
                     document.title = "❌ failed";
-                    playSound(false)
+                    earningSound(false)
                     setTimeout(() => document.title = originalTitle, 2000);
                 }
             } else {
@@ -231,7 +219,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     text: "Something went wrong!",
                 });
                 document.title = "❌ failed";
-                playSound(false)
+                earningSound(false)
                 setTimeout(() => document.title = originalTitle, 2000);
             }
 
@@ -296,7 +284,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                 icon: "success",
                             });
                             document.title = "✅ success!"
-                            playSound(true)
+                            earningSound(true)
                             setTimeout(() => {
                                 document.title = originalTitle
                             }, 4000);
@@ -314,7 +302,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         text: "Something went wrong!",
                     });
                     document.title = "❌ failed"
-                    playSound(false)
+                    earningSound(false)
                     setTimeout(() => {
                         document.title = originalTitle
                     }, 4000);
@@ -451,7 +439,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                             <div className='flex flex-col items-center font-lexend text-2xl'>
                                 <div className='text-center'>Come Back After</div>
                                 <div className='text-4xl font-bold drop-shadow'>
-                                    {/* <CountdownTimer expireTime={viewAds_firstTimeLoad_state.ViewAdsexpireTImer} /> */}
+                                    <CountdownTimer expireTime={viewAds_firstTimeLoad_state.ViewAdsexpireTImer} />
                                 </div>
                             </div>
                         </div>
