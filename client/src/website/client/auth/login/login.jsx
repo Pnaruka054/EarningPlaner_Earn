@@ -3,75 +3,37 @@ import { Link, useNavigate } from 'react-router-dom';
 import ProcessBgBlack from '../../components/processBgBlack/processBgBlack';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import showNotification from '../../components/showNotification'
 import { useGoogleLogin } from "@react-oauth/google";
+import formatTime from '../../components/formatTime'
 
 const Login = () => {
     const [email_userName_state, setEmail_userName_state] = useState('');
     const [password_state, setPassword_state] = useState('');
     const [loginRemember_state, setLoginRemember_state] = useState(false);
-    const [error, setError] = useState([]);
+    const [error_state, setError_state] = useState([]);
     let [submit_process_state, setSubmit_process_state] = useState(false);
-    let [data_process_state, setData_process_state] = useState(false);
     const navigation = useNavigate();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setData_process_state(true);
-            try {
-                const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userLoginCheckGet`, {
-                    withCredentials: true
-                });
-                if (response.data.success && response.data.message) {
-                    // If the user is already logged in
-                    Swal.fire({
-                        title: 'You Already Logged In',
-                        text: 'Please Continue Earning',
-                        icon: 'error',
-                        timer: 5000,
-                        timerProgressBar: true,
-                        confirmButtonText: 'OK',
-                        didClose: () => {
-                            // Navigate to the dashboard after the modal closes
-                            navigation('/member/dashboard');
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error(error);
-                if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
-                    navigation('/login');
-                } else if (error.response.data.jwtMiddleware_error) {
-                    Swal.fire({
-                        title: 'Session Expired',
-                        text: 'Your session has expired. Please log in again.',
-                        icon: 'error',
-                        timer: 5000,
-                        timerProgressBar: true,
-                        confirmButtonText: 'OK',
-                        didClose: () => {
-                            navigation('/login');
-                        }
-                    });
-                }
-            } finally {
-                setData_process_state(false);
-            }
-        };
-        fetchData();
-    }, []);
     let dataBase_post_login = async (obj) => {
         try {
             let response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/userRoute/login`, obj, {
                 withCredentials: true // This ensures cookies are sent with the request
             })
-            setError([])
+            setError_state([])
             if (response) {
+                showNotification(false, 'Login Success!')
                 navigation('/member/dashboard')
             }
-            setSubmit_process_state(false)
         } catch (error) {
-            setSubmit_process_state(false)
-            console.log(error);
+            console.error(error);
+            if (error?.response?.data?.error_msg) {
+                showNotification(true, error?.response?.data?.error_msg)
+            } else {
+                showNotification(true, "Something went wrong, please try again.");
+            }
+        } finally {
+            setSubmit_process_state(false);
         }
     }
 
@@ -93,15 +55,21 @@ const Login = () => {
                     withCredentials: true // This ensures cookies are sent with the request
                 });
                 if (response) {
+                    showNotification(false, 'success!')
                     navigation('/member/dashboard')
                 }
-                setSubmit_process_state(false)
             } else {
                 throw new Error(authResult);
             }
         } catch (error) {
-            setSubmit_process_state(false)
             console.log(error);
+            if (error?.response?.data?.error_msg) {
+                showNotification(true, error?.response?.data?.error_msg);
+            } else {
+                showNotification(true, "Something went wrong, please try again.");
+            }
+        } finally {
+            setSubmit_process_state(false);
         }
     };
 
@@ -117,6 +85,7 @@ const Login = () => {
         setSubmit_process_state(true)
     };
 
+    // forgot password handle
     const handleForgotPassword = () => {
         Swal.fire({
             title: "Forgot Password",
@@ -138,12 +107,39 @@ const Login = () => {
                 })
                     .then((response) => response.json())
                     .then((data) => {
-                        if (!data.success) {
-                            throw new Error(data.message || "Something went wrong");
+                        if (!data?.success) {
+                            let timeLeftMs = data?.time_left || 0;
+
+                            // Show Swal alert with countdown
+                            return new Promise((resolve, reject) => {
+                                Swal.fire({
+                                    title: "Error",
+                                    html: `<strong>${data?.error_msg}</strong><br>
+                                           <p>Try again after <span id="countdown">${formatTime(timeLeftMs)}</span></p>`,
+                                    icon: "error",
+                                    timer: timeLeftMs,
+                                    showConfirmButton: false,
+                                    didOpen: () => {
+                                        const countdownEl = document.getElementById("countdown");
+
+                                        let interval = setInterval(() => {
+                                            timeLeftMs -= 1000;
+                                            countdownEl.innerText = formatTime(timeLeftMs);
+
+                                            if (timeLeftMs <= 0) {
+                                                clearInterval(interval);
+                                                Swal.close();
+                                                resolve(); // Resolve promise after countdown
+                                            }
+                                        }, 1000);
+                                    }
+                                });
+                            });
                         }
                         return data;
                     })
                     .catch((error) => {
+                        console.log(error);
                         Swal.showValidationMessage(`Request failed: ${error.message}`);
                     });
             },
@@ -200,8 +196,8 @@ const Login = () => {
                     Don’t have an account? <Link to="/signup" className='text-blue-600 underline' >Register a New Account</Link>
                 </p>
             </div>
-            {(submit_process_state || data_process_state) && <ProcessBgBlack />}
-            {error.length > 0 && error.map((value, index) => (
+            {submit_process_state && <ProcessBgBlack />}
+            {error_state.length > 0 && error_state.map((value, index) => (
                 <Error key={index} color="yellow" text={value} />
             ))}
         </div>

@@ -12,6 +12,7 @@ const middleware_userLogin_check = async (req, res, next) => {
             || req.originalUrl.includes('/userRoute/userLoginforgot_password_send_mail')
             || req.originalUrl.includes('/userRoute/reset_password_form_post')
             || req.originalUrl.includes('/userRoute/verify_reset_token')
+            || req.originalUrl.includes('/userRoute/verify_reset_email_token')
         ) {
             return next(); // Skip middleware for this route
         }
@@ -45,9 +46,26 @@ const middleware_userLogin_check = async (req, res, next) => {
         }
 
         if (decoded.jwtUser.password !== decodedData_fromDB.password) {
+            res.clearCookie('jwtToken', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None'
+            });
             return res.status(404).json({
                 success: false,
                 jwtMiddleware_user_not_found_error: 'password mismatch please login again'
+            });
+        }
+
+        if (decoded.jwtUser.email_address !== decodedData_fromDB.email_address) {
+            res.clearCookie('jwtToken', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None'
+            });
+            return res.status(404).json({
+                success: false,
+                jwtMiddleware_user_not_found_error: 'email updated please login again'
             });
         }
 

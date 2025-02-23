@@ -4,12 +4,15 @@ import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FaClipboard, FaClipboardCheck } from "react-icons/fa";
+
 
 const Deposit = ({ setShowBottomAlert_state, setAvailableBalance_forNavBar_state }) => {
     const [deposit_amount_state, setDeposit_amount_state] = useState(0);
     let [data_process_state, setData_process_state] = useState(false);
     let [submit_process_state, setSubmit_process_state] = useState(false);
     const navigation = useNavigate();
+    const [copied, setCopied] = useState(false);
     let [balanceData_state, setBalanceData_state] = useState({
         withdrawable_amount: '0.000',
         deposit_amount: '0.000',
@@ -23,10 +26,9 @@ const Deposit = ({ setShowBottomAlert_state, setAvailableBalance_forNavBar_state
     });
     const handleCopy = () => {
         const textToCopy = document.getElementById('copyText');
-        navigator.clipboard.writeText(textToCopy.textContent).then(() => {
-            setShowBottomAlert_state(true);
-            setTimeout(() => setShowBottomAlert_state(false), 2000);
-        });
+        navigator.clipboard.writeText(textToCopy);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     };
 
     const fetchData = async () => {
@@ -80,8 +82,11 @@ const Deposit = ({ setShowBottomAlert_state, setAvailableBalance_forNavBar_state
                 <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
                     Deposit Amount
                 </div>
-                <div className='text-center bg-gradient-to-r from-teal-400 via-teal-600 to-teal-400 py-3 px-6 rounded-lg shadow-lg text-white font-lexend mb-4'>
-                    Deposit Balance - ₹{balanceData_state.deposit_amount || 0.000}
+                <div className="text-center bg-gradient-to-r from-teal-500 via-teal-600 to-teal-500 py-4 px-8 rounded-xl shadow-xl text-white font-lexend mb-4 border border-white/20 backdrop-blur-lg">
+                    <p className="text-lg font-semibold tracking-wide">Deposit Balance</p>
+                    <p className="text-2xl font-bold mt-1">
+                        ₹{balanceData_state.deposit_amount || "0.000"}
+                    </p>
                 </div>
                 <div className='flex justify-center'>
                     <ul className='flex flex-wrap justify-center gap-5'>
@@ -124,39 +129,46 @@ const Deposit = ({ setShowBottomAlert_state, setAvailableBalance_forNavBar_state
                         <li className='blue-right-list-image'>Note: do not cancel the deposit order after the money has been transferred.</li>
                     </ul>
                 </div>
-                <div className='my-5 pb-5'>
+                <div className="my-6 pb-5">
                     <p className='text-center text-lg my-3'>Deposit History</p>
                     <hr className='w-full m-auto border border-gray-300 shadow-lg' />
-                    <ul className='mt-4 space-y-4'>
-                        <li className='bg-white px-3 py-5 rounded-lg text-[14px] sm:text-[16px] shadow-md mt-4'>
-                            <div className='flex justify-between'>
-                                <p className='px-3 cursor-pointer py-1 rounded-md text-white bg-red-500'>Deposit</p>
-                                <p className='text-green-600 font-bold'>Completed</p>
+                    <ul className="mt-6 space-y-6">
+                        <li className="bg-gray-50 p-3 rounded-xl text-[15px] sm:text-[16px] shadow-md">
+                            <div className="flex justify-between items-center">
+                                <p className="px-4 py-1 rounded-md text-white bg-red-600 font-medium">
+                                    Deposit
+                                </p>
+                                <p className="text-green-700 font-semibold bg-green-100 px-3 py-1 rounded-md">
+                                    Completed
+                                </p>
                             </div>
-                            <div className='mt-2'>
-                                <div className='flex justify-between px-2'>
-                                    <span className='text-gray-500 font-medium'>Balance</span>
-                                    <span className='text-blue-600 font-medium'>₹328.00</span>
+                            <div className="mt-4 space-y-2">
+                                <div className="flex justify-between px-2">
+                                    <span className="text-gray-600 font-medium">Balance</span>
+                                    <span className="text-blue-700 font-semibold">₹328.00</span>
                                 </div>
-                                <div className='flex justify-between px-2'>
-                                    <span className='text-gray-500 font-medium'>Type</span>
-                                    <span className='text-gray-500 font-medium'>BANK CARD</span>
+                                <div className="flex justify-between px-2">
+                                    <span className="text-gray-600 font-medium">Type</span>
+                                    <span className="text-gray-800 font-medium">BANK CARD</span>
                                 </div>
-                                <div className='flex justify-between px-2'>
-                                    <span className='text-gray-500 font-medium'>Time</span>
-                                    <span className='text-gray-500 font-medium'>2025-01-24 06:24:11</span>
+                                <div className="flex justify-between px-2">
+                                    <span className="text-gray-600 font-medium">Time</span>
+                                    <span className="text-gray-800 font-medium">2025-01-24 06:24:11</span>
                                 </div>
-                                <div className='flex justify-between px-2'>
-                                    <span className='text-gray-500 font-medium'>Order number</span>
-                                    <span className='text-gray-500 font-medium space-x-1'>
-                                        <span id='copyText'>WD20250125458KJSH4584</span>
-                                        <i onClick={(e) => {
-                                            handleCopy()
-                                            e.target.className = 'fa-solid fa-clipboard cursor-pointer'
-                                            setTimeout(() => {
-                                                e.target.className = 'fa-regular fa-clipboard cursor-pointer'
-                                            }, 2000);
-                                        }} className="fa-regular fa-clipboard cursor-pointer"></i>
+                                <div className="flex justify-between px-2 items-center">
+                                    <span className="text-gray-600 font-medium">Order number</span>
+                                    <span className="text-gray-800 font-medium flex items-center space-x-2">
+                                        <span id="copyText">WD20250125458KJSH4584</span>
+                                        <button
+                                            onClick={handleCopy}
+                                            className="text-gray-600"
+                                        >
+                                            {copied ? (
+                                                <FaClipboardCheck className="text-green-600" />
+                                            ) : (
+                                                <FaClipboard />
+                                            )}
+                                        </button>
                                     </span>
                                 </div>
                             </div>

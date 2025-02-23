@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
 import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
-import Swal from 'sweetalert2'
+import showNotificationWith_timer from '../components/showNotificationWith_timer';
+import showNotification from '../components/showNotification';
 
-const Profile = () => {
-    const [formData, setFormData] = useState({
+const Profile = ({setAvailableBalance_forNavBar_state}) => {
+    const [formData_state, setFormData_state] = useState({
         name: '',
         address: '',
         city: '',
@@ -26,29 +27,21 @@ const Profile = () => {
                 const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userProfileData_get`, {
                     withCredentials: true
                 });
-                setFormData((prev) => ({ ...prev, ...response.data.msg }));
+                setAvailableBalance_forNavBar_state(response?.data?.msg?.available_balance);
+                setFormData_state((prev) => ({ ...prev, ...response.data.msg }));
             } catch (error) {
-                if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
-                    navigation('/login');
-                } else if (error.response.data.jwtMiddleware_error) {
-                    Swal.fire({
-                        title: 'Session Expired',
-                        text: 'Your session has expired. Please log in again.',
-                        icon: 'error',
-                        timer: 5000,
-                        timerProgressBar: true,
-                        confirmButtonText: 'OK',
-                        didClose: () => {
-                            navigation('/login');
-                        }
-                    });
-                }
                 console.error(error);
+                if (error?.response?.data?.jwtMiddleware_token_not_found_error || error?.response?.data?.jwtMiddleware_user_not_found_error) {
+                    navigation('/login');
+                } else if (error?.response?.data?.jwtMiddleware_error) {
+                    showNotificationWith_timer(true, 'Your session has expired. Please log in again.', '/login', navigation);
+                } else {
+                    showNotification(true, "Something went wrong, please try again.");
+                }
             } finally {
                 setData_process_state(false);
             }
         };
-
         fetchData();
     }, []);
     let dataBase_patch_userData = async (obj) => {
@@ -56,32 +49,22 @@ const Profile = () => {
             await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userRoute/userProfileData_patch`, obj, {
                 withCredentials: true
             });
-
-            setSubmit_process_state(false);
-
-            Swal.fire({
-                title: "Success!",
-                icon: "success",
-                timer: 5000,
-                timerProgressBar: true,
-            });
-
-
+            showNotification(false, "Profile Updated Successfully!");
         } catch (error) {
+            console.error(error)
+            if (error?.response?.data?.error_msg) {
+                showNotificationWith_timer(true, error?.response?.data?.error_msg);
+            } else {
+                showNotification(true, "Something went wrong, please try again.");
+            }
+        } finally {
             setSubmit_process_state(false);
-            console.error(error);
-
-            Swal.fire({
-                title: "Error!",
-                text: "There was an issue updating your profile.",
-                icon: "error"
-            });
         }
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prevFormData) => ({
+        setFormData_state((prevFormData) => ({
             ...prevFormData,
             [name]: value,
         }));
@@ -91,14 +74,14 @@ const Profile = () => {
         e.preventDefault();
         setSubmit_process_state(true);
         let obj = {
-            name: formData.name,
-            address: formData.address,
-            city: formData.city,
-            state: formData.state,
-            zip_code: formData.zip_code,
-            mobile_number: formData.mobile_number,
-            withdrawal_method: formData.withdrawal_method,
-            withdrawal_account_information: formData.withdrawal_account_information,
+            name: formData_state.name,
+            address: formData_state.address,
+            city: formData_state.city,
+            state: formData_state.state,
+            zip_code: formData_state.zip_code,
+            mobile_number: formData_state.mobile_number,
+            withdrawal_method: formData_state.withdrawal_method,
+            withdrawal_account_information: formData_state.withdrawal_account_information,
         }
         dataBase_patch_userData(obj);
     };
@@ -114,7 +97,7 @@ const Profile = () => {
                         name="name"
                         className="w-full p-2 border border-gray-300 rounded-md"
                         id="name"
-                        value={formData.name}
+                        value={formData_state.name}
                         onChange={handleChange}
                         required
                     />
@@ -126,7 +109,7 @@ const Profile = () => {
                         name="address"
                         className="w-full p-2 border border-gray-300 rounded-md"
                         id="address"
-                        value={formData.address}
+                        value={formData_state.address}
                         onChange={handleChange}
                         required
                     />
@@ -139,7 +122,7 @@ const Profile = () => {
                             name="city"
                             className="w-full p-2 border border-gray-300 rounded-md"
                             id="city"
-                            value={formData.city}
+                            value={formData_state.city}
                             onChange={handleChange}
                             required
                         />
@@ -151,7 +134,7 @@ const Profile = () => {
                             name="state"
                             className="w-full p-2 border border-gray-300 rounded-md"
                             id="state"
-                            value={formData.state}
+                            value={formData_state.state}
                             onChange={handleChange}
                             required
                         />
@@ -165,7 +148,7 @@ const Profile = () => {
                             name="zip_code"
                             className="w-full p-2 border border-gray-300 rounded-md"
                             id="zip_code"
-                            value={formData.zip_code}
+                            value={formData_state.zip_code}
                             onChange={handleChange}
                             required
                         />
@@ -176,7 +159,7 @@ const Profile = () => {
                             name="country"
                             className="w-full p-2 border border-gray-300 rounded-md"
                             id="country"
-                            value={formData.country}
+                            value={formData_state.country}
                             onChange={handleChange}
                             required
                         >
@@ -195,7 +178,7 @@ const Profile = () => {
                             name="mobile_number"
                             className="w-full p-2 border border-gray-300 rounded-md"
                             id="mobile_number"
-                            value={formData.mobile_number}
+                            value={formData_state.mobile_number}
                             onChange={handleChange}
                             required
                         />
@@ -211,18 +194,18 @@ const Profile = () => {
                                 name="withdrawal_method"
                                 className="w-full p-2 border border-gray-300 rounded-md"
                                 id="withdrawal_method"
-                                value={formData.withdrawal_method}
+                                value={formData_state.withdrawal_method}
                                 onChange={handleChange}
                                 required
                             >
                                 <option value="">Choose</option>
-                                {formData.withdrawal_methods_data?.map((method, index) => (
+                                {formData_state.withdrawal_methods_data?.map((method, index) => (
                                     <option key={index} value={method.withdrawal_method}>{method.withdrawal_method}</option>
                                 ))}
                             </select>
                         </div>
                         <ul className='mt-3 space-y-5 sm:mb-0 mb-4' style={{ fontSize: "14px" }}>
-                            {formData.withdrawal_methods_data?.map((method, index) => (
+                            {formData_state.withdrawal_methods_data?.map((method, index) => (
                                 <li className='purple-right-list-image' key={index}> {method.description}</li>
                             ))}
                         </ul>
@@ -236,7 +219,7 @@ const Profile = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {formData.withdrawal_methods_data?.map((method, index) => (
+                                {formData_state.withdrawal_methods_data?.map((method, index) => (
                                     <tr key={index} className="border-t">
                                         <td className="p-2">{method.withdrawal_method}</td>
                                         <td className="p-2">{method.minimum_amount}</td>
@@ -253,7 +236,7 @@ const Profile = () => {
                         className="w-full p-3 border border-gray-300 rounded-md"
                         id="withdrawal_account_information"
                         rows="5"
-                        value={formData.withdrawal_account_information}
+                        value={formData_state.withdrawal_account_information}
                         onChange={handleChange}
                         required
                     ></textarea>

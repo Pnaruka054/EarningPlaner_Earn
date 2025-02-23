@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import ProcessBgBlack from "../components/processBgBlack/processBgBlack";
+import showNotificationWith_timer from '../components/showNotificationWith_timer'
+import showNotification from '../components/showNotification'
 
 const PasswordResetForm = () => {
     const [password_state, setPassword_state] = useState("");
@@ -10,7 +12,7 @@ const PasswordResetForm = () => {
     const [data_process_state, setData_process_state] = useState(false);
     const [isTokenValid, setIsTokenValid] = useState(false); // State to check token validity
     let { token } = useParams();
-    const navigate = useNavigate();
+    const navigation = useNavigate();
 
     // Token verification on page load
     useEffect(() => {
@@ -23,28 +25,22 @@ const PasswordResetForm = () => {
                     }
                 );
 
-                const data = await response.json();
+                const data = await response.json(); // ✅ Ab safe hai JSON parse karna    
                 if (data.success) {
                     setIsTokenValid(true);
+                    showNotificationWith_timer(false, data.msg, '', navigation);
                 } else {
-                    navigate("/login"); // Redirect to login if token is invalid
+                    showNotificationWith_timer(true, data.error_msg, '/login', navigation);
                 }
             } catch (error) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Token Verification Failed!",
-                    text: error.message || "Something went wrong.",
-                    toast: true,
-                    position: "top-right",
-                    timer: 4000,
-                    timerProgressBar: true, // ⏳ Progress bar added
-                    showConfirmButton: false,
-                });
-                navigate("/login");
+                console.error("Token Verification Error:", error.message); // ✅ Debug ke liye
+                showNotification(true, 'Token Verification Failed!')
+                navigation("/login");
             }
         };
+
         verifyToken();
-    }, [token, navigate]);
+    }, [token, navigation]);
 
     const handlePasswordUpdate_submit = async (e) => {
         e.preventDefault();
@@ -52,16 +48,7 @@ const PasswordResetForm = () => {
 
         // 🛑 Password Matching Validation
         if (password_state !== confirmPassword_state) {
-            Swal.fire({
-                icon: "error",
-                title: "Password Mismatch!",
-                text: "Passwords do not match. Please enter the same password in both fields.",
-                toast: true,
-                position: "top-right",
-                timer: 4000,
-                timerProgressBar: true, // ⏳ Progress bar added
-                showConfirmButton: false,
-            });
+            showNotification(true, 'Passwords do not match. Please enter the same password in both fields.')
             setSubmit_process_state(false);
             return;
         }
@@ -84,22 +71,11 @@ const PasswordResetForm = () => {
             const data = await response.json();
             if (!data.success) {
                 throw new Error(data.message || "Password reset failed.");
+            } else if (data.error_msg) {
+                showNotificationWith_timer(true, data.error_msg, '', navigation);
+            } else if (data.success) {
+                showNotificationWith_timer(false, data.msg, '/', navigation);
             }
-
-            // ✅ Success Swal with Progress Bar
-            Swal.fire({
-                icon: "success",
-                title: "Password Reset Successful!",
-                text: "You can now log in with your new password.",
-                didClose: () => {
-                    navigate("/login");
-                },
-                toast: true,
-                position: "top-right",
-                timer: 4000,
-                timerProgressBar: true, // ⏳ Progress bar added
-                showConfirmButton: false,
-            });
 
         } catch (err) {
             Swal.fire({

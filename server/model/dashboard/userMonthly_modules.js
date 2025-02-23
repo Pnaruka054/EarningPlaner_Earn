@@ -15,6 +15,9 @@ const monthSchema = new mongoose.Schema({
         referral_income: {
             income: { type: String },
         },
+        fill_survey: {
+            income: { type: String },
+        },
     },
     createdAt: { type: Date, default: Date.now, expires: '1y' } // Data will expire after 1 year
 });

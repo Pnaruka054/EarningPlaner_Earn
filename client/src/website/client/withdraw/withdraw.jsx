@@ -5,12 +5,14 @@ import axios from 'axios'
 import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import { useNavigate } from 'react-router-dom'
 import Pagination from '../components/pagination/pagination';
+import { FaClipboard, FaClipboardCheck } from "react-icons/fa";
 
 const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
     const [withdraw_amount_state, setWithdraw_amount_state] = useState(0);
     let [data_process_state, setData_process_state] = useState(false);
     let [submit_process_state, setSubmit_process_state] = useState(false);
     const navigation = useNavigate();
+    const [copied_state, setCopied_state] = useState(false);
     const [currentPage_state, setCurrentPage_state] = useState(1);
     let [balanceData_state, setBalanceData_state] = useState({
         withdrawable_amount: '0.000',
@@ -24,16 +26,10 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
         withdrawal_methodsData: []
     });
     const handleCopy = (e) => {
-        const textToCopy = e.target.parentElement.children[0].innerText;
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            Swal.fire({
-                icon: 'success',
-                title: 'Copied!',
-                text: 'Text has been copied to clipboard.',
-                timer: 1000,
-                showConfirmButton: false,
-            });
-        });
+        const textToCopy = e.currentTarget.parentElement.children[0].innerText;
+        navigator.clipboard.writeText(textToCopy);
+        setCopied_state(true);
+        setTimeout(() => setCopied_state(false), 2000);
     };
 
     const fetchData = async () => {
@@ -291,7 +287,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
     const totalPages = Math.ceil(withdrawArray?.length / itemsPerPage);
 
     return (
-        <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+        <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12 custom-scrollbar">
             <div className='px-2 py-2'>
                 <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
                     Withdraw Amount
@@ -396,52 +392,65 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                 <div className='my-5 pb-5'>
                     <p className='text-center text-lg my-3'>Withdraw History</p>
                     <hr className='m-auto border border-gray-300 shadow-lg' />
-                    <ul className='mt-4 space-y-4'>
-                        {
-                            currentReferrals?.map((record, index) => (
-                                <li key={index} className='bg-white px-3 py-5 rounded-lg shadow-md text-[14px] sm:text-[16px]'>
-                                    <div className='flex justify-between'>
-                                        <p className='px-3 cursor-pointer py-1 rounded-md text-white bg-red-500'>Withdraw</p>
-                                        <p className={`font-bold ${record.withdrawal_status === 'Pending' ? 'text-yellow-500' :
-                                            record.withdrawal_status === 'Success' ? 'text-green-600' :
-                                                record.withdrawal_status === 'Reject' ? 'text-red-600' : ''
-                                            }`}>{record.withdrawal_status}</p>
-                                    </div>
+                    <ul className="mt-6 space-y-6">
+                        {currentReferrals?.map((record, index) => (
+                            <li key={index} className="bg-gray-50 p-4 rounded-xl shadow-md text-[15px] sm:text-[16px]">
+                                <div className="flex justify-between items-center">
+                                    <p className="px-4 py-1 rounded-md text-white bg-red-500 font-medium">
+                                        Withdraw
+                                    </p>
+                                    <p
+                                        className={`font-semibold px-3 py-1 rounded-md ${record.withdrawal_status === "Pending"
+                                            ? "text-yellow-700 bg-yellow-100"
+                                            : record.withdrawal_status === "Success"
+                                                ? "text-green-700 bg-green-100"
+                                                : record.withdrawal_status === "Reject"
+                                                    ? "text-red-700 bg-red-100"
+                                                    : ""
+                                            }`}
+                                    >
+                                        {record.withdrawal_status}
+                                    </p>
+                                </div>
 
-                                    <div className='mt-2'>
-                                        <div className='flex justify-between px-2'>
-                                            <span className='text-gray-500 font-medium'>Balance</span>
-                                            <span className='text-blue-600 font-medium'>₹{record.balance}</span>
-                                        </div>
-                                        <div className='flex justify-between px-2'>
-                                            <span className='text-gray-500 font-medium'>Type</span>
-                                            <span className='text-gray-500 font-medium'>{record.type}</span>
-                                        </div>
-                                        <div className='flex justify-between px-2'>
-                                            <span className='text-gray-500 font-medium'>Time</span>
-                                            <span className='text-gray-500 font-medium'>{record.time}</span>
-                                        </div>
-                                        <div className='flex justify-between px-2'>
-                                            <span className='text-gray-500 font-medium'>Order number</span>
-                                            <span className='text-gray-500 font-medium space-x-1'>
-                                                <span>{record._id.toUpperCase()}</span>
-                                                <i onClick={(e) => {
-                                                    handleCopy(e)
-                                                    e.target.className = 'fa-solid fa-clipboard cursor-pointer'
-                                                    setTimeout(() => {
-                                                        e.target.className = 'fa-regular fa-clipboard cursor-pointer'
-                                                    }, 2000);
-                                                }} className="fa-regular fa-clipboard cursor-pointer"></i>
-                                            </span>
-                                        </div>
+                                <div className="mt-4 space-y-2">
+                                    <div className="flex justify-between px-2">
+                                        <span className="text-gray-600 font-medium">Balance</span>
+                                        <span className="text-blue-700 font-semibold">₹{record.balance}</span>
                                     </div>
-                                </li>
-                            ))
-                        }
+                                    <div className="flex justify-between px-2">
+                                        <span className="text-gray-600 font-medium">Type</span>
+                                        <span className="text-gray-800 font-medium">{record.type}</span>
+                                    </div>
+                                    <div className="flex justify-between px-2">
+                                        <span className="text-gray-600 font-medium">Time</span>
+                                        <span className="text-gray-800 font-medium">{record.time}</span>
+                                    </div>
+                                    <div className="flex justify-between px-2 items-center">
+                                        <span className="text-gray-600 font-medium">Order Number</span>
+                                        <span className="text-gray-800 font-medium flex items-center space-x-2">
+                                            <span>{record._id.toUpperCase()}</span>
+                                            <button
+                                                onClick={(e) => {
+                                                    handleCopy(e);
+                                                    setCopied_state(true);
+                                                    setTimeout(() => setCopied_state(false), 2000);
+                                                }}
+                                                className="text-gray-600"
+                                            >
+                                                {copied_state ? <FaClipboardCheck className="text-green-600" /> : <FaClipboard />}
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </li>
+                        ))}
                     </ul>
-                    {currentReferrals.length === 0 && <div className='h-48 rounded-lg flex items-center justify-center'>
-                        No Record
-                    </div>}
+                    {currentReferrals.length === 0 && (
+                        <div className="text-center h-48 flex items-center justify-center text-gray-500 font-semibold">
+                            🚫 No Withdrawals Yet
+                        </div>
+                    )}
                 </div>
                 {totalPages > 1 && <Pagination
                     totalPages={totalPages}

@@ -12,15 +12,17 @@ const userDate_records_module = require("../../model/dashboard/userDate_modules"
 const withdrawal_methods_module = require('../../model/withdraw/withdraw_methods_module')
 const current_time_get = require('../../helper/currentTimeUTC')
 const getFormattedMonth = require("../../helper/getFormattedMonth")
-const resetPassword_req_data = require('../../model/resetPassword_req_data/resetPassword_req_data')
+const userUniqueTokenData_module = require('../../model/userUniqueTokenData_10minEx/userUniqueTokenData_module')
 
 
 function jwt_accessToken(user) {
     return jwt.sign({ jwtUser: user }, process.env.JWT_ACCESS_KEY, { expiresIn: '2h' })
 }
 
+// for user registration
 let userSignUp = async (req, res) => {
     try {
+        // check express validation errors
         const errors = validationResult(req)
         if (!errors.isEmpty()) {
             return res.status(400).json({
@@ -29,46 +31,78 @@ let userSignUp = async (req, res) => {
             })
         }
 
+        // format current month and year (e.g., "January 2024")
         const monthName = getFormattedMonth()
 
         const { name, mobile_number, email_address, password, refer_by } = req.body
 
+        // taking userName from email Address
+        let userName = email_address.split('@')[0]
+
+        // convert password in unreadable formate
         const bcrypt_pasword = await bcrypt.hash(password, 10)
-        const isExists = await userSignUp_module.findOne({ email_address })
+
+        // checkinig if user email or mobile number already registered
+        const isExists = await userSignUp_module.findOne({
+            $or: [
+                { email_address },
+                { mobile_number }
+            ]
+        })
         if (isExists) {
-            return res.status(400).json({
+            return res.status(409).json({
                 success: false,
                 error_msg: 'User Already Registered Please Login'
             })
         }
 
+        // function to genrate unique UserName with finding in user registration data
+        async function generateUniqueUserName(userName) {
+            let increment = 0;
+            let newUserName = userName;
+
+            while (await userSignUp_module.findOne({ userName: newUserName })) {
+                increment++;
+                newUserName = `${userName}${increment}`;
+            }
+
+            return newUserName;
+        }
+        userName = await generateUniqueUserName(userName);
+
+        // getting ready user registration obj to store
         let signUp_Data = {
             name,
             mobile_number,
             email_address,
             password: bcrypt_pasword,
-            userName: email_address.split('@')[0],
+            userName
         };
 
+        // check if your register under another one
         if (refer_by) {
+            // check user registration referral link is valid or not
             const referred_by_userData = await userSignUp_module.findOne({ userName: refer_by })
             if (!referred_by_userData) {
                 return res.status(400).json({
                     success: false,
-                    error_msg: 'Your Registration Link is invalid'
+                    error_msg: 'Registration Link is invalid'
                 })
             }
 
+            // if your registration referral link is valid then add this user under refer by user data record
             await new referral_records_module({
                 userDB_id: referred_by_userData._id,
                 date: current_time_get(),
-                userName: email_address.split('@')[0]
+                userName
             }).save()
             signUp_Data.refer_by = refer_by;
         }
 
+        // store user registered data
         const userSignUp_savedData = await new userSignUp_module(signUp_Data).save();
 
+        // creating first time user register month for user dashboard select month options
         await new userMonthly_records_module({
             userDB_id: userSignUp_savedData._id,
             monthName,
@@ -82,43 +116,57 @@ let userSignUp = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            error_msg: error.message
+            msg: error.message
         })
     }
 }
 
+// for user login
 const userLogin = async (req, res) => {
     try {
         let { email_userName, password } = req.body;
-        email_userName = email_userName.toLowerCase();
 
-        if (email_userName.includes('@')) {
-            email_userName = email_userName.split("@")[0];
+        // check if your details are received or not
+        if (!email_userName || !password) {
+            return res.status(409).json({
+                success: false,
+                error_msg: 'All fields are require please fill all details'
+            })
         }
 
-        const isExists = await userSignUp_module.findOne({
-            $or: [
-                { email_address: email_userName },
-                { userName: email_userName }
-            ]
-        });
+        // arrange email without spaces and upper case letters
+        email_userName = email_userName.toLowerCase().trim();
 
+        let userName = null
+        // check if email address if vaild or not
+        if (email_userName.includes('@')) {
+            // getting userName from Email
+            userName = email_userName.split("@")[0];
+        }
+
+        // findinig user in register data using email
+        const isExists = await userSignUp_module.findOne({ email_address: email_userName });
+
+        // check if user finded or not
         if (!isExists) {
-            return res.status(400).json({
+            return res.status(401).json({
                 success: false,
-                error_msg: 'Invalid Gmail or Password'
+                error_msg: 'Invalid details'
             });
         }
 
+        // matching the login password with registeration password
         let passwordMatched = await bcrypt.compare(password, isExists.password);
 
+        // check password is matched or not
         if (!passwordMatched) {
-            return res.status(400).json({
+            return res.status(401).json({
                 success: false,
-                error_msg: 'Password not Matched'
+                error_msg: 'Password is incorrect'
             });
         }
 
+        // create jwt token to login
         let jwt_token = jwt_accessToken(isExists);
 
         // Set the JWT token in an HttpOnly cookie
@@ -133,7 +181,7 @@ const userLogin = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: 'Logged in successfully'
+            msg: 'Logged in successfully'
         });
 
     } catch (error) {
@@ -144,24 +192,51 @@ const userLogin = async (req, res) => {
     }
 };
 
+// for user registration & login using google direct option
 const user_signUp_login_google = async (req, res) => {
     try {
+        // get google unique code for user from query
         const google_code = req.query.google_code;
+
+        // get referral userid if available from query
         const referral_id_signup = req.query.referral_id_signup
+
+        // format current month and year (e.g., "January 2024")
         const monthName = getFormattedMonth()
+
+        // check if google unique code is available or not
         if (!google_code) {
-            return res.status(400).json({ message: 'Missing google_code' });
+            return res.status(400).json({
+                success: false,
+                error_msg: 'Missing credentials'
+            });
         }
+
+        // get google user token using google unique code
         const googleRes = await oauth2Client.getToken(google_code);
         oauth2Client.setCredentials(googleRes.tokens);
 
+        // fatch user details from google using new genrated token
         const userRes = await axios.get(
             `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`
         );
 
+        // get user email, name & user unique Id
         const { email, name, id } = userRes.data;
+        // arrange email without spaces and upper case letters
+        email = email.toLowerCase().trim();
+        // taking userName from email Address
+        let userName = email.split('@')[0]
 
-        const isExists = await userSignUp_module.findOne({ email_address: email })
+        // check user already registered or not using email
+        const isExists = await userSignUp_module.findOne({
+            $or: [
+                { email_address: email },
+                { userName }
+            ]
+        })
+
+        // check user already registered with google or not
         if (!isExists?.google_id && isExists) {
             return res.status(400).json({
                 success: false,
@@ -169,14 +244,31 @@ const user_signUp_login_google = async (req, res) => {
             })
         }
 
+        // function to genrate unique UserName with finding in user registration data
+        async function generateUniqueUserName(userName) {
+            let increment = 0;
+            let newUserName = userName;
+
+            while (await userSignUp_module.findOne({ userName: newUserName })) {
+                increment++;
+                newUserName = `${userName}${increment}`;
+            }
+
+            return newUserName;
+        }
+        userName = await generateUniqueUserName(userName);
+
+        // getting ready user registration obj to store
         let userData = {
             name,
             email_address: email,
-            userName: email.split('@')[0],
+            userName,
             google_id: id
         };
 
+        // checking if refer by id is available or not
         if (referral_id_signup !== 'undefined') {
+            // check user registration referral link is valid or not
             const referred_by_userData = await userSignUp_module.findOne({ userName: referral_id_signup })
             if (!referred_by_userData) {
                 return res.status(400).json({
@@ -184,14 +276,16 @@ const user_signUp_login_google = async (req, res) => {
                     error_msg: 'Your Registration Link is invalid'
                 })
             }
+
+            // if your registration referral link is valid then add this user under refer by user data record
             let referral_recorded_data = new referral_records_module({
                 userDB_id: referred_by_userData._id,
                 date: current_time_get(),
                 userName: email.split('@')[0]
             })
-
             await referral_recorded_data.save()
 
+            // getting ready user registration obj to store with refer by id
             userData = {
                 name,
                 email_address: email,
@@ -201,15 +295,20 @@ const user_signUp_login_google = async (req, res) => {
             };
         }
 
+
         let jwt_token;
+        // check if user already not registered then register this user
         if (!isExists) {
             const user_data = await new userSignUp_module(userData).save()
             await new userMonthly_records_module({
                 userDB_id: user_data._id,
                 monthName,
             }).save()
+
+            // create jwt token to login
             jwt_token = jwt_accessToken(user_data)
         } else {
+            // create jwt token to login
             jwt_token = jwt_accessToken(isExists)
         }
 
@@ -236,42 +335,61 @@ const user_signUp_login_google = async (req, res) => {
     }
 };
 
+// for send mail to reset password
 const userLoginforgot_password_send_mail = async (req, res) => {
     try {
         let { email } = req.body;
-        email = email.toLowerCase();
-        let email_userName = null
-        if (email.includes('@')) {
-            email_userName = email.split("@")[0];
-        }
-        console.log(email);
-        const isExists = await userSignUp_module.findOne({
-            $and: [
-                { email_address: email },
-                { userName: email_userName }
-            ]
-        });
 
+        // arrange email without spaces and upper case letters
+        email = email.toLowerCase().trim();
+
+        // finding user using only email address
+        const isExists = await userSignUp_module.findOne({ email_address: email });
+
+        // check if user register or not
         if (!isExists) {
             return res.status(400).json({
                 success: false,
-                message: "Email is Not Register"
+                error_msg: "Email is Not Register"
             });
         }
 
+        // create url that send on user email id for reset password
         const fullUrl = req.headers.origin || `${req.protocol}://${req.get('host')}`;
+
+        // create unique token for user reset query search from database
         let token = randomString.generate()
+
+        // create obj that use to save data in database
         let obj = {
             userDB_id: isExists._id,
             token
         }
 
+        let isAlreadyMailSended = await userUniqueTokenData_module.findOne({ userDB_id: isExists._id });
+
+        if (isAlreadyMailSended) {
+            const expirationTime = 10 * 60 * 1000; // 10 minutes expiry time
+            const createdAt = new Date(isAlreadyMailSended.createdAt).getTime();
+            const currentTime = Date.now();
+            let timeLeftMs = expirationTime - (currentTime - createdAt);
+
+
+            return res.status(400).json({
+                success: false,
+                error_msg: "Already password reset registered",
+                time_left: timeLeftMs // Milliseconds me bhej rahe hain
+            });
+        }
+
+        // decorate message for user email
         const msg = `<p>Hello ${isExists.name} Welcome To Earning Planer, Click <a href="${fullUrl}/password-reset-form/${token}"> here </a> To Reset Your Password</p>`
+        // send mail function
         mailSender(isExists.email_address, 'Reset/update Password', msg)
-        await new resetPassword_req_data(obj).save()
+        await new userUniqueTokenData_module(obj).save()
 
         return res.status(200).json(
-            { success: true, message: "Reset link sent successfully" }
+            { success: true, msg: "Reset link sent successfully" }
         )
 
     } catch (error) {
@@ -282,27 +400,31 @@ const userLoginforgot_password_send_mail = async (req, res) => {
     }
 };
 
+// for reset password after link click
 const reset_password_form_post = async (req, res) => {
     try {
         let { token, password } = req.body;
-        const errors = validationResult(req)
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                success: false,
-                error_msg: errors.array()
-            })
-        }
 
+        // remove starting and ending spaces
+        password = password.trim()
+
+        // check if token and password is get or not
         if (!token || !password) {
-            return res.status(400).json({ success: false, message: "Token and password are required!" });
-        }
-        const user = await resetPassword_req_data.findOne({ token });
-        if (!user) {
-            return res.status(400).json({ success: false, message: "Invalid or expired token!" });
+            return res.status(400).json({ success: false, error_msg: "Token and password are required!" });
         }
 
+        // find user update req using token
+        const user = await userUniqueTokenData_module.findOne({ token });
+
+        // check if user req find or not
+        if (!user) {
+            return res.status(400).json({ success: false, error_msg: "Invalid or expired token!" });
+        }
+
+        // convert password in unreadable formate
         const bcryptPassword = await bcrypt.hash(password, 10);
 
+        // find user usinig userDB_id and update password and if password is not seted then create password property and remove google_id property
         let updatedData = await userSignUp_module.findOneAndUpdate(
             { _id: user.userDB_id },
             {
@@ -312,77 +434,109 @@ const reset_password_form_post = async (req, res) => {
             { new: true }
         );
 
-        await resetPassword_req_data.deleteMany({ userDB_id: updatedData._id });
+        // after user password req completed then remove user all req at once if available
+        await userUniqueTokenData_module.deleteMany({ userDB_id: updatedData._id });
 
-        return res.status(200).json({ success: true, message: "Password reset successfully!" });
+        return res.status(200).json({ success: true, msg: "Password reset successfully!" });
 
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: error.message || "Internal Server Error",
+            msg: error.message || "Internal Server Error",
         });
     }
 };
 
+// for verify reset password token
 const verify_reset_token = async (req, res) => {
-    const { token } = req.query; // Get the token from query parameter
+    // Get the token from query parameter
+    const { token } = req.query;
 
+    // check if token is get or not
     if (!token) {
         return res.status(400).json({
             success: false,
-            message: "Token is required.",
+            error_msg: "Token is required.",
         });
     }
 
     try {
-        // Step 1: Check if the token exists in the database
-        const tokenData = await resetPassword_req_data.findOne({ token });
-
+        // Check if the token exists in the database
+        const tokenData = await userUniqueTokenData_module.findOne({ token });
         if (!tokenData) {
             return res.status(404).json({
                 success: false,
-                message: "Invalid or expired token.",
+                error_msg: "Invalid or expired token.",
             });
         }
 
-        // If token is valid, continue
         return res.status(200).json({
             success: true,
-            message: "Token is valid.",
+            msg: "Token is valid.",
         });
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: error.message || "Internal Server Error",
+            msg: error.message || "Internal Server Error",
         });
     }
 };
 
-const userLoginCheckGet = async (req, res) => {
+// for verify reset password token
+const verify_reset_email_token = async (req, res) => {
     try {
-        const userData = req.user;
+        // Get the token & email from query params
+        let { token, email } = req.query;
 
-        if (userData) {
-            return res.status(200).json({
-                success: true,
-                message: 'User Already Logged In. Please Continue.'
+        email = atob(email)
+
+        // Validate inputs
+        if (!token || !email) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Token and Email are required.",
             });
         }
 
-        // If no user data, handle the case where the user is not logged in
-        return res.status(401).json({
-            success: false,
-            message: 'User not logged in.'
+        // Check if the token exists in the database
+        const tokenData = await userUniqueTokenData_module.findOne({ token });
+        if (!tokenData) {
+            return res.status(404).json({
+                success: false,
+                error_msg: "Invalid or expired token.",
+            });
+        }
+
+        // Get user data using userDB_id
+        const userData = await userSignUp_module.findById(tokenData.userDB_id);
+        if (!userData) {
+            return res.status(404).json({
+                success: false,
+                error_msg: "User not found.",
+            });
+        }
+
+        // updating email and save it in register data
+        userData.email_address = email;
+        await userData.save();
+
+        // after user email req completed then remove user all req at once if available
+        await userUniqueTokenData_module.deleteMany({ userDB_id: userData._id });
+
+        return res.status(200).json({
+            success: true,
+            msg: "Email successfully updated.",
         });
+
     } catch (error) {
-        console.error("Error in userLoginCheckGet:", error); // Log the error for debugging
         return res.status(500).json({
             success: false,
-            message: 'Internal server error.'
+            error_msg: error.message || "Internal Server Error",
         });
     }
 };
 
+// for logOut user using clear jwtToken from only http cookie
 const userLogOut = async (req, res) => {
     try {
         // Clear the jwtToken cookie from the browser
@@ -404,16 +558,19 @@ const userLogOut = async (req, res) => {
     }
 };
 
-const userDataGet = async (req, res) => {
+// for get dashboard data
+const userDataGet_dashboard = async (req, res) => {
     try {
         const userData = req.user;
 
+        // getting user all months data
         const user_month_records = await userMonthly_records_module.find({ userDB_id: userData._id.toString() });
+        // getting user all dates data
         const user_date_records = await userDate_records_module.find({ userDB_id: userData._id });
 
         return res.status(200).json({
             success: true,
-            userData: [userData, user_month_records, user_date_records]
+            msg: [userData, user_month_records, user_date_records]
         });
     } catch (error) {
         console.error(error);
@@ -424,16 +581,19 @@ const userDataGet = async (req, res) => {
     }
 };
 
+// for get user referral data
 const userReferral_record_get = async (req, res) => {
     try {
         const userData = req.user;
 
+        // find user referral data using userData._id
         const user_DB_referral_record_get = await referral_records_module.find({ userDB_id: userData._id });
 
+        // get ready obj to res
         const resData = {
             userName: userData.userName,
             referral_data: user_DB_referral_record_get,
-            available_balance: (parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)).toFixed(3)
+            available_balance: (parseFloat(userData?.deposit_amount || 0) + parseFloat(userData?.withdrawable_amount || 0)).toFixed(3)
         };
 
         return res.status(200).json({
@@ -449,13 +609,19 @@ const userReferral_record_get = async (req, res) => {
     }
 };
 
+// for get user complete profile information for profile section
 const userProfileData_get = async (req, res) => {
     try {
         const userData = req.user;
 
         const withdrawal_methods_data = await withdrawal_methods_module.find()
 
-        const userProfile = { ...userData.toObject(), withdrawal_methods_data };
+        // get ready obj for res
+        const userProfile = {
+            ...userData.toObject(),
+            withdrawal_methods_data,
+            available_balance: (parseFloat(userData?.deposit_amount || 0) + parseFloat(userData?.withdrawable_amount || 0)).toFixed(3)
+        };
 
         return res.status(200).json({
             success: true,
@@ -470,23 +636,22 @@ const userProfileData_get = async (req, res) => {
     }
 };
 
+// for user profile update from profile section
 const userProfileData_patch = async (req, res) => {
     try {
         const userData = req.user;
         const updateFields = req.body;
+
+        // update userData using req.body data directly
         let user_DB_Data = await userSignUp_module.findByIdAndUpdate(userData._id, updateFields, { new: true });
 
+        // check if user found or not
         if (!user_DB_Data) {
-            return res.status(400).json({
+            return res.status(404).json({
                 success: false,
                 error_msg: "User not found"
             });
         }
-
-        // req.io.emit('realTimeBalanceUpdate', {
-        //     userId: userData._id,
-        //     available_balance: available_balance
-        // });
 
         res.status(200).json({
             success: true,
@@ -502,17 +667,18 @@ const userProfileData_patch = async (req, res) => {
     }
 };
 
+// for get website statistics in home page of website
 const userWebstatisticsGet = async (req, res) => {
     try {
         // Pehle database se saare users ko fetch karo
         let users = await userSignUp_module.find();
         users = users.length
 
-        // Total users ka length check karo
+        // if total lenght is less then 100 then set it 542
         if (users < 100) {
             users = 542;
         }
-        
+
         // Agar 100 ya usse zyada hain, toh original data send karo
         res.status(200).json({ users, fixed: true });
     } catch (error) {
@@ -520,18 +686,161 @@ const userWebstatisticsGet = async (req, res) => {
     }
 };
 
+// to get current seted email in setting page of website
+const userpassword_and_email_get = async (req, res) => {
+    try {
+        const { withdrawable_amount = 0, deposit_amount = 0, email_address } = req.user;
+
+        const available_balance = (parseFloat(withdrawable_amount) + parseFloat(deposit_amount)).toFixed(3);
+
+        return res.status(200).json({
+            success: true,
+            msg: {
+                available_balance,
+                email_address
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            msg: "Internal Server Error",
+            error: error.message
+        });
+    }
+};
+
+// to update user password and email id
+const userpassword_and_email_patch = async (req, res) => {
+    try {
+        let { email_address, newPassword, currentPassword } = req.body;
+        const userData = req.user;
+
+        // Update Email Address
+        if (email_address) {
+            // remove spaces and convert to lowerCase
+            email_address = email_address.toLowerCase().trim()
+
+            if (userData.email_address === email_address) {
+                return res.status(400).json({
+                    success: false,
+                    error_msg: "user Email Already Registered"
+                });
+            }
+
+            // check email id is correct formate
+            if (!/^\S+@\S+\.\S+$/.test(email_address)) {
+                return res.status(400).json({
+                    success: false,
+                    error_msg: "Invalid email format"
+                });
+            }
+
+            let token = randomString.generate()
+
+            // create url that send on user email id for reset password
+            const fullUrl = req.headers.origin || `${req.protocol}://${req.get('host')}`;
+
+            // create unique token for user reset query search from database
+            let isAlreadyMailSended = await userUniqueTokenData_module.findOne({ userDB_id: userData._id });
+
+            if (isAlreadyMailSended) {
+                const expirationTime = 10 * 60 * 1000; // 10 minutes expiry time
+                const createdAt = new Date(isAlreadyMailSended.createdAt).getTime();
+                const currentTime = Date.now();
+                let timeLeftMs = expirationTime - (currentTime - createdAt);
+
+                return res.status(400).json({
+                    success: false,
+                    error_msg: "Already Email update reset registered",
+                    time_left: timeLeftMs // Milliseconds me bhej rahe hain
+                });
+            }
+
+            const msg = `
+            <html>
+            <body>
+                <h2>Email Verification</h2>
+                <p>Dear User,</p>
+                <p>Thank you for updating your email address with us. To complete your email verification, please click on the link below:</p>
+                <p><a href="${fullUrl}/email-verification/${token}/${btoa(email_address)}" style="color: #007BFF;">Verify My Email</a></p>
+                <p>If you did not request this change, please ignore this email or contact our support team.</p>
+                <br/>
+                <p>Best regards,<br/>EarnWiz</p>
+            </body>
+            </html>`;
+
+            // create obj that use to save data in database
+            let obj = {
+                userDB_id: userData._id,
+                token
+            }
+
+            mailSender(email_address, 'Verify Email', msg);
+            await new userUniqueTokenData_module(obj).save()
+
+            return res.status(200).json({
+                success: true,
+                msg: "Verification Mail sended On Your New Email, Please Check."
+            });
+        }
+
+        // Update Password
+        if (newPassword && currentPassword) {
+            const passwordMatched = await bcrypt.compare(currentPassword, userData.password);
+
+            if (!passwordMatched) {
+                return res.status(400).json({
+                    success: false,
+                    error_msg: "Current password is incorrect"
+                });
+            }
+
+            if (newPassword.length < 8) {
+                return res.status(400).json({
+                    success: false,
+                    error_msg: "New password must be at least 8 characters long"
+                });
+            }
+
+            const bcryptPassword = await bcrypt.hash(newPassword, 10);
+            userData.password = bcryptPassword;
+            await userData.save();
+
+            return res.status(200).json({
+                success: true,
+                msg: "Password updated successfully"
+            });
+        }
+
+        return res.status(400).json({
+            success: false,
+            error_msg: "No valid data provided for update"
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            msg: "Internal Server Error",
+            error: error.message
+        });
+    }
+};
+
+
 module.exports = {
     userSignUp,
     userLogin,
-    userDataGet,
+    userDataGet_dashboard,
     userReferral_record_get,
     userProfileData_get,
     userProfileData_patch,
     userLogOut,
-    userLoginCheckGet,
     user_signUp_login_google,
     userLoginforgot_password_send_mail,
     reset_password_form_post,
     verify_reset_token,
-    userWebstatisticsGet
+    userWebstatisticsGet,
+    userpassword_and_email_get,
+    userpassword_and_email_patch,
+    verify_reset_email_token
 }

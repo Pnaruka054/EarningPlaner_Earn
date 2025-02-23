@@ -130,14 +130,23 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const handle_link_click = (link, btnName, amount) => {
         setHandle_clickAds_btnClick_state(true);
         channel.postMessage("handle_clickAds_btnClick_state_true");
+
         const newTab = window.open("", '_blank');
         if (!newTab) {
-            return alert("Please Allow Popup in Your Browse to Earn Money!");
+            return alert("Please Allow Popup in Your Browser to Earn Money!");
         }
         newTab.close();
+
+
         window.open(link, '_blank');
-        window.open(link, '_blank');
-        window.open(`/waitRedirecting/?link=${encodeURIComponent(link + '||' + btnName + '||' + amount)}`, '_blank', 'noopener noreferrer');
+
+        setTimeout(() => {
+            window.open(link, '_blank');
+        }, 2000);
+
+        setTimeout(() => {
+            window.open(`/waitRedirecting/?link=${encodeURIComponent(link + '||' + btnName + '||' + amount)}`, '_blank', 'noopener noreferrer');
+        }, 3000);
     };
 
     const handle_link_click2 = (link, btnName, amount) => {
@@ -162,7 +171,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     useEffect(() => {
         const handleStorageChange = () => {
             const clickSuccessStatus = localStorage.getItem('isSuccess');
-
             if (!isUserActiveOnPage) {
                 if (clickSuccessStatus && clickSuccessStatus.includes('btn')) {
                     localStorage.removeItem('isSuccess');
@@ -443,7 +451,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                             <div className='flex flex-col items-center font-lexend text-2xl'>
                                 <div className='text-center'>Come Back After</div>
                                 <div className='text-4xl font-bold drop-shadow'>
-                                    <CountdownTimer expireTime={viewAds_firstTimeLoad_state.ViewAdsexpireTImer} />
+                                    {/* <CountdownTimer expireTime={viewAds_firstTimeLoad_state.ViewAdsexpireTImer} /> */}
                                 </div>
                             </div>
                         </div>

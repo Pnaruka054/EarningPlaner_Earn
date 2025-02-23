@@ -3,12 +3,11 @@ import axios from "axios";
 import { useEffect, useState } from 'react';
 import Error from '../../components/error/error';
 import ProcessBgBlack from '../../components/processBgBlack/processBgBlack';
-import Swal from 'sweetalert2';
+import showNotification from '../../components/showNotification'
 import { useGoogleLogin } from "@react-oauth/google";
 
-
 const Signup = ({ referral_status }) => {
-    const [formData, setFormData] = useState({
+    const [formData_state, setFormData_state] = useState({
         name: '',
         mobile_number: '',
         email_address: '',
@@ -18,79 +17,56 @@ const Signup = ({ referral_status }) => {
     });
     const navigation = useNavigate();
     let { id } = useParams();
-    const [error, setError] = useState([]);
+    const [error_state, setError_state] = useState([]);
     let [submit_process_state, setSubmit_process_state] = useState(false);
-    let [data_process_state, setData_process_state] = useState(false);
-
-    const fetchData = async () => {
-        setData_process_state(true);
-        try {
-            const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userLoginCheckGet`, {
-                withCredentials: true
-            });
-            if (response.data.success && response.data.message) {
-                // If the user is already logged in
-                Swal.fire({
-                    title: 'You Already Logged In',
-                    text: 'Please Continue Earning',
-                    icon: 'error',
-                    timer: 5000,
-                    timerProgressBar: true,
-                    confirmButtonText: 'OK',
-                    didClose: () => {
-                        // Navigate to the dashboard after the modal closes
-                        navigation('/member/dashboard');
-                    }
-                });
-            }
-        } finally {
-            setData_process_state(false);
-        }
-    };
-    useEffect(() => {
-        fetchData();
-    }, []);
 
     const dataBase_post_signUp = async (obj) => {
         try {
             let response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/userRoute/signUp`, obj);
-            setSubmit_process_state(false);
             if (response.data.user) {
+                showNotification(false, 'user registered successfully!')
                 navigation('/login');
             }
         } catch (error) {
             console.log(error);
-            setSubmit_process_state(false);
-            if (typeof (error.response.data.error_msg) === 'object') {
+            if (typeof (error?.response?.data?.error_msg) === 'object') {
                 let error_array = [];
-                for (let a of error.response.data.error_msg) {
+                for (let a of error?.response?.data?.error_msg) {
                     error_array.push(a.msg);
                 }
-                setError(error_array);
+                setError_state(error_array);
                 setTimeout(() => {
-                    setError("");
+                    setError_state("");
                 }, 4000);
-            } else {
-                setError([error.response.data.error_msg]);
+            } else if (error?.response?.data?.error_msg === 'Already Registered') {
+                showNotification(true, "User Already Registered Please Login")
+                navigation('/login')
+            } else if (error?.response?.data?.error_msg) {
+                showNotification(true, error?.response?.data?.error_msg)
+            } else if (error?.response?.data?.msg) {
+                showNotification(false, "Something went wrong please try again after sometime")
             }
+        } finally {
+            setSubmit_process_state(false);
         }
     };
 
+    // singUp button click handle
     const handleSingUp_submit = async (e) => {
         e.preventDefault();
-        if (formData.password !== formData.reenterPassword) {
-            setError(["Password & confirm password do not match."]);
+        if (formData_state.password !== formData_state.reenterPassword) {
+            setError_state(["Password & confirm password do not match."]);
             setTimeout(() => {
-                setError("");
+                setError_state("");
             }, 5000);
             return;
         }
 
         let obj = {
-            name: formData.name,
-            mobile_number: parseInt(formData.mobile_number),
-            email_address: formData.email_address,
-            password: formData.password,
+            name: formData_state.name,
+            mobile_number: parseInt(formData_state.mobile_number),
+            email_address: formData_state.email_address,
+            password: formData_state.password,
             ...(referral_status && { refer_by: id }),
         };
         dataBase_post_signUp(obj);
@@ -99,7 +75,7 @@ const Signup = ({ referral_status }) => {
 
     const handleInputChange = (e) => {
         const { id, value, type, checked } = e.target;
-        setFormData((prevData) => ({
+        setFormData_state((prevData) => ({
             ...prevData,
             [id]: type === 'checkbox' ? checked : value,
         }));
@@ -112,15 +88,26 @@ const Signup = ({ referral_status }) => {
                     withCredentials: true // This ensures cookies are sent with the request
                 });
                 if (response) {
+                    showNotification(false, 'success!')
                     navigation('/member/dashboard')
                 }
-                setSubmit_process_state(false)
             } else {
                 throw new Error(authResult);
             }
         } catch (error) {
-            setSubmit_process_state(false)
             console.log(error);
+            if (error?.response?.data?.error_msg === "Missing credentials") {
+                showNotification(true, "Missing credentials");
+            } else if (error?.response?.data?.error_msg === "Please Login With Password") {
+                showNotification(true, "You Already Registered Please Login With Password");
+                navigation('/login')
+            } else if (error?.response?.data?.error_msg === "Your Registration Link is invalid") {
+                showNotification(true, "Your Registration Link is invalid");
+            } else {
+                showNotification(true, "Something went wrong, please try again.");
+            }
+        } finally {
+            setSubmit_process_state(false);
         }
     };
 
@@ -130,7 +117,8 @@ const Signup = ({ referral_status }) => {
         flow: "auth-code",
     });
 
-    const handleGoogleLogin = async (e) => {
+    // sighup with google button click handle
+    const handleGoogleSingUp = async (e) => {
         e.preventDefault();
         googleLogin();
         setSubmit_process_state(true)
@@ -141,13 +129,13 @@ const Signup = ({ referral_status }) => {
             <div className='md:w-[45%] sm:w-[90%] w-[97%]'>
                 <h1 className='text-3xl font-medium text-center mb-5 select-none'>Sign Up</h1>
                 <form onSubmit={handleSingUp_submit}>
-                    <input type="text" id="name" value={formData.name} onChange={handleInputChange} placeholder='Enter your name' required className='w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400' />
-                    <input type="text" id="mobile_number" value={formData.mobile_number} onChange={handleInputChange} placeholder='Enter your mobile number' required className='w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400' />
-                    <input type="text" id="email_address" value={formData.gmail_address} onChange={handleInputChange} placeholder='Enter your email' required className='w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400' />
-                    <input type="password" id="password" value={formData.password} onChange={handleInputChange} placeholder='Enter your password' required className='w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400' />
-                    <input type="text" id="reenterPassword" value={formData.reenterPassword} onChange={handleInputChange} placeholder='Re-enter your password' required className='w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400' />
+                    <input type="text" id="name" value={formData_state.name} onChange={handleInputChange} placeholder='Enter your name' required className='w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400' />
+                    <input type="text" pattern="^\d{10}$" title="Please enter a valid 10-digit Indian mobile number" id="mobile_number" value={formData_state.mobile_number} onChange={handleInputChange} placeholder='Enter your mobile number' required className='w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400' />
+                    <input type="text" id="email_address" value={formData_state.gmail_address} onChange={handleInputChange} placeholder='Enter your email' required className='w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400' />
+                    <input type="password" id="password" value={formData_state.password} onChange={handleInputChange} placeholder='Enter your password' required className='w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400' />
+                    <input type="text" id="reenterPassword" value={formData_state.reenterPassword} onChange={handleInputChange} placeholder='Re-enter your password' required className='w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400' />
                     <div className='mb-2 space-x-2'>
-                        <input type="checkbox" required id="signupTerms" checked={formData.signupTerms} onChange={handleInputChange} className='size-3' />
+                        <input type="checkbox" required id="signupTerms" checked={formData_state.signupTerms} onChange={handleInputChange} className='size-3' />
                         <label className='select-none cursor-pointer' htmlFor="signupTerms">I agree to the Terms of Use and Privacy Policy.</label>
                     </div>
                     <button type="submit" disabled={submit_process_state} className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"} w-full text-white rounded py-1 mb-2 transition`}>
@@ -159,7 +147,7 @@ const Signup = ({ referral_status }) => {
                     <span className="bg-white px-2 relative -top-3">or</span>
                     <hr className="absolute border-slate-400" style={{ top: '0%', width: '45%', right: "0" }} />
                 </div>
-                <button onClick={handleGoogleLogin} className='w-full mb-2 bg-red-500 text-white hover:bg-black transition py-1 rounded flex items-center justify-center space-x-2'>
+                <button onClick={handleGoogleSingUp} className='w-full mb-2 bg-red-500 text-white hover:bg-black transition py-1 rounded flex items-center justify-center space-x-2'>
                     <ion-icon name="logo-google"></ion-icon> <span>Sign Up With Google</span>
                 </button>
                 <Link to="/forget-password" className='text-blue-600 underline'>I Forgot My Password</Link>
@@ -167,8 +155,8 @@ const Signup = ({ referral_status }) => {
                     I Already have an account? <Link to="/login" className='text-blue-600 underline' >Login Now</Link>
                 </p>
             </div>
-            {(submit_process_state || data_process_state) && <ProcessBgBlack />}
-            {error.length > 0 && error.map((value, index) => (
+            {submit_process_state && <ProcessBgBlack />}
+            {error_state.length > 0 && error_state.map((value, index) => (
                 <Error key={index} color="yellow" text={value} />
             ))}
         </div>

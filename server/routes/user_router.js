@@ -3,20 +3,22 @@ const route = express()
 const userController = require('../controllers/userController/userController')
 const validator = require('../helper/validator')
 
-route.get('/userDataGet', userController.userDataGet)
+route.get('/userDataGet_dashboard', userController.userDataGet_dashboard)
 route.get('/userReferral_record_get', userController.userReferral_record_get)
 route.get('/userProfileData_get', userController.userProfileData_get)
-route.get('/userLoginCheckGet', userController.userLoginCheckGet)
 route.get('/user_signUp_login_google', userController.user_signUp_login_google)
 route.get('/verify_reset_token', userController.verify_reset_token)
+route.get('/verify_reset_email_token', userController.verify_reset_email_token)
 route.get('/userWebstatisticsGet', userController.userWebstatisticsGet)
+route.get('/userpassword_and_email_get', userController.userpassword_and_email_get)
 
 route.post('/signUp', validator.signUpValidator, userController.userSignUp)
 route.post('/login', userController.userLogin)
 route.post('/userLoginforgot_password_send_mail', userController.userLoginforgot_password_send_mail)
-route.post('/reset_password_form_post', validator.passwordValidator, userController.reset_password_form_post)
+route.post('/reset_password_form_post', userController.reset_password_form_post)
 route.post('/logout', userController.userLogOut)
 
 route.patch('/userProfileData_patch', userController.userProfileData_patch)
+route.patch('/userpassword_and_email_patch', userController.userpassword_and_email_patch)
 
 module.exports = route

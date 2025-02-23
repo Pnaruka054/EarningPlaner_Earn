@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import showNotification from '../showNotification';
+import showNotificationWith_timer from '../showNotificationWith_timer';
 
 const PopUp = ({ heading, btn1_text, btn2_text, setLogOut_btnClicked }) => {
-    const navigate = useNavigate(); // Initialize the navigate function
+    const navigation = useNavigate(); // Initialize the navigation function
 
     // Function to handle JWT removal and logout
     const handleJWTRemoval = async () => {
@@ -15,9 +17,11 @@ const PopUp = ({ heading, btn1_text, btn2_text, setLogOut_btnClicked }) => {
 
         if (response.ok) {
             setLogOut_btnClicked(false); // Notify parent component that the user is logged out
-            navigate('/login'); // Redirect to the login page
+            navigation('/login'); // Redirect to the login page
+            showNotificationWith_timer(false, 'LogOut success!', '/', navigation);
         } else {
             console.error('Logout failed');
+            showNotification(true, "Something went wrong, please try again.");
         }
     };
 
@@ -28,15 +32,18 @@ const PopUp = ({ heading, btn1_text, btn2_text, setLogOut_btnClicked }) => {
                     <p>{heading}</p>
                 </div>
                 <div className='flex justify-around mt-4'>
-                    <button 
+                    <button
                         onClick={handleJWTRemoval} // Call the function to remove JWT
-                        className='px-4 py-1 font-medium text-lg text-white rounded-md bg-red-500'> 
-                        {btn1_text} 
+                        className='px-4 py-1 font-medium text-lg text-white rounded-md bg-red-500'>
+                        {btn1_text}
                     </button>
-                    <button 
-                        onClick={() => setLogOut_btnClicked(false)} 
-                        className='px-4 py-1 font-medium text-lg text-white rounded-md bg-gray-500'> 
-                        {btn2_text} 
+                    <button
+                        onClick={() => {
+                            setLogOut_btnClicked(false)
+                            showNotificationWith_timer(true, 'LogOut canceled', '', navigation);
+                        }}
+                        className='px-4 py-1 font-medium text-lg text-white rounded-md bg-gray-500'>
+                        {btn2_text}
                     </button>
                 </div>
             </div>

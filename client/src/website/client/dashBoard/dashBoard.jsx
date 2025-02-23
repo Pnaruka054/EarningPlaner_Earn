@@ -16,6 +16,9 @@ import Footer from '../components/footer/footer';
 import { Link } from 'react-router-dom';
 import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import axios from 'axios';
+import { FaSpinner } from "react-icons/fa";
+import showNotificationWith_timer from '../components/showNotificationWith_timer'
+import showNotification from '../components/showNotification'
 
 const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBalance_forNavBar_state }) => {
     const [userData_state, setUserData_state] = useState([[]]);
@@ -25,11 +28,52 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
     const [dropdownButtonValue_state, setDropdownButtonValue_state] = useState('');
     const [monthlyData_state, setMonthlyData_state] = useState([]);
     const navigation = useNavigate();
+
+    // handle dropdown buttons valus
     function dropdownButtonValue(e) {
         setDropdownButtonValue_state(e.target.innerText);
         dropdownRef.current.classList.add('hidden')
     }
 
+    const announcements = [
+        {
+            id: 1,
+            time: "8/10/24, 11:53 AM",
+            title: "Why Choose Us?",
+            details: [
+                "1. Receive a $1 bonus for signing up.",
+                "2. Enjoy the highest CPM rates globally.",
+                "3. No intrusive pop-up ads.",
+                "4. Ability to shorten links for 18+, Movies, Faucets, etc.",
+                "5. Fast payments within 2 to 3 days."
+            ],
+            extra: "(Your first payment will be processed within 1 - 2 days)",
+            note: "Statistics will be refreshed every 10 minutes."
+        },
+        {
+            id: 2,
+            time: "8/10/24, 11:52 AM",
+            title: "Contest",
+            details: [
+                "The user with the most active referrals will earn a 25% commission.",
+                "Find your referral link here - [Click](https://droplink.co/member/users/referrals)",
+                "When your referral earns money, your commission will be credited to your DropLink wallet."
+            ],
+            extra: "Write an article about us and earn up to $5.",
+            note: "Create a YouTube video discussing our platform and earn up to $100."
+        },
+        {
+            id: 3,
+            time: "8/10/24, 11:50 AM",
+            title: "Policy",
+            details: [
+                "Dear users, please refrain from creating bots, using proxies, or generating fake traffic.",
+                "Violating this policy will result in account deactivation."
+            ]
+        }
+    ];
+
+    // filter user selected month
     useEffect(() => {
         setMonthlyData_state(
             userData_state[2]?.filter((value) => {
@@ -38,33 +82,26 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
         )
     }, [userData_state]);
 
+    // get all data from server
     useEffect(() => {
         const fetchData = async () => {
             setData_process_state(true);
             try {
-                const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userDataGet`, {
+                const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userDataGet_dashboard`, {
                     withCredentials: true
                 });
-                setUserData_state(response.data.userData);
-                setDropdownButtonValue_state(response.data.userData[1][0].monthName)
-                setAvailableBalance_forNavBar_state((parseFloat(response.data.userData[0].deposit_amount || 0) + parseFloat(response.data.userData[0].withdrawable_amount || 0)).toFixed(3));
+                setUserData_state(response?.data?.msg);
+                setDropdownButtonValue_state(response?.data?.msg[1][0]?.monthName)
+                setAvailableBalance_forNavBar_state((parseFloat(response?.data?.msg[0]?.deposit_amount || 0) + parseFloat(response?.data?.msg[0]?.withdrawable_amount || 0)).toFixed(3));
             } catch (error) {
-                if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
-                    navigation('/login');
-                } else if (error.response.data.jwtMiddleware_error) {
-                    Swal.fire({
-                        title: 'Session Expired',
-                        text: 'Your session has expired. Please log in again.',
-                        icon: 'error',
-                        timer: 5000,
-                        timerProgressBar: true,
-                        confirmButtonText: 'OK',
-                        didClose: () => {
-                            navigation('/login');
-                        }
-                    });
-                }
                 console.error(error);
+                if (error?.response?.data?.jwtMiddleware_token_not_found_error || error?.response?.data?.jwtMiddleware_user_not_found_error) {
+                    navigation('/login');
+                } else if (error?.response?.data?.jwtMiddleware_error) {
+                    showNotificationWith_timer(true, 'Your session has expired. Please log in again.', '/login', navigation);
+                } else {
+                    showNotification(true, "Something went wrong, please try again.");
+                }
             } finally {
                 setData_process_state(false);
             }
@@ -73,102 +110,70 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
         fetchData();
     }, []);
 
+    // handle outside click from month dropdown select
     useEffect(() => {
-        if (getLogOut_btnClicked) {
-            logOut_btnRef.current.innerHTML = `<i class="fa-light fa-spinner fa-spin"></i>`
-        } else {
-            logOut_btnRef.current.innerHTML = `LogOut`
-        }
-        window.addEventListener('click', (e) => {
-            e.stopPropagation()
-            dropdownRef.current?.classList.add('hidden')
-        })
+        const handleClickOutside = (e) => {
+            e.stopPropagation();
+            dropdownRef.current?.classList.add("hidden");
+        };
+
+        window.addEventListener("click", handleClickOutside);
+
         return () => {
-            window.removeEventListener('click', (e) => {
-                e.stopPropagation()
-                dropdownRef.current.classList.add('hidden')
-            })
-        }
-    }, [getLogOut_btnClicked]);
+            window.removeEventListener("click", handleClickOutside);
+        };
+    }, []);
 
     return (
         <div onScroll={(e) => {
             e.stopPropagation()
             dropdownRef.current.classList.add('hidden')
-        }} className="ml-auto bg-[#ecf0f5] flex flex-col justify-between w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+        }} className="ml-auto bg-[#ecf0f5] flex flex-col justify-between w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12 custom-scrollbar">
             <div className='px-2 py-1 select-none'>
                 <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 flex justify-between'>
                     <h1>Dashboard</h1>
-                    <button ref={logOut_btnRef} onClick={() => setLogOut_btnClicked(true)} className='text-lg border border-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg text-red-500'>LogOut</button>
+                    <button ref={logOut_btnRef} onClick={() => setLogOut_btnClicked(true)} className='text-lg border border-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg text-red-500'>
+                        {getLogOut_btnClicked ? <FaSpinner className="animate-spin" /> : "LogOut"}
+                    </button>
                 </div>
-                <div className="grid grid-cols-2 grid-rows-3 sm:grid-cols-3 sm:grid-rows-2 grid-flow-col gap-2 font-poppins mb-5 text-lg sm:text-xl text-center">
-                    {/* <Link to="/member/watch-video" className="bg-blue-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Watch Video</div>
-                        <div className='z-[1]'>₹0.2155</div>
-                        <img src={Watch_Video_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
-                    </Link> */}
-                    <Link to="/member/view-ads" className="bg-green-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>View Ads</div>
-                        <div className='z-[1]'>₹{Array.isArray(userData_state[1]) && userData_state[1][0] ? userData_state[1][0].earningSources?.view_ads.income || '0.000' : '0.000'}</div>
-                        <img src={ViewAds} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
+                <div className="grid grid-cols-2 grid-rows-3 sm:grid-cols-3 sm:grid-rows-2 grid-flow-col gap-4 font-poppins mb-5 text-lg sm:text-xl text-center">
+                    <Link to="/member/view-ads" className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
+                        <div className="font-semibold">View Ads</div>
+                        <div className="z-[1] text-lg font-bold">₹{Array.isArray(userData_state[1]) && userData_state[1][0] ? userData_state[1][0].earningSources?.view_ads.income || '0.000' : '0.000'}</div>
+                        <img src={ViewAds} className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image" />
                     </Link>
-                    {/* bg-purple-500 */}  <div className=" text-white bg-gray-500 relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Play Betting Game</div>
-                        <div>Null</div>
-                        <img src={Betting_games_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
+
+                    {/* Disabled Card (No Hover, Gray Color) */}
+                    <div className="bg-gray-500 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center opacity-70">
+                        <div className="font-semibold">Play Betting Game</div>
+                        <div className="text-lg font-bold">Null</div>
+                        <img src={Betting_games_icon} className="absolute bottom-3 right-3 w-16 opacity-20" />
                     </div>
-                    {/* bg-red-500 */} <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Play Normal Games</div>
-                        <div>Null</div>
-                        <img src={Games} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
+
+                    {/* Disabled Card (No Hover, Gray Color) */}
+                    <div className="bg-gray-500 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center opacity-70">
+                        <div className="font-semibold">Play Normal Games</div>
+                        <div className="text-lg font-bold">Null</div>
+                        <img src={Games} className="absolute bottom-3 right-3 w-16 opacity-20" />
                     </div>
-                    {/* <Link to="/member/click-on-ads" className="bg-orange-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Click On Ads</div>
-                        <div className='z-[1]'>₹0.2155</div>
-                        <img src={ClickOnAds} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
-                    </Link> */}
-                    <Link to="/member/click-shorten-link" className="bg-cyan-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Click Shorten Link</div>
-                        <div className='z-[1]'>₹{Array.isArray(userData_state[1]) && userData_state[1][0] ? userData_state[1][0].earningSources?.click_short_link?.income || '0.000' : '0.000'}</div>
-                        <img src={ClickShortenLink_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
+
+                    <Link to="/member/click-shorten-link" className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 m-3 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
+                        <div className="font-semibold">Click Shorten Link</div>
+                        <div className="z-[1] text-lg font-bold">₹{Array.isArray(userData_state[1]) && userData_state[1][0] ? userData_state[1][0].earningSources?.click_short_link?.income || '0.000' : '0.000'}</div>
+                        <img src={ClickShortenLink_icon} className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image" />
                     </Link>
-                    {/* bg-yellow-500 <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Play Quiz</div>
-                        <div>Null</div>
-                        <img src={Quiz} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
-                    </div> */}
-                    {/* bg-indigo-500 <div className="bg-gray-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Pool Trading</div>
-                        <div>Null</div>
-                        <img src={poolTrading} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2]' />
-                    </div> */}
-                    {/* <Link to="/member/short-link" className="bg-pink-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Short Link</div>
-                        <div className='z-[1]'>₹{userData_state.shortLink || '0.0000'}</div>
-                        <img src={ShortLink_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
-                    </Link> */}
-                    {/* <div className="bg-green-700 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Mining</div>
-                        <div className='z-[1]'>₹{userData_state.mining || '0.0000'}</div>
-                        <img src={Mining} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
-                    </div> */}
-                    <Link to="/member/fill-survey" className="bg-blue-300 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Fill Survey</div>
-                        <div>Null</div>
-                        <img src={FillSurvey} className='self-end mr-2 absolute bottom-3 right-1 hover_on_image opacity-[0.2]' />
+
+                    <Link to="/member/fill-survey" className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
+                        <div className="font-semibold">Fill Survey</div>
+                        <div className="z-[1] text-lg font-bold">₹{Array.isArray(userData_state[1]) && userData_state[1][0] ? userData_state[1][0].earningSources?.fill_survey?.income || '0.000' : '0.000'}</div>
+                        <img src={FillSurvey} className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image" />
                     </Link>
-                    {/* <Link to="/member/click-to-earn" className="bg-teal-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Click to Earn</div>
-                        <div className='z-[1]'>₹0.2155</div>
-                        <img src={ClickToEarn} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
-                    </Link> */}
-                    <Link to="/member/refer-and-earn" className="bg-lime-500 text-white relative h-40 m-2 rounded-lg shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div px-1">
-                        <div>Referral Income</div>
-                        <div className='z-[1]'>₹{Array.isArray(userData_state[1]) && userData_state[1][0] ? userData_state[1][0].earningSources?.referral_income?.income || '0.000' : '0.000'}</div>
-                        <img src={Watch_Video_icon} className='self-end mr-2 absolute bottom-3 right-1 opacity-[0.2] hover_on_image' />
+
+                    <Link to="/member/refer-and-earn" className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
+                        <div className="font-semibold">Referral Income</div>
+                        <div className="z-[1] text-lg font-bold">₹{Array.isArray(userData_state[1]) && userData_state[1][0] ? userData_state[1][0].earningSources?.referral_income?.income || '0.000' : '0.000'}</div>
+                        <img src={Watch_Video_icon} className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image" />
                     </Link>
-                </div>
-                <div className='flex justify-around flex-wrap gap-4'>
                 </div>
                 <div className="w-full mt-4 bg-white border border-blue-500 rounded-lg shadow-md mb-4">
                     <div className="bg-red-800 text-white p-4 rounded-t-lg flex items-center space-x-2">
@@ -176,70 +181,26 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                         <span>Announcements</span>
                         <span className="relative flex size-3">
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
-                            <span className="relative inline-flex size-3 rounded-full bg-redky-500"></span>
+                            <span className="relative inline-flex size-3 rounded-full bg-red-500"></span>
                         </span>
                     </div>
-                    <div className="p-4 space-y-4">
-                        <div className="space-y-2">
-                            <p className="announcement">
-                                <span className="text-sm text-gray-500 float-right">
-                                    <i className="fa fa-clock-o"></i> 8/10/24, 11:53 AM
-                                </span>
-                            </p>
-                            <p className="font-semibold">Why Choose Us?</p>
-                            <p>
-                                1. Receive a $1 bonus for signing up.<br />
-                                2. Enjoy the highest CPM rates globally.<br />
-                                3. No intrusive pop-up ads.<br />
-                                4. Ability to shorten links for 18+, Movies, Faucets, etc.<br />
-                                5. Fast payments within 2 to 3 days.
-                            </p>
-                            <p className="text-red-500 font-semibold">
-                                (Your first payment will be processed within 1 - 2 days)
-                            </p>
-                            <p className="font-semibold">Statistics will be refreshed every 10 minutes.</p>
-                        </div>
-                        <hr className="border-t-2 border-gray-300" />
-                        <div className="space-y-2">
-                            <p className="announcement">
-                                <span className="text-sm text-gray-500 float-right">
-                                    <i className="fa fa-clock-o"></i> 8/10/24, 11:52 AM
-                                </span>
-                            </p>
-                            <p className="font-semibold">Contest</p>
-                            <p className="text-red-500 font-semibold">Use Your Referral Link:</p>
-                            <p>
-                                The user with the most active referrals will earn a
-                                <span className="text-green-500 font-semibold">25% commission</span>.
-                                Find your referral link here -
-                                <a href="https://droplink.co/member/users/referrals" target="_blank" className="text-blue-500 hover:underline">Click</a><br />
-                                When your referral earns money, your commission will be credited to your DropLink wallet.
-                            </p>
-                            <p className="text-red-500 font-semibold">Spread the Word:</p>
-                            <p>
-                                Write an article about us (feel free to include your referral link!) and earn up to
-                                <span className="text-green-500 font-semibold">$5</span>.<br />
-                                Create a YouTube video discussing our platform and earn up to $100. Minimum withdrawal is
-                                <span className="text-green-500 font-semibold">$5</span>.<br />
-                                Send us the link to your article or video via -
-                                <a href="mailto:support@droplink.co" className="text-blue-500 hover:underline">Email</a> |
-                                <a href="https://t.me/droplinksp" target="_blank" className="text-blue-500 hover:underline">Telegram</a><br />
-                                Funds will be credited to your account every Sunday.
-                            </p>
-                        </div>
-                        <hr className="border-t-2 border-gray-300" />
-                        <div className="space-y-2">
-                            <p className="announcement">
-                                <span className="text-sm text-gray-500 float-right">
-                                    <i className="fa fa-clock-o"></i> 8/10/24, 11:50 AM
-                                </span>
-                            </p>
-                            <p className="font-semibold">Policy</p>
-                            <p>
-                                Dear users, please refrain from creating bots, using proxies, or generating fake traffic. Violating this policy will result in
-                                <span className="text-red-500 font-semibold">account deactivation</span>.
-                            </p>
-                        </div>
+                    <div className="p-4 space-y-4 max-h-[600px] overflow-auto custom-scrollbar">
+                        {announcements.map((item) => (
+                            <div key={item.id} className="space-y-2">
+                                <p className="announcement">
+                                    <span className="text-sm text-gray-500 float-right">
+                                        <i className="fa fa-clock-o"></i> {item.time}
+                                    </span>
+                                </p>
+                                <p className="font-semibold">{item.title}</p>
+                                {item.details.map((detail, index) => (
+                                    <p key={index}>{detail}</p>
+                                ))}
+                                {item.extra && <p className="text-red-500 font-semibold">{item.extra}</p>}
+                                {item.note && <p className="font-semibold">{item.note}</p>}
+                                <hr className="border-t-2 border-gray-300" />
+                            </div>
+                        ))}
                     </div>
                 </div>
                 <div className='flex justify-center mt-3'>
@@ -266,27 +227,35 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                         </div>
                     </div>
                 </div>
-                <div className="overflow-auto mt-3 max-h-[300px]">
+                <div className="overflow-auto mt-3 h-[300px] border rounded-lg shadow-lg bg-white custom-scrollbar">
                     <table className="table-auto border-collapse min-w-[633px] sm:min-w-full">
-                        <thead className="bg-gray-100 z-0 sticky top-0">
+                        <thead className="bg-green-500 text-white sticky top-0 z-10">
                             <tr>
-                                <th className="text-start px-4 py-2 border border-gray-300">Date</th>
-                                <th className="text-start px-4 py-2 border border-gray-300">Self Earnings</th>
-                                <th className="text-start px-4 py-2 border border-gray-300">Referral Earnings</th>
-                                <th className="text-start px-4 py-2 border border-gray-300">Total Earnings</th>
+                                <th className="text-start px-4 py-3 border border-gray-300">Date</th>
+                                <th className="text-start px-4 py-3 border border-gray-300">Self Earnings</th>
+                                <th className="text-start px-4 py-3 border border-gray-300">Referral Earnings</th>
+                                <th className="text-start px-4 py-3 border border-gray-300">Total Earnings</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {
-                                monthlyData_state?.map((table_values, index) => (
-                                    <tr key={index} className="odd:bg-gray-200">
-                                        <td className="px-4 py-2 border border-gray-300">{table_values.date}</td>
-                                        <td className="px-4 py-2 border border-gray-300">₹{table_values.self_earnings || '0.000'}</td>
-                                        <td className="px-4 py-2 border border-gray-300">₹{table_values.referral_earnings || '0.000'}</td>
-                                        <td className="px-4 py-2 border border-gray-300">₹{table_values.Total_earnings || '0.000'}</td>
+                            {monthlyData_state && monthlyData_state.length > 0 ? (
+                                monthlyData_state.reverse().map((table_values, index) => (
+                                    <tr key={index} className="odd:bg-gray-100 even:bg-gray-50">
+                                        <td className="px-4 py-3 border border-gray-300">{table_values.date}</td>
+                                        <td className="px-4 py-3 border border-gray-300 text-green-600 font-semibold">₹{table_values.self_earnings || '0.000'}</td>
+                                        <td className="px-4 py-3 border border-gray-300 text-blue-600 font-semibold">₹{table_values.referral_earnings || '0.000'}</td>
+                                        <td className="px-4 py-3 border border-gray-300 text-black font-bold">₹{table_values.Total_earnings || '0.000'}</td>
                                     </tr>
                                 ))
-                            }
+                            ) : (
+                                <tr>
+                                    <td colSpan="4">
+                                        <div className="h-[240px] flex justify-center items-center">
+                                            <div className="text-center text-gray-500 font-semibold">💰 No Earnings Yet! Start Now!</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

@@ -4,12 +4,16 @@ import axios from 'axios';
 import Footer from '../components/footer/footer';
 import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import Pagination from '../components/pagination/pagination';
-
+import { FaClipboard, FaClipboardCheck } from "react-icons/fa";
+import showNotificationWith_timer from '../components/showNotificationWith_timer';
+import showNotification from '../components/showNotification';
+ 
 const ReferEarn = ({ setAvailableBalance_forNavBar_state }) => {
     const [currentPage_state, setCurrentPage_state] = useState(1);
     const [referralRecords_state, setReferralRecords] = useState([]);
     let [data_process_state, setData_process_state] = useState(false);
     const navigation = useNavigate();
+    const [copied_state, setCopied_state] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -18,25 +22,17 @@ const ReferEarn = ({ setAvailableBalance_forNavBar_state }) => {
                 const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userReferral_record_get`, {
                     withCredentials: true
                 });
-                setReferralRecords(response.data.msg);
-                setAvailableBalance_forNavBar_state(response.data.msg.available_balance);
+                setReferralRecords(response?.data?.msg);
+                setAvailableBalance_forNavBar_state(response?.data?.msg?.available_balance);
             } catch (error) {
-                if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
-                    navigation('/login');
-                } else if (error.response.data.jwtMiddleware_error) {
-                    Swal.fire({
-                        title: 'Session Expired',
-                        text: 'Your session has expired. Please log in again.',
-                        icon: 'error',
-                        timer: 5000,
-                        timerProgressBar: true,
-                        confirmButtonText: 'OK',
-                        didClose: () => {
-                            navigation('/login');
-                        }
-                    });
-                }
                 console.error(error);
+                if (error?.response?.data?.jwtMiddleware_token_not_found_error || error?.response.data?.jwtMiddleware_user_not_found_error) {
+                    navigation('/login');
+                } else if (error?.response?.data?.jwtMiddleware_error) {
+                    showNotificationWith_timer(true, 'Your session has expired. Please log in again.', '/login', navigation);
+                } else {
+                    showNotification(true, "Something went wrong, please try again.");
+                }
             } finally {
                 setData_process_state(false);
             }
@@ -45,12 +41,10 @@ const ReferEarn = ({ setAvailableBalance_forNavBar_state }) => {
         fetchData();
     }, []);
 
-    const copyToClipboard = (text) => {
-        navigator.clipboard.writeText(text).then(() => {
-            alert('Link copied to clipboard!');
-        }).catch((err) => {
-            console.error('Error copying text: ', err);
-        });
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(referralLink);
+        setCopied_state(true);
+        setTimeout(() => setCopied_state(false), 2000);
     };
 
     const itemsPerPage = 5
@@ -83,34 +77,42 @@ const ReferEarn = ({ setAvailableBalance_forNavBar_state }) => {
                             <pre className="rounded-md text-gray-800 font-bold">{referralLink}</pre>
                         </div>
                         <button
-                            className="btn btn-outline-primary text-sm bg-blue-500 hover:bg-blue-600 text-white rounded p-2"
-                            onClick={() => copyToClipboard(referralLink)}
+                            className="btn btn-outline-primary text-sm bg-blue-500 hover:bg-blue-600 text-white rounded p-2 flex items-center"
+                            onClick={copyToClipboard}
                         >
-                            <i className="fa fa-copy"></i>
+                            {copied_state ? <FaClipboardCheck size={18} /> : <FaClipboard size={18} />}
                         </button>
                     </div>
                 </div>
 
                 <div className="mt-6">
                     <div className="overflow-x-auto rounded-lg shadow bg-white">
-                        <table className="min-w-full table-auto border-collapse text-left">
-                            <thead>
-                                <tr className="text-gray-700">
-                                    <th className="px-4 py-2 border-l border-t border-b">Username</th>
-                                    <th className="px-4 py-2 border-t border-b">Income</th>
-                                    <th className="px-4 py-2 border-t border-b">Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {currentReferrals?.map((referral, index) => (
-                                    <tr key={index}>
-                                        <td className="px-4 py-2 border-l">{referral.userName}</td>
-                                        <td className="px-4 py-2">₹{referral.income || '0.000'}</td>
-                                        <td className="px-4 py-2">{referral.date}</td>
+                        {referralRecords_state.lenght === 0 || referralRecords_state.referral_data?.length === 0 ? (
+                            <div className="text-center py-6 text-gray-500 font-medium h-[294px] flex justify-center items-center">
+                                📉 No referrals found
+                            </div>
+                        ) : (
+                            <table className="min-w-full table-auto border-collapse text-left">
+                                <thead>
+                                    <tr className="text-gray-700 bg-gray-100">
+                                        <th className="px-4 py-3 border-l border-t border-b">Username</th>
+                                        <th className="px-4 py-3 border-t border-b">Income</th>
+                                        <th className="px-4 py-3 border-t border-b">Date</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {currentReferrals?.map((referral, index) => (
+                                        <tr key={index} className="border-b">
+                                            <td className="px-4 py-3 border-l">{referral.userName}</td>
+                                            <td className="px-4 py-3 text-green-600 font-medium">
+                                                ₹{referral.income || '0.000'}
+                                            </td>
+                                            <td className="px-4 py-3">{referral.date}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </div>
                 {totalPages > 1 && <Pagination

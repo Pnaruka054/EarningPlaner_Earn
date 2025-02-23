@@ -4,16 +4,16 @@ import SideMenu from '../sideMenu/sideMenu';
 import EarnWizLogo from '../../../../assets/EarnWizLogo.png'
 import ProcessBgBlack from '../processBgBlack/processBgBlack';
 import axios from 'axios';
+import showNotificationWith_timer from '../showNotificationWith_timer';
 
 const NavBar = ({ show, availableBalance_forNavBar_state }) => {
     const [sideMenu_state, setSideMenu_state] = useState('menu-outline');
     const [toggelMenu_state, setToggelMenu_state] = useState("reorder-three");
-    const [navBarBalance_state, setNavBarBalance_state] = useState("reorder-three");
     let [data_process_state, setData_process_state] = useState(false);
     let [isUserLogin_state, setIsUserLogin_state] = useState(false);
 
     let toggleMenu_icon = useRef(null)
-    const navigate = useNavigate();
+    const navigation = useNavigate();
     const location = useLocation();
 
     let toggleMenu = (e) => {
@@ -39,14 +39,23 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
     useEffect(() => {
         const menuIcon = toggleMenu_icon.current;
 
-        const handleNavMenuClick = (e) => {
+        const handleNavMenuClick = () => {
             setToggelMenu_state('reorder-three');
             menuIcon?.classList.add("hidden");
         };
 
-        const handleSideMenuClick = (e) => {
+        const handleSideMenuClick = () => {
             setSideMenu_state('menu-outline');
         };
+
+        window.removeEventListener("click", handleNavMenuClick);
+        window.removeEventListener("click", handleSideMenuClick);
+
+        // Check karo agar menu hidden nahi hai to events add karo
+        if (!menuIcon?.classList.contains("hidden")) {
+            window.addEventListener("wheel", handleNavMenuClick, { once: true });
+            window.addEventListener("touchmove", handleNavMenuClick, { once: true });
+        }
 
         window.addEventListener("click", handleNavMenuClick);
         window.addEventListener("click", handleSideMenuClick);
@@ -57,10 +66,11 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
         };
     }, [toggleMenu_icon.current]);
 
+
     const handleClick = () => {
         if (window.location.pathname !== "/") {
-            // If not on the "/" route, navigate to "/"
-            navigate("/");
+            // If not on the "/" route, navigation to "/"
+            navigation("/");
             // After navigating, scroll to the FAQ section
             setTimeout(() => {
                 document.getElementById("FAQs")?.scrollIntoView({ behavior: "smooth" });
@@ -79,10 +89,13 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
                     withCredentials: true
                 });
                 setIsUserLogin_state(response.data.success)
+                if ((location.pathname === '/login' || location.pathname === '/signup') && response.data.success) {
+                    showNotificationWith_timer(true, 'You Already Logged In', '/member/dashboard', navigation);
+                }
             } catch (error) {
                 console.error(error);
                 if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
-
+                    setIsUserLogin_state(false)
                 }
             } finally {
                 setData_process_state(false);
@@ -96,7 +109,7 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
 
     if (show) {
         return (
-            <nav className={`bg-blue-800 select-none h-14 px-4 flex items-center justify-between ${toggelMenu_state === 'close' ? '' : 'shadow-lg'} text-white relative`}>
+            <nav className={`bg-blue-800 z-[1] select-none h-14 px-4 flex items-center justify-between ${toggelMenu_state === 'close' ? '' : 'shadow-lg'} text-white relative`}>
                 <Link to="/" className="h-full flex items-center z-[1] select-none" draggable="false">
                     <div
                         className="h-10 w-40 bg-no-repeat bg-contain"

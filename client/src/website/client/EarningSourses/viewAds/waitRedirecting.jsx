@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 const randomNumber = Math.floor(Math.random() * 2) + 1;
 const WaitRedirecting = () => {
     const [redirectLink, setRedirectLink] = useState('');
-    const [waitingTimer_state, setWaitingTimer_state] = useState(8);
+    const [waitingTimer_state, setWaitingTimer_state] = useState(15);
 
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
@@ -13,6 +13,32 @@ const WaitRedirecting = () => {
         }
     }, []);
 
+    useEffect(() => {
+            const scripts = [
+                { src: "https://kulroakonsu.net/88/tag.min.js", attributes: { 'data-zone': '132939', 'data-cfasync': 'false' } },
+                { src: "https://js.onclckmn.com/static/onclicka.js", attributes: { 'data-admpid': '287247' } },
+                { src: "https://js.wpadmngr.com/static/adManager.js", attributes: { 'data-admpid': '287339' } }
+            ];
+        
+            const scriptElements = scripts.map(({ src, attributes }) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = true;
+        
+                // Additional attributes set karna
+                Object.entries(attributes).forEach(([key, value]) => {
+                    script.setAttribute(key, value);
+                });
+        
+                document.body.appendChild(script);
+                return script;
+            });
+        
+            // Cleanup function to remove all scripts on unmount
+            return () => {
+                scriptElements.forEach(script => document.body.removeChild(script));
+            };
+        }, []);  
 
     useEffect(() => {
         let interval = setInterval(() => {

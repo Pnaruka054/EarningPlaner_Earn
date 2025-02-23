@@ -11,7 +11,6 @@ import { createPortal } from 'react-dom'
 import PopUp from './website/client/components/popUp/popUp';
 import Withdraw from './website/client/withdraw/withdraw';
 import BottomAlert from './website/client/components/bottomAlert/bottomAlert';
-import Support from './website/client/support/support';
 import ReferEarn from './website/client/ReferEarn/ReferEarn';
 import Profile from './website/client/profile/profile';
 import Setting from './website/client/setting/setting';
@@ -21,7 +20,6 @@ import WaitRedirecting1 from './website/client/EarningSourses/viewAds/waitRedire
 import Home from './website/client/home/home';
 import ContactUs from './website/client/components/contactUs/contactUs';
 import PageNotFound from './website/client/components/pageNotFound/pageNotFound';
-import ShortLink from './website/client/EarningSourses/shortLink/shortLink';
 import ExtensionUninstalled from './website/client/extensionUninstalled/extensionUninstalled';
 import PasswordResetForm from './website/client/passwordResetForm/passwordResetForm';
 import ClickShortedLink from './website/client/EarningSourses/clickShortedLink/clickShortedLink';
@@ -30,6 +28,7 @@ import PrivacyPolicy from './website/client/PrivacyPolicy/PrivacyPolicy';
 import Terms_of_Use from './website/client/Terms_of_Use/Terms_of_Use';
 import DMCA from './website/client/DMCA/DMCA';
 import FillSurvey from './website/client/EarningSourses/fillSurvey/fillSurvey';
+import EmailVerification from './website/client/components/email-verification/email-verification';
 
 const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
@@ -109,7 +108,8 @@ const App = () => {
       setshow_Full_NavBar_state((p) => p = false)
     } else if (
       location.pathname.includes('/waitRedirecting') ||
-      location.pathname.includes('/member/last-page')
+      location.pathname.includes('/member/last-page') ||
+      location.pathname.includes('/email-verification')
     ) {
       setshow_Full_NavBar_state((p) => p = true)
     }
@@ -164,6 +164,7 @@ const App = () => {
               <Route path="/member/withdraw" element={<Withdraw setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} setShowBottomAlert_state={setShowBottomAlert_state} />} />
               <Route path="/member/refer-and-earn" element={<ReferEarn setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
               <Route path="/member/settings" element={<Setting setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
+              <Route path="/email-verification/:token/:email" element={<EmailVerification />} />
               <Route path="/member/profile" element={<Profile setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-use" element={<Terms_of_Use />} />
