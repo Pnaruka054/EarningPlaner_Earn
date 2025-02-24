@@ -13,7 +13,7 @@ const middleware_userLogin_check = async (req, res, next) => {
             || req.originalUrl.includes('/userRoute/reset_password_form_post')
             || req.originalUrl.includes('/userRoute/verify_reset_token')
             || req.originalUrl.includes('/userRoute/verify_reset_email_token')
-            || req.originalUrl.includes('/postBack')
+            || req.originalUrl.includes('/postBack/postBackCPX')
         ) {
             return next(); // Skip middleware for this route
         }
