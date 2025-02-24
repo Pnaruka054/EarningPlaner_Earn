@@ -8,7 +8,6 @@ import CountdownTimer from '../../components/countDownTimer/countDownTimer';
 import earningSound from '../../components/earningSound'
 import showNotificationWith_timer from '../../components/showNotificationWith_timer';
 import showNotification from '../../components/showNotification';
-import OnClickaBannerAds from '../../components/onClickaBannerAds/onClickaBannerAds';
 
 const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [handle_clickAds_btnClick_state, setHandle_clickAds_btnClick_state] = useState(false);
@@ -329,6 +328,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 navigation('/login');
             } else if (error?.response?.data?.jwtMiddleware_error) {
                 showNotificationWith_timer(true, 'Your session has expired. Please log in again.', '/login', navigation);
+            } else if (error?.response?.data?.error_msg) {
+                showNotification(true, error?.response?.data?.error_msg);
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }

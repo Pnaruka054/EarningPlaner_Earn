@@ -4,6 +4,8 @@ import Footer from "../../components/footer/footer";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
+import showNotificationWith_timer from "../../components/showNotificationWith_timer";
+import showNotification from "../../components/showNotification";
 
 const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
     const [data_process_state, setData_process_state] = useState(false);
@@ -28,17 +30,9 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                 ) {
                     navigation("/login");
                 } else if (error.response?.data?.jwtMiddleware_error) {
-                    Swal.fire({
-                        title: "Session Expired",
-                        text: "Your session has expired. Please log in again.",
-                        icon: "error",
-                        timer: 5000,
-                        timerProgressBar: true,
-                        confirmButtonText: "OK",
-                        didClose: () => {
-                            navigation("/login");
-                        },
-                    });
+                    showNotificationWith_timer(true, 'Your session has expired. Please log in again.', '/login', navigation);
+                } else {
+                    showNotification(true, "Something went wrong, please try again.");
                 }
             } finally {
                 setData_process_state(false);
@@ -50,6 +44,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
     // 🔄 **Update Link Status & Show Swal**
     const user_linkClick_patch = async (shortnerDomain) => {
         try {
+            setData_process_state(true);
             const origin = `${window.location.origin}`;
             const response = await axios.patch(
                 `${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_shortlink_firstPage_data_patch`,
@@ -60,6 +55,8 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
         } catch (error) {
             console.error("Error updating link status:", error);
             return error
+        } finally {
+            setData_process_state(false);
         }
     };
 
@@ -74,15 +71,18 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
             window.location.href = response.data.shortedLink;
         } catch (error) {
             console.error("Error processing link click:", error);
-
-            Swal.fire({
-                title: "❌ Error!",
-                text: "Failed to record your click. Please try again!",
-                icon: "error",
-                timer: 3000,
-                timerProgressBar: true,
-                confirmButtonText: "OK",
-            });
+            if (
+                error.response?.data?.jwtMiddleware_token_not_found_error ||
+                error.response?.data?.jwtMiddleware_user_not_found_error
+            ) {
+                navigation("/login");
+            } else if (error.response?.data?.jwtMiddleware_error) {
+                showNotificationWith_timer(true, 'Your session has expired. Please log in again.', '/login', navigation);
+            } else if (error.response?.data?.error_msg) {
+                showNotification(true, error.response?.data?.error_msg);
+            } else {
+                showNotification(true, "Something went wrong, please try again.");
+            }
         }
     };
 

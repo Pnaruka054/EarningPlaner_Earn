@@ -13,6 +13,7 @@ const viewAds_directLinksData_module = require("../../model/view_ads_direct_link
 const { userReferByIncome_handle, userIncome_handle } = require('../../helper/usersEarningsUpdate_handle')
 const userID_data_for_survey_module = require('../../model/userID_data_for_survey/userID_data_for_survey_module')
 
+// for view ads page get data
 const user_adsView_home_get = async (req, res) => {
     const session = await mongoose.startSession(); // Start a session
     session.startTransaction(); // Begin a transaction
@@ -90,6 +91,7 @@ const user_adsView_home_get = async (req, res) => {
     }
 };
 
+// for view ads page income update
 const user_adsView_income_patch = async (req, res) => {
     const session = await mongoose.startSession();
     try {
@@ -98,15 +100,15 @@ const user_adsView_income_patch = async (req, res) => {
         // Destructure request body and get user IP
         const { disabledButtons_state, clickBalance, btnClickEarn } = req.body;
         const userIp = req.ip;
-        // Get user data (Assuming req.user is a valid Mongoose document)
         const userData = req.user;
 
+        // incress user income
         let user_incomeUpdate = await userIncome_handle(session, userData, btnClickEarn)
         if (!user_incomeUpdate.success) {
             throw new Error(user_incomeUpdate.error);
         }
         const { userMonthlyRecord } = user_incomeUpdate.values
-
+        // handle user monthly data
         if (
             userMonthlyRecord?.earningSources?.view_ads?.clickBalance !==
             `${process.env.VIEW_ADS_CLICK_BALANCE}/${process.env.VIEW_ADS_CLICK_BALANCE}`
@@ -129,10 +131,11 @@ const user_adsView_income_patch = async (req, res) => {
             }
         }
 
+        // give error if timer is started for this user
         if (idTimer_recordsData_status) {
             return res.status(500).json({
                 success: false,
-                msg: "Not Recorded",
+                error_msg: "Click Limit exceed Try again after Timer Complete.",
             });
         }
 
@@ -142,6 +145,7 @@ const user_adsView_income_patch = async (req, res) => {
             throw new Error(refer_by_incomeupdate.error);
         }
 
+        // find user in ip address record using userIp
         const ipAddressRecord = await ipAddress_records_module
             .findOne({ ipAddress: userIp })
             .session(session);
@@ -159,7 +163,7 @@ const user_adsView_income_patch = async (req, res) => {
         }
 
         // Update monthly income and click balance for view_ads
-        const currentIncome = parseFloat(userMonthlyRecord.earningSources.view_ads.income || 0);
+        const currentIncome = parseFloat(userMonthlyRecord?.earningSources?.view_ads?.income || 0);
         userMonthlyRecord.earningSources.view_ads.income = (
             currentIncome + parseFloat(btnClickEarn)
         ).toFixed(3);
@@ -192,6 +196,7 @@ const user_adsView_income_patch = async (req, res) => {
                 `0/${process.env.VIEW_ADS_CLICK_BALANCE}`
         };
 
+        // change res data if timer started for user
         if (idTimer_recordsData?.ViewAdsexpireTImer) {
             resData = { ...resData, ViewAdsexpireTImer: idTimer_recordsData.ViewAdsexpireTImer }
         }
@@ -212,11 +217,12 @@ const user_adsView_income_patch = async (req, res) => {
             session.endSession();
         }
         console.error("Error in updating user data:", error);
-        return res.status(500).json({ message: 'An error occurred while processing the request.' });
+        return res.status(500).json({ msg: 'An error occurred while processing the request.' });
     }
 
 };
 
+// for click shorten link page data get
 const user_shortlink_data_get = async (req, res) => {
     try {
         // User data
@@ -256,10 +262,14 @@ const user_shortlink_data_get = async (req, res) => {
         res.json(resData);
     } catch (error) {
         console.error("Error fetching user shortlink data:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({
+            success: false,
+            msg: "Internal Server Error"
+        });
     }
 };
 
+// for click shorten link page income update
 const user_shortlink_firstPage_data_patch = async (req, res) => {
     try {
         const userData = req.user;
@@ -267,15 +277,16 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
         const { shortnerDomain, endPageRoute, clientOrigin } = req.body;
 
         if (!userData || !userData._id || !shortnerDomain || !clientOrigin) {
-            return res.status(400).json({ message: "Invalid data received" });
+            return res.status(400).json({ error_msg: "Invalid data received" });
         }
 
-        // Check if record already exists
+        // Check if record already exists using ip and shorten link domain
         const existingRecord = await ipAddress_records_module.findOne({ ipAddress: userIp, shortnerDomain });
 
+        // if already exists then update it
         if (existingRecord) {
             if (existingRecord.status === true || existingRecord.processCount === 2) {
-                return res.status(200).json({ message: "Record already processed, no update required" });
+                return res.status(200).json({ error_msg: "Record already processed, no update required" });
             }
 
             // Update existing record
@@ -283,15 +294,17 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             existingRecord.status = false;
             await existingRecord.save();
 
-            return res.status(200).json({ message: "Record updated successfully", data: existingRecord });
+            return res.status(200).json({ error_msg: "Record updated successfully", data: existingRecord });
         }
 
+        // genrate gandom 10 chatactor random string
         let uniqueRandomID = await generateRandomString(10);
         let shortedLink = null;
 
-        // Fetch Shortener API data
+        // Fetch Shortener data
         const shortnersData = await shortedLinksData_module.findOne({ shortnerDomain });
 
+        // create shorted url for user using shortner api
         if (shortnersData && shortnersData.shortnerApiLink) {
             // const fullUrl = `${clientOrigin}${endPageRoute}/${uniqueRandomID}`;
             const fullUrl = `https://earningplaner-earn.onrender.com${endPageRoute}/${uniqueRandomID}`;
@@ -306,10 +319,13 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
 
         // If shortedLink is null, return an error response
         if (!shortedLink) {
-            return res.status(422).json({ message: "Shortened link not generated. Process aborted." });
+            return res.status(422).json({
+                success: false,
+                error_msg: "Shortened link not generated. Process aborted."
+            });
         }
 
-        // Create new record
+        // Create new ip record for user
         await new ipAddress_records_module({
             userDB_id: userData._id,
             shortnerDomain,
@@ -320,19 +336,26 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             ipAddress: userIp
         }).save();
 
-        res.status(200).json({ message: "New record added successfully", shortedLink });
-
+        res.status(200).json({
+            success: true,
+            shortedLink
+        });
     } catch (error) {
         console.error("Error in user_shortlink_firstPage_data_patch:", error);
-        res.status(500).json({ message: "Internal Server Error" });
+        res.status(500).json({
+            success: false,
+            msg: "Internal Server Error"
+        });
     }
 };
 
+// for click shorten link last page income update for user
 const user_shortlink_lastPage_data_patch = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
+        // get user unique token
         let { uniqueToken } = req.body;
         const userData = req.user;
         const userIp = req.ip;
@@ -418,17 +441,34 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
     }
 };
 
+// for get all survey on survey page
 const user_survey_available_get = async (req, res) => {
     try {
         const userData = req.user;
 
+        // unique userID for survey api
         let isUserIdDataFound = await userID_data_for_survey_module.findOne({ userDB_id: userData._id });
 
+        // check if user already created or not if not created then create new user
         if (!isUserIdDataFound) {
-            const RandomString = generateRandomString(userData.userName.length);
+            // function to genrate unique randomString with finding in user userID_data_for_survey_module data
+            async function generateUniqueRandomString(length) {
+                const RandomString = generateRandomString(length);
+                let increment = 0;
+                let newString = RandomString;
+
+                while (await userID_data_for_survey_module.findOne({ userId: newString })) {
+                    increment++;
+                    newString = `${newString}${increment}`;
+                }
+
+                return newString;
+            }
+            userName = await generateUniqueRandomString(userData.userName.length);
+
             isUserIdDataFound = new userID_data_for_survey_module({
                 userDB_id: userData._id,
-                userId: RandomString
+                userId: userName
             });
 
             await isUserIdDataFound.save(); // Save the new record
@@ -436,26 +476,11 @@ const user_survey_available_get = async (req, res) => {
 
         const userId = isUserIdDataFound.userId;
 
+        // surveys data
         const surveysWebsites = [
-            {
-                surveyNetworkName: "TheoremReach",
-                url: `https://theoremreach.com/respondent_entry/direct?api_key=aded5d2fcb4e683c0f60034c8c5e&user_id=${userId}`
-            },
             {
                 surveyNetworkName: "CPX Research",
                 url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}`
-            },
-            {
-                surveyNetworkName: "BitLabs",
-                url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}&secure_hash=SECURITY_HASH`
-            },
-            {
-                surveyNetworkName: "OfferToro",
-                url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}&secure_hash=SECURITY_HASH`
-            },
-            {
-                surveyNetworkName: "Peanut Labs",
-                url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}&secure_hash=SECURITY_HASH`
             }
         ];
 
@@ -468,7 +493,7 @@ const user_survey_available_get = async (req, res) => {
 
     } catch (error) {
         console.error("Survey availability check error:", error);
-        return res.status(500).json({ success: false, message: "Survey check failed" });
+        return res.status(500).json({ success: false, msg: "Survey check failed" });
     }
 };
 
