@@ -17,10 +17,12 @@ const user_adsView_home_get = async (req, res) => {
     const session = await mongoose.startSession(); // Start a session
     session.startTransaction(); // Begin a transaction
     try {
+        // format current month and year (e.g., "January 2024")
         const monthName = getFormattedMonth()
         const userData = req.user;
         const user_ip = req.ip;
 
+        // get all directLinks data
         let viewAds_directLinksData = await viewAds_directLinksData_module.find()
 
         // Search for an existing record with the same ipAddress
@@ -28,7 +30,7 @@ const user_adsView_home_get = async (req, res) => {
             .findOne({ ipAddress: user_ip })
             .session(session);
 
-        // If no record is found, create a new one
+        // If no record is found, create a new one with empity buttonNames Array
         if (!ipAddress_recordData) {
             ipAddress_recordData = new ipAddress_records_module({
                 userDB_id: userData._id,
@@ -42,11 +44,12 @@ const user_adsView_home_get = async (req, res) => {
             .findOne({ userDB_id: userData._id, monthName })
             .session(session);
 
-        // Safely extract income and clickBalance
+        // Safely extract income and clickBalance if available and if not available then user 0 and 0/env
         const income = userMonthly_recordData?.earningSources?.view_ads?.income || 0;
-        let clickBalance =
-            userMonthly_recordData?.earningSources?.view_ads?.clickBalance ||
-            `0/${process.env.VIEW_ADS_CLICK_BALANCE}`;
+        let clickBalance = userMonthly_recordData?.earningSources?.view_ads?.clickBalance
+            ? `${userMonthly_recordData.earningSources.view_ads.clickBalance.split('/')[0]}/${process.env.VIEW_ADS_CLICK_BALANCE || '0'}`
+            : `0/${process.env.VIEW_ADS_CLICK_BALANCE || '0'}`;
+
 
         // Prepare response data
         let resData = {
@@ -59,6 +62,7 @@ const user_adsView_home_get = async (req, res) => {
             viewAds_directLinksData
         };
 
+        // find if timer is enabled or not for this user if enabled then change res data
         let idTimer_recordsData = await idTimer_records_module.findOne({ userDB_id: userData._id }).session(session)
         if (idTimer_recordsData?.ViewAdsexpireTImer) {
             resData = { ...resData, ViewAdsexpireTImer: idTimer_recordsData.ViewAdsexpireTImer }
@@ -81,7 +85,7 @@ const user_adsView_home_get = async (req, res) => {
         await session.abortTransaction();
         session.endSession();
         return res.status(500).json({
-            message: "An error occurred while processing your request.",
+            msg: "An error occurred while processing your request.",
         });
     }
 };
@@ -231,12 +235,16 @@ const user_shortlink_data_get = async (req, res) => {
         // Mark matched shorted links as isDisable: true
         shortedLinksData = shortedLinksData.map(link => {
             const isClicked = clickedUrls.has(link.shortnerDomain);
-            const isDisable = isClicked && ipAddressRecords.some(record => record.status === true);
+            const relatedRecords = ipAddressRecords.filter(record => record.shortnerDomain === link.shortnerDomain);
+            // isDisable will be true only if all related records have status === true
+            const isDisable = isClicked && relatedRecords.length > 0 && relatedRecords.every(record => record.status === true);
+
             return {
                 ...link.toObject(),
                 isDisable
             };
         });
+
 
         // Prepare response data
         let resData = {
@@ -266,7 +274,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
         const existingRecord = await ipAddress_records_module.findOne({ ipAddress: userIp, shortnerDomain });
 
         if (existingRecord) {
-            if (existingRecord.status === true || existingRecord.processCount === 1) {
+            if (existingRecord.status === true || existingRecord.processCount === 2) {
                 return res.status(200).json({ message: "Record already processed, no update required" });
             }
 

@@ -18,7 +18,6 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                     `${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_shortlink_data_get`,
                     { withCredentials: true }
                 );
-                console.log(response);
                 setAvailableBalance_forNavBar_state(response.data.userAvailableBalance);
                 setShortLinks(response.data.shortedLinksData);
             } catch (error) {
@@ -72,7 +71,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                 throw new Error("API request failed"); // ✅ Agar response me error ho to manually error throw karein
             }
             console.log(response);
-            window.open(response.data.shortedLink, "_blank"); // ✅ Sirf successful API response pe open karein
+            window.location.href = response.data.shortedLink;
         } catch (error) {
             console.error("Error processing link click:", error);
 

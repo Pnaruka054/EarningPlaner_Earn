@@ -61,13 +61,17 @@ async function Database_connection() {
 Database_connection();
 
 
-// route middlewares
-app.use(cors(corsOptions), middleware.middleware_userLogin_check)
-app.use('/userRoute', cors(corsOptions), userRouter);
-app.use('/userWithdraw', cors(corsOptions), userWithdraw);
-app.use('/userIncomeRoute', cors(corsOptions), userIncomeRoute);
-app.use('/userMessageRoute', cors(corsOptions), userMessageRoute);
+// Global Middleware Setup
+app.use(cors(corsOptions)); // CORS ko ek hi jagah set karo
+app.use(middleware.middleware_userLogin_check); // Global login check middleware
+
+// Routes
+app.use('/userRoute', userRouter);
+app.use('/userWithdraw', userWithdraw);
+app.use('/userIncomeRoute', userIncomeRoute);
+app.use('/userMessageRoute', userMessageRoute);
 app.use('/postBack', postBack);
+
 
 // Scheduled cron tasks
 cronForDaily_MonthlyData_Update()

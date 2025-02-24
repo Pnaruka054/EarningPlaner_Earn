@@ -17,7 +17,9 @@ const userSchema = new mongoose.Schema({
     city: { type: String },
     userName: { type: String },
     address: { type: String },
-    google_id: { type: String }
+    google_id: { type: String },
+    isBan: { type: Boolean },
+    banUserDeleteOn: { type: Date }
 })
 
 const userSignUp_module = mongoose.model('userSignUp', userSchema)

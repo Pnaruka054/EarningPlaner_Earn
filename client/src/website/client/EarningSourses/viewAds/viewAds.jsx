@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CountdownTimer from '../../components/countDownTimer/countDownTimer';
 import earningSound from '../../components/earningSound'
+import showNotificationWith_timer from '../../components/showNotificationWith_timer';
+import showNotification from '../../components/showNotification';
+import OnClickaBannerAds from '../../components/onClickaBannerAds/onClickaBannerAds';
 
 const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [handle_clickAds_btnClick_state, setHandle_clickAds_btnClick_state] = useState(false);
@@ -18,8 +21,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [originalTitle] = useState(document.title);
     const [isUserActiveOnPage, setIsUserActiveOnPage] = useState(false);
     const [totalDirectLinkBtns_state, setTotalDirectLinkBtns_state] = useState([]);
-    // const [count_state, setCount_state] = useState(30);
-    // const [count_handle_state, setCount_handle_state] = useState(false);
     const channel = new BroadcastChannel("viewAds_channel");
 
     useEffect(() => {
@@ -83,23 +84,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             channel.close(); // Cleanup channel on unmount
         };
     }, []);
-
-    // useEffect(() => {
-    //     let timerId;
-    //     if (count_handle_state) {
-    //         timerId = setInterval(() => {
-    //             setCount_state((prev) => {
-    //                 const newCount = prev - 1;
-    //                 document.title = newCount; // Update document title with the latest count
-    //                 return newCount;
-    //             });
-    //         }, 1000);
-    //     } else if (!count_handle_state) {
-    //         setCount_state(30)
-    //         clearInterval(timerId);
-    //     }
-    //     return () => clearInterval(timerId);
-    // }, [count_handle_state]);
 
     let Instructions = [
         'Each user gets 5 Ads clicks to earn money per IP address.',
@@ -343,19 +327,12 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             console.error(error);
             if (error.response.data.jwtMiddleware_token_not_found_error) {
                 navigation('/login');
-            } else if (error.response.data.jwtMiddleware_error) {
-                Swal.fire({
-                    title: 'Session Expired',
-                    text: 'Your session has expired. Please log in again.',
-                    icon: 'error',
-                    timer: 5000,
-                    timerProgressBar: true,
-                    confirmButtonText: 'OK',
-                    didClose: () => {
-                        navigation('/login');
-                    }
-                });
+            } else if (error?.response?.data?.jwtMiddleware_error) {
+                showNotificationWith_timer(true, 'Your session has expired. Please log in again.', '/login', navigation);
+            } else {
+                showNotification(true, "Something went wrong, please try again.");
             }
+
         } finally {
             setData_process_state(false);
         }
@@ -363,64 +340,101 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
     const ExtensionInstallPopup = () => {
         Swal.fire({
-            title: 'Extension Installation Instructions',
+            title: '',
             html: `
-              <div class="text-left" style="font-family: sans-serif;">
-                <div class="mb-4">
-                  <p class="font-bold text-lg">📌 Step 1: Download the ZIP File</p>
-                  <p class="text-sm text-gray-700 mt-1">
-                    To boost your income, you need to install our extension. Click the download button below to download the extension file.
-                 </p>
-                  <a 
-                    href="https://drive.google.com/uc?export=download&id=1pz2538vWbMUcq0pqBzikY1n_4KB3_XTg" 
-                    download 
-                    style="display: inline-block; margin-top: 8px; background-color: #3B82F6; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none;">
-                    Download Extension ZIP
-                  </a>
+            <div class="fixed inset-0 flex items-center justify-start bg-black bg-opacity-80 z-50">
+                <div class="w-full h-full max-w-none bg-gray-900 text-white shadow-xl overflow-auto p-8 relative">
+                    
+                    <!-- Close Icon -->
+                    <button data-close="true" class="absolute top-4 right-6 text-white text-3xl font-bold hover:text-gray-400 transition duration-300">
+                        ✖
+                    </button>
+                    
+                    <h2 class="text-4xl font-bold text-white mb-6">🚀 Install Our Chrome Extension</h2>
+                    
+                    <!-- Step 1: Download ZIP -->
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-6 text-left">
+                        <h3 class="text-2xl font-semibold text-yellow-400">📌 Step 1: Download the ZIP File</h3>
+                        <p class="mt-2 text-gray-300">
+                            To start earning more, install our extension by downloading the file below.
+                        </p>
+                        <div class="mt-4">
+                            <a href="https://drive.google.com/uc?export=download&id=1pz2538vWbMUcq0pqBzikY1n_4KB3_XTg" 
+                               download 
+                               class="inline-block bg-blue-500 text-white px-8 py-3 rounded-md text-lg hover:bg-blue-600 transition duration-300">
+                                Download Extension ZIP
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Install in Chrome -->
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-6 text-left">
+                        <h3 class="text-2xl font-semibold text-green-400">📌 Step 2: Install on Chrome (Desktop)</h3>
+                        <ol class="list-decimal list-inside mt-2 text-gray-300 space-y-2">
+                            <li>Open <code class="bg-gray-700 p-1 rounded">chrome://extensions/</code> in Chrome.</li>
+                            <li>Enable <strong>Developer Mode</strong> (Top-Right Toggle).</li>
+                            <li>Click "Load Unpacked".</li>
+                            <li>Select the <strong>Extracted Folder</strong> & Install.</li>
+                            <li>Your extension is now installed successfully! 🎉</li>
+                        </ol>
+                    </div>
+                    
+                    <!-- Step 3: Mobile Users (Yandex Browser) -->
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-6 text-left">
+                        <h3 class="text-2xl font-semibold text-purple-400">📌 Step 3: Mobile Users (Use Yandex Browser)</h3>
+                        <p class="mt-2 text-gray-300">
+                            Most mobile browsers <strong>do not support Chrome Extensions</strong>. But you can use the <strong>Yandex Browser</strong> to install and use extensions on mobile!
+                        </p>
+                        <ol class="list-decimal list-inside mt-2 text-gray-300 space-y-2">
+                            <li>Download <strong>Yandex Browser</strong> from the Play Store.</li>
+                            <li>Open <code class="bg-gray-700 p-1 rounded">chrome.google.com/webstore</code>.</li>
+                            <li>Search for our extension and click "Add to Chrome".</li>
+                            <li>Your extension will be installed successfully! 🎉</li>
+                        </ol>
+                        <div class="mt-4">
+                            <a href="https://play.google.com/store/apps/details?id=com.yandex.browser"
+                               target="_blank"
+                               class="inline-block bg-purple-500 text-white px-8 py-3 rounded-md text-lg hover:bg-purple-600 transition duration-300">
+                                Download Yandex Browser
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4: Watch Video -->
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-md text-left">
+                        <h3 class="text-2xl font-semibold text-red-400">📌 Step 4: Watch Video Tutorial</h3>
+                        <div class="relative w-full h-0 pt-[56.25%] mt-3">
+                            <iframe class="absolute top-0 left-0 w-full h-full rounded-lg"
+                                    src="https://www.youtube.com/embed/VIDEO_ID" 
+                                    frameborder="0" allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                    
+                    <!-- Close Button -->
+                    <div class="mt-6 text-left">
+                        <button data-close="true" 
+                                class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg text-lg transition duration-300">
+                            Close
+                        </button>
+                    </div>
                 </div>
-        
-                <div class="mb-4">
-                  <p class="font-bold text-lg">📌 Step 2: How to Install the Extension</p>
-                  <p class="text-sm text-gray-700 mt-1">
-                    Follow these steps to manually install the extension in your Chrome browser:
-                  </p>
-                  <ol class="list-decimal ml-5 mt-2 text-sm text-gray-700">
-                    <li>Open your Chrome browser.</li>
-                    <li>Go to <code>chrome://extensions/</code> in the address bar.</li>
-                    <li>Enable Developer Mode (toggle switch at the top-right).</li>
-                    <li>Click on "Load Unpacked".</li>
-                    <li>Select the extracted folder from the downloaded ZIP file.</li>
-                    <li>The extension will be installed successfully! 🎉</li>
-                  </ol>
-                  <p class="mt-2 text-sm text-gray-700">
-                    <strong>Tip:</strong> You can provide the ZIP file download link on your website or Google Drive.
-                  </p>
-                </div>
-        
-                <div class="mb-4">
-                  <p class="font-bold text-lg">📌 Step 3: Video Tutorial</p>
-                  <p class="text-sm text-gray-700 mt-1">
-                    Watch the video below for a visual guide on installing the extension:
-                  </p>
-                  <div style="margin-top: 8px; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 4px;">
-                    <iframe 
-                      src="https://www.youtube.com/embed/VIDEO_ID" 
-                      frameborder="0" 
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                      allowfullscreen 
-                      style="position: absolute; top:0; left: 0; width: 100%; height: 100%;">
-                    </iframe>
-                  </div>
-                </div>
-              </div>
+            </div>
             `,
-            showCloseButton: true,
-            confirmButtonText: 'Close',
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: "transparent",
             customClass: {
-                popup: 'rounded-lg'
+                popup: "p-0 m-0 w-full h-full max-w-none shadow-none border-0"
+            },
+            didOpen: () => {
+                document.querySelectorAll("[data-close]").forEach((btn) => {
+                    btn.addEventListener("click", () => Swal.close());
+                });
             }
         });
-    }
+    };
 
     return (
         <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
@@ -428,47 +442,85 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
                     View Ads to Earn
                 </div>
-                <div data-banner-id="6056470"></div>
                 <div className='flex flex-col items-center my-6'>
-                    <div className='flex gap-4'>
-                        <div className='bg-purple-700 px-2 py-1 shadow font-bold text-white rounded-t-2xl'>Click Balance - {viewAds_firstTimeLoad_state.clickBalance}</div>
-                        <div className='bg-purple-700 px-2 py-1 shadow font-bold text-white rounded-t-2xl'>Income - ₹{viewAds_firstTimeLoad_state.income}</div>
-                    </div>
-                    <div className=' bg-white px-6 py-3 shadow relative'>
-                        <div className={`${viewAds_firstTimeLoad_state.ViewAdsexpireTImer ? 'flex' : 'hidden'} absolute z-[1] top-0 bottom-0 left-0 right-0 bg-white bg-opacity-60 justify-center items-center`}>
-                            <div className='flex flex-col items-center font-lexend text-2xl'>
-                                <div className='text-center'>Come Back After</div>
-                                <div className='text-4xl font-bold drop-shadow'>
+                    <div className="bg-white p-6 shadow-lg rounded-lg relative w-full">
+                        {/* Click Balance & Income Section */}
+                        <div className='flex gap-4 mb-4 justify-center'>
+                            <div className='bg-purple-700 px-4 py-2 shadow font-bold text-white rounded-t-2xl'>
+                                Click Balance - {viewAds_firstTimeLoad_state.clickBalance}
+                            </div>
+                            <div className='bg-purple-700 px-4 py-2 shadow font-bold text-white rounded-t-2xl'>
+                                Income - ₹{viewAds_firstTimeLoad_state.income}
+                            </div>
+                        </div>
+
+                        {/* Timer Overlay */}
+                        <div className={`${viewAds_firstTimeLoad_state.ViewAdsexpireTImer ? 'flex' : 'hidden'} absolute z-10 top-0 bottom-0 left-0 right-0 bg-white bg-opacity-70 justify-center items-center`}>
+                            <div className="flex flex-col items-center text-2xl font-semibold">
+                                <div className="text-center">Come Back After</div>
+                                <div className="text-4xl font-bold text-red-600 drop-shadow">
                                     <CountdownTimer expireTime={viewAds_firstTimeLoad_state.ViewAdsexpireTImer} />
                                 </div>
                             </div>
                         </div>
-                        <div className='gap-2 justify-center flex flex-wrap'>
-                            {
-                                totalDirectLinkBtns_state.filter((values) => !values.isExtension).map((values, index) => (
-                                    <button key={index} disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1)) ? true : false} className={`${handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1)) ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
-                                        handle_link_click(values.url, `btn${index + 1}`, values.amount)
-                                    }}><span>{values.buttonTitle} {index + 1}</span><span>₹{values.amount}</span></button>
-                                ))
-                            }
+
+                        {/* Direct Link Section - Manual Ads Handling */}
+                        <div className="my-4 text-center bg-yellow-100 text-yellow-800 p-3 rounded-lg shadow-md">
+                            <span className="font-semibold">Important:</span> Click these buttons and manually handle ads to earn money!
                         </div>
-                        <div className='my-5 text-center text-xl'>---- Boost Your Earnings: Install Our Extension ----</div>
-                        <div className='gap-2 justify-center flex flex-wrap relative'>
-                            <div className={`${isExtension_state ? 'hidden' : 'flex'} absolute top-0 left-0 right-0 bottom-0 bg-white bg-opacity-60 justify-center items-center`}>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            {totalDirectLinkBtns_state.filter((values) => !values.isExtension).map((values, index) => (
+                                <div key={index} className="bg-gray-100 rounded-lg p-4 shadow-md flex flex-col items-center">
+                                    <button
+                                        disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1))}
+                                        className={`w-full px-5 py-2 rounded-md font-medium transition ${handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1))
+                                            ? 'bg-gray-400 cursor-not-allowed'
+                                            : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md'
+                                            }`}
+                                        onClick={(e) => handle_link_click(values.url, `btn${index + 1}`, values.amount)}
+                                    >
+                                        {values.buttonTitle} {index + 1}
+                                    </button>
+                                    <span className="mt-2 text-lg font-bold text-green-600">₹{values.amount}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Extension Install Section */}
+                        <div className="my-6 text-center text-lg font-semibold text-gray-700">---- Boost Your Earnings: Install Our Extension ----</div>
+
+                        {/* Instruction Message */}
+                        <div className="text-center bg-blue-100 text-blue-700 p-3 rounded-lg shadow-md mb-4">
+                            <span className="font-semibold">Important:</span> Only click these buttons below! The extension will handle ads automatically.
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 relative">
+                            {/* Extension Lock Overlay */}
+                            <div className={`${isExtension_state ? 'hidden' : 'flex'} absolute top-0 left-0 right-0 bottom-0 bg-white bg-opacity-70 justify-center items-center`}>
                                 <button
                                     onClick={ExtensionInstallPopup}
-                                    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition duration-200 shadow-lg"
+                                    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 shadow-lg"
                                 >
                                     What Happened?
                                 </button>
                             </div>
-                            {
-                                totalDirectLinkBtns_state.filter((values) => values.isExtension).map((values, index) => (
-                                    <button key={index} disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1)) ? true : false} className={`${handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1)) ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600 '} text-white px-4 py-1 rounded shadow flex flex-col items-center`} onClick={(e) => {
-                                        handle_link_click2(values.url, `1btn${index + 1}`, values.amount)
-                                    }}><span>{values.buttonTitle} {index + 1}</span><span>₹{values.amount}</span></button>
-                                ))
-                            }
+
+                            {totalDirectLinkBtns_state.filter((values) => values.isExtension).map((values, index) => (
+                                <div key={index} className="bg-gray-100 rounded-lg p-4 shadow-md flex flex-col items-center">
+                                    <button
+                                        disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1))}
+                                        className={`w-full px-5 py-2 rounded-md font-medium transition ${handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1))
+                                            ? 'bg-gray-400 cursor-not-allowed'
+                                            : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md'
+                                            }`}
+                                        onClick={(e) => handle_link_click2(values.url, `1btn${index + 1}`, values.amount)}
+                                    >
+                                        {values.buttonTitle} {index + 1}
+                                    </button>
+                                    <span className="mt-2 text-lg font-bold text-green-600">₹{values.amount}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>

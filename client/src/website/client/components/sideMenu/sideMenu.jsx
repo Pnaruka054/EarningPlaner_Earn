@@ -22,12 +22,12 @@ const SideMenu = ({ sideMenu_show }) => {
                 </span>
                 <span>Dashboard</span>
             </Link>
-            <Link to="/member/deposit" className='space-x-1 block px-3 py-2 rounded-lg hover:bg-slate-950'>
+            {/* <Link to="/member/deposit" className='space-x-1 block px-3 py-2 rounded-lg hover:bg-slate-950'>
                 <span className="align-middle">
                     <ion-icon name="card-outline"></ion-icon>
                 </span>
                 <span>Deposit</span>
-            </Link>
+            </Link> */}
             <Link to="/member/withdraw" className='space-x-1 block px-3 py-2 rounded-lg hover:bg-slate-950'>
                 <span className="align-middle">
                     <ion-icon name="cash-outline"></ion-icon>

@@ -826,7 +826,6 @@ const userpassword_and_email_patch = async (req, res) => {
     }
 };
 
-
 module.exports = {
     userSignUp,
     userLogin,
