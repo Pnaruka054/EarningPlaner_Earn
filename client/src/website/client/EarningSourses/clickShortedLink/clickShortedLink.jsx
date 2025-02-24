@@ -6,6 +6,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import showNotificationWith_timer from "../../components/showNotificationWith_timer";
 import showNotification from "../../components/showNotification";
+import ProcessBgSeprate from '../../components/processBgSeprate/processBgSeprate'
 
 const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
     const [data_process_state, setData_process_state] = useState(false);
@@ -107,6 +108,13 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
         .reduce((acc, link) => acc + (parseFloat(link.amount) || 0), 0)
         .toFixed(2);
 
+    if (data_process_state) {
+        return (
+            <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+                <ProcessBgSeprate />
+            </div>
+        )
+    }
     return (
         <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
             <div className="px-2 py-2">
@@ -115,7 +123,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                 </div>
                 <div className="px-4 py-2">
                     <div className="bg-white shadow-md p-6 rounded-lg text-center mb-5">
-                        <h2 className="text-xl font-semibold text-gray-800">💰 Earnings Summary</h2>
+                        <h2 className="text-xl font-semibold text-gray-800 mb-5">💰 Earnings Summary</h2>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4 text-gray-700">
                             <div className="bg-gray-100 p-3 rounded-lg">
                                 <span className="font-semibold">Total Earning:</span>
@@ -181,7 +189,6 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                     </div>
                 </div>
             </div>
-            {data_process_state && <ProcessBgBlack />}
             <div className='mt-3'>
                 <Footer />
             </div>

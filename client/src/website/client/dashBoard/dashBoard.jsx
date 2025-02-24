@@ -19,6 +19,7 @@ import axios from 'axios';
 import { FaSpinner } from "react-icons/fa";
 import showNotificationWith_timer from '../components/showNotificationWith_timer'
 import showNotification from '../components/showNotification'
+import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate'
 
 const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBalance_forNavBar_state }) => {
     const [userData_state, setUserData_state] = useState([[]]);
@@ -72,11 +73,11 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
             ]
         }
     ];
-
+ 
     // filter user selected month
     useEffect(() => {
         setMonthlyData_state(
-            userData_state[2]?.filter((value) => {
+            userData_state?.user_date_records?.filter((value) => {
                 return dropdownButtonValue_state === value.monthName
             })
         )
@@ -90,9 +91,10 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                 const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userDataGet_dashboard`, {
                     withCredentials: true
                 });
+                console.log(response?.data?.msg);
                 setUserData_state(response?.data?.msg);
-                setDropdownButtonValue_state(response?.data?.msg[1][0]?.monthName)
-                setAvailableBalance_forNavBar_state((parseFloat(response?.data?.msg[0]?.deposit_amount || 0) + parseFloat(response?.data?.msg[0]?.withdrawable_amount || 0)).toFixed(3));
+                setDropdownButtonValue_state(response?.data?.msg?.user_month_records[0]?.monthName)
+                setAvailableBalance_forNavBar_state(response?.data?.msg?.userAvailableBalance);
             } catch (error) {
                 console.error(error);
                 if (error?.response?.data?.jwtMiddleware_token_not_found_error || error?.response?.data?.jwtMiddleware_user_not_found_error) {
@@ -124,6 +126,13 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
         };
     }, []);
 
+    if (data_process_state) {
+        return (
+            <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+                <ProcessBgSeprate />
+            </div>
+        )
+    }
     return (
         <div onScroll={(e) => {
             e.stopPropagation()
@@ -139,7 +148,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                 <div className="grid grid-cols-2 grid-rows-3 sm:grid-cols-3 sm:grid-rows-2 grid-flow-col gap-4 font-poppins mb-5 text-lg sm:text-xl text-center">
                     <Link to="/member/view-ads" className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
                         <div className="font-semibold">View Ads</div>
-                        <div className="z-[1] text-lg font-bold">₹{Array.isArray(userData_state[1]) && userData_state[1][0] ? userData_state[1][0].earningSources?.view_ads.income || '0.000' : '0.000'}</div>
+                        <div className="z-[1] text-lg font-bold">₹{Array.isArray(userData_state.user_month_records) && userData_state.user_month_records[0] ? userData_state?.user_month_records[0]?.earningSources?.view_ads.income || '0.000' : '0.000'}</div>
                         <img src={ViewAds} className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image" />
                     </Link>
 
@@ -217,7 +226,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                         <div ref={dropdownRef} id="dropdown" className="bg-white hidden z-[1] rounded-md absolute left-0 right-0 max-h-52 overflow-auto">
                             <ul onClick={dropdownButtonValue} className="py-2 text-sm dark:text-gray-200">
                                 {
-                                    userData_state[1]?.map((monthlyData, index) => (
+                                    userData_state.user_month_records?.map((monthlyData, index) => (
                                         <li key={index} className="block px-4 py-2 text-black hover:bg-slate-100 cursor-pointer">
                                             {monthlyData.monthName}
                                         </li>
@@ -263,7 +272,6 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
             <div className='mt-3'>
                 <Footer />
             </div>
-            {data_process_state && <ProcessBgBlack />}
         </div>
     );
 }

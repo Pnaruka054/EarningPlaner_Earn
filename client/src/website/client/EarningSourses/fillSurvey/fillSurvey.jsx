@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import showNotificationWith_timer from '../../components/showNotificationWith_timer';
 import showNotification from '../../components/showNotification';
+import ProcessBgSeprate from '../../components/processBgSeprate/processBgSeprate'
 
 const FillSurvey = ({ setAvailableBalance_forNavBar_state }) => {
     let [data_process_state, setData_process_state] = useState(false);
@@ -47,6 +48,13 @@ const FillSurvey = ({ setAvailableBalance_forNavBar_state }) => {
         fetchData();
     }, []);
 
+    if (data_process_state) {
+        return (
+            <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+                <ProcessBgSeprate />
+            </div>
+        )
+    }
     return (
         <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
             <div className="px-2 py-2">
@@ -64,7 +72,6 @@ const FillSurvey = ({ setAvailableBalance_forNavBar_state }) => {
                     ))}
                 </div>
             </div>
-            {data_process_state && <ProcessBgBlack />}
             <div className='mt-3'>
                 <Footer />
             </div>

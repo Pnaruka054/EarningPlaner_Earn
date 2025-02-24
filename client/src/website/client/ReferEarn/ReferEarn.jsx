@@ -7,6 +7,7 @@ import Pagination from '../components/pagination/pagination';
 import { FaClipboard, FaClipboardCheck } from "react-icons/fa";
 import showNotificationWith_timer from '../components/showNotificationWith_timer';
 import showNotification from '../components/showNotification';
+import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate'
  
 const ReferEarn = ({ setAvailableBalance_forNavBar_state }) => {
     const [currentPage_state, setCurrentPage_state] = useState(1);
@@ -55,6 +56,13 @@ const ReferEarn = ({ setAvailableBalance_forNavBar_state }) => {
 
     const referralLink = `${window.location.origin}/signup/ref/${referralRecords_state.userName}`;
 
+    if (data_process_state) {
+        return (
+            <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+                <ProcessBgSeprate />
+            </div>
+        )
+    }
     return (
         <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
             <div className='p-2'>
@@ -121,7 +129,6 @@ const ReferEarn = ({ setAvailableBalance_forNavBar_state }) => {
                     onPageChange={setCurrentPage_state}
                 />}
             </div>
-            {data_process_state && <ProcessBgBlack />}
             <div className='mt-3'>
                 <Footer />
             </div>

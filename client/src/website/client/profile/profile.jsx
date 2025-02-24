@@ -4,6 +4,7 @@ import axios from 'axios';
 import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import showNotificationWith_timer from '../components/showNotificationWith_timer';
 import showNotification from '../components/showNotification';
+import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate'
 
 const Profile = ({setAvailableBalance_forNavBar_state}) => {
     const [formData_state, setFormData_state] = useState({
@@ -86,6 +87,13 @@ const Profile = ({setAvailableBalance_forNavBar_state}) => {
         dataBase_patch_userData(obj);
     };
 
+    if (data_process_state) {
+        return (
+            <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+                <ProcessBgSeprate />
+            </div>
+        )
+    }
     return (
         <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
             <form method="post" onSubmit={handleSubmit} className='pt-4 px-4 pb-5'>
@@ -245,7 +253,7 @@ const Profile = ({setAvailableBalance_forNavBar_state}) => {
                     {!submit_process_state ? "Submit" : <i className="fa-solid fa-spinner fa-spin"></i>}
                 </button>
             </form >
-            {(data_process_state || submit_process_state) && <ProcessBgBlack />}
+            {submit_process_state && <ProcessBgBlack />}
         </div >
     );
 };

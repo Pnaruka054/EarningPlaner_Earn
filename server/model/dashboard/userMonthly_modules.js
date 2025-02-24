@@ -6,8 +6,6 @@ const monthSchema = new mongoose.Schema({
     earningSources: {
         view_ads: {
             income: { type: String },
-            clickBalance: { type: String },
-            timerStart: { type: Date }, // Timer start time added
         },
         click_short_link: {
             income: { type: String },

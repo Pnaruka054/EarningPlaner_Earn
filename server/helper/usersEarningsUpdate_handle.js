@@ -4,6 +4,7 @@ const userSignUp_module = require('../model/userSignUp/userSignUp_module')
 const referral_records_module = require('../model/referralRecords/referral_records_module')
 const userDate_records_module = require("../model/dashboard/userDate_modules");
 const { userMonthly_records_module, saveUserMonthlyData } = require("../model/dashboard/userMonthly_modules");
+const other_data_module = require('../model/other_data/other_data_module')
 
 const userReferByIncome_handle = async (session, userData, earningAmount) => {
     const monthName = getFormattedMonth();
@@ -14,61 +15,61 @@ const userReferByIncome_handle = async (session, userData, earningAmount) => {
             let referralRecord = null;
             let dateRecords_referBy = null;
 
-            const referralIncrement = parseFloat(earningAmount) * parseFloat(process.env.REFERRAL_RATE);
+            // Fetch referralRate
+            let other_data_referralRate = await other_data_module.findOne({ documentName: "referralRate" }).session(session);
+            const referralIncrement = parseFloat(earningAmount) * other_data_referralRate.referralRate;
 
-            referredUser = await userSignUp_module
-                .findOne({ userName: userData.refer_by })
-                .session(session);
+            referredUser = await userSignUp_module.findOne({ userName: userData.refer_by }).session(session);
             if (referredUser) {
-                referralRecord = await referral_records_module
-                    .findOne({ userDB_id: referredUser._id, userName: userData.userName })
-                    .session(session);
-                dateRecords_referBy = await userDate_records_module
-                    .findOne({ userDB_id: referredUser._id, date: today })
-                    .session(session);
+                referralRecord = await referral_records_module.findOne({ userDB_id: referredUser._id, userName: userData.userName }).session(session);
+                dateRecords_referBy = await userDate_records_module.findOne({ userDB_id: referredUser._id, date: today }).session(session);
                 if (!dateRecords_referBy) {
-                    dateRecords_referBy = await new userDate_records_module({
+                    dateRecords_referBy = new userDate_records_module({
                         userDB_id: referredUser._id,
                         monthName,
                         date: today,
-                    })
+                    });
                 }
             }
 
             if (dateRecords_referBy) {
-                dateRecords_referBy.referral_earnings = (
-                    parseFloat(dateRecords_referBy.referral_earnings || 0) + referralIncrement
-                ).toFixed(3);
+                dateRecords_referBy.referral_earnings = parseFloat(
+                    (parseFloat(dateRecords_referBy.referral_earnings || 0) + referralIncrement).toFixed(3)
+                );
 
-                dateRecords_referBy.Total_earnings = (
-                    parseFloat(dateRecords_referBy.Total_earnings || 0) + referralIncrement
-                ).toFixed(3);
-                dateRecords_referBy.save({ session })
+                dateRecords_referBy.Total_earnings = parseFloat(
+                    (parseFloat(dateRecords_referBy.Total_earnings || 0) + referralIncrement).toFixed(3)
+                );
+
+                await dateRecords_referBy.save({ session });
             }
 
             // Update referral data only if referred user and referral record exist
             if (referredUser && referralRecord) {
-
                 // Update referred user's withdrawable amount
-                const currentRefWithdrawable = parseFloat(referredUser.withdrawable_amount || 0);
-                referredUser.withdrawable_amount = (currentRefWithdrawable + referralIncrement).toFixed(3);
+                referredUser.withdrawable_amount = parseFloat(
+                    (parseFloat(referredUser.withdrawable_amount || 0) + referralIncrement).toFixed(3)
+                );
 
                 // Update referral record income
-                const currentReferralIncome = parseFloat(referralRecord.income || 0);
-                referralRecord.income = (currentReferralIncome + referralIncrement).toFixed(3);
+                referralRecord.income = parseFloat(
+                    (parseFloat(referralRecord.income || 0) + referralIncrement).toFixed(3)
+                );
 
                 let userMonthlyRecord = await userMonthly_records_module
-                    .findOne({ userDB_id: dateRecords_referBy._id, monthName })
+                    .findOne({ userDB_id: referredUser._id, monthName })
                     .session(session);
                 if (!userMonthlyRecord) {
                     userMonthlyRecord = new userMonthly_records_module({
-                        userDB_id: dateRecords_referBy._id,
+                        userDB_id: referredUser._id,
                         monthName,
+                        earningSources: { referral_income: { income: 0 } } // Ensure structure exists
                     });
                 }
 
-                let currentMonthlyReferralIncome = parseFloat(userMonthlyRecord.earningSources.referral_income.income || 0);
-                userMonthlyRecord.earningSources.referral_income.income = (currentMonthlyReferralIncome + referralIncrement).toFixed(3);
+                userMonthlyRecord.earningSources.referral_income.income = parseFloat(
+                    (parseFloat(userMonthlyRecord.earningSources.referral_income.income || 0) + referralIncrement).toFixed(3)
+                );
 
                 await Promise.all([
                     referralRecord.save({ session }),
@@ -125,8 +126,7 @@ const userIncome_handle = async (session, userData, earningAmount) => {
             currentWithdrawable + parseFloat(earningAmount)
         ).toFixed(3);
 
-        if (dateRecords) dateRecords.save({ session });
-        return { success: true, values: { userMonthlyRecord } };
+        return { success: true, values: { dateRecords, userMonthlyRecord } };
     } catch (error) {
         console.error("Error in updateEarnings function:", error);
         return { success: false, msg: "Error updating earnings" };

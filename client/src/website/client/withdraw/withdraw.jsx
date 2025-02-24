@@ -8,6 +8,7 @@ import Pagination from '../components/pagination/pagination';
 import { FaClipboard, FaClipboardCheck } from "react-icons/fa";
 import showNotificationWith_timer from '../components/showNotificationWith_timer';
 import showNotification from '../components/showNotification';
+import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate'
 
 const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
     const [withdraw_amount_state, setWithdraw_amount_state] = useState(0);
@@ -281,6 +282,13 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
     const currentReferrals = withdrawArray?.slice(indexOfFirstReferral, indexOfLastReferral);
     const totalPages = Math.ceil(withdrawArray?.length / itemsPerPage);
 
+    if (data_process_state) {
+        return (
+            <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+                <ProcessBgSeprate />
+            </div>
+        )
+    }
     return (
         <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12 custom-scrollbar">
             <div className='px-2 py-2'>
@@ -453,7 +461,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                     onPageChange={setCurrentPage_state}
                 />}
             </div>
-            {(data_process_state || submit_process_state) && <ProcessBgBlack />}
+            {submit_process_state && <ProcessBgBlack />}
             <div className='mt-3'>
                 <Footer />
             </div>

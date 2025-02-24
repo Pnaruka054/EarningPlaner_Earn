@@ -8,12 +8,13 @@ import CountdownTimer from '../../components/countDownTimer/countDownTimer';
 import earningSound from '../../components/earningSound'
 import showNotificationWith_timer from '../../components/showNotificationWith_timer';
 import showNotification from '../../components/showNotification';
+import ProcessBgSeprate from '../../components/processBgSeprate/processBgSeprate';
 
 const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [handle_clickAds_btnClick_state, setHandle_clickAds_btnClick_state] = useState(false);
     const [data_process_state, setData_process_state] = useState(false);
     const navigation = useNavigate();
-    const [viewAds_firstTimeLoad_state, setViewAds_firstTimeLoad_state] = useState('');
+    const [viewAds_firstTimeLoad_state, setViewAds_firstTimeLoad_state] = useState([]);
     const [disabledButtons_state, setDisabledButtons_state] = useState([]);
     const [isExtension_state, setIsExtension_state] = useState(false);
     const [currentBtnName_and_amount_For_extension_storedValue_state, setCurrentBtnName_and_amount_For_extension_storedValue_state] = useState([]);
@@ -46,24 +47,20 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             });
             setTotalDirectLinkBtns_state(response.data.msg.viewAds_directLinksData);
             setViewAds_firstTimeLoad_state(response.data.msg)
-            setAvailableBalance_forNavBar_state((parseFloat(response.data.msg.withdrawable_amount || 0) + parseFloat(response.data.msg.deposit_amount || 0)).toFixed(3))
+            setAvailableBalance_forNavBar_state(response.data.msg.userAvailableBalance)
             setDisabledButtons_state(response.data.msg.buttonNames)
         } catch (error) {
             console.error(error);
             if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
                 navigation('/login');
             } else if (error.response.data.jwtMiddleware_error) {
-                Swal.fire({
-                    title: 'Session Expired',
-                    text: 'Your session has expired. Please log in again.',
-                    icon: 'error',
-                    timer: 5000,
-                    timerProgressBar: true,
-                    confirmButtonText: 'OK',
-                    didClose: () => {
-                        navigation('/login');
-                    }
-                });
+                if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
+                    navigation('/login');
+                } else if (error?.response?.data?.jwtMiddleware_error) {
+                    showNotificationWith_timer(true, 'Your session has expired. Please log in again.', '/login', navigation);
+                } else {
+                    showNotification(true, "Something went wrong, please try again.");
+                }
             }
         } finally {
             setData_process_state(false);
@@ -139,6 +136,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         window.open(`/waitRedirecting1/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
     };
 
+    // for normal btn ads success check
     useEffect(() => {
         const handleStorageChange = () => {
             const clickSuccessStatus = localStorage.getItem('isSuccess');
@@ -148,9 +146,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     setHandle_clickAds_btnClick_state(false);
                     channel.postMessage("handle_clickAds_btnClick_state_false");
 
-                    if (viewAds_firstTimeLoad_state?.clickBalance) {
+                    if (viewAds_firstTimeLoad_state?.pendingClick) {
                         const [btnName, amount] = clickSuccessStatus.split('||');
-
                         setDisabledButtons_state((prevDisabled) => {
                             if (!prevDisabled.includes(btnName)) {
                                 return [...prevDisabled, btnName];
@@ -160,7 +157,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
                         const obj = {
                             disabledButtons_state: [...disabledButtons_state, btnName],
-                            clickBalance: `${parseFloat(viewAds_firstTimeLoad_state.clickBalance.split('/')[0])}/${viewAds_firstTimeLoad_state.clickBalance.split('/')[1]}`,
+                            pendingClick: `${parseFloat(viewAds_firstTimeLoad_state.pendingClick)}`,
                             btnClickEarn: amount
                         };
 
@@ -234,6 +231,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         };
     }, [viewAds_firstTimeLoad_state, isUserActiveOnPage]);
 
+    // for extension brn ads success check
     useEffect(() => {
         const handleIsExtensionUpdated = (e) => {
             const [btnName, amount] = currentBtnName_and_amount_For_extension_storedValue_state;
@@ -241,7 +239,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             if (viewAds_firstTimeLoad_state && viewAds_firstTimeLoad_state.clickBalance) {
                 if ((extension_storedValue === 'true') && btnName && amount) {
                     localStorage.removeItem('extension_storedValue');
-
                     setHandle_clickAds_btnClick_state(false);
                     channel.postMessage("handle_clickAds_btnClick_state_false");
 
@@ -254,9 +251,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
                     const obj = {
                         disabledButtons_state: [...disabledButtons_state, btnName],
-                        clickBalance: (parseFloat(viewAds_firstTimeLoad_state.clickBalance.split('/')[0]) + 1).toString() +
-                            "/" +
-                            viewAds_firstTimeLoad_state.clickBalance.split('/')[1],
+                        pendingClick: parseFloat(viewAds_firstTimeLoad_state.pendingClick),
                         btnClickEarn: amount,
                     };
 
@@ -312,16 +307,21 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         };
     }, [viewAds_firstTimeLoad_state, currentBtnName_and_amount_For_extension_storedValue_state]);
 
-
     let user_adsView_income_patch = async (obj) => {
         setData_process_state(true);
         try {
             const response = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_adsView_income_patch`, obj, {
                 withCredentials: true
             });
-            setViewAds_firstTimeLoad_state(response.data.msg)
-            setAvailableBalance_forNavBar_state((parseFloat(response.data.msg.withdrawable_amount || 0) + parseFloat(response.data.msg.deposit_amount || 0)).toFixed(3))
-            setDisabledButtons_state(response.data.msg.buttonNames)
+            setAvailableBalance_forNavBar_state(response.data.msg.userAvailableBalance)
+            setViewAds_firstTimeLoad_state((prev) => ({
+                ...prev,
+                pendingEarnings: (parseFloat(prev.pendingEarnings || 0) - parseFloat(obj.btnClickEarn || 0)).toFixed(3),
+                today_adsviewIncome: (parseFloat(prev.today_adsviewIncome || 0) + parseFloat(obj.btnClickEarn || 0)).toFixed(3),
+                totalLinks: (parseFloat(prev.totalLinks || 0) - 1),
+                completedClick: (parseFloat(prev.completedClick || 0) + 1),
+                pendingClick: (parseFloat(prev.pendingClick || 0) - 1)
+            }))
         } catch (error) {
             console.error(error);
             if (error.response.data.jwtMiddleware_token_not_found_error) {
@@ -436,6 +436,13 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             }
         });
     };
+    if (data_process_state) {
+        return (
+            <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+                <ProcessBgSeprate />
+            </div>
+        )
+    }
 
     return (
         <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
@@ -443,24 +450,38 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
                     View Ads to Earn
                 </div>
-                <div className='flex flex-col items-center my-6 px-4'>
+                <div className='flex flex-col items-center my-6 px-4 text-center'>
                     <div className="bg-white p-4 sm:p-6 shadow-lg rounded-lg relative w-full">
                         {/* Click Balance & Income Section */}
-                        <div className='flex flex-col sm:flex-row gap-4 mb-4 justify-center text-center w-full'>
-                            <div className='bg-purple-700 px-4 py-2 shadow font-bold text-white rounded-t-2xl w-full sm:w-auto'>
-                                Click Balance - {viewAds_firstTimeLoad_state.clickBalance}
+                        <h2 className="text-xl font-semibold text-gray-800 mb-5">💰 Earnings Summary</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4 text-gray-700">
+                            <div className="bg-gray-100 p-3 rounded-lg">
+                                <div className="font-semibold">Pending Earnings:</div>
+                                <div className="text-red-500 font-bold ml-2">₹{viewAds_firstTimeLoad_state.pendingEarnings}</div>
                             </div>
-                            <div className='bg-purple-700 px-4 py-2 shadow font-bold text-white rounded-t-2xl w-full sm:w-auto'>
-                                Income - ₹{viewAds_firstTimeLoad_state.income}
+                            <div className="bg-gray-100 p-3 rounded-lg">
+                                <div className="font-semibold">Today Earnings:</div>
+                                <div className="text-green-600 font-bold ml-2">₹{viewAds_firstTimeLoad_state.today_adsviewIncome}</div>
+                            </div>
+                            <div className="bg-gray-100 p-3 rounded-lg">
+                                <div className="font-semibold">Total Links:</div>
+                                <div className="text-blue-600 font-bold ml-2">{viewAds_firstTimeLoad_state.totalLinks}</div>
+                            </div>
+                            <div className="bg-gray-100 p-3 rounded-lg">
+                                <div className="font-semibold">Completed:</div>
+                                <div className="text-green-600 font-bold ml-2">{viewAds_firstTimeLoad_state.completedClick}</div>
+                            </div>
+                            <div className="bg-gray-100 p-3 rounded-lg">
+                                <div className="font-semibold">Pending:</div>
+                                <div className="text-red-500 font-bold ml-2">{viewAds_firstTimeLoad_state.pendingClick}</div>
                             </div>
                         </div>
-
                         {/* Timer Overlay */}
-                        <div className={`${viewAds_firstTimeLoad_state.ViewAdsexpireTImer ? 'flex' : 'hidden'} absolute z-10 inset-0 bg-white bg-opacity-70 justify-center items-center`}>
+                        <div className={`${viewAds_firstTimeLoad_state.viewAdsexpireTimer ? 'flex' : 'hidden'} absolute z-10 inset-0 bg-white bg-opacity-70 justify-center items-center`}>
                             <div className="flex flex-col items-center text-xl sm:text-2xl font-semibold">
                                 <div className="text-center">Come Back After</div>
                                 <div className="text-3xl sm:text-4xl font-bold text-red-600 drop-shadow">
-                                    <CountdownTimer expireTime={viewAds_firstTimeLoad_state.ViewAdsexpireTImer} />
+                                    <CountdownTimer expireTime={viewAds_firstTimeLoad_state.viewAdsexpireTimer} />
                                 </div>
                             </div>
                         </div>
@@ -474,7 +495,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                             {totalDirectLinkBtns_state.filter((values) => !values.isExtension).map((values, index) => (
                                 <div key={index} className="bg-gray-100 rounded-lg p-3 sm:p-4 shadow-md flex flex-col items-center">
                                     <button
-                                        disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1))}
+                                        disabled={handle_clickAds_btnClick_state || disabledButtons_state?.includes('btn' + (index + 1))}
                                         className={`w-full px-5 py-2 rounded-md font-medium transition ${handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1))
                                             ? 'bg-gray-400 cursor-not-allowed'
                                             : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md'
@@ -543,7 +564,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             <div className='mt-3'>
                 <Footer />
             </div>
-            {(data_process_state) && <ProcessBgBlack />}
+            {data_process_state && <ProcessBgBlack />}
         </div>
     );
 }

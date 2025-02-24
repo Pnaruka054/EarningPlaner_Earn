@@ -7,6 +7,7 @@ import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import showNotificationWith_timer from '../components/showNotificationWith_timer';
 import showNotification from '../components/showNotification';
 import formatTime from '../components/formatTime';
+import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate'
 
 const Setting = ({ setAvailableBalance_forNavBar_state }) => {
     // States for ChangePassword component
@@ -128,7 +129,13 @@ const Setting = ({ setAvailableBalance_forNavBar_state }) => {
         }
         userDataUpdate_patch(obj)
     };
-
+    if (data_process_state) {
+        return (
+            <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+                <ProcessBgSeprate />
+            </div>
+        )
+    }
     return (
         <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
             <div className='px-2 py-2'>
@@ -233,7 +240,7 @@ const Setting = ({ setAvailableBalance_forNavBar_state }) => {
                     </form>
                 </div>
             </div>
-            {(data_process_state || submit_process_state) && <ProcessBgBlack />}
+            {submit_process_state && <ProcessBgBlack />}
             <div className='mt-3'>
                 <Footer />
             </div>

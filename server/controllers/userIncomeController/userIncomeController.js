@@ -12,26 +12,32 @@ const axios = require('axios')
 const viewAds_directLinksData_module = require("../../model/view_ads_direct_links/viewAds_directLinksData_module");
 const { userReferByIncome_handle, userIncome_handle } = require('../../helper/usersEarningsUpdate_handle')
 const userID_data_for_survey_module = require('../../model/userID_data_for_survey/userID_data_for_survey_module')
+const other_data_module = require('../../model/other_data/other_data_module')
+const earningCalculator = require('../../helper/earningCalculator')
 
 // for view ads page get data
 const user_adsView_home_get = async (req, res) => {
     const session = await mongoose.startSession(); // Start a session
     session.startTransaction(); // Begin a transaction
     try {
-        // format current month and year (e.g., "January 2024")
-        const monthName = getFormattedMonth()
+
+        // format current Date YYYY-MM-DD
+        const todayDate = getFormattedDate()
         const userData = req.user;
         const user_ip = req.ip;
 
+        // Fetch other_data for viewAds
+        let other_data_viewAds = await other_data_module.findOne({ documentName: "viewAds" }).session(session);
+
         // get all directLinks data
-        let viewAds_directLinksData = await viewAds_directLinksData_module.find()
+        let viewAds_directLinksData = await viewAds_directLinksData_module.find().session(session);
 
         // Search for an existing record with the same ipAddress
         let ipAddress_recordData = await ipAddress_records_module
             .findOne({ ipAddress: user_ip })
             .session(session);
 
-        // If no record is found, create a new one with empity buttonNames Array
+        // If no record is found, create a new one with empty buttonNames Array
         if (!ipAddress_recordData) {
             ipAddress_recordData = new ipAddress_records_module({
                 userDB_id: userData._id,
@@ -40,34 +46,40 @@ const user_adsView_home_get = async (req, res) => {
             });
         }
 
-        // Fetch the monthly record for the current month
-        let userMonthly_recordData = await userMonthly_records_module
-            .findOne({ userDB_id: userData._id, monthName })
+        // find current date record
+        let userDate_recordData = await userDate_records_module
+            .findOne({ userDB_id: userData._id, date: todayDate })
             .session(session);
 
-        // Safely extract income and clickBalance if available and if not available then user 0 and 0/env
-        const income = userMonthly_recordData?.earningSources?.view_ads?.income || 0;
-        let clickBalance = userMonthly_recordData?.earningSources?.view_ads?.clickBalance
-            ? `${userMonthly_recordData.earningSources.view_ads.clickBalance.split('/')[0]}/${process.env.VIEW_ADS_CLICK_BALANCE || '0'}`
-            : `0/${process.env.VIEW_ADS_CLICK_BALANCE || '0'}`;
+        // Safely extract income and pendingClick if available, otherwise use 0
+        const today_adsviewIncome = userDate_recordData?.earningSources?.view_ads?.income || 0;
+        let pendingClick = userDate_recordData?.earningSources?.view_ads?.pendingClick || other_data_viewAds?.viewAds_pendingClick || 0;
 
+        // Calculate user earnings based on direct links data
+        let userWillEarn = viewAds_directLinksData.length
+            ? earningCalculator(viewAds_directLinksData, 'amount', other_data_viewAds?.viewAds_pendingClick)
+            : 0;
+
+        // Calculate completed clicks
+        let completedClick = Math.max(parseFloat(other_data_viewAds?.viewAds_pendingClick || 0) - parseFloat(pendingClick), 0);
 
         // Prepare response data
         let resData = {
             ipAddress_recordData,
-            income,
-            clickBalance,
-            deposit_amount: userData.deposit_amount,
-            withdrawable_amount: userData.withdrawable_amount,
+            today_adsviewIncome,
+            pendingClick,
+            completedClick,
+            pendingEarnings: (userWillEarn - today_adsviewIncome).toFixed(3),
+            totalLinks: viewAds_directLinksData.length - (ipAddress_recordData.buttonNames || []).length,
+            userAvailableBalance: (parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)).toFixed(3),
             buttonNames: ipAddress_recordData.buttonNames || [],
-            viewAds_directLinksData
+            viewAds_directLinksData,
         };
 
-        // find if timer is enabled or not for this user if enabled then change res data
         let idTimer_recordsData = await idTimer_records_module.findOne({ userDB_id: userData._id }).session(session)
-        if (idTimer_recordsData?.ViewAdsexpireTImer) {
-            resData = { ...resData, ViewAdsexpireTImer: idTimer_recordsData.ViewAdsexpireTImer }
-            await idTimer_recordsData.save({ session })
+        // change res data if timer started for user
+        if (idTimer_recordsData?.viewAdsexpireTimer) {
+            resData = { ...resData, viewAdsexpireTimer: idTimer_recordsData.viewAdsexpireTimer }
         }
 
         // Save (or update) the ipAddress_recordData document
@@ -81,6 +93,7 @@ const user_adsView_home_get = async (req, res) => {
             success: true,
             msg: resData,
         });
+
     } catch (error) {
         console.error("Error in user_adsView_home_get:", error);
         await session.abortTransaction();
@@ -94,72 +107,88 @@ const user_adsView_home_get = async (req, res) => {
 // for view ads page income update
 const user_adsView_income_patch = async (req, res) => {
     const session = await mongoose.startSession();
+    session.startTransaction(); // Start transaction immediately
+
     try {
-        // Start transaction
-        session.startTransaction();
-        // Destructure request body and get user IP
-        const { disabledButtons_state, clickBalance, btnClickEarn } = req.body;
+        // Extract required data
+        const { disabledButtons_state, pendingClick, btnClickEarn } = req.body;
         const userIp = req.ip;
         const userData = req.user;
 
-        // incress user income
-        let user_incomeUpdate = await userIncome_handle(session, userData, btnClickEarn)
-        if (!user_incomeUpdate.success) {
-            throw new Error(user_incomeUpdate.error);
-        }
-        const { userMonthlyRecord } = user_incomeUpdate.values
-        // handle user monthly data
-        if (
-            userMonthlyRecord?.earningSources?.view_ads?.clickBalance !==
-            `${process.env.VIEW_ADS_CLICK_BALANCE}/${process.env.VIEW_ADS_CLICK_BALANCE}`
-        ) {
-            userMonthlyRecord.earningSources.view_ads.clickBalance =
-                `${(parseFloat(clickBalance.split('/')[0]) + 1).toString()}/${process.env.VIEW_ADS_CLICK_BALANCE}`;
+        // Increase user income
+        const userIncomeUpdate = await userIncome_handle(session, userData, btnClickEarn);
+        if (!userIncomeUpdate.success) {
+            throw new Error(userIncomeUpdate.error);
         }
 
-        // Agar clickBalance exactly equal ho jaye to VIEW_ADS_CLICK_BALANCE/VIEW_ADS_CLICK_BALANCE
-        let idTimer_recordsData = null
-        let idTimer_recordsData_status = null
-        if (
-            userMonthlyRecord?.earningSources?.view_ads?.clickBalance ===
-            `${process.env.VIEW_ADS_CLICK_BALANCE}/${process.env.VIEW_ADS_CLICK_BALANCE}`
-        ) {
-            idTimer_recordsData_status = idTimer_recordsData = await idTimer_records_module.findOne({ userDB_id: userData._id }).session(session);
+        const { userMonthlyRecord, dateRecords } = userIncomeUpdate.values;
 
-            if (!idTimer_recordsData) {
-                idTimer_recordsData = await new idTimer_records_module({ userDB_id: userData._id, ViewAdsexpireTImer: new Date(Date.now() + (24 * 60 * 60 * 1000)) }).save({ session }); // Save the new record to the database;
+        // Fetch viewAds settings
+        const viewAdsConfig = await other_data_module
+            .findOne({ documentName: "viewAds" })
+            .session(session);
+
+        if (!dateRecords?.earningSources?.view_ads?.pendingClick) {
+            dateRecords.earningSources.view_ads.pendingClick = pendingClick
+        }
+
+        // Update user's pending clicks and income
+        if (dateRecords?.earningSources?.view_ads?.pendingClick <= viewAdsConfig.viewAds_pendingClick) {
+            dateRecords.earningSources.view_ads.pendingClick = (parseFloat(pendingClick) - 1).toString();
+            dateRecords.earningSources.view_ads.income = (parseFloat(dateRecords.earningSources.view_ads.income || 0) + parseFloat(btnClickEarn)).toFixed(3);
+        }
+
+        // Initialize timer records (if applicable)
+        let idTimerRecordsData = null;
+        let idTimerRecordsDataStatus = null;
+
+        if (dateRecords.earningSources.view_ads.pendingClick === '0') {
+            idTimerRecordsDataStatus = idTimerRecordsData = await idTimer_records_module
+                .findOne({ userDB_id: userData._id })
+                .session(session);
+
+            if (!idTimerRecordsData) {
+                const currentTime_fromNewDate = new Date();
+                idTimerRecordsData = new idTimer_records_module({
+                    userDB_id: userData._id,
+                    viewAdsexpireTimer: new Date(currentTime_fromNewDate.getFullYear(), currentTime_fromNewDate.getMonth(), currentTime_fromNewDate.getDate() + 1, 0, 0, 0),
+                });
+                await idTimerRecordsData.save({ session });
             }
         }
 
-        // give error if timer is started for this user
-        if (idTimer_recordsData_status) {
-            return res.status(500).json({
+        // Return error if the click limit is exceeded
+        if (idTimerRecordsDataStatus) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({
                 success: false,
-                error_msg: "Click Limit exceed Try again after Timer Complete.",
+                error_msg: "Click Limit exceeded. Try again after the timer completes.",
             });
         }
 
-        // update user referral income
-        let refer_by_incomeupdate = await userReferByIncome_handle(session, userData, btnClickEarn)
-        if (!refer_by_incomeupdate.success) {
-            throw new Error(refer_by_incomeupdate.error);
+        // Update referral income
+        const referByIncomeUpdate = await userReferByIncome_handle(session, userData, btnClickEarn);
+        if (!referByIncomeUpdate.success) {
+            throw new Error(referByIncomeUpdate.error);
         }
 
-        // find user in ip address record using userIp
-        const ipAddressRecord = await ipAddress_records_module
+        // Find or create an IP address record
+        let ipAddressRecord = await ipAddress_records_module
             .findOne({ ipAddress: userIp })
             .session(session);
 
-        // Update records based on IP match
-        if (ipAddressRecord.ipAddress === userIp) {
-            // Update dynamic button state
+        if (ipAddressRecord) {
+            // Update existing IP record
             ipAddressRecord.buttonNames = disabledButtons_state;
-        } else if (ipAddressRecord.ipAddress !== userIp) {
+        } else {
+            // Create new IP record
             ipAddressRecord = new ipAddress_records_module({
                 userDB_id: userData._id,
                 buttonNames: disabledButtons_state,
                 ipAddress: userIp,
             });
+            await ipAddressRecord.save({ session });
         }
 
         // Update monthly income and click balance for view_ads
@@ -167,59 +196,47 @@ const user_adsView_income_patch = async (req, res) => {
         userMonthlyRecord.earningSources.view_ads.income = (
             currentIncome + parseFloat(btnClickEarn)
         ).toFixed(3);
-        userMonthlyRecord.earningSources.view_ads.clickBalance =
-            `${(parseFloat(clickBalance.split('/')[0]) + 1).toString()}/${process.env.VIEW_ADS_CLICK_BALANCE}`;
 
 
-        // Save updated documents concurrently
-        const saveOperations = [
+        // Save all changes concurrently
+        await Promise.all([
             userMonthlyRecord.save({ session }),
             ipAddressRecord.save({ session }),
-            userData.save({ session })
-        ];
+            userData.save({ session }),
+            dateRecords.save({ session }),
+        ]);
 
-        await Promise.all(saveOperations);
-
-        // Commit transaction and end session
+        // Commit the transaction and end the session
         await session.commitTransaction();
         session.endSession();
 
         // Prepare response data
-        let resData = {
+        const response = {
             ipAddress_recordData: ipAddressRecord,
-            income: userMonthlyRecord.earningSources.view_ads.income || 0,
-            deposit_amount: userData.deposit_amount,
-            withdrawable_amount: userData.withdrawable_amount,
-            buttonNames: ipAddressRecord.buttonNames,
-            clickBalance:
-                userMonthlyRecord.earningSources.view_ads.clickBalance ||
-                `0/${process.env.VIEW_ADS_CLICK_BALANCE}`
+            userAvailableBalance: (
+                parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)
+            ).toFixed(3),
         };
 
-        // change res data if timer started for user
-        if (idTimer_recordsData?.ViewAdsexpireTImer) {
-            resData = { ...resData, ViewAdsexpireTImer: idTimer_recordsData.ViewAdsexpireTImer }
+        if (idTimerRecordsData?.viewAdsexpireTimer) {
+            response.viewAdsexpireTimer = idTimerRecordsData.viewAdsexpireTimer;
         }
 
         return res.status(200).json({
             success: true,
-            msg: resData
+            msg: response,
         });
-    } catch (error) {
-        try {
-            // Agar session abhi bhi transaction mein hai, tabhi abort karein
-            if (session.inTransaction()) {
-                await session.abortTransaction();
-            }
-        } catch (abortError) {
-            console.error("Error aborting transaction:", abortError);
-        } finally {
-            session.endSession();
-        }
-        console.error("Error in updating user data:", error);
-        return res.status(500).json({ msg: 'An error occurred while processing the request.' });
-    }
 
+    } catch (error) {
+        // Handle transaction rollback and session cleanup
+        if (session.inTransaction()) {
+            await session.abortTransaction();
+        }
+        session.endSession();
+
+        console.error("Error in updating user data:", error);
+        return res.status(500).json({ msg: "An error occurred while processing the request." });
+    }
 };
 
 // for click shorten link page data get

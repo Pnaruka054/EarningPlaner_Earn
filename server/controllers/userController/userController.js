@@ -222,7 +222,7 @@ const user_signUp_login_google = async (req, res) => {
         );
 
         // get user email, name & user unique Id
-        const { email, name, id } = userRes.data;
+        let { email, name, id } = userRes.data;
         // arrange email without spaces and upper case letters
         email = email.toLowerCase().trim();
         // taking userName from email Address
@@ -570,7 +570,13 @@ const userDataGet_dashboard = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            msg: [userData, user_month_records, user_date_records]
+            msg: {
+                user_month_records,
+                user_date_records,
+                userAvailableBalance: (
+                    parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)
+                ).toFixed(3),
+            }
         });
     } catch (error) {
         console.error(error);
