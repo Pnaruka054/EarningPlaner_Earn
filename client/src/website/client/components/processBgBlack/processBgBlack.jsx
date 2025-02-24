@@ -1,12 +1,16 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
+import { FaSpinner } from 'react-icons/fa';
 
 const ProcessBgBlack = () => {
     return createPortal(
-        <div className='flex justify-center items-center fixed z-20 top-0 bottom-0 left-0 right-0 bg-[#00000061] text-white text-4xl'>
-            <i className="fa-duotone fa-solid fa-spinner-third fa-spin"></i>
+        <div className='fixed inset-0 flex justify-center items-center bg-black bg-opacity-60 z-50'>
+            <div className='flex flex-col items-center justify-center p-6 bg-white rounded-2xl shadow-lg'>
+                <FaSpinner className='text-blue-600 text-5xl animate-spin' />
+                <p className='text-gray-800 text-lg font-semibold mt-4'>Processing...</p>
+            </div>
         </div>,
-        document.getElementById('processBgBlack') || document.body // Fallback if element not found
+        document.getElementById('processBgBlack') || document.body // Fallback agar element na mile
     );
 };
 

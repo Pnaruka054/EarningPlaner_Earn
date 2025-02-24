@@ -443,36 +443,36 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
                     View Ads to Earn
                 </div>
-                <div className='flex flex-col items-center my-6'>
-                    <div className="bg-white p-6 shadow-lg rounded-lg relative w-full">
+                <div className='flex flex-col items-center my-6 px-4'>
+                    <div className="bg-white p-4 sm:p-6 shadow-lg rounded-lg relative w-full">
                         {/* Click Balance & Income Section */}
-                        <div className='flex gap-4 mb-4 justify-center'>
-                            <div className='bg-purple-700 px-4 py-2 shadow font-bold text-white rounded-t-2xl'>
+                        <div className='flex flex-col sm:flex-row gap-4 mb-4 justify-center text-center w-full'>
+                            <div className='bg-purple-700 px-4 py-2 shadow font-bold text-white rounded-t-2xl w-full sm:w-auto'>
                                 Click Balance - {viewAds_firstTimeLoad_state.clickBalance}
                             </div>
-                            <div className='bg-purple-700 px-4 py-2 shadow font-bold text-white rounded-t-2xl'>
+                            <div className='bg-purple-700 px-4 py-2 shadow font-bold text-white rounded-t-2xl w-full sm:w-auto'>
                                 Income - ₹{viewAds_firstTimeLoad_state.income}
                             </div>
                         </div>
 
                         {/* Timer Overlay */}
-                        <div className={`${viewAds_firstTimeLoad_state.ViewAdsexpireTImer ? 'flex' : 'hidden'} absolute z-10 top-0 bottom-0 left-0 right-0 bg-white bg-opacity-70 justify-center items-center`}>
-                            <div className="flex flex-col items-center text-2xl font-semibold">
+                        <div className={`${viewAds_firstTimeLoad_state.ViewAdsexpireTImer ? 'flex' : 'hidden'} absolute z-10 inset-0 bg-white bg-opacity-70 justify-center items-center`}>
+                            <div className="flex flex-col items-center text-xl sm:text-2xl font-semibold">
                                 <div className="text-center">Come Back After</div>
-                                <div className="text-4xl font-bold text-red-600 drop-shadow">
+                                <div className="text-3xl sm:text-4xl font-bold text-red-600 drop-shadow">
                                     <CountdownTimer expireTime={viewAds_firstTimeLoad_state.ViewAdsexpireTImer} />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Direct Link Section - Manual Ads Handling */}
+                        {/* Direct Link Section */}
                         <div className="my-4 text-center bg-yellow-100 text-yellow-800 p-3 rounded-lg shadow-md">
                             <span className="font-semibold">Important:</span> Click these buttons and manually handle ads to earn money!
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
                             {totalDirectLinkBtns_state.filter((values) => !values.isExtension).map((values, index) => (
-                                <div key={index} className="bg-gray-100 rounded-lg p-4 shadow-md flex flex-col items-center">
+                                <div key={index} className="bg-gray-100 rounded-lg p-3 sm:p-4 shadow-md flex flex-col items-center">
                                     <button
                                         disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1))}
                                         className={`w-full px-5 py-2 rounded-md font-medium transition ${handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1))
@@ -489,16 +489,18 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         </div>
 
                         {/* Extension Install Section */}
-                        <div className="my-6 text-center text-lg font-semibold text-gray-700">---- Boost Your Earnings: Install Our Extension ----</div>
+                        <div className="my-6 text-center text-lg font-semibold text-gray-700">
+                            ---- Boost Your Earnings: Install Our Extension ----
+                        </div>
 
                         {/* Instruction Message */}
                         <div className="text-center bg-blue-100 text-blue-700 p-3 rounded-lg shadow-md mb-4">
                             <span className="font-semibold">Important:</span> Only click these buttons below! The extension will handle ads automatically.
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 relative">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 relative">
                             {/* Extension Lock Overlay */}
-                            <div className={`${isExtension_state ? 'hidden' : 'flex'} absolute top-0 left-0 right-0 bottom-0 bg-white bg-opacity-70 justify-center items-center`}>
+                            <div className={`${isExtension_state ? 'hidden' : 'flex'} absolute inset-0 bg-white bg-opacity-70 justify-center items-center`}>
                                 <button
                                     onClick={ExtensionInstallPopup}
                                     className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 shadow-lg"
@@ -508,7 +510,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                             </div>
 
                             {totalDirectLinkBtns_state.filter((values) => values.isExtension).map((values, index) => (
-                                <div key={index} className="bg-gray-100 rounded-lg p-4 shadow-md flex flex-col items-center">
+                                <div key={index} className="bg-gray-100 rounded-lg p-3 sm:p-4 shadow-md flex flex-col items-center">
                                     <button
                                         disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1))}
                                         className={`w-full px-5 py-2 rounded-md font-medium transition ${handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1))

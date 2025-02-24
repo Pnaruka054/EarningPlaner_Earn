@@ -229,7 +229,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                 </div>
                 <div className="overflow-auto mt-3 h-[300px] border rounded-lg shadow-lg bg-white custom-scrollbar">
                     <table className="table-auto border-collapse min-w-[633px] sm:min-w-full">
-                        <thead className="bg-green-500 text-white sticky top-0 z-10">
+                        <thead className="bg-green-500 text-white sticky top-0 z-0">
                             <tr>
                                 <th className="text-start px-4 py-3 border border-gray-300">Date</th>
                                 <th className="text-start px-4 py-3 border border-gray-300">Self Earnings</th>
