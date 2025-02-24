@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const { userReferByIncome_handle, userIncome_handle } = require('../helper/usersEarningsUpdate_handle')
 
 
-route.patch('/postBackCPX', async (req, res) => {
+route.get('/postBackCPX', async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
