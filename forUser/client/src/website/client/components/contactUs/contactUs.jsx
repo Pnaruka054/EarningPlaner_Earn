@@ -38,7 +38,7 @@ const ContactUs = ({ forMember, setAvailableBalance_forNavBar_state }) => {
 
   if (forMember === true) {
     return (
-      <div className="ml-auto bg-[#ecf0f5] flex flex-col justify-between w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] custom-scrollbar mt-12">
+      <div className="ml-auto bg-[#ecf0f5] flex flex-col justify-between w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] custom-scrollbar mt-12">
         <div className="p-2">
           <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
             Support
@@ -151,7 +151,7 @@ const ContactUs = ({ forMember, setAvailableBalance_forNavBar_state }) => {
     )
   } else if (forMember === false) {
     return (
-      <div className="overflow-auto h-[94vh]">
+      <div className="overflow-auto h-[92.5dvh]">
         <section id="contactForm" className="mt-5 mx-2 bg-white shadow-md rounded-lg p-8 border border-gray-200">
           <div className="text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-blue-900 relative inline-block">

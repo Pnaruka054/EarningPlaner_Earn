@@ -3,7 +3,7 @@ import Footer from '../components/footer/footer'
 
 const PrivacyPolicy = () => {
     return (
-        <div className='overflow-auto h-[94vh] flex flex-col justify-between'>
+        <div className='overflow-auto h-[92.5dvh] flex flex-col justify-between'>
             <div className='container mx-auto p-6 space-y-7'>
                 <div>
                     <h2 className="text-2xl font-bold text-blue-700">Introduction</h2>

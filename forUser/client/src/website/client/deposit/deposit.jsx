@@ -77,7 +77,7 @@ const Deposit = ({ setShowBottomAlert_state, setAvailableBalance_forNavBar_state
         setDeposit_amount_state(e.currentTarget.children[1].innerText);
     }
     return (
-        <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+        <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] mt-12">
             <div className='px-2 py-2'>
                 <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
                     Deposit Amount

@@ -125,7 +125,7 @@ const Signup = ({ referral_status }) => {
     };
 
     return (
-        <div className='flex h-[90vh] items-center justify-center'>
+        <div className='flex h-[90dvh] items-center justify-center'>
             <div className='md:w-[45%] sm:w-[90%] w-[97%]'>
                 <h1 className='text-3xl font-medium text-center mb-5 select-none'>Sign Up</h1>
                 <form onSubmit={handleSingUp_submit}>

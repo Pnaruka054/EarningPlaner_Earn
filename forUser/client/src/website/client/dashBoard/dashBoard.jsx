@@ -127,7 +127,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
 
     if (data_process_state) {
         return (
-            <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+            <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] mt-12">
                 <ProcessBgSeprate />
             </div>
         )
@@ -136,7 +136,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
         <div onScroll={(e) => {
             e.stopPropagation()
             dropdownRef.current.classList.add('hidden')
-        }} className="ml-auto bg-[#ecf0f5] flex flex-col justify-between w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12 custom-scrollbar">
+        }} className="ml-auto bg-[#ecf0f5] flex flex-col justify-between w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] mt-12 custom-scrollbar">
             <div className='px-2 py-1 select-none'>
                 <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 flex justify-between'>
                     <h1>Dashboard</h1>

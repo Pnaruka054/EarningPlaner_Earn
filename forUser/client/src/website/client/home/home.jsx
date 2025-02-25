@@ -10,7 +10,7 @@ import FAQs from "../components/FAQs/FAQs";
 
 const Home = () => {
   return (
-    <div className="overflow-auto h-[92.5vh] bg-[#ecf0f5] custom-scrollbar select-none">
+    <div className="overflow-auto h-[92.5dvh] bg-[#ecf0f5] custom-scrollbar select-none">
       <header>
         <HeroSection />
       </header>
