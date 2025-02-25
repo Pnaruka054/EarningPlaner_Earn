@@ -45,7 +45,7 @@ const NavItem = ({ to, icon, imgSrc, label, currentPath }) => {
         <Link
             to={to}
             className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition duration-300 
-      ${isActive ? "bg-blue-600 text-white font-semibold" : "hover:bg-blue-600"}`}
+      ${isActive ? "bg-blue-600 text-white font-semibold" : "hover:bg-blue-600/70"}`}
         >
             <span className="text-lg">
                 {imgSrc ? (

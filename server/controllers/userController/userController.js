@@ -155,6 +155,14 @@ const userLogin = async (req, res) => {
             });
         }
 
+        // check if user created account with google_id or not
+        if (isExists.google_id) {
+            return res.status(403).json({
+                success: false,
+                error_msg: "Please log in with Google or reset your password"
+            })
+        }
+
         // matching the login password with registeration password
         let passwordMatched = await bcrypt.compare(password, isExists.password);
 

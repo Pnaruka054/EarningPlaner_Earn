@@ -89,7 +89,7 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
                     withCredentials: true
                 });
                 setIsUserLogin_state(response.data.success)
-                if ((location.pathname === '/login' || location.pathname === '/signup') && response.data.success) {
+                if ((location.pathname === '/login' || location.pathname === '/signup' || location.pathname.includes('/signup/ref')) && response.data.success) {
                     showNotificationWith_timer(true, 'You Already Logged In', '/member/dashboard', navigation);
                 }
             } catch (error) {

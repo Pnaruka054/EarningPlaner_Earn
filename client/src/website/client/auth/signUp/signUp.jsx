@@ -79,7 +79,7 @@ const Signup = ({ referral_status }) => {
             ...prevData,
             [id]: type === 'checkbox' ? checked : value,
         }));
-    };
+    }; 
 
     const responseGoogle = async (authResult) => {
         try {
