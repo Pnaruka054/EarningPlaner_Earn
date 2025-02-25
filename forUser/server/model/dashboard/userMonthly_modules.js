@@ -22,14 +22,4 @@ const monthSchema = new mongoose.Schema({
 
 const userMonthly_records_module = mongoose.model('Monthly_records', monthSchema);
 
-async function saveUserMonthlyData(data) {
-    try {
-        const savedData = await new userMonthly_records_module(data).save();
-        return savedData;
-    } catch (error) {
-        console.error('Error saving data:', error);
-        throw error;
-    }
-}
-
-module.exports = { userMonthly_records_module, saveUserMonthlyData };
+module.exports = userMonthly_records_module;

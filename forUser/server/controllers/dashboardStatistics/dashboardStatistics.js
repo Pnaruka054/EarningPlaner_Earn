@@ -1,7 +1,3 @@
-const { userMonthly_records_module } = require("../../model/dashboard/userMonthly_modules");
-const userDate_records = require('../../model/dashboard/userDate_modules');
-const userSignUp_module = require('../../model/userSignUp/userSignUp_module');
-
 function getAllDatesOfCurrentMonth() {
     const date = new Date();
     const currentMonth = date.getMonth();

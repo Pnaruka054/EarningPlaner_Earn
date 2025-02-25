@@ -7,7 +7,7 @@ const oauth2Client = require("../../helper/oauth2Client")
 const axios = require("axios")
 const userSignUp_module = require('../../model/userSignUp/userSignUp_module')
 const referral_records_module = require('../../model/referralRecords/referral_records_module')
-const { userMonthly_records_module, saveUserMonthlyData } = require("../../model/dashboard/userMonthly_modules");
+const userMonthly_records_module = require("../../model/dashboard/userMonthly_modules");
 const userDate_records_module = require("../../model/dashboard/userDate_modules");
 const withdrawal_methods_module = require('../../model/withdraw/withdraw_methods_module')
 const current_time_get = require('../../helper/currentTimeUTC')
@@ -183,7 +183,7 @@ const userLogin = async (req, res) => {
             secure: true,
             // secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
-            sameSite: 'None',
+            // sameSite: 'None',
             maxAge: 7200000 // 2 hour
         });
 
