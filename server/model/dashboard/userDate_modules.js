@@ -14,6 +14,7 @@ const userDateSchema = new mongoose.Schema({
         },
         click_short_link: {
             income: { type: String },
+            pendingClick: { type: String },
         },
         referral_income: {
             income: { type: String },

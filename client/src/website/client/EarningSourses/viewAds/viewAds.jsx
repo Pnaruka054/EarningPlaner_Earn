@@ -9,6 +9,7 @@ import earningSound from '../../components/earningSound'
 import showNotificationWith_timer from '../../components/showNotificationWith_timer';
 import showNotification from '../../components/showNotification';
 import ProcessBgSeprate from '../../components/processBgSeprate/processBgSeprate';
+import { setItemWithExpiry, getItemWithExpiry } from '../../components/handle_localStorage'
 
 const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [handle_clickAds_btnClick_state, setHandle_clickAds_btnClick_state] = useState(false);
@@ -22,6 +23,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [isUserActiveOnPage, setIsUserActiveOnPage] = useState(false);
     const [totalDirectLinkBtns_state, setTotalDirectLinkBtns_state] = useState([]);
     const channel = new BroadcastChannel("viewAds_channel");
+    const [isChecked_state, setIsChecked_state] = useState(true);
 
     useEffect(() => {
         if (typeof document.hidden !== "undefined" && handle_clickAds_btnClick_state) {
@@ -168,7 +170,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                     icon: "success",
                                 });
                                 document.title = "✅ success!";
-                                earningSound(true)
+                                earningSound(isChecked_state, true)
                                 setTimeout(() => document.title = originalTitle, 4000);
                             })
                             .catch((error) => console.error("Error updating income:", error));
@@ -183,7 +185,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         text: "Something went wrong!",
                     });
                     document.title = "❌ failed";
-                    earningSound(false)
+                    earningSound(isChecked_state, false)
                     setTimeout(() => document.title = originalTitle, 2000);
                 }
             } else {
@@ -199,7 +201,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     text: "Something went wrong!",
                 });
                 document.title = "❌ failed";
-                earningSound(false)
+                earningSound(isChecked_state, false)
                 setTimeout(() => document.title = originalTitle, 2000);
             }
 
@@ -262,7 +264,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                 icon: "success",
                             });
                             document.title = "✅ success!"
-                            earningSound(true)
+                            earningSound(isChecked_state, true)
                             setTimeout(() => {
                                 document.title = originalTitle
                             }, 4000);
@@ -280,7 +282,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                         text: "Something went wrong!",
                     });
                     document.title = "❌ failed"
-                    earningSound(false)
+                    earningSound(isChecked_state, false)
                     setTimeout(() => {
                         document.title = originalTitle
                     }, 4000);
@@ -306,6 +308,27 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             });
         };
     }, [viewAds_firstTimeLoad_state, currentBtnName_and_amount_For_extension_storedValue_state]);
+
+    // for handle sound
+    useEffect(() => {
+        const soundStart = getItemWithExpiry("sound");
+
+        if (soundStart) {
+            setIsChecked_state(false);
+        } else {
+            setIsChecked_state(true);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!isChecked_state) {
+            setItemWithExpiry("sound", "false", 2880); // Store for 48 hrs
+        } else {
+            localStorage.removeItem("sound"); // Remove if switched ON
+        }
+    }, [isChecked_state]);
+
+    const userClickHandle = () => setIsChecked_state((prev) => !prev);
 
     let user_adsView_income_patch = async (obj) => {
         setData_process_state(true);
@@ -450,6 +473,27 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
                     View Ads to Earn
                 </div>
+                <div className='flex -mb-6 justify-center'>
+                    <div className='bg-purple-700 px-2 py-1 pt-2 shadow font-bold text-white rounded-t-2xl'>
+                        <label className="inline-flex items-center cursor-pointer gap-2">
+                            <input
+                                type="checkbox"
+                                checked={isChecked_state}
+                                onChange={() => setIsChecked_state((prev) => {
+                                    userClickHandle(!prev)
+                                    return !prev
+                                })}
+                                className="sr-only peer"
+                            />
+                            <div className="relative w-10 h-5 bg-gray-300 rounded-full transition-all duration-300 peer-checked:bg-[#00E676]">
+                                <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 shadow-md ${isChecked_state ? "translate-x-5" : ""}`}></div>
+                            </div>
+                            <span className="text-sm font-medium text-white">
+                                Sound: {isChecked_state ? "On" : "Off"}
+                            </span>
+                        </label>
+                    </div>
+                </div>
                 <div className='flex flex-col items-center my-6 px-4 text-center'>
                     <div className="bg-white p-4 sm:p-6 shadow-lg rounded-lg relative w-full">
                         {/* Click Balance & Income Section */}
@@ -477,15 +521,14 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                             </div>
                         </div>
                         {/* Timer Overlay */}
-                        <div className={`${viewAds_firstTimeLoad_state.viewAdsexpireTimer ? 'flex' : 'hidden'} absolute z-10 inset-0 bg-white bg-opacity-70 justify-center items-center`}>
-                            <div className="flex flex-col items-center text-xl sm:text-2xl font-semibold">
+                        <div className={`${viewAds_firstTimeLoad_state.click_short_link_expireTimer ? 'flex' : 'hidden'} absolute z-[1] inset-0 bg-white bg-opacity-70 justify-center items-start`}>
+                            <div className="flex flex-col items-center text-3xl sm:text-6xl font-semibold mt-20">
                                 <div className="text-center">Come Back After</div>
-                                <div className="text-3xl sm:text-4xl font-bold text-red-600 drop-shadow">
+                                <div className="text-5xl sm:text-7xl font-bold text-red-600 drop-shadow">
                                     <CountdownTimer expireTime={viewAds_firstTimeLoad_state.viewAdsexpireTimer} />
                                 </div>
                             </div>
                         </div>
-
                         {/* Direct Link Section */}
                         <div className="my-4 text-center bg-yellow-100 text-yellow-800 p-3 rounded-lg shadow-md">
                             <span className="font-semibold">Important:</span> Click these buttons and manually handle ads to earn money!

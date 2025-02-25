@@ -7,10 +7,12 @@ import Swal from "sweetalert2";
 import showNotificationWith_timer from "../../components/showNotificationWith_timer";
 import showNotification from "../../components/showNotification";
 import ProcessBgSeprate from '../../components/processBgSeprate/processBgSeprate'
+import CountdownTimer from "../../components/countDownTimer/countDownTimer";
 
 const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
     const [data_process_state, setData_process_state] = useState(false);
     const [shortLinks, setShortLinks] = useState([]);
+    const [viewAds_firstTimeLoad_state, setViewAds_firstTimeLoad_state] = useState([]);
     const navigation = useNavigate();
 
     useEffect(() => {
@@ -21,8 +23,9 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                     `${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_shortlink_data_get`,
                     { withCredentials: true }
                 );
-                setAvailableBalance_forNavBar_state(response.data.userAvailableBalance);
-                setShortLinks(response.data.shortedLinksData);
+                setAvailableBalance_forNavBar_state(response.data.msg.userAvailableBalance);
+                setShortLinks(response.data.msg.shortedLinksData);
+                setViewAds_firstTimeLoad_state(response.data.msg)
             } catch (error) {
                 console.log(error);
                 if (
@@ -43,15 +46,23 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
     }, []);
 
     // 🔄 **Update Link Status & Show Swal**
-    const user_linkClick_patch = async (shortnerDomain) => {
+    const user_linkClick_patch = async (obj) => {
         try {
             setData_process_state(true);
             const origin = `${window.location.origin}`;
             const response = await axios.patch(
                 `${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_shortlink_firstPage_data_patch`,
-                { shortnerDomain, endPageRoute: import.meta.env.VITE_CLICK_SHORTEN_LINK_ENDPAGE_ROUTE, clientOrigin: origin },
+                { shortnerDomain: obj.shortnerDomain, endPageRoute: import.meta.env.VITE_CLICK_SHORTEN_LINK_ENDPAGE_ROUTE, clientOrigin: origin },
                 { withCredentials: true }
             );
+            setViewAds_firstTimeLoad_state((prev) => ({
+                ...prev,
+                pendingEarnings: (parseFloat(prev.pendingEarnings || 0) - parseFloat(obj.amount || 0)).toFixed(3),
+                today_shortLinkIncome: (parseFloat(prev.today_shortLinkIncome || 0) + parseFloat(obj.amount || 0)).toFixed(3),
+                totalLinks: (parseFloat(prev.totalLinks || 0) - 1),
+                completedClick: (parseFloat(prev.completedClick || 0) + 1),
+                pendingClick: (parseFloat(prev.pendingClick || 0) - 1)
+            }))
             return response
         } catch (error) {
             console.error("Error updating link status:", error);
@@ -63,7 +74,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
 
     const handelLink_click = async (link) => {
         try {
-            const response = await user_linkClick_patch(link.shortnerDomain); // ✅ API call ka response wait karein
+            const response = await user_linkClick_patch(link); // ✅ API call ka response wait karein
 
             if (!response || response.error) {
                 throw new Error("API request failed"); // ✅ Agar response me error ho to manually error throw karein
@@ -96,18 +107,6 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
         return timeString;
     };
 
-    // 🔢 **Summary Calculations**
-    const totalLinks = shortLinks.length;
-    const completedLinks = shortLinks.filter((link) => link.isDisable).length;
-    const pendingLinks = totalLinks - completedLinks;
-    const totalEarnings = shortLinks
-        .reduce((acc, link) => acc + (parseFloat(link.amount) || 0), 0)
-        .toFixed(2);
-    const earnedSoFar = shortLinks
-        .filter((link) => link.isDisable)
-        .reduce((acc, link) => acc + (parseFloat(link.amount) || 0), 0)
-        .toFixed(2);
-
     if (data_process_state) {
         return (
             <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
@@ -126,28 +125,37 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                         <h2 className="text-xl font-semibold text-gray-800 mb-5">💰 Earnings Summary</h2>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4 text-gray-700">
                             <div className="bg-gray-100 p-3 rounded-lg">
-                                <span className="font-semibold">Total Earning:</span>
-                                <span className="text-green-600 font-bold ml-2">₹ {totalEarnings}</span>
+                                <div className="font-semibold">Pending Earnings:</div>
+                                <div className="text-red-500 font-bold ml-2">₹{viewAds_firstTimeLoad_state.pendingEarnings}</div>
                             </div>
                             <div className="bg-gray-100 p-3 rounded-lg">
-                                <span className="font-semibold">Earned So Far:</span>
-                                <span className="text-green-600 font-bold ml-2">₹ {earnedSoFar}</span>
+                                <div className="font-semibold">Today Earnings:</div>
+                                <div className="text-green-600 font-bold ml-2">₹{viewAds_firstTimeLoad_state.today_shortLinkIncome}</div>
                             </div>
                             <div className="bg-gray-100 p-3 rounded-lg">
-                                <span className="font-semibold">Total Links:</span>
-                                <span className="text-blue-600 font-bold ml-2">{totalLinks}</span>
+                                <div className="font-semibold">Total Links:</div>
+                                <div className="text-blue-600 font-bold ml-2">{viewAds_firstTimeLoad_state.totalLinks}</div>
                             </div>
                             <div className="bg-gray-100 p-3 rounded-lg">
-                                <span className="font-semibold">Completed:</span>
-                                <span className="text-gray-600 font-bold ml-2">{completedLinks}</span>
+                                <div className="font-semibold">Completed:</div>
+                                <div className="text-green-600 font-bold ml-2">{viewAds_firstTimeLoad_state.completedClick}</div>
                             </div>
                             <div className="bg-gray-100 p-3 rounded-lg">
-                                <span className="font-semibold">Pending:</span>
-                                <span className="text-red-500 font-bold ml-2">{pendingLinks}</span>
+                                <div className="font-semibold">Pending:</div>
+                                <div className="text-red-500 font-bold ml-2">{viewAds_firstTimeLoad_state.pendingClick}</div>
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white rounded-lg shadow-md p-4">
+                    <div className="bg-white rounded-lg shadow-md p-4 relative">
+                        {/* Timer Overlay */}
+                        <div className={`${viewAds_firstTimeLoad_state.click_short_link_expireTimer ? 'flex' : 'hidden'} absolute z-[1] inset-0 bg-white bg-opacity-70 justify-center items-start`}>
+                            <div className="flex flex-col items-center text-3xl sm:text-6xl font-semibold mt-20">
+                                <div className="text-center">Come Back After</div>
+                                <div className="text-5xl sm:text-7xl font-bold text-red-600 drop-shadow">
+                                    <CountdownTimer expireTime={viewAds_firstTimeLoad_state.click_short_link_expireTimer} />
+                                </div>
+                            </div>
+                        </div>
                         {shortLinks.length === 0 ? (
                             <p className="text-center text-gray-500 py-5">🚫 No short links available at the moment.</p>
                         ) : (

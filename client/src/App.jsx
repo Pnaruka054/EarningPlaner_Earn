@@ -95,7 +95,7 @@ const App = () => {
       setshow_Full_NavBar_state((p) => p = false)
     } else if (
       location.pathname === '/member/dashboard' ||
-      location.pathname === '/member/deposit' ||
+      // location.pathname === '/member/deposit' ||
       location.pathname === '/member/withdraw' ||
       location.pathname === '/member/refer-and-earn' ||
       location.pathname === '/member/support' ||

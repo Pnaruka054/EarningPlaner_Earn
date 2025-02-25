@@ -13,6 +13,7 @@ const WaitRedirecting = () => {
         }
     }, []);
 
+    // for ads
     useEffect(() => {
         const scripts = [
             { src: "https://kulroakonsu.net/88/tag.min.js", attributes: { 'data-zone': '132939', 'data-cfasync': 'false' } },

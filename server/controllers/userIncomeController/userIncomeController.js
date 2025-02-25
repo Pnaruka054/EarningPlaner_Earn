@@ -20,7 +20,6 @@ const user_adsView_home_get = async (req, res) => {
     const session = await mongoose.startSession(); // Start a session
     session.startTransaction(); // Begin a transaction
     try {
-
         // format current Date YYYY-MM-DD
         const todayDate = getFormattedDate()
         const userData = req.user;
@@ -37,7 +36,7 @@ const user_adsView_home_get = async (req, res) => {
             .findOne({ ipAddress: user_ip })
             .session(session);
 
-        // If no record is found, create a new one with empty buttonNames Array
+        // If no ipAddress record found, create a new one with empty buttonNames Array
         if (!ipAddress_recordData) {
             ipAddress_recordData = new ipAddress_records_module({
                 userDB_id: userData._id,
@@ -65,7 +64,6 @@ const user_adsView_home_get = async (req, res) => {
 
         // Prepare response data
         let resData = {
-            ipAddress_recordData,
             today_adsviewIncome,
             pendingClick,
             completedClick,
@@ -76,7 +74,12 @@ const user_adsView_home_get = async (req, res) => {
             viewAds_directLinksData,
         };
 
-        let idTimer_recordsData = await idTimer_records_module.findOne({ userDB_id: userData._id }).session(session)
+        let idTimer_recordsData = await idTimer_records_module.findOne({
+            $and: [
+                { userDB_id: userData._id },
+                { viewAdsexpireTimer: { $exists: null } }
+            ]
+        }).session(session)
         // change res data if timer started for user
         if (idTimer_recordsData?.viewAdsexpireTimer) {
             resData = { ...resData, viewAdsexpireTimer: idTimer_recordsData.viewAdsexpireTimer }
@@ -121,32 +124,39 @@ const user_adsView_income_patch = async (req, res) => {
             throw new Error(userIncomeUpdate.error);
         }
 
+        // get monthly module and date module to update more and save al last
         const { userMonthlyRecord, dateRecords } = userIncomeUpdate.values;
 
-        // Fetch viewAds settings
+        // get all viewAds links data
         const viewAdsConfig = await other_data_module
             .findOne({ documentName: "viewAds" })
             .session(session);
 
+        // check if pendingClick is available in date data if not then create
         if (!dateRecords?.earningSources?.view_ads?.pendingClick) {
             dateRecords.earningSources.view_ads.pendingClick = pendingClick
         }
 
-        // Update user's pending clicks and income
-        if (dateRecords?.earningSources?.view_ads?.pendingClick <= viewAdsConfig.viewAds_pendingClick) {
+        // check current pending number is lessthen equel to total available pending click limit if its true then Update user's pending clicks and income
+        if (parseFloat(dateRecords?.earningSources?.view_ads?.pendingClick) <= parseFloat(viewAdsConfig.viewAds_pendingClick)) {
             dateRecords.earningSources.view_ads.pendingClick = (parseFloat(pendingClick) - 1).toString();
             dateRecords.earningSources.view_ads.income = (parseFloat(dateRecords.earningSources.view_ads.income || 0) + parseFloat(btnClickEarn)).toFixed(3);
         }
 
         // Initialize timer records (if applicable)
         let idTimerRecordsData = null;
-        let idTimerRecordsDataStatus = null;
-
+        // if user current pending click is empety means its 0 then start timer
         if (dateRecords.earningSources.view_ads.pendingClick === '0') {
-            idTimerRecordsDataStatus = idTimerRecordsData = await idTimer_records_module
-                .findOne({ userDB_id: userData._id })
+            idTimerRecordsData = await idTimer_records_module
+                .findOne({
+                    $and: [
+                        { userDB_id: userData._id },
+                        { viewAdsexpireTimer: { $exists: null } }
+                    ]
+                })
                 .session(session);
 
+            // check if timer already available or not if not available then create new one
             if (!idTimerRecordsData) {
                 const currentTime_fromNewDate = new Date();
                 idTimerRecordsData = new idTimer_records_module({
@@ -154,17 +164,15 @@ const user_adsView_income_patch = async (req, res) => {
                     viewAdsexpireTimer: new Date(currentTime_fromNewDate.getFullYear(), currentTime_fromNewDate.getMonth(), currentTime_fromNewDate.getDate() + 1, 0, 0, 0),
                 });
                 await idTimerRecordsData.save({ session });
+            } else {
+                // Return error if the click limit timer is exceeded
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({
+                    success: false,
+                    error_msg: "Click Limit exceeded. Try again after the timer completes.",
+                });
             }
-        }
-
-        // Return error if the click limit is exceeded
-        if (idTimerRecordsDataStatus) {
-            await session.abortTransaction();
-            session.endSession();
-            return res.status(400).json({
-                success: false,
-                error_msg: "Click Limit exceeded. Try again after the timer completes.",
-            });
         }
 
         // Update referral income
@@ -173,16 +181,15 @@ const user_adsView_income_patch = async (req, res) => {
             throw new Error(referByIncomeUpdate.error);
         }
 
-        // Find or create an IP address record
+        // Find user current IP address address record if available
         let ipAddressRecord = await ipAddress_records_module
             .findOne({ ipAddress: userIp })
             .session(session);
 
+        // check if ip address already available if available then Update existing IP record otherwise Create new IP record 
         if (ipAddressRecord) {
-            // Update existing IP record
             ipAddressRecord.buttonNames = disabledButtons_state;
         } else {
-            // Create new IP record
             ipAddressRecord = new ipAddress_records_module({
                 userDB_id: userData._id,
                 buttonNames: disabledButtons_state,
@@ -196,7 +203,6 @@ const user_adsView_income_patch = async (req, res) => {
         userMonthlyRecord.earningSources.view_ads.income = (
             currentIncome + parseFloat(btnClickEarn)
         ).toFixed(3);
-
 
         // Save all changes concurrently
         await Promise.all([
@@ -218,6 +224,7 @@ const user_adsView_income_patch = async (req, res) => {
             ).toFixed(3),
         };
 
+        // check if user limit timer started then change res
         if (idTimerRecordsData?.viewAdsexpireTimer) {
             response.viewAdsexpireTimer = idTimerRecordsData.viewAdsexpireTimer;
         }
@@ -241,19 +248,37 @@ const user_adsView_income_patch = async (req, res) => {
 
 // for click shorten link page data get
 const user_shortlink_data_get = async (req, res) => {
+    const session = await mongoose.startSession(); // Start session
+    session.startTransaction(); // Start transaction
+
     try {
+        // format current Date YYYY-MM-DD
+        const todayDate = getFormattedDate();
         // User data
         const userData = req.user;
         const userIp = req.ip;
 
-        // Fetch shorted links
-        let shortedLinksData = await shortedLinksData_module.find();
+        // Fetch shorted links with session
+        let shortedLinksData = await shortedLinksData_module.find().session(session);
 
-        // Fetch user's click records
-        let ipAddressRecords = await ipAddress_records_module.find({ ipAddress: userIp });
+        // Fetch user's click records with session
+        let ipAddressRecords = await ipAddress_records_module.find({
+            $and: [
+                { ipAddress: userIp },
+                { shortnerDomain: { $exists: true } }
+            ]
+        }).session(session);
+
+        // Fetch other_data for shortLink with session
+        let other_data_shortLink = await other_data_module.findOne({ documentName: "shortLink" }).session(session);
 
         // Get all clicked URLs
         const clickedUrls = new Set(ipAddressRecords.map(record => record.shortnerDomain));
+
+        // Calculate user earnings based on shortLink data
+        let userWillEarn = shortedLinksData.length
+            ? earningCalculator(shortedLinksData, 'amount', other_data_shortLink?.shortLink_pendingClick)
+            : 0;
 
         // Mark matched shorted links as isDisable: true
         shortedLinksData = shortedLinksData.map(link => {
@@ -268,16 +293,56 @@ const user_shortlink_data_get = async (req, res) => {
             };
         });
 
+        // Find current date record with session
+        let userDate_recordData = await userDate_records_module.findOne({
+            userDB_id: userData._id,
+            date: todayDate
+        }).session(session);
+
+        // Safely extract income and pendingClick if available, otherwise use 0
+        const today_shortLinkIncome = parseFloat(userDate_recordData?.earningSources?.click_short_link?.income || 0);
+        let pendingClick = parseFloat(userDate_recordData?.earningSources?.click_short_link?.pendingClick || other_data_shortLink?.shortLink_pendingClick || 0);
+
+        // Calculate completed clicks
+        let completedClick = Math.max(parseFloat(other_data_shortLink?.shortLink_pendingClick || 0) - pendingClick, 0);
 
         // Prepare response data
         let resData = {
             userAvailableBalance: (parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)).toFixed(3),
-            shortedLinksData
+            shortedLinksData,
+            today_shortLinkIncome: today_shortLinkIncome.toFixed(3),
+            pendingClick,
+            completedClick,
+            pendingEarnings: (userWillEarn - today_shortLinkIncome).toFixed(3),
+            totalLinks: shortedLinksData.length - (ipAddressRecords || []).length,
         };
 
+        // Find timer record with session
+        let idTimer_recordsData = await idTimer_records_module.findOne({
+            $and: [
+                { userDB_id: userData._id },
+                { click_short_link_expireTimer: { $exists: true } }
+            ]
+        }).session(session);
+
+        // Change res data if timer started for user
+        if (idTimer_recordsData?.click_short_link_expireTimer) {
+            resData = { ...resData, click_short_link_expireTimer: idTimer_recordsData.click_short_link_expireTimer };
+        }
+
+        // Commit transaction
+        await session.commitTransaction();
+        session.endSession();
+
         // Send response
-        res.json(resData);
+        return res.status(200).json({
+            success: true,
+            msg: resData,
+        });
+
     } catch (error) {
+        await session.abortTransaction(); // Rollback transaction
+        session.endSession(); // End session
         console.error("Error fetching user shortlink data:", error);
         res.status(500).json({
             success: false,
@@ -288,6 +353,9 @@ const user_shortlink_data_get = async (req, res) => {
 
 // for click shorten link page income update
 const user_shortlink_firstPage_data_patch = async (req, res) => {
+    const session = await mongoose.startSession(); // Start session
+    session.startTransaction(); // Start transaction
+
     try {
         const userData = req.user;
         const userIp = req.ip;
@@ -297,33 +365,54 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             return res.status(400).json({ error_msg: "Invalid data received" });
         }
 
+        // Find timer record with session
+        let idTimer_recordsData = await idTimer_records_module.findOne({
+            $and: [
+                { userDB_id: userData._id },
+                { click_short_link_expireTimer: { $exists: true } }
+            ]
+        }).session(session);
+
+        // Change res data if timer started for user
+        if (idTimer_recordsData?.click_short_link_expireTimer) {
+            await session.abortTransaction(); // Rollback transaction
+            session.endSession();
+            return res.status(400).json({
+                success: false,
+                error_msg: "Click Limit exceeded. Try again after the timer completes.",
+            });
+        }
+
         // Check if record already exists using ip and shorten link domain
-        const existingRecord = await ipAddress_records_module.findOne({ ipAddress: userIp, shortnerDomain });
+        const existingRecord = await ipAddress_records_module.findOne({ ipAddress: userIp, shortnerDomain }).session(session);
 
         // if already exists then update it
         if (existingRecord) {
             if (existingRecord.status === true || existingRecord.processCount === 2) {
+                await session.commitTransaction();
+                session.endSession();
                 return res.status(200).json({ error_msg: "Record already processed, no update required" });
             }
 
             // Update existing record
             existingRecord.processCount = 1;
             existingRecord.status = false;
-            await existingRecord.save();
+            await existingRecord.save({ session });
 
+            await session.commitTransaction();
+            session.endSession();
             return res.status(200).json({ error_msg: "Record updated successfully", data: existingRecord });
         }
 
-        // genrate gandom 10 chatactor random string
+        // generate random 10 character string
         let uniqueRandomID = await generateRandomString(10);
         let shortedLink = null;
 
         // Fetch Shortener data
-        const shortnersData = await shortedLinksData_module.findOne({ shortnerDomain });
+        const shortnersData = await shortedLinksData_module.findOne({ shortnerDomain }).session(session);
 
         // create shorted url for user using shortner api
         if (shortnersData && shortnersData.shortnerApiLink) {
-            // const fullUrl = `${clientOrigin}${endPageRoute}/${uniqueRandomID}`;
             const fullUrl = `https://earningplaner-earn.onrender.com${endPageRoute}/${uniqueRandomID}`;
 
             try {
@@ -336,6 +425,8 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
 
         // If shortedLink is null, return an error response
         if (!shortedLink) {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(422).json({
                 success: false,
                 error_msg: "Shortened link not generated. Process aborted."
@@ -351,13 +442,18 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             processCount: 1,
             uniqueToken: uniqueRandomID,
             ipAddress: userIp
-        }).save();
+        }).save({ session });
+
+        await session.commitTransaction(); // Commit transaction
+        session.endSession(); // End session
 
         res.status(200).json({
             success: true,
             shortedLink
         });
     } catch (error) {
+        await session.abortTransaction(); // Rollback transaction
+        session.endSession(); // End session
         console.error("Error in user_shortlink_firstPage_data_patch:", error);
         res.status(500).json({
             success: false,
@@ -407,15 +503,82 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
         }
         const amount = parseFloat(shortedLink.amount) || 0;
 
+        // Find timer record with session
+        let idTimer_recordsData = await idTimer_records_module.findOne({
+            $and: [
+                { userDB_id: userData._id },
+                { click_short_link_expireTimer: { $exists: true } }
+            ]
+        }).session(session);
+
+        // Change res data if timer started for user
+        if (idTimer_recordsData?.click_short_link_expireTimer) {
+            await session.abortTransaction(); // Rollback transaction
+            session.endSession();
+            return res.status(400).json({
+                success: false,
+                error_msg: "Click Limit exceeded. Try again after the timer completes.",
+            });
+        }
+
         let user_incomeUpdate = await userIncome_handle(session, userData, amount)
         if (!user_incomeUpdate.success) {
             throw new Error(user_incomeUpdate.error);
         }
-        const { userMonthlyRecord } = user_incomeUpdate.values
+        const { userMonthlyRecord, dateRecords } = user_incomeUpdate.values
+
+        // get all viewAds links data
+        const viewAdsConfig = await other_data_module
+            .findOne({ documentName: "viewAds" })
+            .session(session);
+
+        // check if pendingClick is available in date data if not then create
+        if (!dateRecords?.earningSources?.click_short_link?.pendingClick) {
+            dateRecords.earningSources.click_short_link.pendingClick = viewAdsConfig.viewAds_pendingClick
+        }
+
+        // check current pending number is lessthen equel to total available pending click limit if its true then Update user's pending clicks and income
+        if (parseFloat(dateRecords?.earningSources?.click_short_link?.pendingClick) <= parseFloat(viewAdsConfig.viewAds_pendingClick)) {
+            dateRecords.earningSources.click_short_link.pendingClick = (parseFloat(dateRecords.earningSources.click_short_link.pendingClick) - 1).toString();
+            dateRecords.earningSources.click_short_link.income = (parseFloat(dateRecords.earningSources.click_short_link.income || 0) + parseFloat(amount)).toFixed(3);
+        }
 
         let refer_by_incomeupdate = await userReferByIncome_handle(session, userData, amount)
         if (!refer_by_incomeupdate.success) {
             throw new Error(refer_by_incomeupdate.error);
+        }
+
+        // Initialize timer records (if applicable)
+
+        // if user current pending click is empety means its 0 then start timer
+        if (dateRecords.earningSources.click_short_link.pendingClick === '0') {
+            let idTimerRecordsData = null;
+            idTimerRecordsData = await idTimer_records_module
+                .findOne({
+                    $and: [
+                        { userDB_id: userData._id },
+                        { click_short_link_expireTimer: { $exists: null } }
+                    ]
+                })
+                .session(session);
+
+            // check if timer already available or not if not available then create new one
+            if (!idTimerRecordsData) {
+                const currentTime_fromNewDate = new Date();
+                idTimerRecordsData = new idTimer_records_module({
+                    userDB_id: userData._id,
+                    click_short_link_expireTimer: new Date(currentTime_fromNewDate.getFullYear(), currentTime_fromNewDate.getMonth(), currentTime_fromNewDate.getDate() + 1, 0, 0, 0),
+                });
+                await idTimerRecordsData.save({ session });
+            } else {
+                // Return error if the click limit timer is exceeded
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({
+                    success: false,
+                    error_msg: "Click Limit exceeded. Try again after the timer completes.",
+                });
+            }
         }
 
         if (userMonthlyRecord) {
@@ -439,7 +602,8 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
         const saveOperations = [
             userMonthlyRecord.save({ session }),
             ipAddressRecord.save({ session }),
-            userData.save({ session })
+            userData.save({ session }),
+            dateRecords.save({ session })
         ];
 
         await Promise.all(saveOperations);
