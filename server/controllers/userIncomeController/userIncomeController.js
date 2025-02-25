@@ -265,7 +265,8 @@ const user_shortlink_data_get = async (req, res) => {
         let ipAddressRecords = await ipAddress_records_module.find({
             $and: [
                 { ipAddress: userIp },
-                { shortnerDomain: { $exists: true } }
+                { shortnerDomain: { $exists: true } },
+                { userDB_id: userData._id }
             ]
         }).session(session);
 
@@ -314,7 +315,7 @@ const user_shortlink_data_get = async (req, res) => {
             pendingClick,
             completedClick,
             pendingEarnings: (userWillEarn - today_shortLinkIncome).toFixed(3),
-            totalLinks: shortedLinksData.length - (ipAddressRecords || []).length,
+            totalLinks: shortedLinksData.length - ipAddressRecords.filter(values => values.processCount === 1 && values.status === true).length,
         };
 
         // Find timer record with session
@@ -384,7 +385,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
         }
 
         // Check if record already exists using ip and shorten link domain
-        const existingRecord = await ipAddress_records_module.findOne({ ipAddress: userIp, shortnerDomain }).session(session);
+        const existingRecord = await ipAddress_records_module.findOne({ ipAddress: userIp, shortnerDomain, userDB_id: userData._id }).session(session);
 
         // if already exists then update it
         if (existingRecord) {
@@ -401,7 +402,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
 
             await session.commitTransaction();
             session.endSession();
-            return res.status(200).json({ error_msg: "Record updated successfully", data: existingRecord });
+            return res.status(200).json({ msg: "Record updated successfully", existingRecord });
         }
 
         // generate random 10 character string
@@ -449,7 +450,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            shortedLink
+            shortUrl: shortedLink
         });
     } catch (error) {
         await session.abortTransaction(); // Rollback transaction

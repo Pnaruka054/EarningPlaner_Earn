@@ -7,6 +7,7 @@ const ipAddressRecordSchema = new mongoose.Schema({
   processCount: { type: Number, require: true },
   ipAddress: { type: String },
   uniqueToken: { type: String },
+  shortUrl: { type: String },
   shortnerDomain: { type: String },
   createdAt: { type: Date, default: Date.now, expires: 86400 } // 24 Hours (86400 seconds)
 });

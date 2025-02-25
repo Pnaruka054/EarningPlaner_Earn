@@ -100,7 +100,7 @@ const LastPage = () => {
         // ✅ ✅ ✅ **Navigate and Clear History**
         setTimeout(() => {
           window.history.replaceState(null, "", location.pathname)
-          navigate("/member/click-shorten-link", { replace: true });
+          window.location.replace("/member/click-shorten-link");
         }, 3000);
       });
   };

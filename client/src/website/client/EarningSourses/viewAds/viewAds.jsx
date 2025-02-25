@@ -468,10 +468,10 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     }
 
     return (
-        <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+        <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] custom-scrollbar mt-12">
             <div className='px-2 py-2'>
                 <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
-                    View Ads to Earn
+                    View Ads
                 </div>
                 <div className='flex -mb-6 justify-center'>
                     <div className='bg-purple-700 px-2 py-1 pt-2 shadow font-bold text-white rounded-t-2xl'>

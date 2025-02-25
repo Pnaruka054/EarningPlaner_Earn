@@ -38,7 +38,7 @@ const ContactUs = ({ forMember, setAvailableBalance_forNavBar_state }) => {
 
   if (forMember === true) {
     return (
-      <div className="ml-auto bg-[#ecf0f5] flex flex-col justify-between w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+      <div className="ml-auto bg-[#ecf0f5] flex flex-col justify-between w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] custom-scrollbar mt-12">
         <div className="p-2">
           <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
             Support

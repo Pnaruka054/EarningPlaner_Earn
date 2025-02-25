@@ -95,7 +95,7 @@ const Profile = ({setAvailableBalance_forNavBar_state}) => {
         )
     }
     return (
-        <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+        <div className="ml-auto flex flex-col justify-between pb-5 bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] custom-scrollbar overflow-auto h-[94vh] mt-12">
             <form method="post" onSubmit={handleSubmit} className='pt-4 px-4 pb-5'>
                 <legend className="text-2xl text-blue-600 font-semibold my-4 mx-1 select-none flex justify-between">Profile & Billing Section</legend>
                 <div className="mb-4">

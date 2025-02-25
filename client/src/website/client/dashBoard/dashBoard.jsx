@@ -173,7 +173,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
 
                     <Link to="/member/fill-survey" className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
                         <div className="font-semibold">Fill Survey</div>
-                        <div className="z-[1] text-lg font-bold">₹{Array.isArray(userData_state[1]) && userData_state[1][0] ? userData_state[1][0].earningSources?.fill_survey?.income || '0.000' : '0.000'}</div>
+                        <div className="z-[1] text-lg font-bold">₹{Array.isArray(userData_state.user_month_records) && userData_state.user_month_records[0] ? userData_state?.user_month_records[0]?.earningSources?.fill_survey?.income || '0.000' : '0.000'}</div>
                         <img src={FillSurvey} className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image" />
                     </Link>
 

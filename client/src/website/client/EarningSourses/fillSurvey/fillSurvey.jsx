@@ -56,10 +56,10 @@ const FillSurvey = ({ setAvailableBalance_forNavBar_state }) => {
         )
     }
     return (
-        <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+        <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12 custom-scrollbar">
             <div className="px-2 py-2">
                 <div className="text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between">
-                    Fill Surveys & Earn Money
+                    Fill Surveys
                 </div>
                 <div className="px-4 py-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {surveyWebsites_state.map((platform, index) => (

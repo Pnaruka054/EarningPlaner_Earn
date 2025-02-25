@@ -22,7 +22,7 @@ const SideMenu = ({ sideMenu_show }) => {
         border-r border-gray-700
       `}
         >
-            <h2 className="text-lg font-semibold text-gray-200 mb-5 px-2">
+            <h2 className="font-semibold text-gray-300 mb-5 px-2">
                 Member Menu
             </h2>
 
