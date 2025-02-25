@@ -72,10 +72,6 @@ app.use('/userIncomeRoute', userIncomeRoute);
 app.use('/userMessageRoute', userMessageRoute);
 app.use('/postBack', postBack);
 
-
-// Scheduled cron tasks
-cronForDaily_MonthlyData_Update()
-
 // Server listen
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
