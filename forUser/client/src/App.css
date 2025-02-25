@@ -105,14 +105,30 @@
 
 
 .custom-scrollbar::-webkit-scrollbar {
-    width: 5px;
+    width: 4px; /* Super Slim */
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+    width: 0px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #616161;
+    background: linear-gradient(135deg, rgba(0, 191, 255, 0.9), rgba(0, 140, 255, 0.9)); /* Smooth gradient */
     border-radius: 10px;
+    box-shadow: 0px 0px 6px rgba(0, 170, 255, 0.6); /* Subtle glow */
+    transition: all 0.3s ease-in-out;
+    backdrop-filter: blur(5px); /* Glass effect */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, rgba(0, 140, 255, 1), rgba(0, 90, 255, 1)); /* Darker hover */
+    box-shadow: 0px 0px 10px rgba(0, 140, 255, 0.8); /* More glow on hover */
+    transform: scale(1.2); /* Slight zoom */
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-    background: #cbcbcb;
+    background: rgba(255, 255, 255, 0.08); /* Super subtle background */
+    backdrop-filter: blur(10px); /* Extra blur for glass effect */
+    border-radius: 10px;
+    box-shadow: inset 0px 0px 4px rgba(0, 0, 0, 0.1); /* Inner shadow */
 }

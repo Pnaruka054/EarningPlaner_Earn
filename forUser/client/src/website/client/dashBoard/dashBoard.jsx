@@ -144,7 +144,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                         {getLogOut_btnClicked ? <FaSpinner className="animate-spin" /> : "LogOut"}
                     </button>
                 </div>
-                <div className="grid grid-cols-2 grid-rows-3 sm:grid-cols-3 sm:grid-rows-2 grid-flow-col gap-4 font-poppins mb-5 text-lg sm:text-xl text-center">
+                <div className="grid grid-cols-2 grid-rows-3 sm:grid-cols-3 sm:grid-rows-2 grid-flow-col font-poppins mb-5 text-md sm:text-xl text-center">
                     <Link to="/member/view-ads" className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
                         <div className="font-semibold">View Ads</div>
                         <div className="z-[1] text-lg font-bold">₹{Array.isArray(userData_state.user_month_records) && userData_state.user_month_records[0] ? userData_state?.user_month_records[0]?.earningSources?.view_ads?.income || '0.000' : '0.000'}</div>
@@ -165,7 +165,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                         <img src={Games} className="absolute bottom-3 right-3 w-16 opacity-20" />
                     </div>
 
-                    <Link to="/member/click-shorten-link" className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 m-3 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
+                    <Link to="/member/click-shorten-link" className="bg-gradient-to-r p-2 from-green-500 to-green-600 text-white relative h-44 m-3 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
                         <div className="font-semibold">Click Shorten Link</div>
                         <div className="z-[1] text-lg font-bold">₹{Array.isArray(userData_state.user_month_records) && userData_state.user_month_records[0] ? userData_state?.user_month_records[0]?.earningSources?.click_short_link?.income || '0.000' : '0.000'}</div>
                         <img src={ClickShortenLink_icon} className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image" />
@@ -192,7 +192,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                             <span className="relative inline-flex size-3 rounded-full bg-red-500"></span>
                         </span>
                     </div>
-                    <div className="p-4 space-y-4 max-h-[600px] overflow-auto custom-scrollbar">
+                    <div className="p-4 space-y-4 max-h-[600px] overflow-auto hidden-scrollbar">
                         {announcements.map((item) => (
                             <div key={item.id} className="space-y-2">
                                 <p className="announcement">
