@@ -11,5 +11,8 @@ export default defineConfig({
     rollupOptions: {
       external: ["sweetalert2"]
     }
+  },
+  optimizeDeps: {
+    include: ["react-icons/fa"]
   }
 })
