@@ -28,6 +28,7 @@ import Terms_of_Use from './website/Terms_of_Use/Terms_of_Use';
 import DMCA from './website/DMCA/DMCA';
 import FillSurvey from './website/EarningSourses/fillSurvey/fillSurvey';
 import EmailVerification from './website/components/email-verification/email-verification';
+import { Faq_navBar_contextProvider } from "./website/components/context/faq_navBar_context";
 
 const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
@@ -115,7 +116,7 @@ const App = () => {
   }, [location.pathname]);
 
   return (
-    <>
+    <Faq_navBar_contextProvider>
       {
         !show_Full_navBar_state && createPortal(
           <NavBar show={show_navBar_state} availableBalance_forNavBar_state={availableBalance_forNavBar_state} />,
@@ -183,7 +184,7 @@ const App = () => {
         </CSSTransition>
       </TransitionGroup>
       <div id="networkStatus" ref={networkStatusRef} className='hidden' />
-    </>
+    </Faq_navBar_contextProvider>
   );
 }
 

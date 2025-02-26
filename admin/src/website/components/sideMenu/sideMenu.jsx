@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, LayoutDashboard, PlayCircle, Link as LinkIcon, FileText, DollarSign, LogOut } from "lucide-react";
+import { Menu, X, LayoutDashboard, PlayCircle, Link as LinkIcon, FileText, DollarSign, LogOut, ShieldCheck, FileWarning, FileLock } from "lucide-react";
 import EarnWizLogo from '../../../assets/EarnWizLogo.png';
 
 const SideMenu = () => {
@@ -10,9 +10,7 @@ const SideMenu = () => {
     <div className="flex">
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full ${isOpen ? "w-full" : "w-64"
-          } md:w-64 p-5 bg-gray-900 backdrop-blur-lg shadow-lg border-r border-gray-700 transform ${isOpen ? "translate-x-0" : "-translate-x-full"
-          } transition-transform duration-300 md:translate-x-0 z-50`}
+        className={`fixed top-0 left-0 h-full ${isOpen ? "w-full" : "w-64"} md:w-64 p-5 bg-gray-900 backdrop-blur-lg shadow-lg border-r border-gray-700 transform ${isOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 md:translate-x-0 z-50`}
       >
         {/* Close Button (Mobile) */}
         <button
@@ -40,6 +38,13 @@ const SideMenu = () => {
             <LogOut className="mr-2" /> Logout
           </button>
         </nav>
+
+        {/* Privacy & Legal Links */}
+        <div className="mt-10 border-t border-gray-700 pt-4 space-y-2 text-gray-400 text-sm">
+          <NavItem to="/privacy-policy" icon={<ShieldCheck />} label="Privacy Policy" />
+          <NavItem to="/terms-of-use" icon={<FileWarning />} label="Terms of Use" />
+          <NavItem to="/dmca" icon={<FileLock />} label="DMCA" />
+        </div>
       </div>
 
       {/* Main Content Area */}

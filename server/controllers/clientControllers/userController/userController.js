@@ -13,7 +13,7 @@ const withdrawal_methods_module = require('../../../model/withdraw/withdraw_meth
 const current_time_get = require('../../../helper/currentTimeUTC')
 const getFormattedMonth = require("../../../helper/getFormattedMonth")
 const userUniqueTokenData_module = require('../../../model/userUniqueTokenData_10minEx/userUniqueTokenData_module')
-
+const other_data_module = require('../../../model/other_data/other_data_module')
 
 function jwt_accessToken(user) {
     return jwt.sign({ jwtUser: user }, process.env.JWT_ACCESS_KEY, { expiresIn: '2h' })
@@ -569,6 +569,7 @@ const userDataGet_dashboard = async (req, res) => {
     try {
         const userData = req.user;
 
+        const other_data_announcementsArray = await other_data_module.find({ documentName: "announcement" }) || [];
         // getting user all months data
         const user_month_records = await userMonthly_records_module.find({ userDB_id: userData._id.toString() });
         // getting user all dates data
@@ -582,6 +583,7 @@ const userDataGet_dashboard = async (req, res) => {
                 userAvailableBalance: (
                     parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)
                 ).toFixed(3),
+                other_data_announcementsArray
             }
         });
     } catch (error) {
@@ -600,12 +602,14 @@ const userReferral_record_get = async (req, res) => {
 
         // find user referral data using userData._id
         const user_DB_referral_record_get = await referral_records_module.find({ userDB_id: userData._id });
+        const other_data_referralRate = await other_data_module.findOne({ documentName: "referralRate" }) || {};
 
         // get ready obj to res
         const resData = {
             userName: userData.userName,
             referral_data: user_DB_referral_record_get,
-            available_balance: (parseFloat(userData?.deposit_amount || 0) + parseFloat(userData?.withdrawable_amount || 0)).toFixed(3)
+            available_balance: (parseFloat(userData?.deposit_amount || 0) + parseFloat(userData?.withdrawable_amount || 0)).toFixed(3),
+            other_data_referralRate
         };
 
         return res.status(200).json({
@@ -626,12 +630,12 @@ const userProfileData_get = async (req, res) => {
     try {
         const userData = req.user;
 
-        const withdrawal_methods_data = await withdrawal_methods_module.find()
+        const other_data_withdrawalMethodArray = await other_data_module.find({ documentName: "withdrawalMethod" }) || [];
 
         // get ready obj for res
         const userProfile = {
             ...userData.toObject(),
-            withdrawal_methods_data,
+            other_data_withdrawalMethodArray,
             available_balance: (parseFloat(userData?.deposit_amount || 0) + parseFloat(userData?.withdrawable_amount || 0)).toFixed(3)
         };
 

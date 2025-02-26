@@ -66,7 +66,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
             ]
         }
     ];
- 
+
     // filter user selected month
     useEffect(() => {
         setMonthlyData_state(
@@ -186,22 +186,16 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                         </span>
                     </div>
                     <div className="p-4 space-y-4 max-h-[600px] overflow-auto hidden-scrollbar">
-                        {announcements.map((item) => (
-                            <div key={item.id} className="space-y-2">
-                                <p className="announcement">
-                                    <span className="text-sm text-gray-500 float-right">
-                                        <i className="fa fa-clock-o"></i> {item.time}
-                                    </span>
-                                </p>
-                                <p className="font-semibold">{item.title}</p>
-                                {item.details.map((detail, index) => (
-                                    <p key={index}>{detail}</p>
-                                ))}
-                                {item.extra && <p className="text-red-500 font-semibold">{item.extra}</p>}
-                                {item.note && <p className="font-semibold">{item.note}</p>}
-                                <hr className="border-t-2 border-gray-300" />
+                        {userData_state?.other_data_announcementsArray?.map((item) => (
+                            <div key={item.id} className="flex justify-between items-start space-y-2 border-b pb-2">
+                                {/* Announcement Message */}
+                                <div dangerouslySetInnerHTML={{ __html: item?.announcementMessage }} className="flex-1" />
+
+                                {/* Announcement Time */}
+                                <span className="text-gray-500 text-sm whitespace-nowrap">{item.announcementTime}</span>
                             </div>
                         ))}
+
                     </div>
                 </div>
                 <div className='flex justify-center mt-3'>

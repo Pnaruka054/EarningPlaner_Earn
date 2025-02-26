@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const userSignUp_module = require('../model/userSignUp/userSignUp_module')
-const adminLogin = require('../controllers/adminControllers/adminLogin/adminLogin')
+const admin_module = require('../model/admin/admin_module')
 
 const middleware_userLogin_check = async (req, res, next) => {
     try {
@@ -9,29 +9,16 @@ const middleware_userLogin_check = async (req, res, next) => {
             || req.originalUrl === '/userRoute/signUp'
             || req.originalUrl === '/userMessageRoute/userMessageSave_post'
             || req.originalUrl === '/userRoute/userWebstatisticsGet'
+            || req.originalUrl.includes('/checkLogin_for_navBar')
             || req.originalUrl.includes('/userRoute/user_signUp_login_google')
             || req.originalUrl.includes('/userRoute/userLoginforgot_password_send_mail')
             || req.originalUrl.includes('/userRoute/reset_password_form_post')
             || req.originalUrl.includes('/userRoute/verify_reset_token')
             || req.originalUrl.includes('/userRoute/verify_reset_email_token')
             || req.originalUrl.includes('/postBack/postBackCPX')
+            || req.originalUrl.includes('/admin')
         ) {
             return next(); // Skip middleware for this route
-        }
-
-        if (req.originalUrl === ('/admin/login')) {
-            adminLogin().then((result) => {
-                if (result) {
-                    next()
-                } else {
-                    return res.status(404).json({
-                        success: false,
-                        msg: 'you are not admin'
-                    })
-                }
-            })
-        } else if (req.originalUrl.includes('/admin')) {
-
         }
 
         // Retrieve the token from cookies (assuming it's named 'jwtToken')
@@ -51,15 +38,6 @@ const middleware_userLogin_check = async (req, res, next) => {
                 success: false,
                 jwtMiddleware_user_not_found_error: 'Authorization token invalid or user not found'
             });
-        }
-
-        if (
-            req.originalUrl === '/checkLogin_for_navBar'
-        ) {
-            return res.status(200).json({
-                success: true,
-                msg: "jwt Token is Correct"
-            })
         }
 
         if (decoded.jwtUser.password !== decodedData_fromDB.password) {
@@ -101,6 +79,93 @@ const middleware_userLogin_check = async (req, res, next) => {
     }
 };
 
+const adminCheck_middleware = async (req, res, next) => {
+    try {
+        // Exclude login route from middleware check
+        if (req.originalUrl.includes('/admin/adminLogin')) {
+            return next();
+        }
+
+        // Get token from cookies
+        const token = req.cookies.admin_jwt_token;
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                error_msg: 'Authorization token missing'
+            });
+        }
+
+        // Verify JWT token
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+        } catch (err) {
+            res.clearCookie('admin_jwt_token', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None'
+            });
+            return res.status(403).json({
+                success: false,
+                error_msg: 'Invalid or expired token. Please log in again.'
+            });
+        }
+
+        // Fetch admin data from DB
+        const admin = await admin_module.findById(decoded.jwtUser._id);
+        if (!admin) {
+            res.clearCookie('admin_jwt_token', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None'
+            });
+            return res.status(404).json({
+                success: false,
+                error_msg: 'User not found. Please log in again.'
+            });
+        }
+
+        // Ensure password has not changed after token issuance
+        if (decoded.jwtUser.adminPassword !== admin.adminPassword) {
+            res.clearCookie('admin_jwt_token', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None'
+            });
+            return res.status(403).json({
+                success: false,
+                error_msg: 'Password changed. Please log in again.'
+            });
+        }
+
+        // Ensure username has not changed
+        if (decoded.jwtUser.adminUserName !== admin.adminUserName) {
+            res.clearCookie('admin_jwt_token', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None'
+            });
+            return res.status(403).json({
+                success: false,
+                error_msg: 'Username updated. Please log in again.'
+            });
+        }
+
+        // Attach admin data to the request object
+        req.adminData = admin;
+
+        // Proceed to the next middleware or route handler
+        next();
+    } catch (error) {
+        console.error('Middleware Error:', error);
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
+    }
+};
+
 module.exports = {
-    middleware_userLogin_check
+    middleware_userLogin_check,
+    adminCheck_middleware
 };

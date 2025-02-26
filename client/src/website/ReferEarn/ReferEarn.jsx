@@ -8,7 +8,7 @@ import { FaClipboard, FaClipboardCheck } from "react-icons/fa";
 import showNotificationWith_timer from '../components/showNotificationWith_timer';
 import showNotification from '../components/showNotification';
 import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate'
- 
+
 const ReferEarn = ({ setAvailableBalance_forNavBar_state }) => {
     const [currentPage_state, setCurrentPage_state] = useState(1);
     const [referralRecords_state, setReferralRecords] = useState([]);
@@ -72,14 +72,13 @@ const ReferEarn = ({ setAvailableBalance_forNavBar_state }) => {
 
                 <div className="mt-6">
                     <div className="bg-blue-100 p-4 rounded mb-4">
-                        <i className="fa fa-bullhorn"></i> [17-07-2023] Referral Earnings increased by 25%
+                        <i className="fa fa-bullhorn"></i> Referral Earnings increased by {parseFloat(referralRecords_state?.other_data_referralRate?.referralRate) * 100}%
                     </div>
                 </div>
 
                 <div className="bg-white p-4 rounded shadow">
-                    <p className="text-gray-800 mb-4">
-                        The DropLink.co | Earn money on short links referral program is a great way to spread the word of this great service and earn more money with your short links! Refer friends and receive 25% of their earnings for life!
-                    </p>
+                    <div dangerouslySetInnerHTML={{ __html: referralRecords_state?.other_data_referralRate?.referralPageText }} className="text-gray-800 mb-4">
+                    </div>
                     <div className="flex items-center space-x-2">
                         <div className='overflow-auto bg-gray-100 p-2'>
                             <pre className="rounded-md text-gray-800 font-bold">{referralLink}</pre>

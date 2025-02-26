@@ -6,7 +6,7 @@ import showNotificationWith_timer from '../components/showNotificationWith_timer
 import showNotification from '../components/showNotification';
 import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate'
 
-const Profile = ({setAvailableBalance_forNavBar_state}) => {
+const Profile = ({ setAvailableBalance_forNavBar_state }) => {
     const [formData_state, setFormData_state] = useState({
         name: '',
         address: '',
@@ -16,7 +16,7 @@ const Profile = ({setAvailableBalance_forNavBar_state}) => {
         mobile_number: '',
         withdrawal_method: '',
         withdrawal_account_information: '',
-        withdrawal_methods_data: []
+        other_data_withdrawalMethodArray: []
     });
     const navigation = useNavigate();
     let [data_process_state, setData_process_state] = useState(false);
@@ -207,14 +207,14 @@ const Profile = ({setAvailableBalance_forNavBar_state}) => {
                                 required
                             >
                                 <option value="">Choose</option>
-                                {formData_state.withdrawal_methods_data?.map((method, index) => (
-                                    <option key={index} value={method.withdrawal_method}>{method.withdrawal_method}</option>
+                                {formData_state.other_data_withdrawalMethodArray?.map((method, index) => (
+                                    <option key={index} value={method.withdrawalMethod_name}>{method.withdrawalMethod_name}</option>
                                 ))}
                             </select>
                         </div>
                         <ul className='mt-3 space-y-5 sm:mb-0 mb-4' style={{ fontSize: "14px" }}>
-                            {formData_state.withdrawal_methods_data?.map((method, index) => (
-                                <li className='purple-right-list-image' key={index}> {method.description}</li>
+                            {formData_state.other_data_withdrawalMethodArray?.map((method, index) => (
+                                <li className='purple-right-list-image' key={index}> {method.withdrawalMethod_details}</li>
                             ))}
                         </ul>
                     </div>
@@ -227,10 +227,10 @@ const Profile = ({setAvailableBalance_forNavBar_state}) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {formData_state.withdrawal_methods_data?.map((method, index) => (
+                                {formData_state.other_data_withdrawalMethodArray?.map((method, index) => (
                                     <tr key={index} className="border-t">
-                                        <td className="p-2">{method.withdrawal_method}</td>
-                                        <td className="p-2">{method.minimum_amount}</td>
+                                        <td className="p-2">{method.withdrawalMethod_name}</td>
+                                        <td className="p-2">₹{method.withdrawalMethod_minimumAmount}</td>
                                     </tr>
                                 ))}
                             </tbody>

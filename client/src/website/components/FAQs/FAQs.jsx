@@ -1,45 +1,9 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { FaChevronDown } from "react-icons/fa";
+import { Faq_navBar_context } from "../context/faq_navBar_context";
 
 const FAQs = () => {
-    const faqsData = [
-        {
-            question: "What is linksfire.co?",
-            answer: `LINKSFIRE© is one of the best URL shortener websites in the world 
-            from which you can earn a lot of money very easily. LINKSFIRE© website was created in 2021 
-            by SWD Family team, It is a very popular or trusted team trusted by many users (Best, Trusted & Verified).`
-        },
-        {
-            question: "How to Work and Use LINKSFIRE©?",
-            answer: `So let's see how it works and how to use it,
-            It's just three steps to Start:
-            1️⃣ Create Your free Account  
-            2️⃣ Shorten Your Links  
-            3️⃣ Share it With Your Audience`,
-        },
-        {
-            question: "How much eCPM Provide?",
-            answer: `LINKSFIRE© provides the highest eCPM Rate for Worldwide users. 
-            If you can bring 5k clicks every day, then $15 Fixed eCPM will be given.`,
-        },
-        {
-            question: "Payment frequency?",
-            answer: `You only need to complete $2 to Get your Withdrawal. 
-            We usually pay Daily, and if there is any technical problem then we pay twice a month.`,
-        },
-        {
-            question: "How much click count per IP?",
-            answer: `We count one click per IP every 24 hours. This is to prevent self-clicking and bot traffic.`,
-        },
-        {
-            question: "Why many users choose us?",
-            answer: `We provide features that other websites don't, like:
-            - Highest eCPM
-            - No Captcha
-            - Easy Payout (only $2)
-            - 24x7 Live Support`
-        },
-    ];
+    const { faq_navBar_context_state } = useContext(Faq_navBar_context);
 
     const [openIndex, setOpenIndex] = useState(null);
 
@@ -56,14 +20,14 @@ const FAQs = () => {
 
             {/* FAQs Box */}
             <div className="mx-auto">
-                {faqsData.map((faq, index) => (
+                {faq_navBar_context_state.map((faq, index) => (
                     <div key={index} className="mb-4">
                         {/* Question Box */}
                         <button
                             className="flex justify-between items-center w-full px-5 py-4 text-lg font-semibold text-left bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-md shadow-md hover:shadow-lg transition-all duration-300"
                             onClick={() => toggleFAQ(index)}
                         >
-                            {faq.question}
+                            {faq.faqQuestioin}
                             <FaChevronDown
                                 className={`transform transition-transform duration-300 ${openIndex === index ? "rotate-180" : "rotate-0"
                                     }`}
@@ -76,7 +40,7 @@ const FAQs = () => {
                                 }`}
                         >
                             <div className="p-5 bg-white border-l-4 border-blue-600 rounded-md shadow-md">
-                                <p className="text-gray-700">{faq.answer}</p>
+                                <p className="text-gray-700">{faq.faqAnswer}</p>
                             </div>
                         </div>
                     </div>

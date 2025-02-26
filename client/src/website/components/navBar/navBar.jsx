@@ -1,16 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import SideMenu from '../sideMenu/sideMenu';
 import EarnWizLogo from '../../../assets/EarnWizLogo.png'
 import ProcessBgBlack from '../processBgBlack/processBgBlack';
 import axios from 'axios';
 import showNotificationWith_timer from '../showNotificationWith_timer';
+import { Faq_navBar_context } from "../context/faq_navBar_context";
 
 const NavBar = ({ show, availableBalance_forNavBar_state }) => {
     const [sideMenu_state, setSideMenu_state] = useState('menu-outline');
     const [toggelMenu_state, setToggelMenu_state] = useState("reorder-three");
     let [data_process_state, setData_process_state] = useState(false);
     let [isUserLogin_state, setIsUserLogin_state] = useState(false);
+    const { _, setFaq_navBar_context } = useContext(Faq_navBar_context);
 
     let toggleMenu_icon = useRef(null)
     const navigation = useNavigate();
@@ -85,18 +87,26 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
         const fetchData = async () => {
             setData_process_state(true);
             try {
-                const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/checkLogin_for_navBar`, {
-                    withCredentials: true
-                });
-                setIsUserLogin_state(response.data.success)
-                if ((location.pathname === '/login' || location.pathname === '/signup' || location.pathname.includes('/signup/ref')) && response.data.success) {
-                    showNotificationWith_timer(true, 'You Already Logged In', '/member/dashboard', navigation);
+                const url = `${import.meta.env.VITE_SERVER_URL}/checkLogin_for_navBar${location.pathname === "/" ? "?faq=true" : ""
+                    }`;
+
+                const response = await axios.get(url, { withCredentials: true });
+
+                if (location.pathname === "/") {
+                    setFaq_navBar_context(response.data.msg.other_data_faqArray);
+                }
+                setIsUserLogin_state(response.data.msg.isLogin);
+
+                if (
+                    ["/login", "/signup"].includes(location.pathname) ||
+                    location.pathname.startsWith("/signup/ref")
+                ) {
+                    if (response.data.msg.isLogin) {
+                        showNotificationWith_timer(true, "You Already Logged In", "/member/dashboard", navigation);
+                    }
                 }
             } catch (error) {
-                console.error(error);
-                if (error.response.data.jwtMiddleware_token_not_found_error || error.response.data.jwtMiddleware_user_not_found_error) {
-                    setIsUserLogin_state(false)
-                }
+                console.error("Error fetching data:", error);
             } finally {
                 setData_process_state(false);
             }
@@ -105,6 +115,7 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
         if (show) {
             fetchData();
         }
+        console.log(show);
     }, [show, location]);
 
     if (show) {

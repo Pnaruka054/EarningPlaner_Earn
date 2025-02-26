@@ -13,8 +13,9 @@ const userWithdraw = require('./routes/clientRoutes/userWIthdraw_router');
 const userIncomeRoute = require('./routes/clientRoutes/userIncome_router');
 const userMessageRoute = require('./routes/clientRoutes/userMessage_router');
 const postBack = require('./routes/postBack')
-const admin_referralRoute = require('./routes/adminRoutes/raferralRoute')
+const checkLogin_for_navBar = require('./routes/checkLogin_for_navBar')
 const { cronForDaily_MonthlyData_Update } = require('./helper/cronJobs')
+const adminRoutes = require('./routes/adminRoutes/adminRoutes')
 
 const io = socketIo(server, {
     cors: {
@@ -26,7 +27,8 @@ const io = socketIo(server, {
 const allowedOrigins = [
     'https://earningplaner-earn.onrender.com',
     'http://localhost:5173',
-    'http://192.168.1.2:5173'
+    'http://192.168.1.2:5173',
+    'http://localhost:5174'
 ];
 app.set('trust proxy', true);
 const corsOptions = {
@@ -72,7 +74,8 @@ app.use('/userWithdraw', userWithdraw);
 app.use('/userIncomeRoute', userIncomeRoute);
 app.use('/userMessageRoute', userMessageRoute);
 app.use('/postBack', postBack);
-app.use('/admin', [admin_referralRoute]);
+app.use('/checkLogin_for_navBar', checkLogin_for_navBar);
+app.use('/admin', middleware.adminCheck_middleware, adminRoutes);
 
 // Server listen
 const PORT = process.env.PORT || 3000;
