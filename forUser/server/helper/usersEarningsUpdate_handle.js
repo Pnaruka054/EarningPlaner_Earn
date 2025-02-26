@@ -3,7 +3,7 @@ const getFormattedDate = require('./getFormattedDate')
 const userSignUp_module = require('../model/userSignUp/userSignUp_module')
 const referral_records_module = require('../model/referralRecords/referral_records_module')
 const userDate_records_module = require("../model/dashboard/userDate_modules");
-const { userMonthly_records_module, saveUserMonthlyData } = require("../model/dashboard/userMonthly_modules");
+const userMonthly_records_module = require("../model/dashboard/userMonthly_modules");
 const other_data_module = require('../model/other_data/other_data_module')
 
 const userReferByIncome_handle = async (session, userData, earningAmount) => {
