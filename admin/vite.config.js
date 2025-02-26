@@ -7,4 +7,9 @@ export default defineConfig({
   server: {
     host: true,
   },
+  build: {
+    rollupOptions: {
+      external: ["sweetalert2"]
+    }
+  }
 })
