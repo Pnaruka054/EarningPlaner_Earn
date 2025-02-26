@@ -9,10 +9,7 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      external: ["sweetalert2"]
+      external: ["sweetalert2", "react-icons/fa"]
     }
-  },
-  optimizeDeps: {
-    include: ["react-icons/fa"]
   }
 })
