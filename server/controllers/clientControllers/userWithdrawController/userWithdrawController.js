@@ -1,7 +1,7 @@
-const userSignUp_module = require('../../model/userSignUp/userSignUp_module')
-const withdrawal_records_module = require('../../model/withdraw/withdrawal_records_module')
-const withdrawal_methods_module = require('../../model/withdraw/withdraw_methods_module')
-const current_time_get = require('../../helper/currentTimeUTC')
+const userSignUp_module = require('../../../model/userSignUp/userSignUp_module')
+const withdrawal_records_module = require('../../../model/withdraw/withdrawal_records_module')
+const withdrawal_methods_module = require('../../../model/withdraw/withdraw_methods_module')
+const current_time_get = require('../../../helper/currentTimeUTC')
 const mongoose = require('mongoose')
 
 const userBalanceData_get = async (req, res) => {

@@ -8,11 +8,12 @@ const app = express();
 const server = http.createServer(app);
 const cookieParser = require('cookie-parser');
 const middleware = require('./middlewares/jwt_to_userData_middleware')
-const userRouter = require('./routes/user_router');
-const userWithdraw = require('./routes/userWIthdraw_router');
-const userIncomeRoute = require('./routes/userIncome_router');
-const userMessageRoute = require('./routes/userMessage_router');
+const userRouter = require('./routes/clientRoutes/user_router');
+const userWithdraw = require('./routes/clientRoutes/userWIthdraw_router');
+const userIncomeRoute = require('./routes/clientRoutes/userIncome_router');
+const userMessageRoute = require('./routes/clientRoutes/userMessage_router');
 const postBack = require('./routes/postBack')
+const admin_referralRoute = require('./routes/adminRoutes/raferralRoute')
 const { cronForDaily_MonthlyData_Update } = require('./helper/cronJobs')
 
 const io = socketIo(server, {
@@ -71,6 +72,7 @@ app.use('/userWithdraw', userWithdraw);
 app.use('/userIncomeRoute', userIncomeRoute);
 app.use('/userMessageRoute', userMessageRoute);
 app.use('/postBack', postBack);
+app.use('/admin', [admin_referralRoute]);
 
 // Server listen
 const PORT = process.env.PORT || 3000;

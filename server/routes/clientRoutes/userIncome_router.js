@@ -1,6 +1,6 @@
 const express = require('express')
 const route = express()
-const userIncomeController = require('../controllers/userIncomeController/userIncomeController')
+const userIncomeController = require('../../controllers/clientControllers/userIncomeController/userIncomeController')
 
 route.get('/user_adsView_home_get', userIncomeController.user_adsView_home_get)
 route.get('/user_shortlink_data_get', userIncomeController.user_shortlink_data_get)

@@ -1,20 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom'
-import Watch_Video_icon from '../../../assets/WatchVideo.png'
-import Betting_games_icon from '../../../assets/BettingGames.png'
-import ShortLink_icon from '../../../assets/ShortLink.png'
-import ClickShortenLink_icon from '../../../assets/ClickShortenLink.png'
-import ClickOnAds from '../../../assets/ClickOnAds.png'
-import ViewAds from '../../../assets/ViewAds.png'
-import Quiz from '../../../assets/Quiz.png'
-import poolTrading from '../../../assets/poolTrading.png'
-import Games from '../../../assets/Games.png'
-import FillSurvey from '../../../assets/FillSurvey.png'
-import Mining from '../../../assets/Mining.png'
-import ClickToEarn from '../../../assets/ClickToEarn.png'
+import Watch_Video_icon from '../../assets/WatchVideo.png'
+import Betting_games_icon from '../../assets/BettingGames.png'
+import ClickShortenLink_icon from '../../assets/ClickShortenLink.png'
+import ViewAds from '../../assets/ViewAds.png'
+import Games from '../../assets/Games.png'
+import FillSurvey from '../../assets/FillSurvey.png'
 import Footer from '../components/footer/footer';
 import { Link } from 'react-router-dom';
-import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import axios from 'axios';
 import { FaSpinner } from "react-icons/fa";
 import showNotificationWith_timer from '../components/showNotificationWith_timer'

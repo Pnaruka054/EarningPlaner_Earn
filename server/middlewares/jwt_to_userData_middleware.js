@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const userSignUp_module = require('../model/userSignUp/userSignUp_module')
+const adminLogin = require('../controllers/adminControllers/adminLogin/adminLogin')
 
 const middleware_userLogin_check = async (req, res, next) => {
     try {
@@ -16,6 +17,21 @@ const middleware_userLogin_check = async (req, res, next) => {
             || req.originalUrl.includes('/postBack/postBackCPX')
         ) {
             return next(); // Skip middleware for this route
+        }
+
+        if (req.originalUrl === ('/admin/login')) {
+            adminLogin().then((result) => {
+                if (result) {
+                    next()
+                } else {
+                    return res.status(404).json({
+                        success: false,
+                        msg: 'you are not admin'
+                    })
+                }
+            })
+        } else if (req.originalUrl.includes('/admin')) {
+
         }
 
         // Retrieve the token from cookies (assuming it's named 'jwtToken')

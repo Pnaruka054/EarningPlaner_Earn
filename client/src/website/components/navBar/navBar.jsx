@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import SideMenu from '../sideMenu/sideMenu';
-import EarnWizLogo from '../../../../assets/EarnWizLogo.png'
+import EarnWizLogo from '../../../assets/EarnWizLogo.png'
 import ProcessBgBlack from '../processBgBlack/processBgBlack';
 import axios from 'axios';
 import showNotificationWith_timer from '../showNotificationWith_timer';

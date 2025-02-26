@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import ContactUs_gif from '../../../../assets/ContactUs.gif'
+import ContactUs_gif from '../../../assets/ContactUs.gif'
 import ProcessBgBlack from "../processBgBlack/processBgBlack";
 import Footer from "../footer/footer";
 

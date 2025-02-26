@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import Support_icon from "../../../../assets/Support.png";
+import Support_icon from "../../../assets/Support.png";
 
 const SideMenu = ({ sideMenu_show }) => {
     const location = useLocation(); // Get the current URL

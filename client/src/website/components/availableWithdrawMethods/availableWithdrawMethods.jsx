@@ -1,8 +1,8 @@
-import paytm_icon from '../../../../assets/Paytm.webp'
-import bankTransfer_icon from '../../../../assets/BankTransfer.webp'
-import upi_icon from '../../../../assets/UPI.webp'
-import phonePe_icon from '../../../../assets/PhonePe.png'
-import googlePay_icon from '../../../../assets/GooglePay.png'
+import paytm_icon from '../../../assets/Paytm.webp'
+import bankTransfer_icon from '../../../assets/BankTransfer.webp'
+import upi_icon from '../../../assets/UPI.webp'
+import phonePe_icon from '../../../assets/PhonePe.png'
+import googlePay_icon from '../../../assets/GooglePay.png'
 
 const AvailableWithdrawMethods = () => {
     

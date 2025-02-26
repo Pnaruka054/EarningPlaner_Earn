@@ -1,5 +1,5 @@
-import success_sound from '../../../assets/success_earn.mp3';
-import not_success_sound from '../../../assets/not_success_earn.mp3';
+import success_sound from '../../assets/success_earn.mp3';
+import not_success_sound from '../../assets/not_success_earn.mp3';
 
 // Preload audio files for instant playback
 const successAudio = new Audio(success_sound);

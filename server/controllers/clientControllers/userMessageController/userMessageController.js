@@ -1,5 +1,5 @@
-const userMail_message_module = require('../../model/userMessage/userMail_message_module')
-const googleSheetsDataAdd = require('../../helper/googleSheetsDataAdd')
+const userMail_message_module = require('../../../model/userMessage/userMail_message_module')
+const googleSheetsDataAdd = require('../../../helper/googleSheetsDataAdd')
 
 const userMessageSave_post = async (req, res) => {
     try {

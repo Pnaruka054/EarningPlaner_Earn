@@ -1,7 +1,7 @@
 const express = require('express')
 const route = express()
-const userController = require('../controllers/userController/userController')
-const validator = require('../helper/validator')
+const userController = require('../../controllers/clientControllers/userController/userController')
+const validator = require('../../helper/validator')
 
 route.get('/userDataGet_dashboard', userController.userDataGet_dashboard)
 route.get('/userReferral_record_get', userController.userReferral_record_get)

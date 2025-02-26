@@ -1,16 +1,16 @@
 const mongoose = require('mongoose');
-const ipAddress_records_module = require('../../model/IPAddress/useripAddresses_records_module');
-const userDate_records_module = require("../../model/dashboard/userDate_modules");
-const idTimer_records_module = require('../../model/id_timer/id_timer_records_module')
-const getFormattedDate = require('../../helper/getFormattedDate')
-const shortedLinksData_module = require('../../model/shortLinks/shortedLinksData_module')
-const generateRandomString = require("../../helper/generateRandomString")
+const ipAddress_records_module = require('../../../model/IPAddress/useripAddresses_records_module');
+const userDate_records_module = require("../../../model/dashboard/userDate_modules");
+const idTimer_records_module = require('../../../model/id_timer/id_timer_records_module')
+const getFormattedDate = require('../../../helper/getFormattedDate')
+const shortedLinksData_module = require('../../../model/shortLinks/shortedLinksData_module')
+const generateRandomString = require("../../../helper/generateRandomString")
 const axios = require('axios')
-const viewAds_directLinksData_module = require("../../model/view_ads_direct_links/viewAds_directLinksData_module");
-const { userReferByIncome_handle, userIncome_handle } = require('../../helper/usersEarningsUpdate_handle')
-const userID_data_for_survey_module = require('../../model/userID_data_for_survey/userID_data_for_survey_module')
-const other_data_module = require('../../model/other_data/other_data_module')
-const earningCalculator = require('../../helper/earningCalculator')
+const viewAds_directLinksData_module = require("../../../model/view_ads_direct_links/viewAds_directLinksData_module");
+const { userReferByIncome_handle, userIncome_handle } = require('../../../helper/usersEarningsUpdate_handle')
+const userID_data_for_survey_module = require('../../../model/userID_data_for_survey/userID_data_for_survey_module')
+const other_data_module = require('../../../model/other_data/other_data_module')
+const earningCalculator = require('../../../helper/earningCalculator')
 
 // for view ads page get data
 const user_adsView_home_get = async (req, res) => {

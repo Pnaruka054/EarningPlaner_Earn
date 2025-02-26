@@ -1,5 +1,5 @@
 import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
-import EarnWiz from '../../../../assets/EarnWizLogo.png'
+import EarnWiz from '../../../assets/EarnWizLogo.png'
 import { Link, useNavigate } from "react-router-dom";
 
 
