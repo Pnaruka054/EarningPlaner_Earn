@@ -908,7 +908,7 @@ const Dashboard = () => {
                             onChange={(e) => setNewWithdrawalMethod_state({ ...newWithdrawalMethod_state, withdrawalMethod_name: e.target.value })}
                         />
                         <input
-                            type="number"
+                            type="text"
                             placeholder="Minimum Amount"
                             className="border p-2 rounded w-full mb-2"
                             value={newWithdrawalMethod_state.withdrawalMethod_minimumAmount}
@@ -944,7 +944,7 @@ const Dashboard = () => {
                                             onChange={(e) => setEdited_withdrawalMethod_state({ ...edited_withdrawalMethod_state, withdrawalMethod_name: e.target.value })}
                                         />
                                         <input
-                                            type="number"
+                                            type="text"
                                             className="border p-2 rounded w-full mb-2"
                                             value={edited_withdrawalMethod_state.withdrawalMethod_minimumAmount}
                                             onChange={(e) => setEdited_withdrawalMethod_state({ ...edited_withdrawalMethod_state, withdrawalMethod_minimumAmount: e.target.value })}
