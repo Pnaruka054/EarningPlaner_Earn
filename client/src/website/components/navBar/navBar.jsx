@@ -115,7 +115,6 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
         if (show) {
             fetchData();
         }
-        console.log(show);
     }, [show, location]);
 
     if (show) {
