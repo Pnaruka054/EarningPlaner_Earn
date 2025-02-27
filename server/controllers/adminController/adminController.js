@@ -385,7 +385,7 @@ const post_withdrawalMethod_data = async (req, res) => {
                 error_msg: "Invalid data received."
             });
         }
-        const is_already_withdrawalMethod = await other_data_module.findOne({ documentName: "withdrawalMethod", withdrawalMethod_name }) || [];
+        const is_already_withdrawalMethod = await other_data_module.findOne({ documentName: "withdrawalMethod", withdrawalMethod_name });
         if (is_already_withdrawalMethod) {
             return res.status(409).json({
                 success: false,
