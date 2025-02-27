@@ -41,11 +41,14 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
             const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userBalanceData_get`, {
                 withCredentials: true
             });
-            setBalanceData_state((prev) => ({
-                ...prev,
-                ...response.data.msg,
-                available_amount: (parseFloat(response.data.msg.withdrawable_amount || 0) + parseFloat(response.data.msg.deposit_amount || 0)).toFixed(3)  // Calculate and update available_amount
-            }));
+            if (response?.data?.msg) {
+                setBalanceData_state(prev => ({
+                    ...prev,
+                    ...response.data.msg,
+                    available_amount: (parseFloat(response.data.msg.withdrawable_amount || 0) + parseFloat(response.data.msg.deposit_amount || 0)).toFixed(3)
+                }));
+            }
+
             setAvailableBalance_forNavBar_state((parseFloat(response.data.msg.withdrawable_amount || 0) + parseFloat(response.data.msg.deposit_amount || 0)).toFixed(3))
         } catch (error) {
             console.error(error);
@@ -240,13 +243,12 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
         }
 
         // Check if withdrawal amount is above the minimum
-        const selectedMethod = balanceData_state.other_data_withdrawalMethodArray.find((value) => value.withdrawal_method === balanceData_state.withdrawal_method);
-        if (parseFloat(withdraw_amount_state) < parseFloat(selectedMethod.minimum_amount)) {
+        if (parseFloat(withdraw_amount_state) < parseFloat(balanceData_state.minimum_amount)) {
             return Swal.fire({
                 icon: 'warning',
                 title: 'Invalid Amount',
                 timerProgressBar: 5000,
-                text: `The minimum withdrawal amount for ${selectedMethod.withdrawal_method} is ₹${selectedMethod.minimum_amount}. Please enter a valid amount.`
+                text: `The minimum withdrawal amount for ${balanceData_state.withdrawal_method} is ₹${balanceData_state.minimum_amount}. Please enter a valid amount.`
             });
         }
 

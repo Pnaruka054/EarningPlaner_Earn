@@ -27,8 +27,11 @@ const userBalanceData_get = async (req, res) => {
             withdrawal_account_information: user_DB_Data.withdrawal_account_information,
             withdrawal_method: user_DB_Data.withdrawal_method,
             withdrawal_Records: user_DB_Withdrawal_Data,
-            other_data_withdrawalMethodArray
-        }
+            other_data_withdrawalMethodArray,
+            minimum_amount: other_data_withdrawalMethodArray.find(
+                (value) => value.withdrawalMethod_name === user_DB_Data.withdrawal_method
+            )?.withdrawalMethod_minimumAmount || 0  // Agar match nahi mile to default 0 rakho
+        };        
 
         return res.status(200).json({
             success: true,
