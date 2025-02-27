@@ -26,6 +26,7 @@ const io = socketIo(server, {
 });
 const allowedOrigins = [
     'https://earningplaner-earn.onrender.com',
+    'https://earningplaner-earn-admin.onrender.com',
     'http://localhost:5173',
     'http://192.168.1.2:5173',
     'http://localhost:5174'
