@@ -27,7 +27,7 @@ route.get('/postBackCPX', async (req, res) => {
             const refer_by_incomeupdate = await userReferByIncome_handle(session, userData, amount_local);
             if (!refer_by_incomeupdate.success) throw new Error(refer_by_incomeupdate.error);
 
-            const { userMonthlyRecord } = user_incomeUpdate.values;
+            const { userMonthlyRecord, dateRecords } = user_incomeUpdate.values;
             if (userMonthlyRecord) {
                 userMonthlyRecord.earningSources ||= {};
                 userMonthlyRecord.earningSources.fill_survey ||= { income: 0 };
@@ -37,9 +37,12 @@ route.get('/postBackCPX', async (req, res) => {
                 ).toFixed(3);
             }
 
+            dateRecords.earningSources.fill_survey.income = (parseFloat(dateRecords.earningSources.fill_survey.income || 0) + parseFloat(amount_local)).toFixed(3);
+
             await Promise.all([
                 userMonthlyRecord?.save({ session }),
-                userData.save({ session })
+                userData.save({ session }),
+                dateRecords.save({ session })
             ]);
 
             await session.commitTransaction();

@@ -69,6 +69,7 @@ const user_adsView_home_get = async (req, res) => {
             userAvailableBalance: (parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)).toFixed(3),
             buttonNames: ipAddress_recordData.buttonNames || [],
             viewAds_directLinksData,
+            other_data_viewAds_instructions: other_data_viewAds.viewAds_instructions
         };
 
         let idTimer_recordsData = await idTimer_records_module.findOne({
@@ -313,6 +314,7 @@ const user_shortlink_data_get = async (req, res) => {
             completedClick,
             pendingEarnings: (userWillEarn - today_shortLinkIncome).toFixed(3),
             totalLinks: shortedLinksData.length - ipAddressRecords.filter(values => values.processCount === 1 && values.status === true).length,
+            other_data_shortLink_instructions: other_data_shortLink.shortLink_instructions
         };
 
         // Find timer record with session

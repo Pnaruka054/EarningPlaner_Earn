@@ -91,7 +91,7 @@ const adminCheck_middleware = async (req, res, next) => {
         if (!token) {
             return res.status(401).json({
                 success: false,
-                error_msg: 'Authorization token missing'
+                adminJWT_error_msg: 'Authorization token missing'
             });
         }
 
@@ -107,7 +107,7 @@ const adminCheck_middleware = async (req, res, next) => {
             });
             return res.status(403).json({
                 success: false,
-                error_msg: 'Invalid or expired token. Please log in again.'
+                adminJWT_error_msg: 'Invalid or expired token. Please log in again.'
             });
         }
 
@@ -121,7 +121,7 @@ const adminCheck_middleware = async (req, res, next) => {
             });
             return res.status(404).json({
                 success: false,
-                error_msg: 'User not found. Please log in again.'
+                adminJWT_error_msg: 'User not found. Please log in again.'
             });
         }
 
@@ -134,7 +134,7 @@ const adminCheck_middleware = async (req, res, next) => {
             });
             return res.status(403).json({
                 success: false,
-                error_msg: 'Password changed. Please log in again.'
+                adminJWT_error_msg: 'Password changed. Please log in again.'
             });
         }
 
@@ -147,7 +147,7 @@ const adminCheck_middleware = async (req, res, next) => {
             });
             return res.status(403).json({
                 success: false,
-                error_msg: 'Username updated. Please log in again.'
+                adminJWT_error_msg: 'Username updated. Please log in again.'
             });
         }
 

@@ -26,7 +26,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
         withdrawal_method: '',
         withdrawal_account_information: '',
         withdrawal_Records: [],
-        withdrawal_methodsData: []
+        other_data_withdrawalMethodArray: []
     });
     const handleCopy = (e) => {
         const textToCopy = e.currentTarget.parentElement.children[0].innerText;
@@ -240,7 +240,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
         }
 
         // Check if withdrawal amount is above the minimum
-        const selectedMethod = balanceData_state.withdrawal_methodsData.find((value) => value.withdrawal_method === balanceData_state.withdrawal_method);
+        const selectedMethod = balanceData_state.other_data_withdrawalMethodArray.find((value) => value.withdrawal_method === balanceData_state.withdrawal_method);
         if (parseFloat(withdraw_amount_state) < parseFloat(selectedMethod.minimum_amount)) {
             return Swal.fire({
                 icon: 'warning',

@@ -187,15 +187,13 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                     </div>
                     <div className="p-4 space-y-4 max-h-[600px] overflow-auto hidden-scrollbar">
                         {userData_state?.other_data_announcementsArray?.map((item) => (
-                            <div key={item.id} className="flex justify-between items-start space-y-2 border-b pb-2">
-                                {/* Announcement Message */}
-                                <div dangerouslySetInnerHTML={{ __html: item?.announcementMessage }} className="flex-1" />
-
-                                {/* Announcement Time */}
-                                <span className="text-gray-500 text-sm whitespace-nowrap">{item.announcementTime}</span>
+                            <div key={item.id} className='border-b pb-2'>
+                                <spa className="text-gray-500 text-sm whitespace-nowrap mb-15">
+                                    {item.announcementTime}
+                                </spa>
+                                <div dangerouslySetInnerHTML={{ __html: item?.announcementMessage }} />
                             </div>
                         ))}
-
                     </div>
                 </div>
                 <div className='flex justify-center mt-3'>

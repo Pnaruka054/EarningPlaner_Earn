@@ -5,7 +5,7 @@ const viewAds_directLinksData_schema = new mongoose.Schema({
     buttonTitle: { type: String, require: true },
     amount: { type: String, require: true },
     url: { type: String, require: true },
-    isExtension: { type: String },
+    isExtension: { type: Boolean },
 })
 
 const viewAds_directLinksData_module = mongoose.model("viewAds_directLinksData_record", viewAds_directLinksData_schema)

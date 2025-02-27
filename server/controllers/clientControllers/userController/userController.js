@@ -9,7 +9,6 @@ const userSignUp_module = require('../../../model/userSignUp/userSignUp_module')
 const referral_records_module = require('../../../model/referralRecords/referral_records_module')
 const userMonthly_records_module = require("../../../model/dashboard/userMonthly_modules");
 const userDate_records_module = require("../../../model/dashboard/userDate_modules");
-const withdrawal_methods_module = require('../../../model/withdraw/withdraw_methods_module')
 const current_time_get = require('../../../helper/currentTimeUTC')
 const getFormattedMonth = require("../../../helper/getFormattedMonth")
 const userUniqueTokenData_module = require('../../../model/userUniqueTokenData_10minEx/userUniqueTokenData_module')

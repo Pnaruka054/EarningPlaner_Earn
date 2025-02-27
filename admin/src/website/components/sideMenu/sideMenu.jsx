@@ -1,10 +1,57 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X, LayoutDashboard, PlayCircle, Link as LinkIcon, FileText, DollarSign, LogOut, ShieldCheck, FileWarning, FileLock } from "lucide-react";
 import EarnWizLogo from '../../../assets/EarnWizLogo.png';
+import { useNavigate } from 'react-router-dom'
+import Swal from 'sweetalert2';
+import axios from 'axios'; 
+import ProcessBgBlack from "../processBgBlack/processBgBlack";
+import showNotification from "../showNotification";
 
 const SideMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
+  let [data_process_state, setData_process_state] = useState(false);
+  const navigation = useNavigate();
+
+  const logOut = async () => {
+    try {
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "Do you really want to log out?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, Logout!",
+      });
+
+      if (!result.isConfirmed) return;
+
+      setData_process_state(true);
+
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/admin/adminLogout`,
+        { withCredentials: true }
+      );
+
+      if (response?.data?.msg) {
+        showNotification(false, response.data.msg);
+        navigation('/admin')
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      if (error.response?.data?.error_msg) {
+        showNotification(true, error.response.data.error_msg);
+      } else if (error.response?.data?.adminJWT_error_msg) {
+        showNotification(true, error.response.data.adminJWT_error_msg);
+        navigation('/admin')
+      } else {
+        showNotification(true, "Something went wrong, please try again.");
+      }
+    } finally {
+      setData_process_state(false);
+    }
+  };
 
   return (
     <div className="flex">
@@ -34,7 +81,7 @@ const SideMenu = () => {
           <NavItem to="/admin/withdrawals" icon={<DollarSign />} label="Withdrawals" />
 
           {/* Logout Button */}
-          <button className="sidebar-item text-red-400 hover:bg-red-500/20 hover:text-red-300 mt-10 transition duration-200 px-4 py-2 rounded-md flex items-center w-full">
+          <button onClick={logOut} className="sidebar-item text-red-400 hover:bg-red-500/20 hover:text-red-300 mt-10 transition duration-200 px-4 py-2 rounded-md flex items-center w-full">
             <LogOut className="mr-2" /> Logout
           </button>
         </nav>
@@ -62,6 +109,7 @@ const SideMenu = () => {
           <div className="flex-1 flex justify-center md:justify-center sm:justify-end">
             <img src={EarnWizLogo} alt="Website Logo" className="h-10 w-auto" />
           </div>
+          {data_process_state && <ProcessBgBlack />}
         </div>
       </div>
     </div>
@@ -69,13 +117,19 @@ const SideMenu = () => {
 };
 
 /* Reusable NavItem Component */
-const NavItem = ({ to, icon, label }) => (
-  <Link
-    to={to}
-    className="flex items-center text-gray-300 hover:text-white hover:bg-blue-500/20 transition duration-200 px-4 py-2 rounded-md"
-  >
-    <span className="mr-3 text-blue-400">{icon}</span> {label}
-  </Link>
-);
+const NavItem = ({ to, icon, label }) => {
+  const location = useLocation(); // Get current route
+  const isActive = location.pathname === to; // Check if route is active
+
+  return (
+    <Link
+      to={to}
+      className={`flex items-center px-4 py-2 rounded-md transition duration-200 ${isActive ? "bg-blue-500 text-white" : "text-gray-300 hover:text-white hover:bg-blue-500/20"
+        }`}
+    >
+      <span className={`mr-3 ${isActive ? "text-white" : "text-blue-400"}`}>{icon}</span> {label}
+    </Link>
+  );
+};
 
 export default SideMenu;

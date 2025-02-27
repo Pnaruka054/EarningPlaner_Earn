@@ -1,8 +1,8 @@
 const userSignUp_module = require('../../../model/userSignUp/userSignUp_module')
 const withdrawal_records_module = require('../../../model/withdraw/withdrawal_records_module')
-const withdrawal_methods_module = require('../../../model/withdraw/withdraw_methods_module')
 const current_time_get = require('../../../helper/currentTimeUTC')
 const mongoose = require('mongoose')
+const other_data_module = require('../../../model/other_data/other_data_module')
 
 const userBalanceData_get = async (req, res) => {
     try {
@@ -10,7 +10,8 @@ const userBalanceData_get = async (req, res) => {
 
         const user_DB_Data = await userSignUp_module.findById(userData._id);
         const user_DB_Withdrawal_Data = await withdrawal_records_module.find({ userDB_id: userData._id });
-        const withdrawal_methodsData = await withdrawal_methods_module.find();
+        const other_data_withdrawalMethodArray = await other_data_module.find({ documentName: "withdrawalMethod" }) || [];
+
         if (!user_DB_Data || !user_DB_Withdrawal_Data) {
             return res.status(404).json({
                 success: false,
@@ -26,7 +27,7 @@ const userBalanceData_get = async (req, res) => {
             withdrawal_account_information: user_DB_Data.withdrawal_account_information,
             withdrawal_method: user_DB_Data.withdrawal_method,
             withdrawal_Records: user_DB_Withdrawal_Data,
-            withdrawal_methodsData
+            other_data_withdrawalMethodArray
         }
 
         return res.status(200).json({

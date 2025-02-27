@@ -1,102 +1,54 @@
 import React, { useEffect, useState } from "react";
 import SideMenu from "../components/sideMenu/sideMenu";
 import axios from 'axios'
-import ProcessBgBlack from "../../../../client/src/website/components/processBgBlack/processBgBlack";
-import showNotification from "../../../../client/src/website/components/showNotification";
+import ProcessBgBlack from "../components/processBgBlack/processBgBlack";
+import showNotification from "../components/showNotification";
 import Swal from "sweetalert2";
 import { useNavigate } from 'react-router-dom'
 
 const Dashboard = () => {
-    const [referralRate_state, setReferralRate_state] = useState(10);
-    const [referralMessage_state, setReferralMessage_state] = useState('');
-    const [announcements_state, setAnnouncements_state] = useState([{
-        announcementTitle: '',
-        announcementMessage: '',
-        announcementTime: ''
-    }]);
-    const [newAnnouncement_state, setNewAnnouncement_state] = useState({
-        announcementTitle: "",
-        announcementMessage: "",
-    });
-    const [editingId_announcement_state, setEditingId_announcement_state] = useState(null);
-    const [edited_announcement_state, setEdited_announcement_state] = useState({
-        announcementTitle: "",
-        announcementMessage: "",
-    });
-    const [faqs_state, setFaqs_state] = useState([
-        {
-            faqQuestioin: "",
-            faqAnswer: ""
-        }
-    ]);
-    const [newFaq_state, setNewFaq_state] = useState({
-        faqQuestioin: "",
-        faqAnswer: ""
-    });
-    const [editingId_faq_state, setEditingId_faq_state] = useState(null);
-    const [edited_faq_state, setEdited_faq_state] = useState({
-        faqQuestioin: "",
-        faqAnswer: ""
-    });
-    const [withdrawalMethods_state, setWithdrawalMethods_state] = useState([
-        {
-            withdrawalMethod_name: "",
-            withdrawalMethod_minimumAmount: "",
-            withdrawalMethod_details: ""
-        }
-    ]);
     let [data_process_state, setData_process_state] = useState(false);
-
-    const [newWithdrawalMethod_state, setNewWithdrawalMethod_state] = useState({
-        withdrawalMethod_name: "",
-        withdrawalMethod_minimumAmount: "",
-        withdrawalMethod_details: ""
-    });
-
-    const [editingId_withdrawalMethod_state, setEditingId_withdrawalMethod_state] = useState(null);
-    const [edited_withdrawalMethod_state, setEdited_withdrawalMethod_state] = useState({
-        withdrawalMethod_name: "",
-        withdrawalMethod_minimumAmount: "",
-        withdrawalMethod_details: ""
-    });
-
     const navigation = useNavigate();
 
-    const fetchData = async () => {
-        try {
-            setData_process_state(true);
-
-            const response = await axios.get(
-                `${import.meta.env.VITE_SERVER_URL}/admin/getDashboardData`,
-                { withCredentials: true }
-            );
-
-            if (response?.data?.msg) {
-                const { referralData, announcementData, faqData, withdrawalMethodData } = response.data.msg;
-
-                setReferralMessage_state(referralData?.referral_page_text || "");
-                setReferralRate_state(parseFloat(referralData?.referral_rate || 0) * 100);
-                setAnnouncements_state(announcementData.reverse() || []);
-                setFaqs_state(faqData.reverse() || []);
-                setWithdrawalMethods_state(withdrawalMethodData.reverse() || []);
-            }
-        } catch (error) {
-            console.error("Error fetching dashboard data:", error);
-            if (error.response.data.error_msg) {
-                showNotification(true, error.response.data.error_msg);
-                navigation('/admin')
-            } else {
-                showNotification(true, "Something went wrong, please try again.");
-            }
-        } finally {
-            setData_process_state(false);
-        }
-    };
-
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setData_process_state(true);
+    
+                const response = await axios.get(
+                    `${import.meta.env.VITE_SERVER_URL}/admin/getDashboardData`,
+                    { withCredentials: true }
+                );
+    
+                if (response?.data?.msg) {
+                    const { referralData, announcementData, faqData, withdrawalMethodData } = response.data.msg;
+    
+                    setReferralMessage_state(referralData?.referral_page_text || "");
+                    setReferralRate_state(parseFloat(referralData?.referral_rate || 0) * 100);
+                    setAnnouncements_state(announcementData.reverse() || []);
+                    setFaqs_state(faqData.reverse() || []);
+                    setWithdrawalMethods_state(withdrawalMethodData.reverse() || []);
+                }
+            } catch (error) {
+                console.error("Error fetching dashboard data:", error);
+                if (error.response.data.error_msg) {
+                    showNotification(true, error.response.data.error_msg);
+                } else if (error.response.data.adminJWT_error_msg) {
+                    showNotification(true, error.response.data.adminJWT_error_msg);
+                    navigation('/admin')
+                } else {
+                    showNotification(true, "Something went wrong, please try again.");
+                }
+            } finally {
+                setData_process_state(false);
+            }
+        };
         fetchData()
     }, []);
 
+    // handle referrals
+    const [referralRate_state, setReferralRate_state] = useState(10);
+    const [referralMessage_state, setReferralMessage_state] = useState('');
 
     const referral_database_patch = async (data, btnName) => {
         try {
@@ -118,6 +70,8 @@ const Dashboard = () => {
             console.error("Error fetching dashboard data:", error);
             if (error.response.data.error_msg) {
                 showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
                 navigation('/admin')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
@@ -143,6 +97,23 @@ const Dashboard = () => {
             }
         });
     }
+
+
+    // handle announcements
+    const [announcements_state, setAnnouncements_state] = useState([{
+        announcementTitle: '',
+        announcementMessage: '',
+        announcementTime: ''
+    }]);
+    const [newAnnouncement_state, setNewAnnouncement_state] = useState({
+        announcementTitle: "",
+        announcementMessage: "",
+    });
+    const [editingId_announcement_state, setEditingId_announcement_state] = useState(null);
+    const [edited_announcement_state, setEdited_announcement_state] = useState({
+        announcementTitle: "",
+        announcementMessage: "",
+    });
 
     const announcement_database_post = async (newAnnouncement_data) => {
         try {
@@ -174,6 +145,8 @@ const Dashboard = () => {
             console.error("Error fetching dashboard data:", error);
             if (error.response.data.error_msg) {
                 showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
                 navigation('/admin')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
@@ -219,6 +192,8 @@ const Dashboard = () => {
             console.error("Error deleting announcement:", error);
             if (error.response.data.error_msg) {
                 showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
                 navigation('/admin')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
@@ -284,6 +259,8 @@ const Dashboard = () => {
             console.error("Error updating announcement:", error);
             if (error.response.data.error_msg) {
                 showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
                 navigation('/admin')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
@@ -310,6 +287,23 @@ const Dashboard = () => {
         });
     };
 
+
+    // handle FAQ
+    const [faqs_state, setFaqs_state] = useState([
+        {
+            faqQuestioin: "",
+            faqAnswer: ""
+        }
+    ]);
+    const [newFaq_state, setNewFaq_state] = useState({
+        faqQuestioin: "",
+        faqAnswer: ""
+    });
+    const [editingId_faq_state, setEditingId_faq_state] = useState(null);
+    const [edited_faq_state, setEdited_faq_state] = useState({
+        faqQuestioin: "",
+        faqAnswer: ""
+    });
     const faq_database_post = async (newFaq_data) => {
         try {
             setData_process_state(true);
@@ -339,6 +333,8 @@ const Dashboard = () => {
             console.error("Error adding FAQ:", error);
             if (error.response.data.error_msg) {
                 showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
                 navigation('/admin')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
@@ -384,6 +380,8 @@ const Dashboard = () => {
             console.error("Error deleting FAQ:", error);
             if (error.response.data.error_msg) {
                 showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
                 navigation('/admin')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
@@ -447,6 +445,8 @@ const Dashboard = () => {
             console.error("Error updating FAQ:", error);
             if (error.response.data.error_msg) {
                 showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
                 navigation('/admin')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
@@ -497,6 +497,8 @@ const Dashboard = () => {
             console.error("Error adding withdrawal method:", error);
             if (error.response.data.error_msg) {
                 showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
                 navigation('/admin')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
@@ -505,6 +507,29 @@ const Dashboard = () => {
             setData_process_state(false);
         }
     };
+
+
+    // handle Withdrawal Method
+    const [withdrawalMethods_state, setWithdrawalMethods_state] = useState([
+        {
+            withdrawalMethod_name: "",
+            withdrawalMethod_minimumAmount: "",
+            withdrawalMethod_details: ""
+        }
+    ]);
+
+    const [newWithdrawalMethod_state, setNewWithdrawalMethod_state] = useState({
+        withdrawalMethod_name: "",
+        withdrawalMethod_minimumAmount: "",
+        withdrawalMethod_details: ""
+    });
+
+    const [editingId_withdrawalMethod_state, setEditingId_withdrawalMethod_state] = useState(null);
+    const [edited_withdrawalMethod_state, setEdited_withdrawalMethod_state] = useState({
+        withdrawalMethod_name: "",
+        withdrawalMethod_minimumAmount: "",
+        withdrawalMethod_details: ""
+    });
 
     const addWithdrawalMethod = () => {
         if (newWithdrawalMethod_state.withdrawalMethod_name && newWithdrawalMethod_state.withdrawalMethod_minimumAmount && newWithdrawalMethod_state.withdrawalMethod_details) {
@@ -542,6 +567,8 @@ const Dashboard = () => {
             console.error("Error deleting withdrawal method:", error);
             if (error.response.data.error_msg) {
                 showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
                 navigation('/admin')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
@@ -601,6 +628,8 @@ const Dashboard = () => {
             console.error("Error updating withdrawal method:", error);
             if (error.response.data.error_msg) {
                 showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
                 navigation('/admin')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
@@ -629,6 +658,13 @@ const Dashboard = () => {
             });
         }
     };
+
+
+    // handle textarea resize
+    const handleResize = (event) => {
+        event.target.style.height = "auto"; // Reset height
+        event.target.style.height = event.target.scrollHeight + "px"; // Set new height
+    };    
 
     return (
         <div>
@@ -687,6 +723,8 @@ const Dashboard = () => {
                             placeholder="Details (use new line for multiple points)"
                             className="border p-2 rounded w-full mb-2"
                             rows="4"
+                            onInput={handleResize}
+                            style={{ overflow: "hidden" }}
                             value={newAnnouncement_state.announcementMessage}
                             onChange={(e) => setNewAnnouncement_state({ ...newAnnouncement_state, announcementMessage: e.target.value })}
                         />
@@ -717,6 +755,8 @@ const Dashboard = () => {
                                             className="border p-2 rounded w-full mb-2"
                                             rows="4"
                                             value={edited_announcement_state.announcementMessage}
+                                            onInput={handleResize}
+                                            style={{ overflow: "hidden" }}
                                             onChange={(e) => setEdited_announcement_state(prevState => ({
                                                 ...prevState,
                                                 announcementMessage: e.target.value
@@ -781,6 +821,8 @@ const Dashboard = () => {
                             className="border p-2 rounded w-full mb-2"
                             rows="4"
                             value={newFaq_state.faqAnswer}
+                            onInput={handleResize}
+                            style={{ overflow: "hidden" }}
                             onChange={(e) => setNewFaq_state({ ...newFaq_state, faqAnswer: e.target.value })}
                         />
                         <button
@@ -807,6 +849,8 @@ const Dashboard = () => {
                                             className="border p-2 rounded w-full mb-2"
                                             rows="4"
                                             value={edited_faq_state.faqAnswer}
+                                            onInput={handleResize}
+                                            style={{ overflow: "hidden" }}
                                             onChange={(e) => setEdited_faq_state({ ...edited_faq_state, faqAnswer: e.target.value })}
                                         />
                                         <div className="flex gap-4">
@@ -874,6 +918,8 @@ const Dashboard = () => {
                             placeholder="Description"
                             className="border p-2 rounded w-full mb-2"
                             rows="3"
+                            onInput={handleResize}
+                            style={{ overflow: "hidden" }}
                             value={newWithdrawalMethod_state.withdrawalMethod_details}
                             onChange={(e) => setNewWithdrawalMethod_state({ ...newWithdrawalMethod_state, withdrawalMethod_details: e.target.value })}
                         />
@@ -906,6 +952,8 @@ const Dashboard = () => {
                                         <textarea
                                             className="border p-2 rounded w-full mb-2"
                                             rows="3"
+                                            onInput={handleResize}
+                                            style={{ overflow: "hidden" }}
                                             value={edited_withdrawalMethod_state.withdrawalMethod_details}
                                             onChange={(e) => setEdited_withdrawalMethod_state({ ...edited_withdrawalMethod_state, withdrawalMethod_details: e.target.value })}
                                         />
@@ -917,8 +965,10 @@ const Dashboard = () => {
                                         <p className="font-semibold">{item.withdrawalMethod_name}</p>
                                         <p>Minimum Amount: {item.withdrawalMethod_minimumAmount}</p>
                                         <p>{item.withdrawalMethod_details}</p>
-                                        <button className="bg-yellow-500 text-white px-4 py-2 rounded" onClick={() => startEditing_widthdrawal(item)}>Edit</button>
-                                        <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => deleteWithdrawalMethod(item._id)}>Delete</button>
+                                        <div className="flex gap-4">
+                                            <button className="bg-yellow-500 text-white px-4 py-2 rounded" onClick={() => startEditing_widthdrawal(item)}>Edit</button>
+                                            <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => deleteWithdrawalMethod(item._id)}>Delete</button>
+                                        </div>
                                     </>
                                 )}
                             </div>

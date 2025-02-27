@@ -83,20 +83,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         };
     }, []);
 
-    let Instructions = [
-        'Each user gets 5 Ads clicks to earn money per IP address.',
-        'Clicking All Ads allows users to earn money.',
-        'Once the 5 link clicks limit is reached, users cannot click more links with the same IP.',
-        'To reset the balance and earn again, users must change their IP address.',
-        'After changing the IP, users get 5 new Ads to click.',
-        'This process can be repeated multiple times for more earnings.',
-        'Users can change their IP address 50 times per day.',
-        'Users can maximize their income by clicking Ads and changing IPs carefully.',
-        'The cycle resets every day to allow users to earn again.',
-        'As more users join the platform, the limits on ad clicks and IP changes will gradually increase, allowing users to earn even more as the platform grows.',
-        'Please do not attempt to cheat or hack the website, as this could lead to your account_state being permanently banned. We are working hard to increase your income opportunities, so please follow the rules and earn money fairly. Any attempts to exploit scripts or find income tricks will result in both you and us being unable to earn. Follow the guidelines to maximize your earnings.'
-    ];
-
     const handle_link_click = (link, btnName, amount) => {
         setHandle_clickAds_btnClick_state(true);
         channel.postMessage("handle_clickAds_btnClick_state_true");
@@ -599,7 +585,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     <hr className='mt-2 border' />
                     <ul className='mt-4 font-medium text-gray-500 drop-shadow-sm'>
                         {
-                            Instructions.map((value, index) => <li key={index}><i className="fa-solid fa-hand-point-right fa-fade text-red-600"></i> {value}</li>)
+                            viewAds_firstTimeLoad_state?.other_data_viewAds_instructions?.map((value, index) => <li key={index}><i className="fa-solid fa-hand-point-right fa-fade text-red-600"></i> {value}</li>)
                         }
                     </ul>
                 </div>

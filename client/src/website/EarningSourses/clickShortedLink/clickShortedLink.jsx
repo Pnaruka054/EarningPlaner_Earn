@@ -12,7 +12,7 @@ import CountdownTimer from "../../components/countDownTimer/countDownTimer";
 const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
     const [data_process_state, setData_process_state] = useState(false);
     const [shortLinks, setShortLinks] = useState([]);
-    const [viewAds_firstTimeLoad_state, setViewAds_firstTimeLoad_state] = useState([]);
+    const [shortLink_firstTimeLoad_state, setShortLink_firstTimeLoad_state] = useState([]);
     const [filter_state, setFilter_state] = useState("all")
     const navigation = useNavigate();
     const [isChecked_state, setIsChecked_state] = useState(true);
@@ -27,7 +27,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                 );
                 setAvailableBalance_forNavBar_state(response.data.msg.userAvailableBalance);
                 setShortLinks(response.data.msg.shortedLinksData);
-                setViewAds_firstTimeLoad_state(response.data.msg)
+                setShortLink_firstTimeLoad_state(response.data.msg)
             } catch (error) {
                 console.log(error);
                 if (
@@ -58,7 +58,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                 { withCredentials: true }
             );
 
-            setViewAds_firstTimeLoad_state((prev) => ({
+            setShortLink_firstTimeLoad_state((prev) => ({
                 ...prev,
                 pendingEarnings: (parseFloat(prev.pendingEarnings || 0) - parseFloat(obj.amount || 0)).toFixed(3),
                 today_shortLinkIncome: (parseFloat(prev.today_shortLinkIncome || 0) + parseFloat(obj.amount || 0)).toFixed(3),
@@ -182,33 +182,33 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4 text-gray-700">
                             <div className="bg-gray-100 p-3 rounded-lg">
                                 <div className="font-semibold">Pending Earnings:</div>
-                                <div className="text-red-500 font-bold ml-2">₹{viewAds_firstTimeLoad_state.pendingEarnings}</div>
+                                <div className="text-red-500 font-bold ml-2">₹{shortLink_firstTimeLoad_state.pendingEarnings}</div>
                             </div>
                             <div className="bg-gray-100 p-3 rounded-lg">
                                 <div className="font-semibold">Today Earnings:</div>
-                                <div className="text-green-600 font-bold ml-2">₹{viewAds_firstTimeLoad_state.today_shortLinkIncome}</div>
+                                <div className="text-green-600 font-bold ml-2">₹{shortLink_firstTimeLoad_state.today_shortLinkIncome}</div>
                             </div>
                             <div className="bg-gray-100 p-3 rounded-lg">
                                 <div className="font-semibold">Total Links:</div>
-                                <div className="text-blue-600 font-bold ml-2">{viewAds_firstTimeLoad_state.totalLinks}</div>
+                                <div className="text-blue-600 font-bold ml-2">{shortLink_firstTimeLoad_state.totalLinks}</div>
                             </div>
                             <div className="bg-gray-100 p-3 rounded-lg">
                                 <div className="font-semibold">Completed:</div>
-                                <div className="text-green-600 font-bold ml-2">{viewAds_firstTimeLoad_state.completedClick}</div>
+                                <div className="text-green-600 font-bold ml-2">{shortLink_firstTimeLoad_state.completedClick}</div>
                             </div>
                             <div className="bg-gray-100 p-3 rounded-lg">
                                 <div className="font-semibold">Pending:</div>
-                                <div className="text-red-500 font-bold ml-2">{viewAds_firstTimeLoad_state.pendingClick}</div>
+                                <div className="text-red-500 font-bold ml-2">{shortLink_firstTimeLoad_state.pendingClick}</div>
                             </div>
                         </div>
                     </div>
                     <div className="bg-white rounded-lg shadow-md p-4 relative">
                         {/* Timer Overlay */}
-                        <div className={`${viewAds_firstTimeLoad_state.click_short_link_expireTimer ? 'flex' : 'hidden'} absolute z-[1] inset-0 bg-white bg-opacity-70 justify-center items-start`}>
+                        <div className={`${shortLink_firstTimeLoad_state.click_short_link_expireTimer ? 'flex' : 'hidden'} absolute z-[1] inset-0 bg-white bg-opacity-70 justify-center items-start`}>
                             <div className="flex flex-col items-center text-3xl sm:text-6xl font-semibold mt-20">
                                 <div className="text-center">Come Back After</div>
                                 <div className="text-5xl sm:text-7xl font-bold text-red-600 drop-shadow">
-                                    <CountdownTimer expireTime={viewAds_firstTimeLoad_state.click_short_link_expireTimer} />
+                                    <CountdownTimer expireTime={shortLink_firstTimeLoad_state.click_short_link_expireTimer} />
                                 </div>
                             </div>
                         </div>
@@ -285,6 +285,18 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                             </div>
                         )}
                     </div>
+                </div>
+                {/* adsterra Native Banner start */}
+                <div id="container-f2e76b1a9af84306102d9f8675c030e8"></div>
+                {/* adsterra Native Banner End*/}
+                <div className='bg-white rounded shadow px-5 py-2'>
+                    <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>View Ads Instructions</p>
+                    <hr className='mt-2 border' />
+                    <ul className='mt-4 font-medium text-gray-500 drop-shadow-sm'>
+                        {
+                            shortLink_firstTimeLoad_state?.other_data_shortLink_instructions?.map((value, index) => <li key={index}><i className="fa-solid fa-hand-point-right fa-fade text-red-600"></i> {value}</li>)
+                        }
+                    </ul>
                 </div>
             </div>
             <div className='mt-3'>
