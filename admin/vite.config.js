@@ -6,10 +6,5 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
-  },
-  build: {
-    rollupOptions: {
-      external: ["sweetalert2"]
-    }
   }
 })
