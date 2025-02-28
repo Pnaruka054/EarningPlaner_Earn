@@ -14,7 +14,7 @@ const userIncomeRoute = require('./routes/clientRoutes/userIncome_router');
 const userMessageRoute = require('./routes/clientRoutes/userMessage_router');
 const postBack = require('./routes/postBack')
 const checkLogin_for_navBar = require('./routes/checkLogin_for_navBar')
-const { cronForDaily_MonthlyData_Update } = require('./helper/cronJobs')
+const { cronForDaily_midNight_update } = require('./helper/cronJobs')
 const adminRoutes = require('./routes/adminRoutes/adminRoutes')
 
 const io = socketIo(server, {
@@ -77,6 +77,9 @@ app.use('/userMessageRoute', userMessageRoute);
 app.use('/postBack', postBack);
 app.use('/checkLogin_for_navBar', checkLogin_for_navBar);
 app.use('/admin', middleware.adminCheck_middleware, adminRoutes);
+
+// cron jobs
+cronForDaily_midNight_update()
 
 // Server listen
 const PORT = process.env.PORT || 3000;

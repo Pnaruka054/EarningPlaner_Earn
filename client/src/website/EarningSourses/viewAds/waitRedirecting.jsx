@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
-const randomNumber = Math.floor(Math.random() * 2) + 1;
 const WaitRedirecting = () => {
     const [redirectLink, setRedirectLink] = useState('');
-    const [waitingTimer_state, setWaitingTimer_state] = useState(15);
+    const [waitingTimer_state, setWaitingTimer_state] = useState(5);
 
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
@@ -46,7 +45,7 @@ const WaitRedirecting = () => {
             setWaitingTimer_state((prev) => prev - 1);
         }, 1000);
 
-        if (waitingTimer_state === randomNumber && redirectLink) {
+        if (waitingTimer_state === 0 && redirectLink) {
             localStorage.setItem('isSuccess', redirectLink.split('||')[1] + '||' + redirectLink.split('||')[2]);
             clearInterval(interval);
             window.location.href = redirectLink.split('||')[0];
@@ -65,7 +64,6 @@ const WaitRedirecting = () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
     }, [waitingTimer_state, redirectLink]);
-
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-blue-50">

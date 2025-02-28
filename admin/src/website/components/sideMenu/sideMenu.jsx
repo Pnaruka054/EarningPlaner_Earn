@@ -36,7 +36,7 @@ const SideMenu = () => {
 
       if (response?.data?.msg) {
         showNotification(false, response.data.msg);
-        navigation('/admin')
+        navigation('/')
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -44,7 +44,7 @@ const SideMenu = () => {
         showNotification(true, error.response.data.error_msg);
       } else if (error.response?.data?.adminJWT_error_msg) {
         showNotification(true, error.response.data.adminJWT_error_msg);
-        navigation('/admin')
+        navigation('/')
       } else {
         showNotification(true, "Something went wrong, please try again.");
       }

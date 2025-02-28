@@ -18,15 +18,15 @@ const ViewAds = () => {
         const fetchData = async () => {
             try {
                 setData_process_state(true);
-    
+
                 const response = await axios.get(
                     `${import.meta.env.VITE_SERVER_URL}/admin/getViewAdsData`,
                     { withCredentials: true }
                 );
-    
+
                 if (response?.data?.msg) {
-                    const { other_data_viewAds_limit: { viewAds_pendingClick, viewAds_instructions }, viewAds_directLinksData } = response.data.msg;
-                    setViewAdsLimit_state(viewAds_pendingClick)
+                    const { other_data_viewAds_limit: { viewAds_pendingUpdates, viewAds_instructions }, viewAds_directLinksData } = response.data.msg;
+                    setViewAdsLimit_state(viewAds_pendingUpdates)
                     setViewAdsInstructions_state(viewAds_instructions.join("\n"))
                     setDirectLinkData_state(viewAds_directLinksData.reverse())
                 }
@@ -36,7 +36,7 @@ const ViewAds = () => {
                     showNotification(true, error.response.data.error_msg);
                 } else if (error.response.data.adminJWT_error_msg) {
                     showNotification(true, error.response.data.adminJWT_error_msg);
-                    navigation('/admin')
+                    navigation('/')
                 } else {
                     showNotification(true, "Something went wrong, please try again.");
                 }
@@ -61,8 +61,8 @@ const ViewAds = () => {
                 { withCredentials: true }
             );
             if (response?.data?.msg) {
-                const { viewAds_instructions, viewAds_pendingClick } = response.data.msg;
-                setViewAdsLimit_state(viewAds_pendingClick)
+                const { viewAds_instructions, viewAds_pendingUpdates } = response.data.msg;
+                setViewAdsLimit_state(viewAds_pendingUpdates)
                 setViewAdsInstructions_state(viewAds_instructions.join("\n"))
                 showNotification(false, "updated successfull!");
             }
@@ -72,7 +72,7 @@ const ViewAds = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -134,7 +134,7 @@ const ViewAds = () => {
 
     const [editingIndex_state, setEditingIndex_state] = useState(null);
     const [editData_state, setEditData_state] = useState(null);
-   
+
     const viewAdsDirectLink_database_post = async (viewAdsDirectLink_data) => {
         try {
             setData_process_state(true);
@@ -166,7 +166,7 @@ const ViewAds = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -235,7 +235,7 @@ const ViewAds = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -290,7 +290,7 @@ const ViewAds = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }

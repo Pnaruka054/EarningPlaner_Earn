@@ -3,8 +3,10 @@ const mongoose = require('mongoose')
 const other_data_schema = new mongoose.Schema({
     documentName: { type: String, require: true },
     viewAds_pendingClick: { type: String },
+    viewAds_pendingUpdates: { type: String },
     viewAds_instructions: { type: Array },
     shortLink_pendingClick: { type: String },
+    shortLink_pendingUpdates: { type: String },
     shortLink_instructions: { type: Array },
     referralRate: { type: String },
     referralPageText: { type: String },

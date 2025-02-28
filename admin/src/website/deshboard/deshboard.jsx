@@ -35,7 +35,7 @@ const Dashboard = () => {
                     showNotification(true, error.response.data.error_msg);
                 } else if (error.response.data.adminJWT_error_msg) {
                     showNotification(true, error.response.data.adminJWT_error_msg);
-                    navigation('/admin')
+                    navigation('/')
                 } else {
                     showNotification(true, "Something went wrong, please try again.");
                 }
@@ -72,7 +72,7 @@ const Dashboard = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -147,7 +147,7 @@ const Dashboard = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -194,7 +194,7 @@ const Dashboard = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -261,7 +261,7 @@ const Dashboard = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -335,7 +335,7 @@ const Dashboard = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -382,7 +382,7 @@ const Dashboard = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -447,7 +447,7 @@ const Dashboard = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -499,7 +499,7 @@ const Dashboard = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -569,7 +569,7 @@ const Dashboard = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -630,7 +630,7 @@ const Dashboard = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }

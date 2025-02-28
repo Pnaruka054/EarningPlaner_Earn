@@ -10,7 +10,7 @@ const App = () => {
   return (
     <div>
       <Routes>
-        <Route path='/admin' element={<AdminLogin />} />
+        <Route path='/' element={<AdminLogin />} />
         <Route path='/admin/dashboard' element={<Deshboard />} />
         <Route path='/admin/view-ads' element={<ViewAds />} />
         <Route path='/admin/shorten-links' element={<ShortLink/>} />

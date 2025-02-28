@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
-const randomNumber = Math.floor(Math.random() * 3) + 1;
 const WaitRedirecting = () => {
     const [redirectLink, setRedirectLink] = useState('');
-    const [waitingTimer_state, setWaitingTimer_state] = useState(15);
+    const [waitingTimer_state, setWaitingTimer_state] = useState(5);
     const [isRedirecting, setIsRedirecting] = useState(false);
 
     useEffect(() => {
@@ -20,33 +19,33 @@ const WaitRedirecting = () => {
             { src: "https://js.onclckmn.com/static/onclicka.js", attributes: { 'data-admpid': '287247' } },
             { src: "https://js.wpadmngr.com/static/adManager.js", attributes: { 'data-admpid': '287339' } }
         ];
-    
+
         const scriptElements = scripts.map(({ src, attributes }) => {
             const script = document.createElement('script');
             script.src = src;
             script.async = true;
-    
+
             // Additional attributes set karna
             Object.entries(attributes).forEach(([key, value]) => {
                 script.setAttribute(key, value);
             });
-    
+
             document.body.appendChild(script);
             return script;
         });
-    
+
         // Cleanup function to remove all scripts on unmount
         return () => {
             scriptElements.forEach(script => document.body.removeChild(script));
         };
-    }, []);    
+    }, []);
 
     useEffect(() => {
         let interval = setInterval(() => {
             setWaitingTimer_state((prev) => prev - 1);
         }, 1000);
 
-        if (waitingTimer_state === randomNumber && redirectLink) {
+        if (waitingTimer_state === 0 && redirectLink) {
             setIsRedirecting(true);
             sessionStorage.setItem('isUserClosed', 'true')
             clearInterval(interval);

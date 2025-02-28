@@ -22,9 +22,9 @@ const ShortLink = () => {
                 );
 
                 if (response?.data?.msg) {
-                    const { other_data_shortLink_limit: { shortLink_pendingClick, shortLink_instructions }, linkShortnerData
+                    const { other_data_shortLink_limit: { shortLink_pendingUpdates, shortLink_instructions }, linkShortnerData
                     } = response.data.msg;
-                    setShortLinkLimit_state(shortLink_pendingClick)
+                    setShortLinkLimit_state(shortLink_pendingUpdates)
                     setShortLinkInstructions_state(shortLink_instructions.join("\n"))
                     setLinkShortnersData_state(linkShortnerData.reverse())
                 }
@@ -34,7 +34,7 @@ const ShortLink = () => {
                     showNotification(true, error.response.data.error_msg);
                 } else if (error.response.data.adminJWT_error_msg) {
                     showNotification(true, error.response.data.adminJWT_error_msg);
-                    navigation('/admin')
+                    navigation('/')
                 } else {
                     showNotification(true, "Something went wrong, please try again.");
                 }
@@ -44,7 +44,6 @@ const ShortLink = () => {
         };
         fetchData()
     }, []);
-
 
     // handle short link update data
     const [shortLinkLimit_state, setShortLinkLimit_state] = useState('');
@@ -60,8 +59,8 @@ const ShortLink = () => {
                 { withCredentials: true }
             );
             if (response?.data?.msg) {
-                const { shortLink_instructions, shortLink_pendingClick } = response.data.msg;
-                setShortLinkLimit_state(shortLink_pendingClick)
+                const { shortLink_instructions, shortLink_pendingUpdates } = response.data.msg;
+                setShortLinkLimit_state(shortLink_pendingUpdates)
                 setShortLinkInstructions_state(shortLink_instructions.join("\n"))
                 showNotification(false, "updated successfull!");
             }
@@ -71,7 +70,7 @@ const ShortLink = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -163,7 +162,7 @@ const ShortLink = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -235,7 +234,7 @@ const ShortLink = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -290,7 +289,7 @@ const ShortLink = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }

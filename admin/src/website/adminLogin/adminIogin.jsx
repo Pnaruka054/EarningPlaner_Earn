@@ -31,7 +31,7 @@ const AdminLogin = () => {
 
       setTimeout(() => {
         navigate("/admin/dashboard"); // ✅ 3 sec baad redirect hoga
-      }, 3000);
+      }, 1000);
 
     } catch (err) {
       console.error("Login Error:", err.response?.data || err.message);

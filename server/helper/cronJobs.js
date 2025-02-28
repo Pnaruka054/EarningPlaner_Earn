@@ -1,55 +1,26 @@
 const cron = require('node-cron');
-const userSignUp_module = require('../model/userSignUp/userSignUp_module')
-const { userMonthly_records_module } = require('../model/dashboard/userMonthly_modules')
-const getFormattedMonth = require('./getFormattedMonth')
+const other_data_module = require('../model/other_data/other_data_module')
 
 
-const cronForDaily_MonthlyData_Update = async () => {
-    cron.schedule('0 0 * * *', async () => {
+const cronForDaily_midNight_update = async () => {
+    cron.schedule("0 0 * * *", async () => {
         try {
-            // Get current month and year (e.g., "January 2024")
-            const monthName = getFormattedMonth()
+            console.log("Cron Job Started: Updating viewAds_pendingClick...");
+            const other_data_viewAds_limit = await other_data_module.findOne({ documentName: "viewAds" });
+            const other_data_shortLink_limit = await other_data_module.findOne({ documentName: "shortLink" });
 
-            // Fetch all monthly data for the current month
-            const AllMonthlyData = await userMonthly_records_module.find({ monthName });
+            other_data_viewAds_limit.viewAds_pendingClick = other_data_viewAds_limit?.viewAds_pendingUpdates;
+            other_data_shortLink_limit.shortLink_pendingClick = other_data_shortLink_limit?.shortLink_pendingUpdates;
 
-            if (!AllMonthlyData || AllMonthlyData.length === 0) {
-                console.log(`No monthly data found for the month: ${monthName}`);
-                return;
-            }
-
-            // Ensure VIEW_ADS_CLICK_BALANCE is set
-            const clickBalanceLimit = process.env.VIEW_ADS_CLICK_BALANCE;
-            if (!clickBalanceLimit) {
-                console.error('VIEW_ADS_CLICK_BALANCE is not defined in environment variables');
-                return;
-            }
-
-            // Update earningSources for each user
-            const updatePromises = AllMonthlyData.map(async (data) => {
-                if (data.earningSources && data.earningSources.view_ads) {
-                    // Update click balance for each record
-                    data.earningSources.view_ads.clickBalance = `0/${clickBalanceLimit}`;
-
-                    // Now save the updated document back to the database
-                    await userMonthly_records_module.updateOne(
-                        { _id: data._id }, // Ensure we target the specific document
-                        { $set: { "earningSources.view_ads.clickBalance": data.earningSources.view_ads.clickBalance } }
-                    );
-                } else {
-                    console.log(`Skipping update for data with missing earningSources: ${data._id}`);
-                }
-            });
-            console.log("done");
-            // Wait for all update operations to complete
-            await Promise.all(updatePromises);
-            console.log("successfully updated daily monthlydata");
+            await other_data_viewAds_limit.save();
+            await other_data_shortLink_limit.save();
+            console.log("✅ Successfully updated viewAds_pendingClick at midnight.");
         } catch (error) {
-            console.error('Error updating monthly data:', error);
+            console.error("❌ Error updating viewAds_pendingClick:", error);
         }
     });
 };
 
 module.exports = {
-    cronForDaily_MonthlyData_Update,
+    cronForDaily_midNight_update,
 }

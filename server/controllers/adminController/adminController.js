@@ -7,7 +7,7 @@ const shortedLinksData_module = require('../../model/shortLinks/shortedLinksData
 const withdrawal_record = require('../../model/withdraw/withdrawal_records_module')
 const userSignUp_module = require('../../model/userSignUp/userSignUp_module')
 const mongoose = require("mongoose");
-
+const getFormattedDate = require('../../helper/getFormattedDate')
 
 function jwt_accessToken(user) {
     return jwt.sign({ jwtUser: user }, process.env.JWT_ACCESS_KEY, { expiresIn: '2h' })
@@ -527,7 +527,7 @@ const update_viewAds_data = async (req, res) => {
             });
         }
 
-        let updateField = btnName === "text" ? { viewAds_instructions: data } : { viewAds_pendingClick: data };
+        let updateField = btnName === "text" ? { viewAds_instructions: data } : { viewAds_pendingUpdates: data };
 
         let updatedData = await other_data_module.findOneAndUpdate(
             { documentName: "viewAds" },
@@ -700,7 +700,7 @@ const update_ShortLink_data = async (req, res) => {
             });
         }
 
-        let updateField = btnName === "text" ? { shortLink_instructions: data } : { shortLink_pendingClick: data };
+        let updateField = btnName === "text" ? { shortLink_instructions: data } : { shortLink_pendingUpdates: data };
 
         let updatedData = await other_data_module.findOneAndUpdate(
             { documentName: "shortLink" },

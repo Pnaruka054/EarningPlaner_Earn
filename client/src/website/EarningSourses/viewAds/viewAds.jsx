@@ -583,9 +583,9 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 <div className='bg-white rounded shadow px-5 py-2'>
                     <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>View Ads Instructions</p>
                     <hr className='mt-2 border' />
-                    <ul className='mt-4 font-medium text-gray-500 drop-shadow-sm'>
+                    <ul className='mt-4 font-medium text-gray-500 drop-shadow-sm space-y-4'>
                         {
-                            viewAds_firstTimeLoad_state?.other_data_viewAds_instructions?.map((value, index) => <li key={index}><i className="fa-solid fa-hand-point-right fa-fade text-red-600"></i> {value}</li>)
+                            viewAds_firstTimeLoad_state?.other_data_viewAds_instructions?.map((value, index) => <li key={index} className='instruction-list-image' dangerouslySetInnerHTML={{ __html: value }}></li>)
                         }
                     </ul>
                 </div>

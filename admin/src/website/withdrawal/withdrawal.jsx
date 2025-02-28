@@ -40,7 +40,7 @@ const Withdrawal = () => {
                     showNotification(true, error.response.data.error_msg);
                 } else if (error.response.data.adminJWT_error_msg) {
                     showNotification(true, error.response.data.adminJWT_error_msg);
-                    navigation('/admin');
+                    navigation('/');
                 } else {
                     showNotification(true, "Something went wrong, please try again.");
                 }
@@ -100,7 +100,7 @@ const Withdrawal = () => {
                 "Something went wrong, please try again.";
             showNotification(true, errorMsg);
             if (error?.response?.data?.adminJWT_error_msg) {
-                navigation('/admin');
+                navigation('/');
             }
         } finally {
             setData_process_state(false);
@@ -177,7 +177,7 @@ const Withdrawal = () => {
                 showNotification(true, error.response.data.error_msg);
             } else if (error.response.data.adminJWT_error_msg) {
                 showNotification(true, error.response.data.adminJWT_error_msg);
-                navigation('/admin')
+                navigation('/')
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
