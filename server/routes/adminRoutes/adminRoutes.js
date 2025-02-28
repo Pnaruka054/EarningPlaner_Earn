@@ -5,6 +5,8 @@ route.get("/getDashboardData", adminDashboardController.getDashboardData)
 route.get("/getViewAdsData", adminDashboardController.getViewAdsData)
 route.get("/getShortLinkData", adminDashboardController.getShortLinkData)
 route.get("/adminLogout", adminDashboardController.adminLogout)
+route.get("/getWithdrawalsData", adminDashboardController.getWithdrawalsData)
+route.get("/getUserData", adminDashboardController.getUserData)
 
 route.post("/adminLogin", adminDashboardController.adminLogin)
 route.post("/post_newAnnouncement_data", adminDashboardController.post_newAnnouncement_data)
@@ -21,6 +23,7 @@ route.patch("/update_viewAds_data", adminDashboardController.update_viewAds_data
 route.patch("/patch_viewAds_directLink_data", adminDashboardController.patch_viewAds_directLink_data)
 route.patch("/update_ShortLink_data", adminDashboardController.update_ShortLink_data)
 route.patch("/patch_ShortenLink_data", adminDashboardController.patch_ShortenLink_data)
+route.patch("/updateWithdrawalsData", adminDashboardController.updateWithdrawalsData)
 
 route.delete("/delete_announcement_data", adminDashboardController.delete_announcement_data)
 route.delete("/delete_faq_data", adminDashboardController.delete_faq_data)

@@ -34,6 +34,11 @@ const middleware_userLogin_check = async (req, res, next) => {
         const decoded = await jwt.verify(token, process.env.JWT_ACCESS_KEY);
         let decodedData_fromDB = await userSignUp_module.findById(decoded.jwtUser._id)
         if (!decodedData_fromDB) {
+            res.clearCookie('jwtToken', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None'
+            });
             return res.status(404).json({
                 success: false,
                 jwtMiddleware_user_not_found_error: 'Authorization token invalid or user not found'

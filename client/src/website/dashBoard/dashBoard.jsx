@@ -29,44 +29,6 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
         dropdownRef.current.classList.add('hidden')
     }
 
-    const announcements = [
-        {
-            id: 1,
-            time: "8/10/24, 11:53 AM",
-            title: "Why Choose Us?",
-            details: [
-                "1. Receive a $1 bonus for signing up.",
-                "2. Enjoy the highest CPM rates globally.",
-                "3. No intrusive pop-up ads.",
-                "4. Ability to shorten links for 18+, Movies, Faucets, etc.",
-                "5. Fast payments within 2 to 3 days."
-            ],
-            extra: "(Your first payment will be processed within 1 - 2 days)",
-            note: "Statistics will be refreshed every 10 minutes."
-        },
-        {
-            id: 2,
-            time: "8/10/24, 11:52 AM",
-            title: "Contest",
-            details: [
-                "The user with the most active referrals will earn a 25% commission.",
-                "Find your referral link here - [Click](https://droplink.co/member/users/referrals)",
-                "When your referral earns money, your commission will be credited to your DropLink wallet."
-            ],
-            extra: "Write an article about us and earn up to $5.",
-            note: "Create a YouTube video discussing our platform and earn up to $100."
-        },
-        {
-            id: 3,
-            time: "8/10/24, 11:50 AM",
-            title: "Policy",
-            details: [
-                "Dear users, please refrain from creating bots, using proxies, or generating fake traffic.",
-                "Violating this policy will result in account deactivation."
-            ]
-        }
-    ];
-
     // filter user selected month
     useEffect(() => {
         setMonthlyData_state(
@@ -186,11 +148,11 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                         </span>
                     </div>
                     <div className="p-4 space-y-4 max-h-[600px] overflow-auto hidden-scrollbar">
-                        {userData_state?.other_data_announcementsArray?.map((item) => (
-                            <div key={item.id} className='border-b pb-2'>
-                                <spa className="text-gray-500 text-sm whitespace-nowrap mb-15">
+                        {userData_state?.other_data_announcementsArray?.map((item, index) => (
+                            <div key={index} className='border-b pb-2'>
+                                <span className="text-gray-500 text-sm whitespace-nowrap mb-15">
                                     {item.announcementTime}
-                                </spa>
+                                </span>
                                 <div dangerouslySetInnerHTML={{ __html: item?.announcementMessage }} />
                             </div>
                         ))}

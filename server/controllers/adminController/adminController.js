@@ -4,6 +4,9 @@ const other_data_module = require('../../model/other_data/other_data_module')
 const current_time_get = require('../../helper/currentTimeUTC')
 const viewAds_directLinksData_module = require("../../model/view_ads_direct_links/viewAds_directLinksData_module");
 const shortedLinksData_module = require('../../model/shortLinks/shortedLinksData_module')
+const withdrawal_record = require('../../model/withdraw/withdrawal_records_module')
+const userSignUp_module = require('../../model/userSignUp/userSignUp_module')
+const mongoose = require("mongoose");
 
 
 function jwt_accessToken(user) {
@@ -842,6 +845,146 @@ const delete_ShortenLink_data = async (req, res) => {
     }
 };
 
+
+// handle user withdrawals
+const getWithdrawalsData = async (req, res) => {
+    try {
+        // Retrieve all withdrawal records from the database, sorted by creation date (latest first)
+        const withdrawals = await withdrawal_record.find().sort({ createdAt: -1 });
+
+        return res.status(200).json({
+            success: true,
+            msg: withdrawals,
+        });
+    } catch (error) {
+        console.error("Error fetching withdrawals:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch withdrawal records",
+            error: error.message,
+        });
+    }
+};
+
+const updateWithdrawalsData = async (req, res) => {
+    const session = await mongoose.startSession();
+    try {
+        session.startTransaction();
+
+        const { id, newStatus, remark } = req.body;
+
+        if (!id) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({
+                success: false,
+                error_msg: "Withdrawal ID is required",
+            });
+        }
+
+        // Update the withdrawal record with the new status and remark
+        const updatedWithdrawal = await withdrawal_record.findByIdAndUpdate(
+            id,
+            { withdrawal_status: newStatus, remark },
+            { new: true, session }
+        );
+
+        if (!updatedWithdrawal) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(404).json({
+                success: false,
+                error_msg: "Withdrawal record not found",
+            });
+        }
+
+        // If the withdrawal is marked as "Success" or "Reject", update the user's financial fields accordingly
+        if (["Success", "Reject"].includes(newStatus)) {
+            const user = await userSignUp_module.findById(updatedWithdrawal.userDB_id).session(session);
+            if (user) {
+                const withdrawalAmount = parseFloat(updatedWithdrawal.balance || "0");
+                // Deduct the withdrawal amount from the pending withdrawal amount
+                const pendingWithdrawal =
+                    parseFloat(user.pending_withdrawal_amount || "0") - withdrawalAmount;
+
+                if (newStatus === "Success") {
+                    // For successful withdrawals, add the amount to total withdrawal amount
+                    const totalWithdrawal =
+                        parseFloat(user.total_withdrawal_amount || "0") + withdrawalAmount;
+                    await userSignUp_module.findByIdAndUpdate(
+                        user._id,
+                        {
+                            pending_withdrawal_amount: pendingWithdrawal.toFixed(3).toString(),
+                            total_withdrawal_amount: totalWithdrawal.toFixed(3).toString(),
+                        },
+                        { new: true, session }
+                    );
+                } else if (newStatus === "Reject") {
+                    // For rejected withdrawals, refund the amount to withdrawable_amount
+                    const withdrawableAmount =
+                        parseFloat(user.withdrawable_amount || "0") + withdrawalAmount;
+                    await userSignUp_module.findByIdAndUpdate(
+                        user._id,
+                        {
+                            pending_withdrawal_amount: pendingWithdrawal.toFixed(3).toString(),
+                            withdrawable_amount: withdrawableAmount.toFixed(3).toString(),
+                        },
+                        { new: true, session }
+                    );
+                }
+            }
+        }
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return res.status(200).json({
+            success: true,
+            msg: updatedWithdrawal,
+        });
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        console.error("Error updating withdrawal record:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update withdrawal record",
+            error: error.message,
+        });
+    }
+};
+
+const getUserData = async (req, res) => {
+    try {
+        const { userSearchId } = req.query;
+        if (!userSearchId) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "User search ID is required.",
+            });
+        }
+        const userData = await userSignUp_module.findById(userSearchId);
+        if (!userData) {
+            return res.status(404).json({
+                success: false,
+                error_msg: "User not found.",
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            msg: userData,
+        });
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch user data.",
+            error: error.message,
+        });
+    }
+};
+
+
 module.exports = {
     adminLogin,
     adminLogout,
@@ -865,5 +1008,8 @@ module.exports = {
     update_ShortLink_data,
     post_ShortenLink_data,
     patch_ShortenLink_data,
-    delete_ShortenLink_data
+    delete_ShortenLink_data,
+    getWithdrawalsData,
+    updateWithdrawalsData,
+    getUserData
 }
