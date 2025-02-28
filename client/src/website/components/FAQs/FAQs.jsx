@@ -1,9 +1,9 @@
 import { useState, useContext } from "react";
 import { FaChevronDown } from "react-icons/fa";
-import { Faq_navBar_context } from "../context/faq_navBar_context";
+import { NavBar_global_context } from "../context/navBar_globalContext";
 
 const FAQs = () => {
-    const { faq_navBar_context_state } = useContext(Faq_navBar_context);
+    const { navBar_global_context_state } = useContext(NavBar_global_context);
 
     const [openIndex, setOpenIndex] = useState(null);
 
@@ -20,7 +20,7 @@ const FAQs = () => {
 
             {/* FAQs Box */}
             <div className="mx-auto">
-                {faq_navBar_context_state.map((faq, index) => (
+                {navBar_global_context_state?.map((faq, index) => (
                     <div key={index} className="mb-4">
                         {/* Question Box */}
                         <button

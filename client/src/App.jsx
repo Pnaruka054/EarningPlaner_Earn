@@ -28,7 +28,8 @@ import Terms_of_Use from './website/Terms_of_Use/Terms_of_Use';
 import DMCA from './website/DMCA/DMCA';
 import FillSurvey from './website/EarningSourses/fillSurvey/fillSurvey';
 import EmailVerification from './website/components/email-verification/email-verification';
-import { Faq_navBar_contextProvider } from "./website/components/context/faq_navBar_context";
+import { NavBar_global_contextProvider } from "./website/components/context/navBar_globalContext";
+import PaymentProof from './website/paymentProof/paymentProof';
 
 const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
@@ -85,6 +86,7 @@ const App = () => {
       location.pathname === '/login' ||
       location.pathname === '/signup' ||
       location.pathname === '/contact-us' ||
+      location.pathname === '/payment-proof' ||
       location.pathname.includes('/signup/ref') ||
       location.pathname.includes('/password-reset-form') ||
       location.pathname.includes('/terms-of-use') ||
@@ -116,7 +118,7 @@ const App = () => {
   }, [location.pathname]);
 
   return (
-    <Faq_navBar_contextProvider>
+    <NavBar_global_contextProvider>
       {
         !show_Full_navBar_state && createPortal(
           <NavBar show={show_navBar_state} availableBalance_forNavBar_state={availableBalance_forNavBar_state} />,
@@ -153,6 +155,7 @@ const App = () => {
           <div ref={nodeRefMap.get(location.pathname)}>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/payment-proof" element={<PaymentProof />} />
               <Route path="/contact-us" element={<ContactUs forMember={false} />} />
               <Route path="/member/support" element={<ContactUs setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} forMember={true} />} />
               <Route path="/login" element={<Login />} />
@@ -184,7 +187,7 @@ const App = () => {
         </CSSTransition>
       </TransitionGroup>
       <div id="networkStatus" ref={networkStatusRef} className='hidden' />
-    </Faq_navBar_contextProvider>
+    </NavBar_global_contextProvider>
   );
 }
 

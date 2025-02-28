@@ -11,6 +11,7 @@ const userBalanceData_get = async (req, res) => {
         const user_DB_Data = await userSignUp_module.findById(userData._id);
         const user_DB_Withdrawal_Data = await withdrawal_records_module.find({ userDB_id: userData._id });
         const other_data_withdrawalMethodArray = await other_data_module.find({ documentName: "withdrawalMethod" }) || [];
+        const other_data_withdrawal_instructions = await other_data_module.findOne({ documentName: "withdrawal_instructions" }) || {};
 
         if (!user_DB_Data || !user_DB_Withdrawal_Data) {
             return res.status(404).json({
@@ -30,7 +31,8 @@ const userBalanceData_get = async (req, res) => {
             other_data_withdrawalMethodArray,
             minimum_amount: other_data_withdrawalMethodArray.find(
                 (value) => value.withdrawalMethod_name === user_DB_Data.withdrawal_method
-            )?.withdrawalMethod_minimumAmount || 0  // Agar match nahi mile to default 0 rakho
+            )?.withdrawalMethod_minimumAmount || 0,
+            other_data_withdrawal_instructions: other_data_withdrawal_instructions.withdrawal_instructions
         };
 
         return res.status(200).json({
@@ -178,7 +180,6 @@ const userBalanceConvertPatch = async (req, res) => {
         session.endSession();
     }
 };
-
 
 module.exports = {
     userBalanceData_get,

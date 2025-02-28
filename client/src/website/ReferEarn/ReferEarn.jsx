@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
 import Footer from '../components/footer/footer';
-import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import Pagination from '../components/pagination/pagination';
 import { FaClipboard, FaClipboardCheck } from "react-icons/fa";
 import showNotificationWith_timer from '../components/showNotificationWith_timer';

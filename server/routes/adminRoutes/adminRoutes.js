@@ -24,6 +24,7 @@ route.patch("/patch_viewAds_directLink_data", adminDashboardController.patch_vie
 route.patch("/update_ShortLink_data", adminDashboardController.update_ShortLink_data)
 route.patch("/patch_ShortenLink_data", adminDashboardController.patch_ShortenLink_data)
 route.patch("/updateWithdrawalsData", adminDashboardController.updateWithdrawalsData)
+route.patch("/update_withdrawal_instructions_data", adminDashboardController.update_withdrawal_instructions_data)
 
 route.delete("/delete_announcement_data", adminDashboardController.delete_announcement_data)
 route.delete("/delete_faq_data", adminDashboardController.delete_faq_data)

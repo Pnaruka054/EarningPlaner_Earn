@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import SideMenu from '../components/sideMenu/sideMenu';
 import showNotification from '../components/showNotification';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const Withdrawal = () => {
     // State for process/loading indicator
@@ -29,10 +30,12 @@ const Withdrawal = () => {
                     { withCredentials: true }
                 );
                 if (response?.data?.msg) {
-                    setWithdrawals_state(response.data.msg);
+                    let { withdrawal_instructions, withdrawals } = response.data.msg
+                    setWithdrawals_state(withdrawals);
+                    setWithdrawalInstructions_state(withdrawal_instructions.join("\n"))
                 }
             } catch (error) {
-                console.error("Error fetching dashboard data:", error);
+                console.error("Error fetching withdrawal page data:", error);
                 if (error.response.data.error_msg) {
                     showNotification(true, error.response.data.error_msg);
                 } else if (error.response.data.adminJWT_error_msg) {
@@ -50,13 +53,30 @@ const Withdrawal = () => {
 
     // Handler to update a withdrawal record
     const handleUpdate = async (id, newStatus, remark) => {
+        if (!id) {
+            showNotification(true, "Withdrawal ID is required.");
+            return;
+        }
+
+        // Prepare the payload with remark only if provided
+        const payload = { id, newStatus, ...(remark ? { remark } : {}) };
+
+        // Show confirmation dialog
+        const confirmResult = await Swal.fire({
+            title: "Are you sure?",
+            text: "Update This Withdrawal Data?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, update it!",
+            cancelButtonText: "Cancel"
+        });
+
+        if (!confirmResult.isConfirmed) return;
+
         try {
             setData_process_state(true);
-            if (!id) {
-                showNotification(true, "Withdrawal ID is required.");
-                return;
-            }
-            const payload = { id, newStatus, ...(remark ? { remark } : {}) };
             const response = await axios.patch(
                 `${import.meta.env.VITE_SERVER_URL}/admin/updateWithdrawalsData`,
                 payload,
@@ -86,6 +106,7 @@ const Withdrawal = () => {
             setData_process_state(false);
         }
     };
+
 
     // Handler to search user by ID (simulate API call)
     const handleUserSearch = async () => {
@@ -134,26 +155,108 @@ const Withdrawal = () => {
         return matchesSearch && matchesFilter;
     });
 
+
+    const [withdrawalInstructions_state, setWithdrawalInstructions_state] = useState('');
+    const withdrawal_instructions_database_patch = async (data) => {
+        try {
+            setData_process_state(true);
+
+            const response = await axios.patch(
+                `${import.meta.env.VITE_SERVER_URL}/admin/update_withdrawal_instructions_data`,
+                { data },
+                { withCredentials: true }
+            );
+            if (response?.data?.msg) {
+                const { withdrawal_instructions } = response.data.msg;
+                setWithdrawalInstructions_state(withdrawal_instructions.join("\n"))
+                showNotification(false, "updated successfull!");
+            }
+        } catch (error) {
+            console.error("Error fetching dashboard data:", error);
+            if (error.response.data.error_msg) {
+                showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
+                navigation('/admin')
+            } else {
+                showNotification(true, "Something went wrong, please try again.");
+            }
+        } finally {
+            setData_process_state(false);
+        }
+    }
+    const handle_withdrawalInstructions_update = () => {
+        if (withdrawalInstructions_state.trim() !== '') {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "Update This Instructions?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, update it!",
+                cancelButtonText: "Cancel"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    withdrawal_instructions_database_patch(withdrawalInstructions_state.split("\n"))
+                }
+            });
+        }
+    };
+
+    // to adjust height dynamically
+    const textareaRef = useRef(null);
+    const adjustTextareaHeight = () => {
+        const textarea = textareaRef.current;
+        if (textarea) {
+            textarea.style.height = "auto"; // Reset height
+            textarea.style.height = textarea.scrollHeight + "px"; // Set new height
+        }
+    };
+    useEffect(() => {
+        adjustTextareaHeight(); // Adjust height on mount
+    }, [withdrawalInstructions_state]);
+
     return (
         <div>
             <SideMenu sideMenu_show={true} />
             <div className="mt-[75px] md:ml-[256px] p-6 space-y-8">
                 <h1 className="text-2xl font-bold mb-4">Manage Withdrawals</h1>
 
+                {/* Instructions Section */}
+                <div className="p-6 border border-gray-300 rounded-lg shadow-md">
+                    <h2 className="text-xl font-semibold mb-4">Instructions</h2>
+                    <textarea
+                        ref={textareaRef}
+                        className="border p-2 rounded w-full overflow-hidden resize-none"
+                        value={withdrawalInstructions_state}
+                        onChange={(e) => {
+                            setWithdrawalInstructions_state(e.target.value);
+                            adjustTextareaHeight();
+                        }}
+                    />
+                    <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+                        onClick={() => handle_withdrawalInstructions_update()}
+                    >
+                        Update
+                    </button>
+                </div>
+
                 {/* User Search Section */}
                 <div className="p-4 border border-gray-300 rounded">
                     <h2 className="text-xl font-semibold mb-2">Search User Information</h2>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2">
                         <input
                             type="text"
                             placeholder="Enter User ID"
                             value={userSearchId_state}
                             onChange={(e) => setUserSearchId_state(e.target.value)}
-                            className="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:border-blue-400"
+                            className="w-full md:w-[50%] border border-gray-300 rounded px-3 py-1 focus:outline-none focus:border-blue-400"
                         />
                         <button
                             onClick={handleUserSearch}
-                            className="bg-green-600 hover:bg-green-700 text-white rounded px-3 py-1 transition"
+                            className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white rounded px-3 py-1 transition"
                         >
                             Search User
                         </button>

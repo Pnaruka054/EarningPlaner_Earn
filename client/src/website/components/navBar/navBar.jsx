@@ -5,14 +5,14 @@ import EarnWizLogo from '../../../assets/EarnWizLogo.png'
 import ProcessBgBlack from '../processBgBlack/processBgBlack';
 import axios from 'axios';
 import showNotificationWith_timer from '../showNotificationWith_timer';
-import { Faq_navBar_context } from "../context/faq_navBar_context";
+import { NavBar_global_context } from "../context/navBar_globalContext";
 
 const NavBar = ({ show, availableBalance_forNavBar_state }) => {
     const [sideMenu_state, setSideMenu_state] = useState('menu-outline');
     const [toggelMenu_state, setToggelMenu_state] = useState("reorder-three");
     let [data_process_state, setData_process_state] = useState(false);
     let [isUserLogin_state, setIsUserLogin_state] = useState(false);
-    const { _, setFaq_navBar_context } = useContext(Faq_navBar_context);
+    const { _, setNavBar_global_context_state } = useContext(NavBar_global_context);
 
     let toggleMenu_icon = useRef(null)
     const navigation = useNavigate();
@@ -87,14 +87,24 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
         const fetchData = async () => {
             setData_process_state(true);
             try {
-                const url = `${import.meta.env.VITE_SERVER_URL}/checkLogin_for_navBar${location.pathname === "/" ? "?faq=true" : ""
-                    }`;
+                let queryParams = '';
+
+                if (location.pathname === "/") {
+                    queryParams = "?faq=true";
+                } else if (location.pathname === "/payment-proof") {
+                    queryParams = "?paymentProof=true";
+                }
+
+                const url = `${import.meta.env.VITE_SERVER_URL}/checkLogin_for_navBar${queryParams}`
 
                 const response = await axios.get(url, { withCredentials: true });
 
                 if (location.pathname === "/") {
-                    setFaq_navBar_context(response.data.msg.other_data_faqArray);
+                    setNavBar_global_context_state(response?.data?.msg?.other_data_faqArray);
+                } else if (location.pathname === "/payment-proof") {
+                    setNavBar_global_context_state(response.data.msg.paymentProof_data);
                 }
+
                 setIsUserLogin_state(response.data.msg.isLogin);
 
                 if (
@@ -150,8 +160,8 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
                         </Link>
                     </li>
                     <li>
-                        <Link className="hover:text-yellow-400 px-3 py-2 rounded-lg transition" to="#">
-                            Income
+                        <Link className="hover:text-yellow-400 px-3 py-2 rounded-lg transition" to="/payment-proof">
+                            Payments Proof
                         </Link>
                     </li>
                     <span>

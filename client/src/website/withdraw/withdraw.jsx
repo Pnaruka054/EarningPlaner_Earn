@@ -24,14 +24,19 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
         withdrawal_account_information: '',
         withdrawal_Records: [],
         other_data_withdrawalMethodArray: [],
-        minimum_amount: '0.000'
+        minimum_amount: '0.000',
+        other_data_withdrawal_instructions: []
     });
     // Added missing state for current page
     const [currentPage_state, setCurrentPage_state] = useState(1);
     const navigation = useNavigate();
 
-    const fetchData = async () => {
-        setData_process_state(true);
+    const fetchData = async (blackBgProcess = false) => {
+        if (blackBgProcess) {
+            ProcessBgSeprate(true)
+        } else {
+            setData_process_state(true);
+        }
         try {
             const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userBalanceData_get`, {
                 withCredentials: true
@@ -60,7 +65,11 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                 showNotification(true, "Something went wrong, please try again.");
             }
         } finally {
-            setData_process_state(false);
+            if (blackBgProcess) {
+                ProcessBgSeprate(false)
+            } else {
+                setData_process_state(false);
+            }
         }
     };
 
@@ -77,7 +86,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                 });
 
                 if (response.status === 200) {
-                    await fetchData();
+                    await fetchData(true);
                     Swal.fire({
                         title: "Success!",
                         text: "Your balance has been successfully converted.",
@@ -164,7 +173,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
             });
 
             if (response.status === 200) {
-                fetchData();
+                fetchData(true);
                 Swal.fire({
                     icon: 'success',
                     title: 'Withdrawal Successful',
@@ -372,17 +381,16 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                     </div>
                 </div>
                 <div className='bg-white my-5 pb-5 rounded-xl border border-green-800'>
-                    <p className='text-center text-lg my-3'>Withdraw Instructions</p>
+                    <p className='text-center text-xl font-bold my-4'>Withdraw Instructions</p>
                     <hr className='w-[95%] m-auto border' />
                     <ul className='px-6 mt-2'>
-                        <li className='blue-right-list-image'>If the transfer time is up, please fill out the form again.</li>
-                        <li className='blue-right-list-image'>The transfer amount must match the order you create, otherwise the money cannot be credited successfully.</li>
-                        <li className='blue-right-list-image'>If you transfer the wrong amount, our company will not be responsible for the lost amount!</li>
-                        <li className='blue-right-list-image'>Note: do not cancel the deposit order after the money has been transferred.</li>
+                        {
+                            balanceData_state?.other_data_withdrawal_instructions?.map((value, index) => <li key={index} className='blue-right-list-image'>{value}</li>)
+                        }
                     </ul>
                 </div>
                 <div className="my-5 pb-5">
-                    <p className="text-center text-2xl font-bold my-4">Withdraw History</p>
+                    <p className="text-center text-xl font-bold my-4">Withdraw History</p>
                     <hr className="mx-auto w-11/12 border border-gray-300" />
                     <ul className="mt-6 space-y-4">
                         {currentReferrals?.map((record, index) => (

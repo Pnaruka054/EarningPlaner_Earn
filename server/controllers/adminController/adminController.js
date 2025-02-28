@@ -851,10 +851,16 @@ const getWithdrawalsData = async (req, res) => {
     try {
         // Retrieve all withdrawal records from the database, sorted by creation date (latest first)
         const withdrawals = await withdrawal_record.find().sort({ createdAt: -1 });
+        const other_data_withdrawal = await other_data_module.findOne({ documentName: "withdrawal_instructions" }) || {};
+
+        let res_data = {
+            withdrawals,
+            withdrawal_instructions: other_data_withdrawal.withdrawal_instructions
+        }
 
         return res.status(200).json({
             success: true,
-            msg: withdrawals,
+            msg: res_data,
         });
     } catch (error) {
         console.error("Error fetching withdrawals:", error);
@@ -882,10 +888,14 @@ const updateWithdrawalsData = async (req, res) => {
             });
         }
 
-        // Update the withdrawal record with the new status and remark
+        // Update the withdrawal record with the new status, remark, and set expiry (1 year from now)
         const updatedWithdrawal = await withdrawal_record.findByIdAndUpdate(
             id,
-            { withdrawal_status: newStatus, remark },
+            {
+                withdrawal_status: newStatus,
+                remark,
+                expireAt: new Date(Date.now() + 31536000000) // 1 year in milliseconds
+            },
             { new: true, session }
         );
 
@@ -984,6 +994,34 @@ const getUserData = async (req, res) => {
     }
 };
 
+const update_withdrawal_instructions_data = async (req, res) => {
+    try {
+        let { data } = req.body;
+
+        if (!data) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Invalid Data Received."
+            });
+        }
+
+        let updatedData = await other_data_module.findOneAndUpdate(
+            { documentName: "withdrawal_instructions" },
+            { withdrawal_instructions: data },
+            { new: true, upsert: true }
+        );
+
+        res.status(200).json({ success: true, msg: updatedData });
+    } catch (error) {
+        console.error("Error updating withdrawal instructions data:", error);
+        res.status(500).json({
+            success: false,
+            msg: "Internal Server Error. Please try again later.",
+            error: error.message
+        });
+    }
+};
+
 
 module.exports = {
     adminLogin,
@@ -1011,5 +1049,6 @@ module.exports = {
     delete_ShortenLink_data,
     getWithdrawalsData,
     updateWithdrawalsData,
-    getUserData
+    getUserData,
+    update_withdrawal_instructions_data
 }

@@ -13,6 +13,7 @@ const other_data_schema = new mongoose.Schema({
     announcementTime: { type: String },
     faqQuestioin: { type: String },
     faqAnswer: { type: String },
+    withdrawal_instructions: { type: Array },
     withdrawalMethod_name: { type: String },
     withdrawalMethod_minimumAmount: { type: String },
     withdrawalMethod_details: { type: String }

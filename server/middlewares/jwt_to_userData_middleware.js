@@ -7,8 +7,8 @@ const middleware_userLogin_check = async (req, res, next) => {
         if (
             req.originalUrl === '/userRoute/login'
             || req.originalUrl === '/userRoute/signUp'
-            || req.originalUrl === '/userMessageRoute/userMessageSave_post'
             || req.originalUrl === '/userRoute/userWebstatisticsGet'
+            || req.originalUrl === '/userWithdraw/websitePaymentProof_get'
             || req.originalUrl.includes('/checkLogin_for_navBar')
             || req.originalUrl.includes('/userRoute/user_signUp_login_google')
             || req.originalUrl.includes('/userRoute/userLoginforgot_password_send_mail')

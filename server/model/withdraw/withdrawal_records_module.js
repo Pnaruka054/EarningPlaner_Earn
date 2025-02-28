@@ -9,6 +9,7 @@ const withdrawalRecordSchema = new mongoose.Schema({
     withdrawal_method: { type: String },
     withdrawal_account_information: { type: String },
     remark: { type: String },
+    expireAt: { type: Date }
 })
 
 const withdrawal_record = mongoose.model('withdrawal_record', withdrawalRecordSchema)
