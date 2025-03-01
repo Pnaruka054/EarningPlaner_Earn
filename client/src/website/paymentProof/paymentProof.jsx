@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { NavBar_global_context } from "../components/context/navBar_globalContext";
 import Pagination from "../components/pagination/pagination";
+import Footer from "../components/footer/footer";
 
 const PaymentProof = () => {
     const { navBar_global_context_state } = useContext(NavBar_global_context);
@@ -9,12 +10,12 @@ const PaymentProof = () => {
     const itemsPerPage = 10;
     const indexOfLastRecord = currentPage_state * itemsPerPage;
     const indexOfFirstRecord = indexOfLastRecord - itemsPerPage;
-    const currentRecords = navBar_global_context_state?.slice(indexOfFirstRecord, indexOfLastRecord) || [];
+    const currentRecords = Array.from(navBar_global_context_state)?.slice(indexOfFirstRecord, indexOfLastRecord) || [];
     const totalPages = Math.ceil((navBar_global_context_state?.length || 0) / itemsPerPage);
 
     return (
-        <div className="overflow-auto custom-scrollbar h-[92.5dvh] bg-gradient-to-r from-green-100 to-blue-100 flex flex-col items-center py-10">
-            <div className="w-full px-4">
+        <div className="overflow-auto custom-scrollbar h-[92.5dvh] flex flex-col justify-between bg-gradient-to-r from-green-100 to-blue-100 pt-8">
+            <div className="w-full px-4 ">
                 <h2 className="text-4xl font-bold text-center text-green-800 mb-8">
                     Payment Proof
                 </h2>
@@ -77,6 +78,9 @@ const PaymentProof = () => {
                         onPageChange={setCurrentPage_state}
                     />
                 )}
+            </div>
+            <div className='mt-3'>
+                <Footer />
             </div>
         </div>
     );

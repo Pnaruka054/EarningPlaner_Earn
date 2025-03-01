@@ -88,9 +88,9 @@ const SideMenu = () => {
 
         {/* Privacy & Legal Links */}
         <div className="mt-10 border-t border-gray-700 pt-4 space-y-2 text-gray-400 text-sm">
-          <NavItem to="/privacy-policy" icon={<ShieldCheck />} label="Privacy Policy" />
-          <NavItem to="/terms-of-use" icon={<FileWarning />} label="Terms of Use" />
-          <NavItem to="/dmca" icon={<FileLock />} label="DMCA" />
+          <NavItem to="/admin/privacy-policy" icon={<ShieldCheck />} label="Privacy Policy" />
+          <NavItem to="/admin/terms-of-use" icon={<FileWarning />} label="Terms of Use" />
+          <NavItem to="/admin/dmca" icon={<FileLock />} label="DMCA" />
         </div>
       </div>
 

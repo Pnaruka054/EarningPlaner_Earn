@@ -20,7 +20,7 @@ const FAQs = () => {
 
             {/* FAQs Box */}
             <div className="mx-auto">
-                {navBar_global_context_state?.map((faq, index) => (
+                {Array.from(navBar_global_context_state).map((faq, index) => (
                     <div key={index} className="mb-4">
                         {/* Question Box */}
                         <button

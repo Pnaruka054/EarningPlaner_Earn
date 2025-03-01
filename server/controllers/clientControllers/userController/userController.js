@@ -14,8 +14,8 @@ const getFormattedMonth = require("../../../helper/getFormattedMonth")
 const userUniqueTokenData_module = require('../../../model/userUniqueTokenData_10minEx/userUniqueTokenData_module')
 const other_data_module = require('../../../model/other_data/other_data_module')
 
-function jwt_accessToken(user) {
-    return jwt.sign({ jwtUser: user }, process.env.JWT_ACCESS_KEY, { expiresIn: '2h' })
+function jwt_accessToken(user, time) {
+    return jwt.sign({ jwtUser: user }, process.env.JWT_ACCESS_KEY, { expiresIn: time })
 }
 
 // for user registration
@@ -123,7 +123,7 @@ let userSignUp = async (req, res) => {
 // for user login
 const userLogin = async (req, res) => {
     try {
-        let { email_userName, password } = req.body;
+        let { email_userName, password, loginRemember_state } = req.body;
 
         // check if your details are received or not
         if (!email_userName || !password) {
@@ -174,15 +174,25 @@ const userLogin = async (req, res) => {
         }
 
         // create jwt token to login
-        let jwt_token = jwt_accessToken(isExists);
+        let jwt_token = null;
 
-        // Set the JWT token in an HttpOnly cookie
-        res.cookie('jwtToken', jwt_token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'None',
-            maxAge: 7200000 // 2 hour
-        });
+        if (loginRemember_state) {
+            jwt_token = jwt_accessToken(isExists, '24h')
+            res.cookie('jwtToken', jwt_token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+                maxAge: 86400000 // 24 hour
+            });
+        } else {
+            jwt_token = jwt_accessToken(isExists, '12h')
+            res.cookie('jwtToken', jwt_token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+                maxAge: 43200000 // 12 hour
+            });
+        }
 
         return res.status(200).json({
             success: true,
@@ -311,20 +321,18 @@ const user_signUp_login_google = async (req, res) => {
             }).save()
 
             // create jwt token to login
-            jwt_token = jwt_accessToken(user_data)
+            jwt_token = jwt_accessToken(user_data, '12h')
         } else {
             // create jwt token to login
-            jwt_token = jwt_accessToken(isExists)
+            jwt_token = jwt_accessToken(isExists, '12h')
         }
 
         // Set the JWT token in an HttpOnly cookie
         res.cookie('jwtToken', jwt_token, {
             httpOnly: true,
             secure: true,
-            // secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
             sameSite: 'None',
-            maxAge: 7200000 // 2 hour
+            maxAge: 43200000 // 12 hour
         });
 
         return res.status(200).json({

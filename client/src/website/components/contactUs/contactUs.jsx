@@ -151,7 +151,7 @@ const ContactUs = ({ forMember, setAvailableBalance_forNavBar_state }) => {
     )
   } else if (forMember === false) {
     return (
-      <div className="overflow-auto h-[92.5dvh]">
+      <div className="overflow-auto h-[92.5dvh] custom-scrollbar">
         <section id="contactForm" className="mt-5 mx-2 bg-white shadow-md rounded-lg p-8 border border-gray-200">
           <div className="text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-blue-900 relative inline-block">

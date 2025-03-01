@@ -1,17 +1,20 @@
 let current_time_get = () => {
-    const currentTime = new Date();
+    const currentTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
 
-    // Create a custom date format: "30/11/24 10:25 PM"
+    const dateObj = new Date(currentTime); // Convert to Date object in IST
+
+    // Format: "30/11/24 10:25 PM"
     const formattedTime = new Intl.DateTimeFormat('en-GB', {
         day: '2-digit',
         month: '2-digit',
         year: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
-        hour12: true
-    }).format(currentTime);
+        hour12: true,
+        timeZone: 'Asia/Kolkata' // ✅ Ensure India Time
+    }).format(dateObj);
 
-    return formattedTime; // Return custom formatted time
+    return formattedTime;
 };
 
-module.exports = current_time_get
+module.exports = current_time_get;

@@ -988,7 +988,7 @@ const getUserData = async (req, res) => {
         console.error("Error fetching user data:", error);
         return res.status(500).json({
             success: false,
-            message: "Failed to fetch user data.",
+            message: "Internal Server Error. Please try again later.",
             error: error.message,
         });
     }
@@ -1023,6 +1023,149 @@ const update_withdrawal_instructions_data = async (req, res) => {
 };
 
 
+// handle Privacy Policy
+const getPrivacy_policyData = async (req, res) => {
+    try {
+        const other_data_privacy_policy = await other_data_module.findOne({documentName:"privacy_policy"});
+       
+        return res.status(200).json({
+            success: true,
+            msg: other_data_privacy_policy,
+        });
+    } catch (error) {
+        console.error("Error fetching privacy_policy data:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error. Please try again later.",
+            error: error.message,
+        });
+    }
+};
+
+const patch_privacy_policy_data = async (req, res) => {
+    try {
+        let { privacy_policy } = req.body;
+
+        if (!privacy_policy) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Invalid Data Received."
+            });
+        }
+
+        let updatedData = await other_data_module.findOneAndUpdate(
+            { documentName: "privacy_policy" },
+            { privacy_policy },
+            { new: true, upsert: true }
+        );
+
+        res.status(200).json({ success: true, msg: updatedData });
+    } catch (error) {
+        console.error("Error updating terms_of_use data:", error);
+        res.status(500).json({
+            success: false,
+            msg: "Internal Server Error. Please try again later.",
+            error: error.message
+        });
+    }
+};
+
+
+// handle terms_of_use
+const getTerms_of_useData = async (req, res) => {
+    try {
+        const other_data_terms_of_use = await other_data_module.findOne({documentName:"terms_of_use"});
+       
+        return res.status(200).json({
+            success: true,
+            msg: other_data_terms_of_use,
+        });
+    } catch (error) {
+        console.error("Error fetching terms_of_use data:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error. Please try again later.",
+            error: error.message,
+        });
+    }
+};
+
+const patch_terms_of_use_data = async (req, res) => {
+    try {
+        let { terms_of_use } = req.body;
+
+        if (!terms_of_use) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Invalid Data Received."
+            });
+        }
+
+        let updatedData = await other_data_module.findOneAndUpdate(
+            { documentName: "terms_of_use" },
+            { terms_of_use },
+            { new: true, upsert: true }
+        );
+
+        res.status(200).json({ success: true, msg: updatedData });
+    } catch (error) {
+        console.error("Error updating terms_of_use data:", error);
+        res.status(500).json({
+            success: false,
+            msg: "Internal Server Error. Please try again later.",
+            error: error.message
+        });
+    }
+};
+
+
+// handle getDmcaData
+const getDmcaData = async (req, res) => {
+    try {
+        const other_data_dmca = await other_data_module.findOne({documentName:"dmca"});
+       
+        return res.status(200).json({
+            success: true,
+            msg: other_data_dmca,
+        });
+    } catch (error) {
+        console.error("Error fetching dmca data:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error. Please try again later.",
+            error: error.message,
+        });
+    }
+};
+
+const patch_dmca_data = async (req, res) => {
+    try {
+        let { dmca } = req.body;
+
+        if (!dmca) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Invalid Data Received."
+            });
+        }
+
+        let updatedData = await other_data_module.findOneAndUpdate(
+            { documentName: "dmca" },
+            { dmca },
+            { new: true, upsert: true }
+        );
+
+        res.status(200).json({ success: true, msg: updatedData });
+    } catch (error) {
+        console.error("Error updating dmca data:", error);
+        res.status(500).json({
+            success: false,
+            msg: "Internal Server Error. Please try again later.",
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     adminLogin,
     adminLogout,
@@ -1050,5 +1193,11 @@ module.exports = {
     getWithdrawalsData,
     updateWithdrawalsData,
     getUserData,
-    update_withdrawal_instructions_data
+    update_withdrawal_instructions_data,
+    getPrivacy_policyData,
+    patch_privacy_policy_data,
+    getTerms_of_useData,
+    patch_terms_of_use_data,
+    getDmcaData,
+    patch_dmca_data
 }

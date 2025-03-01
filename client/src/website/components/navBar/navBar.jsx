@@ -12,7 +12,7 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
     const [toggelMenu_state, setToggelMenu_state] = useState("reorder-three");
     let [data_process_state, setData_process_state] = useState(false);
     let [isUserLogin_state, setIsUserLogin_state] = useState(false);
-    const { _, setNavBar_global_context_state } = useContext(NavBar_global_context);
+    const { setNavBar_global_context_state, setNavBar_to_privacyPolicy_dmca_termsOfUse_context_state } = useContext(NavBar_global_context);
 
     let toggleMenu_icon = useRef(null)
     const navigation = useNavigate();
@@ -93,6 +93,12 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
                     queryParams = "?faq=true";
                 } else if (location.pathname === "/payment-proof") {
                     queryParams = "?paymentProof=true";
+                } else if (location.pathname === "/privacy-policy") {
+                    queryParams = "?privacy_policy=true";
+                } else if (location.pathname === "/dmca") {
+                    queryParams = "?dmca=true";
+                } else if (location.pathname === "/terms-of-use") {
+                    queryParams = "?terms_of_use=true";
                 }
 
                 const url = `${import.meta.env.VITE_SERVER_URL}/checkLogin_for_navBar${queryParams}`
@@ -103,6 +109,12 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
                     setNavBar_global_context_state(response?.data?.msg?.other_data_faqArray);
                 } else if (location.pathname === "/payment-proof") {
                     setNavBar_global_context_state(response.data.msg.paymentProof_data);
+                } else if (location.pathname === "/privacy-policy") {
+                    setNavBar_to_privacyPolicy_dmca_termsOfUse_context_state(response.data.msg.privacy_policy_data);
+                } else if (location.pathname === "/dmca") {
+                    setNavBar_to_privacyPolicy_dmca_termsOfUse_context_state(response.data.msg.dmca_data);
+                } else if (location.pathname === "/terms-of-use") {
+                    setNavBar_to_privacyPolicy_dmca_termsOfUse_context_state(response.data.msg.terms_of_use_data);
                 }
 
                 setIsUserLogin_state(response.data.msg.isLogin);

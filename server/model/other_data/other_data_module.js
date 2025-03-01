@@ -4,10 +4,10 @@ const other_data_schema = new mongoose.Schema({
     documentName: { type: String, require: true },
     viewAds_pendingClick: { type: String },
     viewAds_pendingUpdates: { type: String },
-    viewAds_instructions: { type: Array },
+    viewAds_instructions: { type: Array, default: undefined },
     shortLink_pendingClick: { type: String },
     shortLink_pendingUpdates: { type: String },
-    shortLink_instructions: { type: Array },
+    shortLink_instructions: { type: Array, default: undefined },
     referralRate: { type: String },
     referralPageText: { type: String },
     announcementTitle: { type: String },
@@ -15,10 +15,13 @@ const other_data_schema = new mongoose.Schema({
     announcementTime: { type: String },
     faqQuestioin: { type: String },
     faqAnswer: { type: String },
-    withdrawal_instructions: { type: Array },
+    withdrawal_instructions: { type: Array, default: undefined },
     withdrawalMethod_name: { type: String },
     withdrawalMethod_minimumAmount: { type: String },
-    withdrawalMethod_details: { type: String }
+    withdrawalMethod_details: { type: String },
+    privacy_policy: { type: String },
+    terms_of_use: { type: String },
+    dmca: { type: String },
 })
 
 const other_data_module = mongoose.model("other_data", other_data_schema)
