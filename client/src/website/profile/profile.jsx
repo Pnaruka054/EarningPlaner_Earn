@@ -5,6 +5,7 @@ import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import showNotificationWith_timer from '../components/showNotificationWith_timer';
 import showNotification from '../components/showNotification';
 import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate'
+import { Helmet } from 'react-helmet';
 
 const Profile = ({ setAvailableBalance_forNavBar_state }) => {
     const [formData_state, setFormData_state] = useState({
@@ -89,79 +90,90 @@ const Profile = ({ setAvailableBalance_forNavBar_state }) => {
 
     if (data_process_state) {
         return (
-            <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
-                <ProcessBgSeprate />
-            </div>
+            <>
+                <Helmet>
+                    <title>EarnWiz User Profile</title>
+                    <meta name="description" content="View and update your personal details on your EarnWiz User Profile. Keep your information current for a seamless earning experience." />
+                </Helmet>
+                <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[94vh] mt-12">
+                    <ProcessBgSeprate />
+                </div>
+            </>
         )
     }
     return (
-        <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] custom-scrollbar overflow-auto h-[93.3dvh] mt-12">
-            <form method="post" onSubmit={handleSubmit} className='pt-4 px-4 pb-5'>
-                <legend className="text-2xl text-blue-600 font-semibold my-4 mx-1 select-none flex justify-between">Profile & Billing Section</legend>
-                <div className="mb-4">
-                    <label htmlFor="name" className="block text-gray-700">Full Name</label>
-                    <input
-                        type="text"
-                        name="name"
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                        id="name"
-                        value={formData_state.name}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="address" className="block text-gray-700">Address</label>
-                    <input
-                        type="text"
-                        name="address"
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                        id="address"
-                        value={formData_state.address}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <>
+            <Helmet>
+                <title>EarnWiz User Profile</title>
+                <meta name="description" content="View and update your personal details on your EarnWiz User Profile. Keep your information current for a seamless earning experience." />
+            </Helmet>
+            <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] custom-scrollbar overflow-auto h-[93.3dvh] mt-12">
+                <form method="post" onSubmit={handleSubmit} className='pt-4 px-4 pb-5'>
+                    <legend className="text-2xl text-blue-600 font-semibold my-4 mx-1 select-none flex justify-between">Profile & Billing Section</legend>
                     <div className="mb-4">
-                        <label htmlFor="city" className="block text-gray-700">City</label>
+                        <label htmlFor="name" className="block text-gray-700">Full Name</label>
                         <input
                             type="text"
-                            name="city"
+                            name="name"
                             className="w-full p-2 border border-gray-300 rounded-md"
-                            id="city"
-                            value={formData_state.city}
+                            id="name"
+                            value={formData_state.name}
                             onChange={handleChange}
                             required
                         />
                     </div>
                     <div className="mb-4">
-                        <label htmlFor="state" className="block text-gray-700">State</label>
+                        <label htmlFor="address" className="block text-gray-700">Address</label>
                         <input
                             type="text"
-                            name="state"
+                            name="address"
                             className="w-full p-2 border border-gray-300 rounded-md"
-                            id="state"
-                            value={formData_state.state}
+                            id="address"
+                            value={formData_state.address}
                             onChange={handleChange}
                             required
                         />
                     </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="mb-4">
-                        <label htmlFor="zip_code" className="block text-gray-700">ZIP</label>
-                        <input
-                            type="text"
-                            name="zip_code"
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            id="zip_code"
-                            value={formData_state.zip_code}
-                            onChange={handleChange}
-                            required
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="mb-4">
+                            <label htmlFor="city" className="block text-gray-700">City</label>
+                            <input
+                                type="text"
+                                name="city"
+                                className="w-full p-2 border border-gray-300 rounded-md"
+                                id="city"
+                                value={formData_state.city}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label htmlFor="state" className="block text-gray-700">State</label>
+                            <input
+                                type="text"
+                                name="state"
+                                className="w-full p-2 border border-gray-300 rounded-md"
+                                id="state"
+                                value={formData_state.state}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
                     </div>
-                    {/* <div className="mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="mb-4">
+                            <label htmlFor="zip_code" className="block text-gray-700">ZIP</label>
+                            <input
+                                type="text"
+                                name="zip_code"
+                                className="w-full p-2 border border-gray-300 rounded-md"
+                                id="zip_code"
+                                value={formData_state.zip_code}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        {/* <div className="mb-4">
                         <label htmlFor="country" className="block text-gray-700">Country</label>
                         <select
                             name="country"
@@ -179,82 +191,83 @@ const Profile = ({ setAvailableBalance_forNavBar_state }) => {
                             ))}
                         </select>
                     </div> */}
-                    <div className="mb-4">
-                        <label htmlFor="mobile_number" className="block text-gray-700">Phone Number</label>
-                        <input
-                            type="text"
-                            name="mobile_number"
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            id="mobile_number"
-                            value={formData_state.mobile_number}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                </div>
-
-                <legend className="text-xl font-semibold mt-6">Withdrawal Info</legend>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
                         <div className="mb-4">
-                            <label htmlFor="withdrawal_method" className="block mt-4 text-gray-700">Withdrawal Method</label>
-                            <select
-                                name="withdrawal_method"
+                            <label htmlFor="mobile_number" className="block text-gray-700">Phone Number</label>
+                            <input
+                                type="text"
+                                name="mobile_number"
                                 className="w-full p-2 border border-gray-300 rounded-md"
-                                id="withdrawal_method"
-                                value={formData_state.withdrawal_method}
+                                id="mobile_number"
+                                value={formData_state.mobile_number}
                                 onChange={handleChange}
                                 required
-                            >
-                                <option value="">Choose</option>
-                                {formData_state.other_data_withdrawalMethodArray?.map((method, index) => (
-                                    <option key={index} value={method.withdrawalMethod_name}>{method.withdrawalMethod_name}</option>
-                                ))}
-                            </select>
+                            />
                         </div>
-                        <ul className='mt-3 space-y-5 sm:mb-0 mb-4' style={{ fontSize: "14px" }}>
-                            {formData_state.other_data_withdrawalMethodArray?.map((method, index) => (
-                                <li className='purple-right-list-image' key={index}> {method.withdrawalMethod_details}</li>
-                            ))}
-                        </ul>
                     </div>
-                    <div className="mt-4 bg-white flex">
-                        <table className="min-w-full table-auto">
-                            <thead>
-                                <tr>
-                                    <th className="p-2 text-left text-gray-700">Withdraw Method</th>
-                                    <th className="p-2 text-left text-gray-700">Minimum Withdrawal Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+
+                    <legend className="text-xl font-semibold mt-6">Withdrawal Info</legend>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <div className="mb-4">
+                                <label htmlFor="withdrawal_method" className="block mt-4 text-gray-700">Withdrawal Method</label>
+                                <select
+                                    name="withdrawal_method"
+                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                    id="withdrawal_method"
+                                    value={formData_state.withdrawal_method}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Choose</option>
+                                    {formData_state.other_data_withdrawalMethodArray?.map((method, index) => (
+                                        <option key={index} value={method.withdrawalMethod_name}>{method.withdrawalMethod_name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <ul className='mt-3 space-y-5 sm:mb-0 mb-4' style={{ fontSize: "14px" }}>
                                 {formData_state.other_data_withdrawalMethodArray?.map((method, index) => (
-                                    <tr key={index} className="border-t">
-                                        <td className="p-2">{method.withdrawalMethod_name}</td>
-                                        <td className="p-2">₹{method.withdrawalMethod_minimumAmount}</td>
-                                    </tr>
+                                    <li className='purple-right-list-image' key={index}> {method.withdrawalMethod_details}</li>
                                 ))}
-                            </tbody>
-                        </table>
+                            </ul>
+                        </div>
+                        <div className="mt-4 bg-white flex">
+                            <table className="min-w-full table-auto">
+                                <thead>
+                                    <tr>
+                                        <th className="p-2 text-left text-gray-700">Withdraw Method</th>
+                                        <th className="p-2 text-left text-gray-700">Minimum Withdrawal Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {formData_state.other_data_withdrawalMethodArray?.map((method, index) => (
+                                        <tr key={index} className="border-t">
+                                            <td className="p-2">{method.withdrawalMethod_name}</td>
+                                            <td className="p-2">₹{method.withdrawalMethod_minimumAmount}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-                <div className="my-4">
-                    <label htmlFor="withdrawal_account_information" className="block text-gray-700">Withdrawal Account</label>
-                    <textarea
-                        name="withdrawal_account_information"
-                        className="w-full p-3 border border-gray-300 rounded-md"
-                        id="withdrawal_account_information"
-                        rows="5"
-                        value={formData_state.withdrawal_account_information}
-                        onChange={handleChange}
-                        required
-                    ></textarea>
-                </div>
-                <button type="submit" disabled={submit_process_state} className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"} w-full py-3 mt-4 text-white rounded mb-2 transition`}>
-                    {!submit_process_state ? "Submit" : <i className="fa-solid fa-spinner fa-spin"></i>}
-                </button>
-            </form >
-            {submit_process_state && <ProcessBgBlack />}
-        </div >
+                    <div className="my-4">
+                        <label htmlFor="withdrawal_account_information" className="block text-gray-700">Withdrawal Account</label>
+                        <textarea
+                            name="withdrawal_account_information"
+                            className="w-full p-3 border border-gray-300 rounded-md"
+                            id="withdrawal_account_information"
+                            rows="5"
+                            value={formData_state.withdrawal_account_information}
+                            onChange={handleChange}
+                            required
+                        ></textarea>
+                    </div>
+                    <button type="submit" disabled={submit_process_state} className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"} w-full py-3 mt-4 text-white rounded mb-2 transition`}>
+                        {!submit_process_state ? "Submit" : <i className="fa-solid fa-spinner fa-spin"></i>}
+                    </button>
+                </form >
+                {submit_process_state && <ProcessBgBlack />}
+            </div >
+        </>
     );
 };
 

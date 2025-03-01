@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import ProcessBgBlack from "../components/processBgBlack/processBgBlack";
 import showNotificationWith_timer from '../components/showNotificationWith_timer'
 import showNotification from '../components/showNotification'
+import { Helmet } from 'react-helmet';
 
 const PasswordResetForm = () => {
     const [password_state, setPassword_state] = useState("");
@@ -99,43 +100,49 @@ const PasswordResetForm = () => {
     }
 
     return (
-        <div className="flex h-[90vh] items-center justify-center">
-            <div className="md:w-[45%] sm:w-[90%] w-[97%]">
-                <h1 className="text-3xl font-medium text-center mb-5 select-none">
-                    Reset Password
-                </h1>
-                <form onSubmit={handlePasswordUpdate_submit}>
-                    <input
-                        type="password"
-                        value={password_state}
-                        onChange={(e) => setPassword_state(e.target.value)}
-                        placeholder="Enter new password"
-                        required
-                        className="w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400"
-                    />
-                    <input
-                        type="password"
-                        value={confirmPassword_state}
-                        onChange={(e) => setConfirmPassword_state(e.target.value)}
-                        placeholder="Confirm new password"
-                        required
-                        className="w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400"
-                    />
-                    <button
-                        type="submit"
-                        disabled={submit_process_state}
-                        className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"
-                            } w-full text-white rounded py-1 mb-2 transition`}
-                    >
-                        {!submit_process_state ? "Reset Password" : <i className="fa-solid fa-spinner fa-spin"></i>}
-                    </button>
-                </form>
-                <Link to="/login" className="text-blue-600 underline">
-                    I Remember My Password
-                </Link>
+        <>
+            <Helmet>
+                <title>EarnWiz - Password Reset Form</title>
+                <meta name="description" content="Reset your EarnWiz password quickly and securely. Enter your email to receive a reset link and update your credentials for uninterrupted access." />
+            </Helmet>
+            <div className="flex h-[90vh] items-center justify-center">
+                <div className="md:w-[45%] sm:w-[90%] w-[97%]">
+                    <h1 className="text-3xl font-medium text-center mb-5 select-none">
+                        Reset Password
+                    </h1>
+                    <form onSubmit={handlePasswordUpdate_submit}>
+                        <input
+                            type="password"
+                            value={password_state}
+                            onChange={(e) => setPassword_state(e.target.value)}
+                            placeholder="Enter new password"
+                            required
+                            className="w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400"
+                        />
+                        <input
+                            type="password"
+                            value={confirmPassword_state}
+                            onChange={(e) => setConfirmPassword_state(e.target.value)}
+                            placeholder="Confirm new password"
+                            required
+                            className="w-full rounded outline-none border-2 px-2 py-1 inline-block mb-2 focus:border-blue-400"
+                        />
+                        <button
+                            type="submit"
+                            disabled={submit_process_state}
+                            className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"
+                                } w-full text-white rounded py-1 mb-2 transition`}
+                        >
+                            {!submit_process_state ? "Reset Password" : <i className="fa-solid fa-spinner fa-spin"></i>}
+                        </button>
+                    </form>
+                    <Link to="/login" className="text-blue-600 underline">
+                        I Remember My Password
+                    </Link>
+                </div>
+                {(submit_process_state || data_process_state) && <ProcessBgBlack />}
             </div>
-            {(submit_process_state || data_process_state) && <ProcessBgBlack />}
-        </div>
+        </>
     );
 };
 

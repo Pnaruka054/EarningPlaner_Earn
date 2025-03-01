@@ -9,6 +9,7 @@ import { FaClipboard, FaClipboardCheck } from "react-icons/fa";
 import showNotificationWith_timer from '../components/showNotificationWith_timer';
 import showNotification from '../components/showNotification';
 import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate';
+import { Helmet } from 'react-helmet';
 
 const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
     const [withdraw_amount_state, setWithdraw_amount_state] = useState(0);
@@ -284,141 +285,147 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
         );
     }
     return (
-        <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] mt-12 custom-scrollbar">
-            <div className='px-2 py-2'>
-                <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
-                    Withdraw Amount
-                </div>
-                <div className="sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5 mb-4 sm:space-y-0 space-y-5">
-                    <div className="bg-teal-500 p-6 rounded-lg shadow-md text-white relative">
-                        <div className="flex flex-col justify-between h-full">
-                            <h3 className="text-3xl font-semibold">₹{balanceData_state.deposit_amount}</h3>
-                            <p className="text-lg">Deposit Balance</p>
+        <>
+            <Helmet>
+                <title>EarnWiz Member Withdrawal</title>
+                <meta name="description" content="Withdraw your earnings securely via our member withdrawal page. Process your requests quickly and track your withdrawal status effortlessly on EarnWiz." />
+            </Helmet>
+            <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] mt-12 custom-scrollbar">
+                <div className='px-2 py-2'>
+                    <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
+                        Withdraw Amount
+                    </div>
+                    <div className="sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5 mb-4 sm:space-y-0 space-y-5">
+                        <div className="bg-teal-500 p-6 rounded-lg shadow-md text-white relative">
+                            <div className="flex flex-col justify-between h-full">
+                                <h3 className="text-3xl font-semibold">₹{balanceData_state.deposit_amount}</h3>
+                                <p className="text-lg">Deposit Balance</p>
+                            </div>
+                            <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
+                                <i className="fa-solid fa-credit-card"></i>
+                            </div>
                         </div>
-                        <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
-                            <i className="fa-solid fa-credit-card"></i>
+                        <div className="bg-teal-500 p-6 rounded-lg shadow-md text-white relative">
+                            <div className="flex flex-col justify-between h-full">
+                                <h3 className="text-3xl font-semibold">₹{balanceData_state.withdrawable_amount}</h3>
+                                <p className="text-lg">Withdrawable Balance</p>
+                            </div>
+                            <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
+                                <i className="fa-duotone fa-light fa-money-from-bracket"></i>
+                            </div>
+                        </div>
+                        <div className="bg-cyan-500 p-6 hidden lg:block rounded-lg shadow-md text-white relative row-span-3">
+                            <div className="flex flex-col justify-center sm:items-center h-full">
+                                <h3 className="text-3xl xl:text-4xl font-semibold">
+                                    ₹{
+                                        isNaN(parseFloat(balanceData_state.available_amount))
+                                            ? (parseFloat(balanceData_state.deposit_amount) || parseFloat(balanceData_state.withdrawable_amount) || "0.000")
+                                            : parseFloat(balanceData_state.available_amount).toFixed(3)
+                                    }
+                                </h3>
+                                <p className="text-lg">Available Balance</p>
+                            </div>
+                            <div className="absolute top-4 right-4 text-5xl opacity-[0.2]">
+                                <i className="fa-solid fa-wallet"></i>
+                            </div>
+                        </div>
+                        <div className="p-2 rounded-lg relative col-span-2 flex justify-center text-xl">
+                            <button onClick={handelDeposit_to_withdrawal} className='bg-blue-500 hover:bg-blue-600 px-4 py-2 text-white'>
+                                <i className="fa-solid fa-rotate"></i> <span>Convert to withdrawable Balance</span>
+                            </button>
+                        </div>
+                        <div className="bg-cyan-500 p-6 max-h-60 block lg:hidden rounded-lg shadow-md text-white relative row-span-3">
+                            <div className="flex flex-col justify-center sm:items-center h-full">
+                                <h3 className="text-3xl font-semibold">
+                                    ₹{
+                                        isNaN(parseFloat(balanceData_state.available_amount))
+                                            ? (parseFloat(balanceData_state.deposit_amount) || parseFloat(balanceData_state.withdrawable_amount) || "0.000")
+                                            : parseFloat(balanceData_state.available_amount).toFixed(3)
+                                    }
+                                </h3>
+                                <p className="text-lg">Available Balance</p>
+                            </div>
+                            <div className="absolute top-4 right-4 text-7xl opacity-[0.2]">
+                                <i className="fa-solid fa-wallet"></i>
+                            </div>
+                        </div>
+                        <div className="bg-red-500 p-6 rounded-lg shadow-md text-white relative">
+                            <div className="flex flex-col justify-between h-full">
+                                <h3 className="text-3xl font-semibold">₹{balanceData_state.pending_withdrawal_amount}</h3>
+                                <p className="text-lg">Pending Withdrawn</p>
+                            </div>
+                            <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
+                                <i className="fa fa-share"></i>
+                            </div>
+                        </div>
+                        <div className="bg-green-500 p-6 rounded-lg shadow-md text-white relative">
+                            <div className="flex flex-col justify-between h-full">
+                                <h3 className="text-3xl font-semibold">₹{balanceData_state.total_withdrawal_amount}</h3>
+                                <p className="text-lg">Total Withdraw</p>
+                            </div>
+                            <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
+                                <i className="fa-solid fa-indian-rupee-sign"></i>
+                            </div>
                         </div>
                     </div>
-                    <div className="bg-teal-500 p-6 rounded-lg shadow-md text-white relative">
-                        <div className="flex flex-col justify-between h-full">
-                            <h3 className="text-3xl font-semibold">₹{balanceData_state.withdrawable_amount}</h3>
-                            <p className="text-lg">Withdrawable Balance</p>
-                        </div>
-                        <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
-                            <i className="fa-duotone fa-light fa-money-from-bracket"></i>
-                        </div>
-                    </div>
-                    <div className="bg-cyan-500 p-6 hidden lg:block rounded-lg shadow-md text-white relative row-span-3">
-                        <div className="flex flex-col justify-center sm:items-center h-full">
-                            <h3 className="text-3xl xl:text-4xl font-semibold">
-                                ₹{
-                                    isNaN(parseFloat(balanceData_state.available_amount))
-                                        ? (parseFloat(balanceData_state.deposit_amount) || parseFloat(balanceData_state.withdrawable_amount) || "0.000")
-                                        : parseFloat(balanceData_state.available_amount).toFixed(3)
-                                }
-                            </h3>
-                            <p className="text-lg">Available Balance</p>
-                        </div>
-                        <div className="absolute top-4 right-4 text-5xl opacity-[0.2]">
-                            <i className="fa-solid fa-wallet"></i>
+                    <div className='px-5'>
+                        <input
+                            type="text"
+                            value={withdraw_amount_state}
+                            onFocus={() => setWithdraw_amount_state('')}
+                            onBlur={() => setWithdraw_amount_state((prev) => prev === '' ? '0' : prev)}
+                            onChange={(e) => {
+                                const val = e.target.value.replace(/[^0-9]/g, '');
+                                setWithdraw_amount_state(val);
+                            }}
+                            required
+                            className="block w-full my-3 pl-10 py-2 px-3 outline-none text-blue-600 no-arrows rounded-md rupees_symbol bg-no-repeat"
+                        />
+                        <div className='space-x-5 flex justify-center'>
+                            <button onClick={handleUserWithdrawals} className='w-full py-2 bg-green-600 text-white'>Withdraw Now</button>
+                            <button onClick={() => setWithdraw_amount_state(0)} className='w-full py-2 bg-red-600 text-white'>Clear</button>
                         </div>
                     </div>
-                    <div className="p-2 rounded-lg relative col-span-2 flex justify-center text-xl">
-                        <button onClick={handelDeposit_to_withdrawal} className='bg-blue-500 hover:bg-blue-600 px-4 py-2 text-white'>
-                            <i className="fa-solid fa-rotate"></i> <span>Convert to withdrawable Balance</span>
-                        </button>
+                    <div className='bg-white my-5 pb-5 rounded-xl border border-green-800'>
+                        <p className='text-center text-xl font-bold my-4'>Withdraw Instructions</p>
+                        <hr className='w-[95%] m-auto border' />
+                        <ul className='px-6 mt-2'>
+                            {
+                                balanceData_state?.other_data_withdrawal_instructions?.map((value, index) => <li key={index} className='blue-right-list-image'>{value}</li>)
+                            }
+                        </ul>
                     </div>
-                    <div className="bg-cyan-500 p-6 max-h-60 block lg:hidden rounded-lg shadow-md text-white relative row-span-3">
-                        <div className="flex flex-col justify-center sm:items-center h-full">
-                            <h3 className="text-3xl font-semibold">
-                                ₹{
-                                    isNaN(parseFloat(balanceData_state.available_amount))
-                                        ? (parseFloat(balanceData_state.deposit_amount) || parseFloat(balanceData_state.withdrawable_amount) || "0.000")
-                                        : parseFloat(balanceData_state.available_amount).toFixed(3)
-                                }
-                            </h3>
-                            <p className="text-lg">Available Balance</p>
-                        </div>
-                        <div className="absolute top-4 right-4 text-7xl opacity-[0.2]">
-                            <i className="fa-solid fa-wallet"></i>
-                        </div>
+                    <div className="my-5 pb-5">
+                        <p className="text-center text-xl font-bold my-4">Withdraw History</p>
+                        <hr className="mx-auto w-11/12 border border-gray-300" />
+                        <ul className="mt-6 space-y-4">
+                            {currentReferrals?.map((record, index) => (
+                                <WithdrawalRow
+                                    key={index}
+                                    record={record}
+                                />
+                            ))}
+                        </ul>
+                        {currentReferrals.length === 0 && (
+                            <div className="text-center h-32 flex items-center justify-center text-gray-500 font-semibold">
+                                🚫 No Withdrawals Yet
+                            </div>
+                        )}
                     </div>
-                    <div className="bg-red-500 p-6 rounded-lg shadow-md text-white relative">
-                        <div className="flex flex-col justify-between h-full">
-                            <h3 className="text-3xl font-semibold">₹{balanceData_state.pending_withdrawal_amount}</h3>
-                            <p className="text-lg">Pending Withdrawn</p>
-                        </div>
-                        <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
-                            <i className="fa fa-share"></i>
-                        </div>
-                    </div>
-                    <div className="bg-green-500 p-6 rounded-lg shadow-md text-white relative">
-                        <div className="flex flex-col justify-between h-full">
-                            <h3 className="text-3xl font-semibold">₹{balanceData_state.total_withdrawal_amount}</h3>
-                            <p className="text-lg">Total Withdraw</p>
-                        </div>
-                        <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
-                            <i className="fa-solid fa-indian-rupee-sign"></i>
-                        </div>
-                    </div>
-                </div>
-                <div className='px-5'>
-                    <input
-                        type="text"
-                        value={withdraw_amount_state}
-                        onFocus={() => setWithdraw_amount_state('')}
-                        onBlur={() => setWithdraw_amount_state((prev) => prev === '' ? '0' : prev)}
-                        onChange={(e) => {
-                            const val = e.target.value.replace(/[^0-9]/g, '');
-                            setWithdraw_amount_state(val);
-                        }}
-                        required
-                        className="block w-full my-3 pl-10 py-2 px-3 outline-none text-blue-600 no-arrows rounded-md rupees_symbol bg-no-repeat"
-                    />
-                    <div className='space-x-5 flex justify-center'>
-                        <button onClick={handleUserWithdrawals} className='w-full py-2 bg-green-600 text-white'>Withdraw Now</button>
-                        <button onClick={() => setWithdraw_amount_state(0)} className='w-full py-2 bg-red-600 text-white'>Clear</button>
-                    </div>
-                </div>
-                <div className='bg-white my-5 pb-5 rounded-xl border border-green-800'>
-                    <p className='text-center text-xl font-bold my-4'>Withdraw Instructions</p>
-                    <hr className='w-[95%] m-auto border' />
-                    <ul className='px-6 mt-2'>
-                        {
-                            balanceData_state?.other_data_withdrawal_instructions?.map((value, index) => <li key={index} className='blue-right-list-image'>{value}</li>)
-                        }
-                    </ul>
-                </div>
-                <div className="my-5 pb-5">
-                    <p className="text-center text-xl font-bold my-4">Withdraw History</p>
-                    <hr className="mx-auto w-11/12 border border-gray-300" />
-                    <ul className="mt-6 space-y-4">
-                        {currentReferrals?.map((record, index) => (
-                            <WithdrawalRow
-                                key={index}
-                                record={record}
-                            />
-                        ))}
-                    </ul>
-                    {currentReferrals.length === 0 && (
-                        <div className="text-center h-32 flex items-center justify-center text-gray-500 font-semibold">
-                            🚫 No Withdrawals Yet
-                        </div>
+                    {totalPages > 1 && (
+                        <Pagination
+                            totalPages={totalPages}
+                            currentPage={currentPage_state}
+                            onPageChange={setCurrentPage_state}
+                        />
                     )}
                 </div>
-                {totalPages > 1 && (
-                    <Pagination
-                        totalPages={totalPages}
-                        currentPage={currentPage_state}
-                        onPageChange={setCurrentPage_state}
-                    />
-                )}
+                {submit_process_state && <ProcessBgBlack />}
+                <div className='mt-3'>
+                    <Footer />
+                </div>
             </div>
-            {submit_process_state && <ProcessBgBlack />}
-            <div className='mt-3'>
-                <Footer />
-            </div>
-        </div>
+        </>
     );
 };
 

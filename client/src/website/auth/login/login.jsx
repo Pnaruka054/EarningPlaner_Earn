@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import showNotification from '../../components/showNotification'
 import { useGoogleLogin } from "@react-oauth/google";
 import formatTime from '../../components/formatTime'
+import { Helmet } from 'react-helmet';
 
 const Login = () => {
     const [email_userName_state, setEmail_userName_state] = useState('');
@@ -150,68 +151,74 @@ const Login = () => {
     };
 
     return (
-        <div className='flex h-[92.5dvh] items-center justify-center bg-gray-100 overflow-auto custom-scrollbar'>
-            <div className='md:w-[40%] sm:w-[80%] w-[90%] bg-white p-6 rounded-lg shadow-lg '>
-                <h1 className='text-3xl font-semibold text-center mb-6 select-none text-gray-800'>Login</h1>
-                <form onSubmit={handleLogin_submit}>
-                    <div className="mb-4">
-                        <input
-                            type="text"
-                            value={email_userName_state}
-                            onChange={(e) => setEmail_userName_state(e.target.value)}
-                            placeholder='Enter your email or username'
-                            required
-                            className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none'
-                        />
-                    </div>
+        <>
+            <Helmet>
+                <title>EarnWiz - Login</title>
+                <meta name="description" content="Welcome back to EarnWiz! Log in now to continue your journey, access engaging tasks, and unlock rewarding earning opportunities." />
+            </Helmet>
+            <div className='flex h-[92.5dvh] items-center justify-center bg-gray-100 overflow-auto custom-scrollbar'>
+                <div className='md:w-[40%] sm:w-[80%] w-[90%] bg-white p-6 rounded-lg shadow-lg '>
+                    <h1 className='text-3xl font-semibold text-center mb-6 select-none text-gray-800'>Login</h1>
+                    <form onSubmit={handleLogin_submit}>
+                        <div className="mb-4">
+                            <input
+                                type="text"
+                                value={email_userName_state}
+                                onChange={(e) => setEmail_userName_state(e.target.value)}
+                                placeholder='Enter your email or username'
+                                required
+                                className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none'
+                            />
+                        </div>
 
-                    <div className="mb-4 relative">
-                        <input
-                            type={showPassword ? "text" : "password"}
-                            value={password_state}
-                            onChange={(e) => setPassword_state(e.target.value)}
-                            placeholder='Enter your password'
-                            required
-                            className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none pr-10'
-                        />
-                        <span
-                            className="absolute right-3 top-3 cursor-pointer text-gray-600"
-                            onClick={() => setShowPassword(!showPassword)}
-                        >
-                            {showPassword ? <i className="fa-solid fa-eye-slash"></i> : <i className="fa-solid fa-eye"></i>}
-                        </span>
-                    </div>
+                        <div className="mb-4 relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                value={password_state}
+                                onChange={(e) => setPassword_state(e.target.value)}
+                                placeholder='Enter your password'
+                                required
+                                className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none pr-10'
+                            />
+                            <span
+                                className="absolute right-3 top-3 cursor-pointer text-gray-600"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <i className="fa-solid fa-eye-slash"></i> : <i className="fa-solid fa-eye"></i>}
+                            </span>
+                        </div>
 
-                    <div className='mb-4 flex items-center space-x-2'>
-                        <input
-                            type="checkbox"
-                            id="loginRememberCheck"
-                            checked={loginRemember_state}
-                            onChange={(e) => setLoginRemember_state(e.target.checked)}
-                            className='size-4 cursor-pointer'
-                        />
-                        <label className='select-none cursor-pointer' htmlFor="loginRememberCheck">Remember Me</label>
-                    </div>
+                        <div className='mb-4 flex items-center space-x-2'>
+                            <input
+                                type="checkbox"
+                                id="loginRememberCheck"
+                                checked={loginRemember_state}
+                                onChange={(e) => setLoginRemember_state(e.target.checked)}
+                                className='size-4 cursor-pointer'
+                            />
+                            <label className='select-none cursor-pointer' htmlFor="loginRememberCheck">Remember Me</label>
+                        </div>
 
-                    <button type="submit" disabled={submit_process_state} className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"} w-full text-white rounded-lg py-2 font-medium transition`}>
-                        {!submit_process_state ? "Login" : <i className="fa-solid fa-spinner fa-spin"></i>}
+                        <button type="submit" disabled={submit_process_state} className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"} w-full text-white rounded-lg py-2 font-medium transition`}>
+                            {!submit_process_state ? "Login" : <i className="fa-solid fa-spinner fa-spin"></i>}
+                        </button>
+                    </form>
+
+                    <button onClick={handleGoogleLogin} className='w-full mt-4 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg flex items-center justify-center space-x-2 font-medium transition'>
+                        <ion-icon name="logo-google"></ion-icon> <span>Login With Google</span>
                     </button>
-                </form>
 
-                <button onClick={handleGoogleLogin} className='w-full mt-4 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg flex items-center justify-center space-x-2 font-medium transition'>
-                    <ion-icon name="logo-google"></ion-icon> <span>Login With Google</span>
-                </button>
-
-                <p onClick={handleForgotPassword} className='text-blue-600 mt-4 text-center underline cursor-pointer'>I Forgot My Password</p>
-                <p className='mt-4 text-center'>
-                    Don’t have an account? <Link to="/signup" className='text-blue-600 underline'>Register</Link>
-                </p>
+                    <p onClick={handleForgotPassword} className='text-blue-600 mt-4 text-center underline cursor-pointer'>I Forgot My Password</p>
+                    <p className='mt-4 text-center'>
+                        Don’t have an account? <Link to="/signup" className='text-blue-600 underline'>Register</Link>
+                    </p>
+                </div>
+                {submit_process_state && <ProcessBgBlack />}
+                {error_state.length > 0 && error_state.map((value, index) => (
+                    <Error key={index} color="yellow" text={value} />
+                ))}
             </div>
-            {submit_process_state && <ProcessBgBlack />}
-            {error_state.length > 0 && error_state.map((value, index) => (
-                <Error key={index} color="yellow" text={value} />
-            ))}
-        </div>
+        </>
     );
 }
 

@@ -10,6 +10,7 @@ import showNotificationWith_timer from '../../components/showNotificationWith_ti
 import showNotification from '../../components/showNotification';
 import ProcessBgSeprate from '../../components/processBgSeprate/processBgSeprate';
 import { setItemWithExpiry, getItemWithExpiry } from '../../components/handle_localStorage'
+import { Helmet } from 'react-helmet';
 
 const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [handle_clickAds_btnClick_state, setHandle_clickAds_btnClick_state] = useState(false);
@@ -87,22 +88,36 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         setHandle_clickAds_btnClick_state(true);
         channel.postMessage("handle_clickAds_btnClick_state_true");
 
-        const newTab = window.open("", '_blank');
-        if (!newTab) {
-            return alert("Please Allow Popup in Your Browser to Earn Money!");
+        let newTab1 = window.open(link, '_blank');
+        if (!newTab1) {
+            return Swal.fire({
+                icon: "error",
+                title: "Success!",
+                text: "Please Allow Popup in Your Browser to Earn Money!",
+            });;
         }
-        newTab.close();
-
-
-        window.open(link, '_blank');
 
         setTimeout(() => {
-            window.open(link, '_blank');
-        }, 2000);
-
-        setTimeout(() => {
-            window.open(`/waitRedirecting/?link=${encodeURIComponent(link + '||' + btnName + '||' + amount)}`, '_blank', 'noopener noreferrer');
+            let newTab2 = window.open(link, '_blank');
+            if (!newTab2) {
+                return Swal.fire({
+                    icon: "error",
+                    title: "Success!",
+                    text: "Please Allow Popup in Your Browser to Earn Money!",
+                });;
+            }
         }, 3000);
+
+        setTimeout(() => {
+            let newTab3 = window.open(`/waitRedirecting/?link=${encodeURIComponent(link + '||' + btnName + '||' + amount)}`, '_blank', 'noopener noreferrer');
+            if (!newTab3) {
+                return Swal.fire({
+                    icon: "error",
+                    title: "Success!",
+                    text: "Please Allow Popup in Your Browser to Earn Money!",
+                });;
+            }
+        }, 6000);
     };
 
     const handle_link_click2 = (link, btnName, amount) => {
@@ -126,7 +141,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
     // for normal btn ads success check
     useEffect(() => {
-        const handleStorageChange = () => {
+        const handleStorageChange = (e) => {
+            console.log(e);
             const clickSuccessStatus = localStorage.getItem('isSuccess');
             if (!isUserActiveOnPage) {
                 if (clickSuccessStatus && clickSuccessStatus.includes('btn')) {
@@ -190,13 +206,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 earningSound(isChecked_state, false)
                 setTimeout(() => document.title = originalTitle, 2000);
             }
-
-            setIsExtension_state(isExtension === 'true');
         };
-
-        // Initial state setup
-        const isExtension = localStorage.getItem('isExtension');
-        setIsExtension_state(isExtension === 'true');
 
         // Event listeners for storage and beforeunload
         window.addEventListener('storage', handleStorageChange);
@@ -454,147 +464,153 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     }
 
     return (
-        <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] custom-scrollbar mt-12">
-            <div className='px-2 py-2'>
-                <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
-                    View Ads
-                </div>
-                <div className='flex -mb-6 justify-center'>
-                    <div className='bg-purple-700 px-2 py-1 pt-2 shadow font-bold text-white rounded-t-2xl'>
-                        <label className="inline-flex items-center cursor-pointer gap-2">
-                            <input
-                                type="checkbox"
-                                checked={isChecked_state}
-                                onChange={() => setIsChecked_state((prev) => {
-                                    userClickHandle(!prev)
-                                    return !prev
-                                })}
-                                className="sr-only peer"
-                            />
-                            <div className="relative w-10 h-5 bg-gray-300 rounded-full transition-all duration-300 peer-checked:bg-[#00E676]">
-                                <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 shadow-md ${isChecked_state ? "translate-x-5" : ""}`}></div>
-                            </div>
-                            <span className="text-sm font-medium text-white">
-                                Sound: {isChecked_state ? "On" : "Off"}
-                            </span>
-                        </label>
+        <>
+            <Helmet>
+                <title>EarnWiz - View Ads & Earn Money</title>
+                <meta name="description" content="Earn money by viewing ads on EarnWiz. Visit our view ads earnings page to quickly boost your income with minimal effort." />
+            </Helmet>
+            <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] custom-scrollbar mt-12">
+                <div className='px-2 py-2'>
+                    <div className='text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between'>
+                        View Ads
                     </div>
-                </div>
-                <div className='flex flex-col items-center my-6 px-4 text-center'>
-                    <div className="bg-white p-4 sm:p-6 shadow-lg rounded-lg relative w-full">
-                        {/* Click Balance & Income Section */}
-                        <h2 className="text-xl font-semibold text-gray-800 mb-5">💰 Earnings Summary</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4 text-gray-700">
-                            <div className="bg-gray-100 p-3 rounded-lg">
-                                <div className="font-semibold">Pending Earnings:</div>
-                                <div className="text-red-500 font-bold ml-2">₹{viewAds_firstTimeLoad_state.pendingEarnings}</div>
-                            </div>
-                            <div className="bg-gray-100 p-3 rounded-lg">
-                                <div className="font-semibold">Today Earnings:</div>
-                                <div className="text-green-600 font-bold ml-2">₹{viewAds_firstTimeLoad_state.today_adsviewIncome}</div>
-                            </div>
-                            <div className="bg-gray-100 p-3 rounded-lg">
-                                <div className="font-semibold">Total Links:</div>
-                                <div className="text-blue-600 font-bold ml-2">{viewAds_firstTimeLoad_state.totalLinks}</div>
-                            </div>
-                            <div className="bg-gray-100 p-3 rounded-lg">
-                                <div className="font-semibold">Completed:</div>
-                                <div className="text-green-600 font-bold ml-2">{viewAds_firstTimeLoad_state.completedClick}</div>
-                            </div>
-                            <div className="bg-gray-100 p-3 rounded-lg">
-                                <div className="font-semibold">Pending:</div>
-                                <div className="text-red-500 font-bold ml-2">{viewAds_firstTimeLoad_state.pendingClick}</div>
-                            </div>
-                        </div>
-                        {/* Timer Overlay */}
-                        <div className={`${viewAds_firstTimeLoad_state.click_short_link_expireTimer ? 'flex' : 'hidden'} absolute z-[1] inset-0 bg-white bg-opacity-70 justify-center items-start`}>
-                            <div className="flex flex-col items-center text-3xl sm:text-6xl font-semibold mt-20">
-                                <div className="text-center">Come Back After</div>
-                                <div className="text-5xl sm:text-7xl font-bold text-red-600 drop-shadow">
-                                    <CountdownTimer expireTime={viewAds_firstTimeLoad_state.viewAdsexpireTimer} />
+                    <div className='flex -mb-6 justify-center'>
+                        <div className='bg-purple-700 px-2 py-1 pt-2 shadow font-bold text-white rounded-t-2xl'>
+                            <label className="inline-flex items-center cursor-pointer gap-2">
+                                <input
+                                    type="checkbox"
+                                    checked={isChecked_state}
+                                    onChange={() => setIsChecked_state((prev) => {
+                                        userClickHandle(!prev)
+                                        return !prev
+                                    })}
+                                    className="sr-only peer"
+                                />
+                                <div className="relative w-10 h-5 bg-gray-300 rounded-full transition-all duration-300 peer-checked:bg-[#00E676]">
+                                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 shadow-md ${isChecked_state ? "translate-x-5" : ""}`}></div>
                                 </div>
-                            </div>
-                        </div>
-                        {/* Direct Link Section */}
-                        <div className="my-4 text-center bg-yellow-100 text-yellow-800 p-3 rounded-lg shadow-md">
-                            <span className="font-semibold">Important:</span> Click these buttons and manually handle ads to earn money!
-                        </div>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
-                            {totalDirectLinkBtns_state.filter((values) => !values.isExtension).map((values, index) => (
-                                <div key={index} className="bg-gray-100 rounded-lg p-3 sm:p-4 shadow-md flex flex-col items-center">
-                                    <button
-                                        disabled={handle_clickAds_btnClick_state || disabledButtons_state?.includes('btn' + (index + 1))}
-                                        className={`w-full px-5 py-2 rounded-md font-medium transition ${handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1))
-                                            ? 'bg-gray-400 cursor-not-allowed'
-                                            : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md'
-                                            }`}
-                                        onClick={(e) => handle_link_click(values.url, `btn${index + 1}`, values.amount)}
-                                    >
-                                        {values.buttonTitle} {index + 1}
-                                    </button>
-                                    <span className="mt-2 text-lg font-bold text-green-600">₹{values.amount}</span>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Extension Install Section */}
-                        <div className="my-6 text-center text-lg font-semibold text-gray-700">
-                            ---- Boost Your Earnings: Install Our Extension ----
-                        </div>
-
-                        {/* Instruction Message */}
-                        <div className="text-center bg-blue-100 text-blue-700 p-3 rounded-lg shadow-md mb-4">
-                            <span className="font-semibold">Important:</span> Only click these buttons below! The extension will handle ads automatically.
-                        </div>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 relative">
-                            {/* Extension Lock Overlay */}
-                            <div className={`${isExtension_state ? 'hidden' : 'flex'} absolute inset-0 bg-white bg-opacity-70 justify-center items-center`}>
-                                <button
-                                    onClick={ExtensionInstallPopup}
-                                    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 shadow-lg"
-                                >
-                                    What Happened?
-                                </button>
-                            </div>
-
-                            {totalDirectLinkBtns_state.filter((values) => values.isExtension).map((values, index) => (
-                                <div key={index} className="bg-gray-100 rounded-lg p-3 sm:p-4 shadow-md flex flex-col items-center">
-                                    <button
-                                        disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1))}
-                                        className={`w-full px-5 py-2 rounded-md font-medium transition ${handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1))
-                                            ? 'bg-gray-400 cursor-not-allowed'
-                                            : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md'
-                                            }`}
-                                        onClick={(e) => handle_link_click2(values.url, `1btn${index + 1}`, values.amount)}
-                                    >
-                                        {values.buttonTitle} {index + 1}
-                                    </button>
-                                    <span className="mt-2 text-lg font-bold text-green-600">₹{values.amount}</span>
-                                </div>
-                            ))}
+                                <span className="text-sm font-medium text-white">
+                                    Sound: {isChecked_state ? "On" : "Off"}
+                                </span>
+                            </label>
                         </div>
                     </div>
+                    <div className='flex flex-col items-center my-6 px-4 text-center'>
+                        <div className="bg-white p-4 sm:p-6 shadow-lg rounded-lg relative w-full">
+                            {/* Click Balance & Income Section */}
+                            <h2 className="text-xl font-semibold text-gray-800 mb-5">💰 Earnings Summary</h2>
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4 text-gray-700">
+                                <div className="bg-gray-100 p-3 rounded-lg">
+                                    <div className="font-semibold">Pending Earnings:</div>
+                                    <div className="text-red-500 font-bold ml-2">₹{viewAds_firstTimeLoad_state.pendingEarnings}</div>
+                                </div>
+                                <div className="bg-gray-100 p-3 rounded-lg">
+                                    <div className="font-semibold">Today Earnings:</div>
+                                    <div className="text-green-600 font-bold ml-2">₹{viewAds_firstTimeLoad_state.today_adsviewIncome}</div>
+                                </div>
+                                <div className="bg-gray-100 p-3 rounded-lg">
+                                    <div className="font-semibold">Total Links:</div>
+                                    <div className="text-blue-600 font-bold ml-2">{viewAds_firstTimeLoad_state.totalLinks}</div>
+                                </div>
+                                <div className="bg-gray-100 p-3 rounded-lg">
+                                    <div className="font-semibold">Completed:</div>
+                                    <div className="text-green-600 font-bold ml-2">{viewAds_firstTimeLoad_state.completedClick}</div>
+                                </div>
+                                <div className="bg-gray-100 p-3 rounded-lg">
+                                    <div className="font-semibold">Pending:</div>
+                                    <div className="text-red-500 font-bold ml-2">{viewAds_firstTimeLoad_state.pendingClick}</div>
+                                </div>
+                            </div>
+                            {/* Timer Overlay */}
+                            <div className={`${viewAds_firstTimeLoad_state.click_short_link_expireTimer ? 'flex' : 'hidden'} absolute z-[1] inset-0 bg-white bg-opacity-70 justify-center items-start`}>
+                                <div className="flex flex-col items-center text-3xl sm:text-6xl font-semibold mt-20">
+                                    <div className="text-center">Come Back After</div>
+                                    <div className="text-5xl sm:text-7xl font-bold text-red-600 drop-shadow">
+                                        <CountdownTimer expireTime={viewAds_firstTimeLoad_state.viewAdsexpireTimer} />
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Direct Link Section */}
+                            <div className="my-4 text-center bg-yellow-100 text-yellow-800 p-3 rounded-lg shadow-md">
+                                <span className="font-semibold">Important:</span> Click these buttons and manually handle ads to earn money!
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+                                {totalDirectLinkBtns_state.filter((values) => !values.isExtension).map((values, index) => (
+                                    <div key={index} className="bg-gray-100 rounded-lg p-3 sm:p-4 shadow-md flex flex-col items-center">
+                                        <button
+                                            disabled={handle_clickAds_btnClick_state || disabledButtons_state?.includes('btn' + (index + 1))}
+                                            className={`w-full px-5 py-2 rounded-md font-medium transition ${handle_clickAds_btnClick_state || disabledButtons_state.includes('btn' + (index + 1))
+                                                ? 'bg-gray-400 cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md'
+                                                }`}
+                                            onClick={(e) => handle_link_click(values.url, `btn${index + 1}`, values.amount)}
+                                        >
+                                            {values.buttonTitle} {index + 1}
+                                        </button>
+                                        <span className="mt-2 text-lg font-bold text-green-600">₹{values.amount}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Extension Install Section */}
+                            <div className="my-6 text-center text-lg font-semibold text-gray-700">
+                                ---- Boost Your Earnings: Install Our Extension ----
+                            </div>
+
+                            {/* Instruction Message */}
+                            <div className="text-center bg-blue-100 text-blue-700 p-3 rounded-lg shadow-md mb-4">
+                                <span className="font-semibold">Important:</span> Only click these buttons below! The extension will handle ads automatically.
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 relative">
+                                {/* Extension Lock Overlay */}
+                                <div className={`${isExtension_state ? 'hidden' : 'flex'} absolute inset-0 bg-white bg-opacity-70 justify-center items-center`}>
+                                    <button
+                                        onClick={ExtensionInstallPopup}
+                                        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 shadow-lg"
+                                    >
+                                        What Happened?
+                                    </button>
+                                </div>
+
+                                {totalDirectLinkBtns_state.filter((values) => values.isExtension).map((values, index) => (
+                                    <div key={index} className="bg-gray-100 rounded-lg p-3 sm:p-4 shadow-md flex flex-col items-center">
+                                        <button
+                                            disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1))}
+                                            className={`w-full px-5 py-2 rounded-md font-medium transition ${handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1))
+                                                ? 'bg-gray-400 cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md'
+                                                }`}
+                                            onClick={(e) => handle_link_click2(values.url, `1btn${index + 1}`, values.amount)}
+                                        >
+                                            {values.buttonTitle} {index + 1}
+                                        </button>
+                                        <span className="mt-2 text-lg font-bold text-green-600">₹{values.amount}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    {/* adsterra Native Banner start */}
+                    <div id="container-f2e76b1a9af84306102d9f8675c030e8"></div>
+                    {/* adsterra Native Banner End*/}
+                    <div className='bg-white rounded shadow px-5 py-2'>
+                        <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>View Ads Instructions</p>
+                        <hr className='mt-2 border' />
+                        <ul className='mt-4 font-medium text-gray-500 drop-shadow-sm space-y-4'>
+                            {
+                                viewAds_firstTimeLoad_state?.other_data_viewAds_instructions?.map((value, index) => <li key={index} className='instruction-list-image' dangerouslySetInnerHTML={{ __html: value }}></li>)
+                            }
+                        </ul>
+                    </div>
                 </div>
-                {/* adsterra Native Banner start */}
-                <div id="container-f2e76b1a9af84306102d9f8675c030e8"></div>
-                {/* adsterra Native Banner End*/}
-                <div className='bg-white rounded shadow px-5 py-2'>
-                    <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>View Ads Instructions</p>
-                    <hr className='mt-2 border' />
-                    <ul className='mt-4 font-medium text-gray-500 drop-shadow-sm space-y-4'>
-                        {
-                            viewAds_firstTimeLoad_state?.other_data_viewAds_instructions?.map((value, index) => <li key={index} className='instruction-list-image' dangerouslySetInnerHTML={{ __html: value }}></li>)
-                        }
-                    </ul>
+                <div className='mt-3'>
+                    <Footer />
                 </div>
+                {data_process_state && <ProcessBgBlack />}
             </div>
-            <div className='mt-3'>
-                <Footer />
-            </div>
-            {data_process_state && <ProcessBgBlack />}
-        </div>
+        </>
     );
 }
 

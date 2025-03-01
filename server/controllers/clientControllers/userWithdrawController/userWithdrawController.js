@@ -3,6 +3,7 @@ const withdrawal_records_module = require('../../../model/withdraw/withdrawal_re
 const current_time_get = require('../../../helper/currentTimeUTC')
 const mongoose = require('mongoose')
 const other_data_module = require('../../../model/other_data/other_data_module')
+const MAX_RETRIES = parseInt(process.env.MAX_RETRIES, 10) || 3;
 
 const userBalanceData_get = async (req, res) => {
     try {
@@ -49,136 +50,174 @@ const userBalanceData_get = async (req, res) => {
 }
 
 const userWithdrawal_record_post = async (req, res) => {
-    const session = await mongoose.startSession(); // Start a transaction
-    session.startTransaction(); // Begin transaction
-    try {
-        const userDB_id = req.user._id;
-        const { balance, type } = req.body;
+    let attempt = 0;
 
-        // Validate balance input
-        if (!balance || balance <= 0) {
-            return res.status(400).json({
-                success: false,
-                msg: "Invalid withdrawal amount."
+    while (attempt < MAX_RETRIES) {
+        const session = await mongoose.startSession(); // Start a transaction
+        session.startTransaction(); // Begin transaction
+        try {
+            const userDB_id = req.user._id;
+            const { balance, type } = req.body;
+
+            // Validate balance input
+            if (!balance || balance <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    msg: "Invalid withdrawal amount."
+                });
+            }
+
+            // Fetch user data
+            let userSignUpData = await userSignUp_module.findById(userDB_id).session(session); // Use session for transaction
+            if (!userSignUpData) {
+                return res.status(404).json({
+                    success: false,
+                    msg: "User not found."
+                });
+            }
+
+            // Check if the user has sufficient balance for withdrawal
+            if (parseInt(userSignUpData.withdrawable_amount) < parseInt(balance)) {
+                return res.status(400).json({
+                    success: false,
+                    msg: "Insufficient funds."
+                });
+            }
+
+            // Generate order number and time
+            const time = current_time_get();
+
+            // Update the withdrawable amount
+            userSignUpData.withdrawable_amount = (parseInt(userSignUpData.withdrawable_amount) - parseInt(balance)).toFixed(3).toString();
+            userSignUpData.pending_withdrawal_amount = ((parseInt(userSignUpData.pending_withdrawal_amount) || 0) + parseInt(balance)).toString();
+
+            // Save the updated user data
+            await userSignUpData.save({ session });
+
+            // Save the withdrawal record
+            await new withdrawal_records_module({
+                userDB_id,
+                balance,
+                type,
+                time,
+                withdrawal_method: userSignUpData.withdrawal_method,
+                withdrawal_account_information: userSignUpData.withdrawal_account_information
+            }).save({ session });
+
+            // Commit the transaction
+            await session.commitTransaction();
+
+            return res.status(200).json({
+                success: true,
+                msg: "Withdrawal successful!"
             });
-        }
-
-        // Fetch user data
-        let userSignUpData = await userSignUp_module.findById(userDB_id).session(session); // Use session for transaction
-        if (!userSignUpData) {
-            return res.status(404).json({
+        } catch (error) {
+            await session.abortTransaction(); // Abort the transaction on error
+            console.error('Error processing withdrawal:', error);
+            // Check for write conflict errors
+            const isWriteConflict = error.code === 112 ||
+                (error.errorResponse && error.errorResponse.code === 112) ||
+                (error.codeName && error.codeName === 'WriteConflict');
+            if (isWriteConflict) {
+                attempt++;
+                continue;
+            }
+            return res.status(500).json({
                 success: false,
-                msg: "User not found."
+                msg: 'An error occurred while processing the withdrawal.'
             });
+        } finally {
+            session.endSession(); // End the session (transaction)
         }
-
-        // Check if the user has sufficient balance for withdrawal
-        if (parseInt(userSignUpData.withdrawable_amount) < parseInt(balance)) {
-            return res.status(400).json({
-                success: false,
-                msg: "Insufficient funds."
-            });
-        }
-
-        // Generate order number and time
-        const time = current_time_get();
-
-        // Update the withdrawable amount
-        userSignUpData.withdrawable_amount = (parseInt(userSignUpData.withdrawable_amount) - parseInt(balance)).toFixed(3).toString();
-        userSignUpData.pending_withdrawal_amount = ((parseInt(userSignUpData.pending_withdrawal_amount) || 0) + parseInt(balance)).toString();
-
-        // Save the updated user data
-        await userSignUpData.save({ session });
-
-        // Save the withdrawal record
-        await new withdrawal_records_module({ userDB_id, balance, type, time, withdrawal_method: userSignUpData.withdrawal_method, withdrawal_account_information: userSignUpData.withdrawal_account_information }).save({ session });
-
-        // Commit the transaction
-        await session.commitTransaction();
-
-        return res.status(200).json({
-            success: true,
-            msg: "Withdrawal successful!"
-        });
-    } catch (error) {
-        await session.abortTransaction(); // Abort the transaction on error
-        console.error('Error processing withdrawal:', error);
-        return res.status(500).json({
-            success: false,
-            msg: 'An error occurred while processing the withdrawal.'
-        });
-    } finally {
-        session.endSession(); // End the session (transaction)
     }
+    return res.status(500).json({
+        success: false,
+        msg: 'Max retry attempts reached. Please try again later.'
+    });
 };
 
 const userBalanceConvertPatch = async (req, res) => {
-    const session = await mongoose.startSession();
-    try {
-        session.startTransaction();
+    let attempt = 0;
 
-        // Assume req.user is a Mongoose document representing the authenticated user.
-        const user = req.user;
-        if (!user) {
-            await session.abortTransaction();
-            return res.status(401).json({
-                success: false,
-                msg: "Unauthorized: User not found.",
+    while (attempt < MAX_RETRIES) {
+        const session = await mongoose.startSession();
+        try {
+            session.startTransaction();
+
+            // Assume req.user is a Mongoose document representing the authenticated user.
+            const user = req.user;
+            if (!user) {
+                await session.abortTransaction();
+                return res.status(401).json({
+                    success: false,
+                    msg: "Unauthorized: User not found.",
+                });
+            }
+
+            const { balanceToConvert, charge } = req.body;
+            const convertAmount = parseFloat(balanceToConvert);
+            const conversionCharge = parseFloat(charge);
+
+            // Validate conversion inputs
+            if (isNaN(convertAmount) || isNaN(conversionCharge) || convertAmount <= 0) {
+                await session.abortTransaction();
+                return res.status(400).json({
+                    success: false,
+                    msg: "Invalid conversion amount or charge.",
+                });
+            }
+
+            const currentDeposit = parseFloat(user.deposit_amount || "0");
+            const currentWithdrawable = parseFloat(user.withdrawable_amount || "0");
+
+            // Ensure the user has enough deposit to convert
+            if (convertAmount > currentDeposit) {
+                await session.abortTransaction();
+                return res.status(400).json({
+                    success: false,
+                    msg: "Insufficient deposit balance.",
+                });
+            }
+
+            // Update the user's deposit and withdrawable amounts
+            user.deposit_amount = (currentDeposit - convertAmount).toFixed(3);
+            user.withdrawable_amount = (
+                currentWithdrawable + (convertAmount - conversionCharge)
+            ).toFixed(3);
+
+            // Save the user document within the transaction session
+            await user.save({ session });
+
+            // Commit the transaction
+            await session.commitTransaction();
+
+            return res.status(200).json({
+                success: true,
+                msg: "Convert successful!",
             });
-        }
-
-        const { balanceToConvert, charge } = req.body;
-        const convertAmount = parseFloat(balanceToConvert);
-        const conversionCharge = parseFloat(charge);
-
-        // Validate conversion inputs
-        if (isNaN(convertAmount) || isNaN(conversionCharge) || convertAmount <= 0) {
+        } catch (error) {
             await session.abortTransaction();
-            return res.status(400).json({
+            console.error("Error processing conversion:", error);
+            const isWriteConflict = error.code === 112 ||
+                (error.errorResponse && error.errorResponse.code === 112) ||
+                (error.codeName && error.codeName === 'WriteConflict');
+            if (isWriteConflict) {
+                attempt++;
+                continue;
+            }
+            return res.status(500).json({
                 success: false,
-                msg: "Invalid conversion amount or charge.",
+                msg: "An error occurred while processing the conversion.",
+                error: error.message,
             });
+        } finally {
+            session.endSession();
         }
-
-        const currentDeposit = parseFloat(user.deposit_amount || "0");
-        const currentWithdrawable = parseFloat(user.withdrawable_amount || "0");
-
-        // Ensure the user has enough deposit to convert
-        if (convertAmount > currentDeposit) {
-            await session.abortTransaction();
-            return res.status(400).json({
-                success: false,
-                msg: "Insufficient deposit balance.",
-            });
-        }
-
-        // Update the user's deposit and withdrawable amounts
-        user.deposit_amount = (currentDeposit - convertAmount).toFixed(3);
-        user.withdrawable_amount = (
-            currentWithdrawable + (convertAmount - conversionCharge)
-        ).toFixed(3);
-
-        // Save the user document within the transaction session
-        await user.save({ session });
-
-        // Commit the transaction
-        await session.commitTransaction();
-
-        return res.status(200).json({
-            success: true,
-            msg: "Convert successful!",
-        });
-    } catch (error) {
-        await session.abortTransaction();
-        console.error("Error processing conversion:", error);
-        return res.status(500).json({
-            success: false,
-            msg: "An error occurred while processing the conversion.",
-            error: error.message,
-        });
-    } finally {
-        session.endSession();
     }
+    return res.status(500).json({
+        success: false,
+        msg: "Max retry attempts reached. Please try again later.",
+    });
 };
 
 module.exports = {

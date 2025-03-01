@@ -1,11 +1,12 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from "axios";
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Error from '../../components/error/error';
 import ProcessBgBlack from '../../components/processBgBlack/processBgBlack';
 import showNotification from '../../components/showNotification'
 import { useGoogleLogin } from "@react-oauth/google";
 import ReCAPTCHA from 'react-google-recaptcha';
+import { Helmet } from 'react-helmet';
 
 const Signup = ({ referral_status }) => {
     const [formData_state, setFormData_state] = useState({
@@ -141,114 +142,120 @@ const Signup = ({ referral_status }) => {
     };
 
     return (
-        <div className='flex h-[92.5dvh] items-center justify-center bg-gray-100 overflow-auto custom-scrollbar'>
-            <div className='md:w-[40%] sm:w-[80%] w-[90%] bg-white p-6 rounded-lg shadow-lg'>
-                <h1 className='text-3xl font-semibold text-center mb-6 select-none text-gray-800'>Sign Up</h1>
-                <form onSubmit={handleSingUp_submit}>
-                    <div className="mb-4">
-                        <input
-                            type="text"
-                            id="name"
-                            value={formData_state.name}
-                            onChange={handleInputChange}
-                            placeholder='Enter your name'
-                            required
-                            className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none'
-                        />
-                    </div>
+        <>
+            <Helmet>
+                <title>EarnWiz - Signup</title>
+                <meta name="description" content="Join EarnWiz today! Sign up quickly to explore exciting tasks, boost your income, and start earning rewards with our engaging platform." />
+            </Helmet>
+            <div className='flex h-[92.5dvh] items-center justify-center bg-gray-100 overflow-auto custom-scrollbar'>
+                <div className='md:w-[40%] sm:w-[80%] w-[90%] bg-white p-6 rounded-lg shadow-lg'>
+                    <h1 className='text-3xl font-semibold text-center mb-6 select-none text-gray-800'>Sign Up</h1>
+                    <form onSubmit={handleSingUp_submit}>
+                        <div className="mb-4">
+                            <input
+                                type="text"
+                                id="name"
+                                value={formData_state.name}
+                                onChange={handleInputChange}
+                                placeholder='Enter your name'
+                                required
+                                className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none'
+                            />
+                        </div>
 
-                    <div className="mb-4">
-                        <input
-                            type="text"
-                            pattern="^\d{10}$"
-                            title="Please enter a valid 10-digit Indian mobile number"
-                            id="mobile_number"
-                            value={formData_state.mobile_number}
-                            onChange={handleInputChange}
-                            placeholder='Enter your mobile number'
-                            required
-                            className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none'
-                        />
-                    </div>
+                        <div className="mb-4">
+                            <input
+                                type="text"
+                                pattern="^\d{10}$"
+                                title="Please enter a valid 10-digit Indian mobile number"
+                                id="mobile_number"
+                                value={formData_state.mobile_number}
+                                onChange={handleInputChange}
+                                placeholder='Enter your mobile number'
+                                required
+                                className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none'
+                            />
+                        </div>
 
-                    <div className="mb-4">
-                        <input
-                            type="text"
-                            id="email_address"
-                            value={formData_state.gmail_address}
-                            onChange={handleInputChange}
-                            placeholder='Enter your email'
-                            required
-                            className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none'
-                        />
-                    </div>
+                        <div className="mb-4">
+                            <input
+                                type="text"
+                                id="email_address"
+                                value={formData_state.gmail_address}
+                                onChange={handleInputChange}
+                                placeholder='Enter your email'
+                                required
+                                className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none'
+                            />
+                        </div>
 
-                    <div className="mb-4 relative">
-                        <input
-                            type={showPassword ? "text" : "password"}
-                            id="password"
-                            value={formData_state.password}
-                            onChange={handleInputChange}
-                            placeholder='Enter your password'
-                            required
-                            className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none pr-10'
-                        />
-                        <span
-                            className="absolute right-3 top-3 cursor-pointer text-gray-600"
-                            onClick={() => setShowPassword(!showPassword)}
-                        >
-                            {showPassword ? <i className="fa-solid fa-eye-slash"></i> : <i className="fa-solid fa-eye"></i>}
-                        </span>
-                    </div>
+                        <div className="mb-4 relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                id="password"
+                                value={formData_state.password}
+                                onChange={handleInputChange}
+                                placeholder='Enter your password'
+                                required
+                                className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none pr-10'
+                            />
+                            <span
+                                className="absolute right-3 top-3 cursor-pointer text-gray-600"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <i className="fa-solid fa-eye-slash"></i> : <i className="fa-solid fa-eye"></i>}
+                            </span>
+                        </div>
 
-                    <div className="mb-4 relative">
-                        <input
-                            type={showReenterPassword ? "text" : "password"}
-                            id="reenterPassword"
-                            value={formData_state.reenterPassword}
-                            onChange={handleInputChange}
-                            placeholder='Re-enter your password'
-                            required
-                            className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none pr-10'
-                        />
-                        <span
-                            className="absolute right-3 top-3 cursor-pointer text-gray-600"
-                            onClick={() => setShowReenterPassword(!showReenterPassword)}
-                        >
-                            {showReenterPassword ? <i className="fa-solid fa-eye-slash"></i> : <i className="fa-solid fa-eye"></i>}
-                        </span>
-                    </div>
+                        <div className="mb-4 relative">
+                            <input
+                                type={showReenterPassword ? "text" : "password"}
+                                id="reenterPassword"
+                                value={formData_state.reenterPassword}
+                                onChange={handleInputChange}
+                                placeholder='Re-enter your password'
+                                required
+                                className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none pr-10'
+                            />
+                            <span
+                                className="absolute right-3 top-3 cursor-pointer text-gray-600"
+                                onClick={() => setShowReenterPassword(!showReenterPassword)}
+                            >
+                                {showReenterPassword ? <i className="fa-solid fa-eye-slash"></i> : <i className="fa-solid fa-eye"></i>}
+                            </span>
+                        </div>
 
-                    <div className='mb-4 flex items-center space-x-2'>
-                        <input
-                            type="checkbox"
-                            id="signupTerms"
-                            required
-                            checked={formData_state.signupTerms}
-                            onChange={handleInputChange}
-                            className='size-4 cursor-pointer'
+                        <div className='mb-4 flex items-center space-x-2'>
+                            <input
+                                type="checkbox"
+                                id="signupTerms"
+                                required
+                                checked={formData_state.signupTerms}
+                                onChange={handleInputChange}
+                                className='size-4 cursor-pointer'
+                            />
+                            <label className='select-none cursor-pointer' htmlFor="signupTerms">I agree to the Terms of Use and Privacy Policy.</label>
+                        </div>
+                        <ReCAPTCHA
+                            sitekey={import.meta.env.VITE_GOOGLE_RECAPTCHA_SITEKEY}
+                            onChange={onCaptchaChange}
                         />
-                        <label className='select-none cursor-pointer' htmlFor="signupTerms">I agree to the Terms of Use and Privacy Policy.</label>
-                    </div>
-                    <ReCAPTCHA
-                        sitekey={import.meta.env.VITE_GOOGLE_RECAPTCHA_SITEKEY}
-                        onChange={onCaptchaChange}
-                    />
-                    <button type="submit" disabled={submit_process_state} className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"} w-full text-white rounded-lg py-2 mt-3 font-medium transition`}>
-                        {!submit_process_state ? "Sign Up" : <i className="fa-solid fa-spinner fa-spin"></i>}
+                        <button type="submit" disabled={submit_process_state} className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"} w-full text-white rounded-lg py-2 mt-3 font-medium transition`}>
+                            {!submit_process_state ? "Sign Up" : <i className="fa-solid fa-spinner fa-spin"></i>}
+                        </button>
+                    </form>
+
+                    <button onClick={handleGoogleSingUp} className='w-full mt-4 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg flex items-center justify-center space-x-2 font-medium transition'>
+                        <ion-icon name="logo-google"></ion-icon> <span>Sign Up With Google</span>
                     </button>
-                </form>
 
-                <button onClick={handleGoogleSingUp} className='w-full mt-4 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg flex items-center justify-center space-x-2 font-medium transition'>
-                    <ion-icon name="logo-google"></ion-icon> <span>Sign Up With Google</span>
-                </button>
-
+                </div>
+                {submit_process_state && <ProcessBgBlack />}
+                {error_state.length > 0 && error_state.map((value, index) => (
+                    showNotification(true, value)
+                ))}
             </div>
-            {submit_process_state && <ProcessBgBlack />}
-            {error_state.length > 0 && error_state.map((value, index) => (
-                showNotification(true, value)
-            ))}
-        </div>
+        </>
     );
 
 }
