@@ -11,7 +11,6 @@ let current_time_get = () => {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true,
-        timeZone: 'Asia/Kolkata' // ✅ Ensure India Time
     }).format(dateObj);
 
     return formattedTime;
