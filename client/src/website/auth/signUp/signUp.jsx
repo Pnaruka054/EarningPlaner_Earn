@@ -5,6 +5,7 @@ import Error from '../../components/error/error';
 import ProcessBgBlack from '../../components/processBgBlack/processBgBlack';
 import showNotification from '../../components/showNotification'
 import { useGoogleLogin } from "@react-oauth/google";
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const Signup = ({ referral_status }) => {
     const [formData_state, setFormData_state] = useState({
@@ -21,6 +22,11 @@ const Signup = ({ referral_status }) => {
     let { id } = useParams();
     const [error_state, setError_state] = useState([]);
     let [submit_process_state, setSubmit_process_state] = useState(false);
+    const [captchaValue, setCaptchaValue] = useState(null);
+
+    const onCaptchaChange = (value) => {
+        setCaptchaValue(value);
+    };
 
     const dataBase_post_signUp = async (obj) => {
         try {
@@ -56,6 +62,10 @@ const Signup = ({ referral_status }) => {
     // singUp button click handle
     const handleSingUp_submit = async (e) => {
         e.preventDefault();
+        if (!captchaValue) {
+            showNotification(true, 'Please verify that you are a human!')
+            return;
+        }
         if (formData_state.password !== formData_state.reenterPassword) {
             setError_state(["Password & confirm password do not match."]);
             setTimeout(() => {
@@ -122,6 +132,10 @@ const Signup = ({ referral_status }) => {
     // sighup with google button click handle
     const handleGoogleSingUp = async (e) => {
         e.preventDefault();
+        if (!captchaValue) {
+            showNotification(true, 'Please verify that you are a human!')
+            return;
+        }
         googleLogin();
         setSubmit_process_state(true)
     };
@@ -216,8 +230,11 @@ const Signup = ({ referral_status }) => {
                         />
                         <label className='select-none cursor-pointer' htmlFor="signupTerms">I agree to the Terms of Use and Privacy Policy.</label>
                     </div>
-
-                    <button type="submit" disabled={submit_process_state} className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"} w-full text-white rounded-lg py-2 font-medium transition`}>
+                    <ReCAPTCHA
+                        sitekey={import.meta.env.VITE_GOOGLE_RECAPTCHA_SITEKEY}
+                        onChange={onCaptchaChange}
+                    />
+                    <button type="submit" disabled={submit_process_state} className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"} w-full text-white rounded-lg py-2 mt-3 font-medium transition`}>
                         {!submit_process_state ? "Sign Up" : <i className="fa-solid fa-spinner fa-spin"></i>}
                     </button>
                 </form>
