@@ -246,7 +246,7 @@ const Signup = ({ referral_status }) => {
             </div>
             {submit_process_state && <ProcessBgBlack />}
             {error_state.length > 0 && error_state.map((value, index) => (
-                <Error key={index} color="yellow" text={value} />
+                showNotification(true, value)
             ))}
         </div>
     );
