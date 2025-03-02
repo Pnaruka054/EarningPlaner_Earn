@@ -460,7 +460,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
                 const fullUrl = `https://earningplaner-earn.onrender.com${endPageRoute}/${uniqueRandomID}`;
 
                 try {
-                    let response = await axios.get(`${shortnersData.shortnerApiLink}${fullUrl}`);
+                    let response = await axios.get(`${shortnersData.shortnerApiLink}${fullUrl}&alias=${uniqueRandomID}`);
                     shortedLink = response.data?.shortenedUrl || null;
                 } catch (error) {
                     console.error("Error fetching shortened URL:", error.message);
