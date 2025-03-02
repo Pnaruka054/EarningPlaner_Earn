@@ -465,7 +465,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
                     console.error("Error fetching shortened URL:", error.message);
                 }
             }
-
+            
             // If shortedLink is null, return an error response
             if (!shortedLink) {
                 await session.abortTransaction();
