@@ -69,89 +69,24 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             setData_process_state(false);
         }
     };
+
     useEffect(() => {
         fetchData();
+    }, []);
+
+    useEffect(() => {
         channel.onmessage = (event) => {
             if (event.data === "handle_clickAds_btnClick_state_true") {
                 setHandle_clickAds_btnClick_state(true);
             } else if (event.data === "handle_clickAds_btnClick_state_false") {
                 setHandle_clickAds_btnClick_state(false);
-            }
-        };
-
-        return () => {
-            channel.close(); // Cleanup channel on unmount
-        };
-    }, []);
-
-    const handle_link_click = (link, btnName, amount) => {
-        setHandle_clickAds_btnClick_state(true);
-        channel.postMessage("handle_clickAds_btnClick_state_true");
-
-        let newTab1 = window.open(link, '_blank');
-        if (!newTab1) {
-            return Swal.fire({
-                icon: "error",
-                title: "Success!",
-                text: "Please Allow Popup in Your Browser to Earn Money!",
-            });;
-        }
-
-        setTimeout(() => {
-            let newTab2 = window.open(link, '_blank');
-            if (!newTab2) {
-                return Swal.fire({
-                    icon: "error",
-                    title: "Success!",
-                    text: "Please Allow Popup in Your Browser to Earn Money!",
-                });;
-            }
-        }, 3000);
-
-        setTimeout(() => {
-            let newTab3 = window.open(`/waitRedirecting/?link=${encodeURIComponent(link + '||' + btnName + '||' + amount)}`, '_blank', 'noopener noreferrer');
-            if (!newTab3) {
-                return Swal.fire({
-                    icon: "error",
-                    title: "Success!",
-                    text: "Please Allow Popup in Your Browser to Earn Money!",
-                });;
-            }
-        }, 6000);
-    };
-
-    const handle_link_click2 = (link, btnName, amount) => {
-        window.postMessage({ action: "startExtension", data: true }, "*");
-        setHandle_clickAds_btnClick_state(true);
-        channel.postMessage("handle_clickAds_btnClick_state_true");
-        setCurrentBtnName_and_amount_For_extension_storedValue_state([btnName, amount]);
-
-        const newTab = window.open("", '_blank');
-        if (!newTab) {
-            return alert("Please Allow Popup in Your Browser to Earn Money!");
-        }
-        newTab.close();
-        let isExtension = localStorage.getItem('isExtension');
-        if (isExtension !== 'true') {
-            return alert('please install extension');
-        }
-
-        window.open(`/waitRedirecting1/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
-    };
-
-    // for normal btn ads success check
-    useEffect(() => {
-        const handleStorageChange = (e) => {
-            console.log(e);
-            const clickSuccessStatus = localStorage.getItem('isSuccess');
-            if (!isUserActiveOnPage) {
-                if (clickSuccessStatus && clickSuccessStatus.includes('btn')) {
-                    localStorage.removeItem('isSuccess');
+            } else if (event.data.includes("isSuccess")) {
+                const [btnName, amount] = currentBtnName_and_amount_For_extension_storedValue_state;
+                if (!isUserActiveOnPage) {
                     setHandle_clickAds_btnClick_state(false);
                     channel.postMessage("handle_clickAds_btnClick_state_false");
-
-                    if (viewAds_firstTimeLoad_state?.pendingClick) {
-                        const [btnName, amount] = clickSuccessStatus.split('||');
+                    console.log(currentBtnName_and_amount_For_extension_storedValue_state);
+                    if (viewAds_firstTimeLoad_state?.pendingClick && btnName && amount) {
                         setDisabledButtons_state((prevDisabled) => {
                             if (!prevDisabled.includes(btnName)) {
                                 return [...prevDisabled, btnName];
@@ -176,31 +111,30 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                 setTimeout(() => document.title = originalTitle, 4000);
                             })
                             .catch((error) => console.error("Error updating income:", error));
+                        setCurrentBtnName_and_amount_For_extension_storedValue_state([])
                     }
-                } else if (clickSuccessStatus === 'false') {
-                    localStorage.removeItem('isSuccess');
+                } else if (isUserActiveOnPage && btnName && amount) {
+                    setIsUserActiveOnPage(false);
                     setHandle_clickAds_btnClick_state(false);
                     channel.postMessage("handle_clickAds_btnClick_state_false");
                     Swal.fire({
                         icon: "error",
                         title: "Success!",
-                        text: "Something went wrong!",
+                        text: "",
                     });
                     document.title = "❌ failed";
                     earningSound(isChecked_state, false)
                     setTimeout(() => document.title = originalTitle, 2000);
+                    channel.postMessage('isAbort')
                 }
-            } else {
+            } else if (event.data.includes("isAbortFromWaitingPage")) {
                 setIsUserActiveOnPage(false);
-                if (clickSuccessStatus) {
-                    localStorage.removeItem('isSuccess');
-                }
                 setHandle_clickAds_btnClick_state(false);
                 channel.postMessage("handle_clickAds_btnClick_state_false");
                 Swal.fire({
                     icon: "error",
-                    title: "Success!",
-                    text: "Something went wrong!",
+                    title: "Operation failed. Please try again.",
+                    text: `Please wait for the timer to finish Then click "Click here to continue" button.`,
                 });
                 document.title = "❌ failed";
                 earningSound(isChecked_state, false)
@@ -208,26 +142,61 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             }
         };
 
-        // Event listeners for storage and beforeunload
-        window.addEventListener('storage', handleStorageChange);
-        window.addEventListener('beforeunload', () => {
-            const clickSuccessStatus = localStorage.getItem('isSuccess');
-            if (clickSuccessStatus) {
-                localStorage.removeItem('isSuccess');
-            }
-        });
-
-        // Cleanup event listeners
         return () => {
-            window.removeEventListener('storage', handleStorageChange);
-            window.removeEventListener('beforeunload', () => {
-                const clickSuccessStatus = localStorage.getItem('isSuccess');
-                if (clickSuccessStatus) {
-                    localStorage.removeItem('isSuccess');
-                }
-            });
+            channel.close(); // Cleanup channel on unmount
         };
-    }, [viewAds_firstTimeLoad_state, isUserActiveOnPage]);
+    }, [viewAds_firstTimeLoad_state, currentBtnName_and_amount_For_extension_storedValue_state, isUserActiveOnPage]);
+
+    const handle_link_click = (link, btnName, amount) => {
+        setHandle_clickAds_btnClick_state(true);
+        channel.postMessage("handle_clickAds_btnClick_state_true");
+
+        let newTab1 = window.open(link, '_blank');
+        if (!newTab1) {
+            setHandle_clickAds_btnClick_state(false);
+            return Swal.fire({
+                icon: "error",
+                title: "Success!",
+                text: "Please Allow Popup in Your Browser to Earn Money!",
+            });;
+        }
+
+        setTimeout(() => {
+            let newTab2 = window.open(link, '_blank');
+            if (!newTab2) {
+                setHandle_clickAds_btnClick_state(false);
+                return Swal.fire({
+                    icon: "error",
+                    title: "Success!",
+                    text: "Please Allow Popup in Your Browser to Earn Money!",
+                });;
+            }
+        }, 3000);
+
+        setTimeout(() => {
+            setCurrentBtnName_and_amount_For_extension_storedValue_state([btnName, amount])
+            window.open(`/waitRedirecting/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
+        }, 6000);
+    };
+
+    const handle_link_click2 = (link, btnName, amount) => {
+        window.postMessage({ action: "startExtension", data: true }, "*");
+        setHandle_clickAds_btnClick_state(true);
+        channel.postMessage("handle_clickAds_btnClick_state_true");
+        setCurrentBtnName_and_amount_For_extension_storedValue_state([btnName, amount]);
+
+        const newTab = window.open("", '_blank');
+        if (!newTab) {
+            return alert("Please Allow Popup in Your Browser to Earn Money!");
+        }
+        newTab.close();
+        let isExtension = localStorage.getItem('isExtension');
+        if (isExtension !== 'true') {
+            return alert('please install extension');
+        }
+
+        window.open(`/waitRedirecting1/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
+    };
 
     // for extension brn ads success check
     useEffect(() => {

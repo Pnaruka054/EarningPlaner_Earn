@@ -3,7 +3,7 @@ const other_data_module = require('../model/other_data/other_data_module')
 
 
 const cronForDaily_midNight_update = async () => {
-    cron.schedule("*/10 * * * * *", async () => {
+    cron.schedule("0 0 * * *", async () => {
         try {
             console.log("Cron Job Started: Updating viewAds_pendingClick...");
             const other_data_viewAds_limit = await other_data_module.findOne({ documentName: "viewAds" });

@@ -4,14 +4,33 @@ import { Helmet } from 'react-helmet';
 const WaitRedirecting = () => {
     const [redirectLink, setRedirectLink] = useState('');
     const [waitingTimer_state, setWaitingTimer_state] = useState(6);
+    const [isAbort_state, setIsAbort_state] = useState(false);
+    const channel = new BroadcastChannel("viewAds_channel");
 
-    // Get redirect link from query params on mount
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
         const link = queryParams.get('link');
         if (link) {
             setRedirectLink(decodeURIComponent(link));
         }
+        channel.onmessage = (event) => {
+            if (event.data === "isAbort") {
+                setIsAbort_state(true)
+            }
+        };
+
+        function handle_userStayOrNot() {
+            let isExist = sessionStorage.getItem("isStay")
+            if (!isExist) {
+                channel.postMessage("isAbortFromWaitingPage")
+            }
+        }
+
+        window.addEventListener("beforeunload", handle_userStayOrNot)
+        return () => {
+            channel.close(); // Cleanup channel on unmount
+            window.removeEventListener("beforeunload", handle_userStayOrNot)
+        };
     }, []);
 
     // For ads: inject external scripts
@@ -51,27 +70,12 @@ const WaitRedirecting = () => {
         };
     }, [waitingTimer_state]);
 
-    // Before unload handler to set localStorage if page is closed without success
-    useEffect(() => {
-        const handleBeforeUnload = (event) => {
-            const isSuccess = localStorage.getItem('isSuccess');
-            if (!isSuccess) {
-                localStorage.setItem('isSuccess', 'false');
-            }
-        };
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-        };
-    }, []);
-
     // Redirect handler which sets localStorage and then redirects
     const handleRedirect = () => {
         if (redirectLink) {
-            const parts = redirectLink.split('||');
-            // Store necessary values in localStorage
-            localStorage.setItem('isSuccess', parts[1] + '||' + parts[2]);
-            window.location.href = parts[0];
+            channel.postMessage(`isSuccess`);
+            sessionStorage.setItem("isStay", "true")
+            window.location.replace(redirectLink);
         }
     };
 
@@ -91,7 +95,11 @@ const WaitRedirecting = () => {
                             </p>
                         ) : (
                             <button
-                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                disabled={isAbort_state ? true : false}
+                                className={`px-4 py-2 rounded text-white ${isAbort_state
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-blue-500 hover:bg-blue-600"
+                                    }`}
                                 onClick={handleRedirect}
                             >
                                 Click here to continue
