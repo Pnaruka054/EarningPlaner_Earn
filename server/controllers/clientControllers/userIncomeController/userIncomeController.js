@@ -458,9 +458,8 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             // create shorted url for user using shortner api
             if (shortnersData && shortnersData.shortnerApiLink) {
                 const fullUrl = `https://earningplaner-earn.onrender.com${endPageRoute}/${uniqueRandomID}`;
-
                 try {
-                    let response = await axios.get(`${shortnersData.shortnerApiLink}${fullUrl}&alias=${uniqueRandomID}`);
+                    let response = await axios.get(`${shortnersData.shortnerApiLink}${fullUrl}`);
                     shortedLink = response.data?.shortenedUrl || null;
                 } catch (error) {
                     console.error("Error fetching shortened URL:", error.message);
@@ -588,17 +587,17 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
             const { userMonthlyRecord, dateRecords } = user_incomeUpdate.values
 
             // get all viewAds links data
-            const viewAdsConfig = await other_data_module
-                .findOne({ documentName: "viewAds" })
+            const other_data_shortLink = await other_data_module
+                .findOne({ documentName: "shortLink" })
                 .session(session);
 
             // check if pendingClick is available in date data if not then create
             if (!dateRecords?.earningSources?.click_short_link?.pendingClick) {
-                dateRecords.earningSources.click_short_link.pendingClick = viewAdsConfig.viewAds_pendingClick
+                dateRecords.earningSources.click_short_link.pendingClick = other_data_shortLink.shortLink_pendingClick
             }
 
             // check current pending number is lessthen equel to total available pending click limit if its true then Update user's pending clicks and income
-            if (parseFloat(dateRecords?.earningSources?.click_short_link?.pendingClick) <= parseFloat(viewAdsConfig.viewAds_pendingClick)) {
+            if (parseFloat(dateRecords?.earningSources?.click_short_link?.pendingClick) <= parseFloat(other_data_shortLink.shortLink_pendingClick)) {
                 dateRecords.earningSources.click_short_link.pendingClick = (parseFloat(dateRecords.earningSources.click_short_link.pendingClick) - 1).toString();
                 dateRecords.earningSources.click_short_link.income = (parseFloat(dateRecords.earningSources.click_short_link.income || 0) + parseFloat(amount)).toFixed(3);
             }
