@@ -16,7 +16,7 @@ const MAX_RETRIES = parseFloat(process.env.MAX_RETRIES) || 3;
 // for view ads page get data
 const user_adsView_home_get = async (req, res) => {
     let attempt = 0;
-    
+
     while (attempt < MAX_RETRIES) {
         const session = await mongoose.startSession(); // Start a session
         session.startTransaction(); // Begin a transaction
@@ -395,7 +395,7 @@ const user_shortlink_data_get = async (req, res) => {
 // for click shorten link page income update
 const user_shortlink_firstPage_data_patch = async (req, res) => {
     let attempt = 0;
-    
+
     while (attempt < MAX_RETRIES) {
         const session = await mongoose.startSession(); // Start session
         session.startTransaction(); // Start transaction
@@ -405,7 +405,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             const userIp = req.ip;
             const { shortnerDomain, endPageRoute, clientOrigin } = req.body;
 
-            if (!userData || !userData._id || !shortnerDomain || !clientOrigin) {
+            if (!userData || !userData._id || !shortnerDomain || !clientOrigin || !endPageRoute) {
                 return res.status(400).json({ error_msg: "Invalid data received" });
             }
 
@@ -522,7 +522,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
 // for click shorten link last page income update for user
 const user_shortlink_lastPage_data_patch = async (req, res) => {
     let attempt = 0;
-    
+
     while (attempt < MAX_RETRIES) {
         const session = await mongoose.startSession();
         session.startTransaction();
