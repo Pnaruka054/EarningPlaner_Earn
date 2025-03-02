@@ -26,6 +26,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const channel = new BroadcastChannel("viewAds_channel");
     const [isChecked_state, setIsChecked_state] = useState(true);
 
+    // user active or not handler
     useEffect(() => {
         if (typeof document.hidden !== "undefined" && handle_clickAds_btnClick_state) {
             const handleVisibilityChange = () => {
@@ -69,11 +70,11 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             setData_process_state(false);
         }
     };
-
     useEffect(() => {
         fetchData();
     }, []);
 
+    // handle channel messages
     useEffect(() => {
         channel.onmessage = (event) => {
             if (event.data === "handle_clickAds_btnClick_state_true") {
@@ -119,8 +120,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     channel.postMessage("handle_clickAds_btnClick_state_false");
                     Swal.fire({
                         icon: "error",
-                        title: "Success!",
-                        text: "",
+                        title: "Operation failed. Please try again.",
+                        text: "Something went wrong please try again",
                     });
                     document.title = "❌ failed";
                     earningSound(isChecked_state, false)
@@ -141,7 +142,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 setTimeout(() => document.title = originalTitle, 2000);
             }
         };
-
         return () => {
             channel.close(); // Cleanup channel on unmount
         };
@@ -243,8 +243,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     channel.postMessage("handle_clickAds_btnClick_state_false");
                     Swal.fire({
                         icon: "error",
-                        title: "Success!",
-                        text: "Something went wrong!",
+                        title: "Operation failed. Please try again.",
+                        text: "Something went wrong please try again",
                     });
                     document.title = "❌ failed"
                     earningSound(isChecked_state, false)
