@@ -48,7 +48,7 @@ const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
                         onClick={() => setLogOut_btnClicked(true)}
                         className="flex items-center space-x-3 px-3 py-2 rounded-lg bg-red-500 bg-opacity-30 hover:bg-red-600 transition-colors duration-300 w-full text-left"
                     >
-                        <span className="text-base text-white flex items-center">
+                        <span className="text-2xl font-bold text-white flex items-center">
                             <ion-icon name="log-out-outline"></ion-icon>
                         </span>
                         <span className="font-semibold text-sm text-white">LogOut</span>
@@ -69,7 +69,7 @@ const NavItem = ({ to, icon, imgSrc, label, currentPath }) => {
             className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition duration-300 
         ${isActive ? "bg-blue-600 text-white font-semibold" : "hover:bg-blue-600/70"}`}
         >
-            <span className="text-base">
+            <span className="text-xl font-bold">
                 {imgSrc ? (
                     <img className="w-5 h-5" src={imgSrc} alt="icon" />
                 ) : icon.includes("fa-") ? (

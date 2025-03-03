@@ -890,8 +890,6 @@ const user_giftCode_verify_and_patch = async (req, res) => {
 
             other_data_giftCode.giftCode_claimed = await parseFloat(other_data_giftCode?.giftCode_claimed) + 1;
 
-            console.log(other_data_giftCode);
-
             // Increase user income by calling a helper function (which uses the session)
             const userIncomeUpdate = await userIncome_handle(session, userData, other_data_giftCode.giftCode_amount);
             if (!userIncomeUpdate.success) {
