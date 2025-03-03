@@ -7,7 +7,7 @@ import axios from 'axios';
 import showNotificationWith_timer from '../showNotificationWith_timer';
 import { NavBar_global_context } from "../context/navBar_globalContext";
 
-const NavBar = ({ show, availableBalance_forNavBar_state }) => {
+const NavBar = ({ show, availableBalance_forNavBar_state, setLogOut_btnClicked }) => {
     const [sideMenu_state, setSideMenu_state] = useState('menu-outline');
     const [toggelMenu_state, setToggelMenu_state] = useState("reorder-three");
     let [data_process_state, setData_process_state] = useState(false);
@@ -216,7 +216,7 @@ const NavBar = ({ show, availableBalance_forNavBar_state }) => {
             <Link to="/" className="h-full hidden md:flex items-center">
                 <img className="h-10" src={EarnWizLogo} alt="EarnWiz Logo" />
             </Link>
-            <SideMenu sideMenu_show={{ sideMenu_state, setSideMenu_state }} />
+            <SideMenu sideMenu_show={{ sideMenu_state, setSideMenu_state }} setLogOut_btnClicked={setLogOut_btnClicked} />
             <span
                 onClick={(e) => {
                     e.stopPropagation();

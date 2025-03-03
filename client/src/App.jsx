@@ -30,6 +30,7 @@ import FillSurvey from './website/EarningSourses/fillSurvey/fillSurvey';
 import EmailVerification from './website/components/email-verification/email-verification';
 import { NavBar_global_contextProvider } from "./website/components/context/navBar_globalContext";
 import PaymentProof from './website/paymentProof/paymentProof';
+import GiftCode from './website/GiftCode/GiftCode';
 
 const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
@@ -103,7 +104,8 @@ const App = () => {
       location.pathname === '/member/support' ||
       location.pathname === '/member/settings' ||
       location.pathname === '/member/profile' ||
-      location.pathname === '/member/view-ads' ||
+      location.pathname === '/member/gift-code' ||
+      location.pathname === '/member/view-ads' || 
       location.pathname === '/member/click-shorten-link'
     ) {
       setshow_NavBar_state((p) => p = false)
@@ -121,7 +123,7 @@ const App = () => {
     <NavBar_global_contextProvider>
       {
         !show_Full_navBar_state && createPortal(
-          <NavBar show={show_navBar_state} availableBalance_forNavBar_state={availableBalance_forNavBar_state} />,
+          <NavBar show={show_navBar_state} availableBalance_forNavBar_state={availableBalance_forNavBar_state} setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state} />,
           document.getElementById('navBar')
         )
       }
@@ -179,6 +181,7 @@ const App = () => {
               <Route path="/member/click-shorten-link" element={<ClickShortedLink setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
               <Route path="/member/last-page/:uniqueToken" element={<LastPage />} />
               <Route path="/member/fill-survey" element={<FillSurvey setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
+              <Route path="/member/gift-code" element={<GiftCode setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
               <Route path="/*" element={<PageNotFound setshow_NavBar_state={setshow_NavBar_state} />} />
 
               <Route path="/extension/uninstalled" element={<ExtensionUninstalled setshow_NavBar_state={setshow_NavBar_state} />} />

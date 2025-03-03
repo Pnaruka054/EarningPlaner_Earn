@@ -17,6 +17,7 @@ route.post("/post_newFaq_data", adminDashboardController.post_newFaq_data)
 route.post("/post_withdrawalMethod_data", adminDashboardController.post_withdrawalMethod_data)
 route.post("/post_viewAds_directLink_data", adminDashboardController.post_viewAds_directLink_data)
 route.post("/post_ShortenLink_data", adminDashboardController.post_ShortenLink_data)
+route.post("/postGift_code_data", adminDashboardController.postGift_code_data)
 
 route.patch("/update_referral_data", adminDashboardController.update_referral_data)
 route.patch("/patch_announcement_data", adminDashboardController.patch_announcement_data)

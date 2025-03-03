@@ -12,6 +12,7 @@ const userID_data_for_survey_module = require('../../../model/userID_data_for_su
 const other_data_module = require('../../../model/other_data/other_data_module')
 const earningCalculator = require('../../../helper/earningCalculator')
 const MAX_RETRIES = parseFloat(process.env.MAX_RETRIES) || 3;
+const userGiftCode_history_module = require('../../../model/userGiftCode_history/userGiftCode_history_module')
 
 // for view ads page get data
 const user_adsView_home_get = async (req, res) => {
@@ -758,11 +759,52 @@ const user_survey_available_get = async (req, res) => {
     }
 };
 
+// for gift code get data page
+const user_giftCode_get = async (req, res) => {
+    try {
+        // Ensure user data exists
+        const userData = req.user;
+        if (!userData) {
+            return res.status(400).json({
+                success: false,
+                msg: "User data not found.",
+            });
+        }
+
+        // Fetch the user's gift code claim history
+        const userGiftCode_claim_history = await userGiftCode_history_module.find({ userDB_id: userData._id });
+
+        // Calculate available balance by summing deposit_amount and withdrawable_amount (defaulting to 0 if missing)
+        const userAvailableBalance = (
+            parseFloat(userData.deposit_amount || 0) +
+            parseFloat(userData.withdrawable_amount || 0)
+        ).toFixed(3);
+
+        // Prepare response data
+        const resData = {
+            userAvailableBalance,
+            userGiftCode_claim_history,
+        };
+
+        return res.status(200).json({
+            success: true,
+            msg: resData,
+        });
+    } catch (error) {
+        console.error("Error in user_giftCode_get:", error);
+        return res.status(500).json({
+            success: false,
+            msg: "An error occurred while processing your request.",
+        });
+    }
+};
+
 module.exports = {
     user_adsView_home_get,
     user_adsView_income_patch,
     user_shortlink_data_get,
     user_shortlink_firstPage_data_patch,
     user_shortlink_lastPage_data_patch,
-    user_survey_available_get
+    user_survey_available_get,
+    user_giftCode_get
 }

@@ -62,6 +62,59 @@ const Dashboard = () => {
         withdrawalMethod_minimumAmount: "",
         withdrawalMethod_details: ""
     });
+    const [giftCode_state, setGiftCode_state] = useState({
+        viewAds_required: "",
+        giftCode_claim_limit: "",
+        giftCode_claimed: "", // preview only
+        shortlink_required: "",
+        fillSurvey_required: ""
+    })
+
+    const handleChange = (field, value) => {
+        setGiftCode_state((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleUpdateSettings = async (obj) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Create new Gift code?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, update it!",
+            cancelButtonText: "Cancel"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    setData_process_state(true);
+
+                    const response = await axios.post(
+                        `${import.meta.env.VITE_SERVER_URL}/admin/postGift_code_data`,
+                        { ...obj },
+                        { withCredentials: true }
+                    );
+
+                    if (response?.data?.msg) {
+                        setGiftCode_state((prevState) => ({ ...prevState, ...response.data.msg }));
+                        showNotification(false, "Gift Code Created successfully!");
+                    }
+                } catch (error) {
+                    console.error("Error updating referral data:", error);
+                    if (error?.response?.data?.error_msg) {
+                        showNotification(true, error.response.data.error_msg);
+                    } else if (error?.response?.data.adminJWT_error_msg) {
+                        showNotification(true, error.response.data.adminJWT_error_msg);
+                        navigation("/");
+                    } else {
+                        showNotification(true, "Something went wrong, please try again.");
+                    }
+                } finally {
+                    setData_process_state(false);
+                }
+            }
+        });
+    }
 
     // Global data fetch on mount
     useEffect(() => {
@@ -75,8 +128,9 @@ const Dashboard = () => {
                 );
 
                 if (response?.data?.msg) {
-                    const { referralData, announcementData, faqData, withdrawalMethodData } = response.data.msg;
-
+                    const { referralData, announcementData, faqData, withdrawalMethodData, other_data_giftCode } = response.data.msg;
+                    console.log(other_data_giftCode);
+                    setGiftCode_state(other_data_giftCode)
                     setReferralMessage_state(referralData?.referral_page_text || "");
                     setReferralRate_state(parseFloat(referralData?.referral_rate || 0) * 100);
                     setAnnouncements_state(announcementData.reverse() || []);
@@ -678,12 +732,6 @@ const Dashboard = () => {
         }
     };
 
-    // A helper function for manual resizing on input events (if needed)
-    const handleResize = (event) => {
-        event.target.style.height = "auto";
-        event.target.style.height = event.target.scrollHeight + "px";
-    };
-
     return (
         <div>
             <SideMenu sideMenu_show={true} />
@@ -722,6 +770,84 @@ const Dashboard = () => {
                         >
                             Submit
                         </button>
+                    </div>
+                </div>
+
+                {/* gift code Section */}
+                <div className="p-6 border border-gray-300 rounded-lg shadow-md">
+                    <h2 className="text-xl font-semibold mb-4">Gift Code</h2>
+                    <div className="space-y-4">
+                        {/* View Ads Required Input */}
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                            <label className="text-gray-700 sm:w-1/2">View Ads Required:</label>
+                            <input
+                                type="number"
+                                className="border p-2 rounded w-full sm:w-1/2"
+                                value={giftCode_state.viewAds_required}
+                                onChange={(e) => handleChange("viewAds_required", e.target.value)}
+                            />
+                        </div>
+
+                        {/* Gift Code Claim Limit Input */}
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                            <label className="text-gray-700 sm:w-1/2">Gift Code Claim Limit:</label>
+                            <input
+                                type="number"
+                                className="border p-2 rounded w-full sm:w-1/2"
+                                value={giftCode_state.giftCode_claim_limit}
+                                onChange={(e) => handleChange("giftCode_claim_limit", e.target.value)}
+                            />
+                        </div>
+
+                        {/* Gift Code Claimed Preview */}
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                            <label className="text-gray-700 sm:w-1/2">Gift Code Claimed (Preview):</label>
+                            <input
+                                type="text"
+                                readOnly
+                                className="border p-2 rounded w-full sm:w-1/2 bg-gray-100 cursor-not-allowed"
+                                value={giftCode_state.giftCode_claimed}
+                            />
+                        </div>
+
+                        {/* Shortlink Required Input */}
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                            <label className="text-gray-700 sm:w-1/2">Shortlink Required:</label>
+                            <input
+                                type="number"
+                                className="border p-2 rounded w-full sm:w-1/2"
+                                value={giftCode_state.shortlink_required}
+                                onChange={(e) => handleChange("shortlink_required", e.target.value)}
+                            />
+                        </div>
+
+                        {/* Fill Survey Required Input */}
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                            <label className="text-gray-700 sm:w-1/2">Fill Survey Required:</label>
+                            <input
+                                type="number"
+                                className="border p-2 rounded w-full sm:w-1/2"
+                                value={giftCode_state.fillSurvey_required}
+                                onChange={(e) => handleChange("fillSurvey_required", e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <button
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-6 w-full"
+                        onClick={() => handleUpdateSettings(giftCode_state)}
+                    >
+                        Get Gift Code
+                    </button>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center mt-4 sm:gap-4">
+                        <label className="text-gray-700 sm:w-1/2">Gift Code (Preview):</label>
+                        <input
+                            type="text"
+                            readOnly
+                            className="border p-2 rounded w-full sm:w-1/2 bg-gray-100"
+                            value={giftCode_state.giftCode}
+                        />
                     </div>
                 </div>
 

@@ -7,7 +7,7 @@ const shortedLinksData_module = require('../../model/shortLinks/shortedLinksData
 const withdrawal_record = require('../../model/withdraw/withdrawal_records_module')
 const userSignUp_module = require('../../model/userSignUp/userSignUp_module')
 const mongoose = require("mongoose");
-const getFormattedDate = require('../../helper/getFormattedDate')
+const generateRandomString = require('../../helper/generateRandomString')
 
 function jwt_accessToken(user) {
     return jwt.sign({ jwtUser: user }, process.env.JWT_ACCESS_KEY, { expiresIn: '2h' })
@@ -96,6 +96,7 @@ const getDashboardData = async (req, res) => {
     try {
         // Fetch Referral Data
         const other_data_referralRate = await other_data_module.findOne({ documentName: "referralRate" }) || {};
+        const other_data_giftCode = await other_data_module.findOne({ documentName: "giftCode" }) || {};
         const referral_rate = other_data_referralRate.referralRate || 0;
         const referral_page_text = other_data_referralRate.referralPageText || "";
 
@@ -109,7 +110,8 @@ const getDashboardData = async (req, res) => {
             referralData: { referral_rate, referral_page_text },
             announcementData: other_data_announcementsArray,
             faqData: other_data_faqArray,
-            withdrawalMethodData: other_data_withdrawalMethodArray
+            withdrawalMethodData: other_data_withdrawalMethodArray,
+            other_data_giftCode
         };
 
         // Send Success Response
@@ -1026,8 +1028,8 @@ const update_withdrawal_instructions_data = async (req, res) => {
 // handle Privacy Policy
 const getPrivacy_policyData = async (req, res) => {
     try {
-        const other_data_privacy_policy = await other_data_module.findOne({documentName:"privacy_policy"});
-       
+        const other_data_privacy_policy = await other_data_module.findOne({ documentName: "privacy_policy" });
+
         return res.status(200).json({
             success: true,
             msg: other_data_privacy_policy,
@@ -1074,8 +1076,8 @@ const patch_privacy_policy_data = async (req, res) => {
 // handle terms_of_use
 const getTerms_of_useData = async (req, res) => {
     try {
-        const other_data_terms_of_use = await other_data_module.findOne({documentName:"terms_of_use"});
-       
+        const other_data_terms_of_use = await other_data_module.findOne({ documentName: "terms_of_use" });
+
         return res.status(200).json({
             success: true,
             msg: other_data_terms_of_use,
@@ -1122,8 +1124,8 @@ const patch_terms_of_use_data = async (req, res) => {
 // handle getDmcaData
 const getDmcaData = async (req, res) => {
     try {
-        const other_data_dmca = await other_data_module.findOne({documentName:"dmca"});
-       
+        const other_data_dmca = await other_data_module.findOne({ documentName: "dmca" });
+
         return res.status(200).json({
             success: true,
             msg: other_data_dmca,
@@ -1166,6 +1168,55 @@ const patch_dmca_data = async (req, res) => {
     }
 };
 
+// handle gift code create
+const postGift_code_data = async (req, res) => {
+    try {
+        console.log(req.body);
+        // Destructure required fields from the request body
+        const { viewAds_required, giftCode_claim_limit, shortlink_required, fillSurvey_required } = req.body;
+
+        // Validate that required fields are present (update condition as per your business logic)
+        if (
+            viewAds_required === undefined ||
+            giftCode_claim_limit === undefined ||
+            shortlink_required === undefined ||
+            fillSurvey_required === undefined
+        ) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Invalid Data Received. All fields are required.",
+            });
+        }
+
+        // Update or insert the gift code configuration document.
+        // A new gift code is generated using generateRandomString(5).
+        const updatedData = await other_data_module.findOneAndUpdate(
+            { documentName: "giftCode" },
+            {
+                viewAds_required,
+                giftCode_claim_limit,
+                giftCode_claimed: "0",
+                giftCode: generateRandomString(10).toUpperCase(),
+                shortlink_required,
+                fillSurvey_required,
+            },
+            { new: true, upsert: true }
+        );
+
+        return res.status(200).json({
+            success: true,
+            msg: updatedData,
+        });
+    } catch (error) {
+        console.error("Error in postGift_code_data:", error);
+        return res.status(500).json({
+            success: false,
+            msg: "Internal Server Error. Please try again later.",
+            error: error.message,
+        });
+    }
+};
+
 module.exports = {
     adminLogin,
     adminLogout,
@@ -1199,5 +1250,6 @@ module.exports = {
     getTerms_of_useData,
     patch_terms_of_use_data,
     getDmcaData,
-    patch_dmca_data
+    patch_dmca_data,
+    postGift_code_data
 }

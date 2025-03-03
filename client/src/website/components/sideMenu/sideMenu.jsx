@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import Support_icon from "../../../assets/Support.png";
 
-const SideMenu = ({ sideMenu_show }) => {
+const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
     const location = useLocation(); // Get the current URL
 
     return (
@@ -9,7 +9,7 @@ const SideMenu = ({ sideMenu_show }) => {
             onClick={(e) => {
                 e.stopPropagation();
                 e.currentTarget.classList.add("hidden");
-                sideMenu_show.setSideMenu_state((prev) => (prev = "menu-outline"));
+                sideMenu_show.setSideMenu_state("menu-outline");
             }}
             className={`
         ${sideMenu_show.sideMenu_state === "close"
@@ -17,37 +17,59 @@ const SideMenu = ({ sideMenu_show }) => {
                     : "translate-x-[-100%] opacity-0 md:translate-x-0 md:opacity-100"
                 } 
         select-none md:block bg-slate-800/90 backdrop-blur-lg shadow-lg absolute z-[2] 
-        md:fixed h-[100vh] mt-2 left-0 px-4 py-6 top-12 w-full sm:w-52 md:w-[25%] 
+        md:fixed h-[93.3dvh] mt-2 left-0 px-4 py-6 top-12 w-full sm:w-52 md:w-[25%] 
         lg:w-[20%] text-white transition-transform duration-300 ease-in-out
-        border-r border-gray-700
+        border-r border-gray-700 overflow-auto custom-scrollbar-sidemenu
       `}
         >
-            <h2 className="font-semibold text-gray-300 mb-5 px-2">
+            <h2 className="font-semibold text-gray-300 text-[14px] mb-5 px-2">
                 Member Menu
             </h2>
 
+            {/* Main Navigation Section */}
             <div className="space-y-2">
+                <NavItem to="/member/profile" icon="person-outline" label="Profile" currentPath={location.pathname} />
                 <NavItem to="/member/dashboard" icon="bar-chart-outline" label="Dashboard" currentPath={location.pathname} />
                 <NavItem to="/member/withdraw" icon="cash-outline" label="Withdraw" currentPath={location.pathname} />
                 <NavItem to="/member/refer-and-earn" icon="person-add-outline" label="Refer & Earn" currentPath={location.pathname} />
-                <NavItem to="/member/support" imgSrc={Support_icon} label="Support" currentPath={location.pathname} />
-                <NavItem to="/member/settings" icon="fa-solid fa-gear" label="Settings" currentPath={location.pathname} />
+                <NavItem to="/member/gift-code" icon="gift-outline" label="GiftCode" currentPath={location.pathname} />
+                <NavItem to="/member/view-ads" icon="eye-outline" label="View Ads" currentPath={location.pathname} />
+                <NavItem to="/member/click-shorten-link" icon="link-outline" label="Click Short Link" currentPath={location.pathname} />
+                <NavItem to="/member/fill-survey" icon="clipboard-outline" label="Fill Survey" currentPath={location.pathname} />
+            </div>
+
+            {/* Divider and Support/Logout Section */}
+            <div className="mt-6">
+                <div className="border-t border-gray-600"></div>
+                <div className="pt-4 space-y-2">
+                    <NavItem to="/member/support" imgSrc={Support_icon} label="Support" currentPath={location.pathname} />
+                    <NavItem to="/member/settings" icon="fa-solid fa-gear" label="Settings" currentPath={location.pathname} />
+                    <button
+                        onClick={() => setLogOut_btnClicked(true)}
+                        className="flex items-center space-x-3 px-3 py-2 rounded-lg bg-red-500 bg-opacity-30 hover:bg-red-600 transition-colors duration-300 w-full text-left"
+                    >
+                        <span className="text-base text-white flex items-center">
+                            <ion-icon name="log-out-outline"></ion-icon>
+                        </span>
+                        <span className="font-semibold text-sm text-white">LogOut</span>
+                    </button>
+                </div>
             </div>
         </div>
     );
 };
 
-// ✅ Active Menu Item Highlight Logic ✅
+// Active Menu Item Highlight Logic
 const NavItem = ({ to, icon, imgSrc, label, currentPath }) => {
     const isActive = currentPath === to;
 
     return (
         <Link
             to={to}
-            className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition duration-300 
-      ${isActive ? "bg-blue-600 text-white font-semibold" : "hover:bg-blue-600/70"}`}
+            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition duration-300 
+        ${isActive ? "bg-blue-600 text-white font-semibold" : "hover:bg-blue-600/70"}`}
         >
-            <span className="text-lg">
+            <span className="text-base">
                 {imgSrc ? (
                     <img className="w-5 h-5" src={imgSrc} alt="icon" />
                 ) : icon.includes("fa-") ? (
@@ -56,7 +78,7 @@ const NavItem = ({ to, icon, imgSrc, label, currentPath }) => {
                     <ion-icon name={icon}></ion-icon>
                 )}
             </span>
-            <span className="font-medium">{label}</span>
+            <span className="font-medium text-sm">{label}</span>
         </Link>
     );
 };
