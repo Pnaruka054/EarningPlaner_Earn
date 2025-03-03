@@ -409,7 +409,7 @@ const ShortLink = () => {
                                         <p><strong>Shortner Name:</strong> {link.shortnerName}</p>
                                         <p><strong>Amount:</strong> {link.amount}</p>
                                         <p><strong>Shortner Domain:</strong> {link.shortnerDomain}</p>
-                                        <p><strong>Shortner API Link:</strong> {link.shortnerApiLink}</p>
+                                        <p className='break-all whitespace-normal'><strong>Shortner API Link:</strong> {link.shortnerApiLink}</p>
                                         <p><strong>time:</strong> {link.time}</p>
                                         <div className="flex gap-4">
                                             <button

@@ -458,15 +458,14 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             // create shorted url for user using shortner api
             if (shortnersData && shortnersData.shortnerApiLink) {
                 const fullUrl = `https://earningplaner-earn.onrender.com${endPageRoute}/${uniqueRandomID}`;
-                const regex = /(https?:\/\/.*?&url=)(?=https?:\/\/|$)/g;
-                const matches_two_shortners = shortnersData.shortnerApiLink.match(regex) || [];
+                const matches_two_shortners = shortnersData.shortnerApiLink.split("&url=");
                 if (matches_two_shortners.length >= 2) {
                     try {
-                        const firstUrl = matches_two_shortners[0];
+                        const firstUrl = matches_two_shortners[0] + "&url=";
                         const secondUrl = matches_two_shortners[1];
-                        let response = await axios.get(`${secondUrl}${fullUrl}`);
+                        let response = await axios.get(`${firstUrl}${fullUrl}`);
                         let secondUrlShortedLink = response.data?.shortenedUrl || null;
-                        shortedLink = firstUrl + secondUrlShortedLink
+                        shortedLink = decodeURIComponent(secondUrl) + secondUrlShortedLink
                     } catch (error) {
                         console.error("Error fetching shortened URL:", error.message);
                     }

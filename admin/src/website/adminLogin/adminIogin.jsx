@@ -25,8 +25,6 @@ const AdminLogin = () => {
       }, {
         withCredentials: true // This ensures cookies are sent with the request
       });
-
-      console.log("Login Successful:", response.data);
       setSuccess("Login Successful! Redirecting..."); // ✅ Success message show karo
 
       setTimeout(() => {
