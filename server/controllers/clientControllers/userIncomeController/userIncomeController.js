@@ -458,14 +458,27 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             // create shorted url for user using shortner api
             if (shortnersData && shortnersData.shortnerApiLink) {
                 const fullUrl = `https://earningplaner-earn.onrender.com${endPageRoute}/${uniqueRandomID}`;
-                try {
-                    let response = await axios.get(`${shortnersData.shortnerApiLink}${fullUrl}`);
-                    shortedLink = response.data?.shortenedUrl || null;
-                } catch (error) {
-                    console.error("Error fetching shortened URL:", error.message);
+                const matches_two_shortners = shortnersData.shortnerApiLink.match(/https?:\/\//g) || [];
+                if (matches_two_shortners.length >= 2) {
+                    try {
+                        const firstUrl = matches_two_shortners[0];
+                        const secondUrl = matches_two_shortners[1];
+                        let response = await axios.get(`${secondUrl}${fullUrl}`);
+                        let secondUrlShortedLink = response.data?.shortenedUrl || null;
+                        shortedLink = firstUrl + secondUrlShortedLink
+                    } catch (error) {
+                        console.error("Error fetching shortened URL:", error.message);
+                    }
+                } else {
+                    try {
+                        let response = await axios.get(`${shortnersData.shortnerApiLink}${fullUrl}`);
+                        shortedLink = response.data?.shortenedUrl || null;
+                    } catch (error) {
+                        console.error("Error fetching shortened URL:", error.message);
+                    }
                 }
             }
-            
+
             // If shortedLink is null, return an error response
             if (!shortedLink) {
                 await session.abortTransaction();
