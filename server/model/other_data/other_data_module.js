@@ -23,11 +23,13 @@ const other_data_schema = new mongoose.Schema({
     terms_of_use: { type: String },
     dmca: { type: String },
     giftCode: { type: String },
+    giftCode_amount: { type: String },
     giftCode_claim_limit: { type: String },
     giftCode_claimed: { type: String },
     viewAds_required: { type: String },
     shortlink_required: { type: String },
     fillSurvey_required: { type: String },
+    giftCode_page_Message: { type: String },
 })
 
 const other_data_module = mongoose.model("other_data", other_data_schema)

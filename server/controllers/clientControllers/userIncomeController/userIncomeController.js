@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const ipAddress_records_module = require('../../../model/IPAddress/useripAddresses_records_module');
 const userDate_records_module = require("../../../model/dashboard/userDate_modules");
+const userMonthly_records_module = require("../../../model/dashboard/userMonthly_modules");
 const idTimer_records_module = require('../../../model/id_timer/id_timer_records_module')
 const getFormattedDate = require('../../../helper/getFormattedDate')
 const shortedLinksData_module = require('../../../model/shortLinks/shortedLinksData_module')
@@ -12,7 +13,9 @@ const userID_data_for_survey_module = require('../../../model/userID_data_for_su
 const other_data_module = require('../../../model/other_data/other_data_module')
 const earningCalculator = require('../../../helper/earningCalculator')
 const MAX_RETRIES = parseFloat(process.env.MAX_RETRIES) || 3;
-const userGiftCode_history_module = require('../../../model/userGiftCode_history/userGiftCode_history_module')
+const userGiftCode_history_module = require('../../../model/userGiftCode_history/userGiftCode_history_module');
+const getFormattedMonth = require('../../../helper/getFormattedMonth');
+const current_time_get = require('../../../helper/currentTimeUTC');
 
 // for view ads page get data
 const user_adsView_home_get = async (req, res) => {
@@ -773,6 +776,7 @@ const user_giftCode_get = async (req, res) => {
 
         // Fetch the user's gift code claim history
         const userGiftCode_claim_history = await userGiftCode_history_module.find({ userDB_id: userData._id });
+        const other_data_giftCode = await other_data_module.findOne({ documentName: "giftCode" }) || {};
 
         // Calculate available balance by summing deposit_amount and withdrawable_amount (defaulting to 0 if missing)
         const userAvailableBalance = (
@@ -784,6 +788,7 @@ const user_giftCode_get = async (req, res) => {
         const resData = {
             userAvailableBalance,
             userGiftCode_claim_history,
+            giftCode_page_Message: other_data_giftCode.giftCode_page_Message
         };
 
         return res.status(200).json({
@@ -799,6 +804,151 @@ const user_giftCode_get = async (req, res) => {
     }
 };
 
+// for gift code verify and incress user income
+const user_giftCode_verify_and_patch = async (req, res) => {
+    let attempt = 0;
+    while (attempt < MAX_RETRIES) {
+        try {
+            // Start a new session and begin a transaction
+            const session = await mongoose.startSession();
+            session.startTransaction();
+
+            // Retrieve the authenticated user and gift code from the request
+            const userData = req.user;
+            const { giftCode_state } = req.body;
+
+            if (!userData) {
+                return res.status(400).json({
+                    success: false,
+                    msg: "User data not found.",
+                });
+            }
+
+            // Fetch configuration documents using the session
+            const other_data_giftCode = await other_data_module
+                .findOne({ documentName: "giftCode" })
+                .session(session);
+            const other_data_viewAds = await other_data_module
+                .findOne({ documentName: "viewAds" })
+                .session(session);
+            const other_data_shortLink = await other_data_module
+                .findOne({ documentName: "shortLink" })
+                .session(session);
+
+            // Validate the gift code: Check if claim limit is reached or provided gift code does not match
+            if (
+                other_data_giftCode.giftCode_claimed == other_data_giftCode.giftCode_claim_limit ||
+                other_data_giftCode.giftCode !== giftCode_state
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    error_msg: "Gift code expired or empty.",
+                });
+            }
+
+            // Get the current month and date in the desired format
+            const monthName = getFormattedMonth();
+            const today = getFormattedDate();
+
+            // Fetch today's record and the monthly record using the session
+            const dateRecords_1 = await userDate_records_module
+                .findOne({ userDB_id: userData._id, date: today })
+                .session(session);
+            const userMonthlyRecord_1 = await userMonthly_records_module
+                .findOne({ userDB_id: userData._id, monthName })
+                .session(session);
+
+            // Check if user meets the required tasks:
+            //   - Today's record must exist.
+            //   - The monthly record must not exist (indicating that the claim hasn't been made yet).
+            //   - User has completed the required number of ad views and short link clicks.
+
+            if (
+                !dateRecords_1 ||
+                !userMonthlyRecord_1 ||
+                (parseFloat(other_data_viewAds.viewAds_pendingClick) -
+                    parseFloat(dateRecords_1.earningSources.view_ads.pendingClick)) < parseFloat(other_data_giftCode.viewAds_required) ||
+                (parseFloat(other_data_shortLink.shortLink_pendingClick) -
+                    parseFloat(dateRecords_1.earningSources.click_short_link.pendingClick)) < parseFloat(other_data_giftCode.shortlink_required)
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    error_msg: `Before claiming, you must complete today ${other_data_giftCode.viewAds_required} ad views, ${other_data_giftCode.shortlink_required} short link clicks, and ${other_data_giftCode.fillSurvey_required} survey completions.`,
+                });
+            }
+
+            // Check if the user has already claimed this gift code using the session
+            const userGiftCode_alreadyclaimed = await userGiftCode_history_module
+                .findOne({ userDB_id: userData._id, giftCode: giftCode_state })
+                .session(session);
+            if (userGiftCode_alreadyclaimed) {
+                return res.status(400).json({
+                    success: false,
+                    error_msg: "You already claimed this code. Please use another one.",
+                });
+            }
+
+            other_data_giftCode.giftCode_claimed = await parseFloat(other_data_giftCode?.giftCode_claimed) + 1;
+
+            console.log(other_data_giftCode);
+
+            // Increase user income by calling a helper function (which uses the session)
+            const userIncomeUpdate = await userIncome_handle(session, userData, other_data_giftCode.giftCode_amount);
+            if (!userIncomeUpdate.success) {
+                throw new Error(userIncomeUpdate.error);
+            }
+            // Destructure the updated monthly record and date record from the helper's returned values
+            const { userMonthlyRecord, dateRecords } = userIncomeUpdate.values;
+
+            // Record the new gift code claim in the history collection using the session
+            await new userGiftCode_history_module({
+                userDB_id: userData._id,
+                giftCode: other_data_giftCode.giftCode,
+                bonusAmount: other_data_giftCode.giftCode_amount,
+                time: current_time_get(), // current_time_get() returns the current time in the desired format
+            }).save({ session });
+
+            // Save all changes concurrently using the session
+            await Promise.all([
+                userMonthlyRecord.save({ session }),
+                userData.save({ session }),
+                dateRecords.save({ session }),
+                other_data_giftCode.save({ session })
+            ]);
+
+            // Commit the transaction and end the session
+            await session.commitTransaction();
+            session.endSession();
+
+            return res.status(200).json({
+                success: true,
+                msg: `₹${other_data_giftCode.giftCode_amount} claimed successfully!`,
+            });
+        } catch (error) {
+            // Handle transaction rollback and session cleanup
+            if (session.inTransaction()) {
+                await session.abortTransaction();
+            }
+            session.endSession();
+
+            console.error("Error in updating user data:", error);
+            const isWriteConflict = error.code === 112 ||
+                (error.errorResponse && error.errorResponse.code === 112) ||
+                (error.codeName && error.codeName === 'WriteConflict');
+            if (isWriteConflict) {
+                attempt++;
+                console.log(`Global write conflict encountered. Retrying attempt ${attempt}`);
+                continue;
+            }
+            return res.status(500).json({
+                success: false,
+                msg: "An error occurred while processing your request.",
+            });
+        }
+    }
+    return res.status(500).json({ msg: "Max retry attempts reached. Please try again later." });
+};
+
 module.exports = {
     user_adsView_home_get,
     user_adsView_income_patch,
@@ -806,5 +956,6 @@ module.exports = {
     user_shortlink_firstPage_data_patch,
     user_shortlink_lastPage_data_patch,
     user_survey_available_get,
-    user_giftCode_get
+    user_giftCode_get,
+    user_giftCode_verify_and_patch
 }

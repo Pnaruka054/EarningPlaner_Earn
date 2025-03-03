@@ -67,17 +67,19 @@ const Dashboard = () => {
         giftCode_claim_limit: "",
         giftCode_claimed: "", // preview only
         shortlink_required: "",
-        fillSurvey_required: ""
+        giftCode_amount: "",
+        fillSurvey_required: "",
+        giftCode_page_Message: ""
     })
 
     const handleChange = (field, value) => {
         setGiftCode_state((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleUpdateSettings = async (obj) => {
+    const handleUpdateSettings = async (obj, isPageMessage) => {
         Swal.fire({
             title: "Are you sure?",
-            text: "Create new Gift code?",
+            text: "update Gift code data?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -91,13 +93,13 @@ const Dashboard = () => {
 
                     const response = await axios.post(
                         `${import.meta.env.VITE_SERVER_URL}/admin/postGift_code_data`,
-                        { ...obj },
+                        { ...obj, isPageMessage },
                         { withCredentials: true }
                     );
 
                     if (response?.data?.msg) {
                         setGiftCode_state((prevState) => ({ ...prevState, ...response.data.msg }));
-                        showNotification(false, "Gift Code Created successfully!");
+                        showNotification(false, "Gift Code Updated successfully!");
                     }
                 } catch (error) {
                     console.error("Error updating referral data:", error);
@@ -777,6 +779,19 @@ const Dashboard = () => {
                 <div className="p-6 border border-gray-300 rounded-lg shadow-md">
                     <h2 className="text-xl font-semibold mb-4">Gift Code</h2>
                     <div className="space-y-4">
+                        <label className="text-gray-700">Gift Code Page Message</label>
+                        <textarea
+                            className="border p-2 overflow-hidden rounded w-full mt-2 auto-resize"
+                            rows="4"
+                            value={giftCode_state.giftCode_page_Message}
+                            onChange={(e) => handleChange("giftCode_page_Message", e.target.value)}
+                        />
+                        <button
+                            className="bg-blue-500 text-white px-4 py-2 rounded mt-4 sm:mt-0 sm:ml-4"
+                            onClick={() => handleUpdateSettings(giftCode_state, true)}
+                        >
+                            Update
+                        </button>
                         {/* View Ads Required Input */}
                         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
                             <label className="text-gray-700 sm:w-1/2">View Ads Required:</label>
@@ -785,6 +800,16 @@ const Dashboard = () => {
                                 className="border p-2 rounded w-full sm:w-1/2"
                                 value={giftCode_state.viewAds_required}
                                 onChange={(e) => handleChange("viewAds_required", e.target.value)}
+                            />
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                            <label className="text-gray-700 sm:w-1/2">giftCode Amount:</label>
+                            <input
+                                type="text"
+                                className="border p-2 rounded w-full sm:w-1/2"
+                                value={giftCode_state.giftCode_amount}
+                                onChange={(e) => handleChange("giftCode_amount", e.target.value)}
                             />
                         </div>
 
@@ -835,7 +860,7 @@ const Dashboard = () => {
 
                     <button
                         className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-6 w-full"
-                        onClick={() => handleUpdateSettings(giftCode_state)}
+                        onClick={() => handleUpdateSettings(giftCode_state, false)}
                     >
                         Get Gift Code
                     </button>

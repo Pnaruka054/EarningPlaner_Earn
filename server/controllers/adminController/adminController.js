@@ -1171,15 +1171,17 @@ const patch_dmca_data = async (req, res) => {
 // handle gift code create
 const postGift_code_data = async (req, res) => {
     try {
-        console.log(req.body);
         // Destructure required fields from the request body
-        const { viewAds_required, giftCode_claim_limit, shortlink_required, fillSurvey_required } = req.body;
+        const { viewAds_required, giftCode_claim_limit, shortlink_required, fillSurvey_required, giftCode_amount, isPageMessage, giftCode_page_Message } = req.body;
 
         // Validate that required fields are present (update condition as per your business logic)
         if (
             viewAds_required === undefined ||
             giftCode_claim_limit === undefined ||
             shortlink_required === undefined ||
+            giftCode_amount === undefined ||
+            isPageMessage === undefined ||
+            giftCode_page_Message === undefined ||
             fillSurvey_required === undefined
         ) {
             return res.status(400).json({
@@ -1190,25 +1192,38 @@ const postGift_code_data = async (req, res) => {
 
         // Update or insert the gift code configuration document.
         // A new gift code is generated using generateRandomString(5).
-        const updatedData = await other_data_module.findOneAndUpdate(
-            { documentName: "giftCode" },
-            {
-                viewAds_required,
-                giftCode_claim_limit,
-                giftCode_claimed: "0",
-                giftCode: generateRandomString(10).toUpperCase(),
-                shortlink_required,
-                fillSurvey_required,
-            },
-            { new: true, upsert: true }
-        );
+        let updatedData = null
+
+        if (isPageMessage) {
+            updatedData = await other_data_module.findOneAndUpdate(
+                { documentName: "giftCode" },
+                {
+                    giftCode_page_Message
+                },
+                { new: true, upsert: true }
+            );
+        } else {
+            updatedData = await other_data_module.findOneAndUpdate(
+                { documentName: "giftCode" },
+                {
+                    viewAds_required,
+                    giftCode_claim_limit,
+                    giftCode_amount,
+                    giftCode_claimed: "0",
+                    giftCode: generateRandomString(10).toUpperCase(),
+                    shortlink_required,
+                    fillSurvey_required,
+                },
+                { new: true, upsert: true }
+            );
+        }
 
         return res.status(200).json({
             success: true,
             msg: updatedData,
         });
     } catch (error) {
-        console.error("Error in postGift_code_data:", error);
+        console.error("Error in Update Gift_code_data:", error);
         return res.status(500).json({
             success: false,
             msg: "Internal Server Error. Please try again later.",
