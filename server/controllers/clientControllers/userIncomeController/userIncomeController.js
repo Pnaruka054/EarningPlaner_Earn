@@ -458,7 +458,8 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             // create shorted url for user using shortner api
             if (shortnersData && shortnersData.shortnerApiLink) {
                 const fullUrl = `https://earningplaner-earn.onrender.com${endPageRoute}/${uniqueRandomID}`;
-                const matches_two_shortners = shortnersData.shortnerApiLink.match(/https?:\/\//g) || [];
+                const regex = /(https?:\/\/.*?&url=)(?=https?:\/\/|$)/g;
+                const matches_two_shortners = shortnersData.shortnerApiLink.match(regex) || [];
                 if (matches_two_shortners.length >= 2) {
                     try {
                         const firstUrl = matches_two_shortners[0];
