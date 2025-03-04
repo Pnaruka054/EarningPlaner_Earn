@@ -37,7 +37,16 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                 return dropdownButtonValue_state === value.monthName
             })
         )
-    }, [userData_state]);
+
+        setUserData_state(prev => ({
+            ...prev,
+            user_month_records: [
+                ...(prev?.user_month_records ?? []).filter(value => value.monthName === dropdownButtonValue_state),
+                ...(prev?.user_month_records ?? []).filter(value => value.monthName !== dropdownButtonValue_state)
+            ]
+        }));
+
+    }, [dropdownButtonValue_state]);
 
     // get all data from server
     useEffect(() => {
@@ -195,23 +204,23 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                         </div>
                     </div>
                     <div className="overflow-auto mt-3 h-[300px] border rounded-lg shadow-lg bg-white custom-scrollbar">
-                        <table className="table-auto border-collapse min-w-[633px] sm:min-w-full">
-                            <thead className="bg-green-500 text-white sticky top-0 z-0">
+                        <table className="table-auto border-collapse min-w-[370px] w-full">
+                            <thead className="bg-green-500 text-white sticky text-sm sm:text-lg top-0 z-0">
                                 <tr>
-                                    <th className="text-start px-4 py-3 border border-gray-300">Date</th>
-                                    <th className="text-start px-4 py-3 border border-gray-300">Self Earnings</th>
-                                    <th className="text-start px-4 py-3 border border-gray-300">Referral Earnings</th>
-                                    <th className="text-start px-4 py-3 border border-gray-300">Total Earnings</th>
+                                    <th className="text-start px-2 md:px-4 py-3 border border-gray-300">Date</th>
+                                    <th className="text-start px-2 md:px-4 py-3 border border-gray-300">Self Earnings</th>
+                                    <th className="text-start px-2 md:px-4 py-3 border border-gray-300">Referral Earnings</th>
+                                    <th className="text-start px-2 md:px-4 py-3 border border-gray-300">Total Earnings</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className='text-sm sm:text-lg'>
                                 {monthlyData_state && monthlyData_state.length > 0 ? (
                                     monthlyData_state.reverse().map((table_values, index) => (
                                         <tr key={index} className="odd:bg-gray-100 even:bg-gray-50">
-                                            <td className="px-4 py-3 border border-gray-300">{table_values.date}</td>
-                                            <td className="px-4 py-3 border border-gray-300 text-green-600 font-semibold">₹{table_values.self_earnings || '0.000'}</td>
-                                            <td className="px-4 py-3 border border-gray-300 text-blue-600 font-semibold">₹{table_values.referral_earnings || '0.000'}</td>
-                                            <td className="px-4 py-3 border border-gray-300 text-black font-bold">₹{table_values.Total_earnings || '0.000'}</td>
+                                            <td className="sm:px-4 py-2 px-2 md:py-4 border border-gray-300">{table_values.date}</td>
+                                            <td className="sm:px-4 py-2 px-2 md:py-4 border border-gray-300 text-green-600 font-semibold">₹{table_values.self_earnings || '0.000'}</td>
+                                            <td className="sm:px-4 py-2 px-2 md:py-4 border border-gray-300 text-blue-600 font-semibold">₹{table_values.referral_earnings || '0.000'}</td>
+                                            <td className="sm:px-4 py-2 px-2 md:py-4 border border-gray-300 text-black font-bold">₹{table_values.Total_earnings || '0.000'}</td>
                                         </tr>
                                     ))
                                 ) : (

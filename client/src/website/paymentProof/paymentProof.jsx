@@ -29,7 +29,7 @@ const PaymentProof = () => {
                         <table className="w-full border border-gray-300 rounded-lg">
                             <thead className="bg-green-700 text-sm sm:text-lg">
                                 <tr>
-                                    <th className="px-2 md:px-4 py-3 hidden md:block text-left text-lg font-semibold text-white">
+                                    <th className="px-2 md:px-4 py-3 hidden md:block text-left font-semibold text-white">
                                         #
                                     </th>
                                     <th className="px-2 md:px-4 py-3 text-left font-semibold text-white">

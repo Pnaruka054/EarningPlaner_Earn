@@ -118,6 +118,7 @@
 .custom-scrollbar::-webkit-scrollbar,
 .custom-scrollbar-sidemenu::-webkit-scrollbar {
     width: 4px;
+    height: 4px;
     /* Super Slim */
 }
 

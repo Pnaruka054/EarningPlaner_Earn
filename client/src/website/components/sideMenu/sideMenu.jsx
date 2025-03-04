@@ -46,12 +46,12 @@ const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
                     <NavItem to="/member/settings" icon="fa-solid fa-gear" label="Settings" currentPath={location.pathname} />
                     <button
                         onClick={() => setLogOut_btnClicked(true)}
-                        className="flex items-center space-x-3 px-3 py-2 rounded-lg bg-red-500 bg-opacity-30 hover:bg-red-600 transition-colors duration-300 w-full text-left"
+                        className="flex items-center font-semibold space-x-3 px-3 text-red-500 py-2 rounded-lg transition-colors duration-300 w-full text-left"
                     >
-                        <span className="text-2xl font-bold text-white flex items-center">
+                        <span className="text-2xl font-bold flex items-center">
                             <ion-icon name="log-out-outline"></ion-icon>
                         </span>
-                        <span className="font-semibold text-sm text-white">LogOut</span>
+                        <span>LogOut</span>
                     </button>
                 </div>
             </div>
