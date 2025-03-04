@@ -471,7 +471,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
                         let secondUrlShortedLink = response.data?.shortenedUrl || null;
                         shortedLink = decodeURIComponent(secondUrl) + secondUrlShortedLink
                     } catch (error) {
-                        console.error("Error fetching shortened URL:", error.message);
+                        console.error("Error fetching shortened URL:", error);
                     }
                 } else {
                     try {
