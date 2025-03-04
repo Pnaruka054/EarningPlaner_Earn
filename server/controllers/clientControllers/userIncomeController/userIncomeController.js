@@ -481,6 +481,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
                                 "X-Forwarded-For": clientIP
                             }
                         });
+                        console.log(response);
                         let secondUrlShortedLink = response.data?.shortenedUrl || null;
                         shortedLink = decodeURIComponent(secondUrl) + secondUrlShortedLink;
                     } catch (error) {
