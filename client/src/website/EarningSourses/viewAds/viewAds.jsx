@@ -28,19 +28,21 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
     // user active or not handler
     useEffect(() => {
-        if (typeof document.hidden !== "undefined" && handle_clickAds_btnClick_state) {
-            const handleVisibilityChange = () => {
-                if (!document.hidden) {
-                    setIsUserActiveOnPage(true)
-                }
-            };
+        setTimeout(() => {
+            if (typeof document.hidden !== "undefined" && handle_clickAds_btnClick_state) {
+                const handleVisibilityChange = () => {
+                    if (!document.hidden) {
+                        setIsUserActiveOnPage(true)
+                    }
+                };
 
-            document.addEventListener("visibilitychange", handleVisibilityChange);
+                document.addEventListener("visibilitychange", handleVisibilityChange);
 
-            return () => {
-                document.removeEventListener("visibilitychange", handleVisibilityChange);
-            };
-        }
+                return () => {
+                    document.removeEventListener("visibilitychange", handleVisibilityChange);
+                };
+            }
+        }, 2000);
     }, [handle_clickAds_btnClick_state]);
 
     const fetchData = async () => {
