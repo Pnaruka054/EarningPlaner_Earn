@@ -28,21 +28,25 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
     // user active or not handler
     useEffect(() => {
-        setTimeout(() => {
-            if (typeof document.hidden !== "undefined" && handle_clickAds_btnClick_state) {
-                const handleVisibilityChange = () => {
-                    if (!document.hidden) {
-                        setIsUserActiveOnPage(true)
-                    }
-                };
+        if (typeof document.hidden !== "undefined" && handle_clickAds_btnClick_state) {
+            // Define the handler outside of the setTimeout, so it's available for cleanup.
+            const handleVisibilityChange = () => {
+                if (!document.hidden) {
+                    setIsUserActiveOnPage(true);
+                }
+            };
 
+            // Start a timer to add the event listener after 2 seconds.
+            const timeoutId = setTimeout(() => {
                 document.addEventListener("visibilitychange", handleVisibilityChange);
+            }, 2000);
 
-                return () => {
-                    document.removeEventListener("visibilitychange", handleVisibilityChange);
-                };
-            }
-        }, 2000);
+            // Cleanup: clear the timeout and remove the event listener.
+            return () => {
+                clearTimeout(timeoutId);
+                document.removeEventListener("visibilitychange", handleVisibilityChange);
+            };
+        }
     }, [handle_clickAds_btnClick_state]);
 
     const fetchData = async () => {
@@ -123,7 +127,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     Swal.fire({
                         icon: "error",
                         title: "Operation failed. Please try again.",
-                        text: "Something went wrong please try again",
+                        text: "Please do not close this tab until the timer has completed and you have clicked the claim button.",
                     });
                     document.title = "❌ failed";
                     earningSound(isChecked_state, false)
