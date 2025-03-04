@@ -389,7 +389,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                     <div className='bg-white my-5 pb-5 rounded-xl border border-green-800'>
                         <p className='text-center text-xl font-bold my-4'>Withdraw Instructions</p>
                         <hr className='w-[95%] m-auto border' />
-                        <ul className='px-6 mt-2'>
+                        <ul className='px-6 mt-2 space-y-4'>
                             {
                                 balanceData_state?.other_data_withdrawal_instructions?.map((value, index) => <li key={index} className='blue-right-list-image' dangerouslySetInnerHTML={{ __html: value }} />)
                             }
