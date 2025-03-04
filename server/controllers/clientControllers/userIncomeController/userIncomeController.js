@@ -461,43 +461,25 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
 
             // create shorted url for user using shortner api
             if (shortnersData && shortnersData.shortnerApiLink) {
-                // Client ka real IP extract kar rahe hain
-                const clientIP = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-
-                // Agar aapne req.body se ye values remove kar di hain,
-                // to fullUrl ke liye aapko inki value kisi aur source se leni hogi.
-                // Yahan hum assume kar rahe hain ki 'endPageRoute' ek configuration variable hai.
                 const fullUrl = `https://earningplaner-earn.onrender.com${endPageRoute}/${uniqueRandomID}`;
-
                 const matches_two_shortners = shortnersData.shortnerApiLink.split("&url=");
-
                 if (matches_two_shortners.length >= 2) {
                     try {
                         const firstUrl = matches_two_shortners[0] + "&url=";
                         const secondUrl = matches_two_shortners[1];
-                        let response = await axios.get(`${firstUrl}${fullUrl}`, {
-                            headers: {
-                                // Client ka real IP forward kar rahe hain
-                                "X-Forwarded-For": clientIP
-                            }
-                        });
-                        console.log(response);
+                        let response = await axios.get(`${firstUrl}${fullUrl}`);
                         let secondUrlShortedLink = response.data?.shortenedUrl || null;
-                        shortedLink = decodeURIComponent(secondUrl) + secondUrlShortedLink;
+                        shortedLink = decodeURIComponent(secondUrl) + secondUrlShortedLink
                     } catch (error) {
-                        console.error("Error fetching shortened URL:", error);
+                        console.error("Error fetching shortened URL:", error.message);
                     }
                 } else {
                     try {
-                        let response = await axios.get(`${shortnersData.shortnerApiLink}${fullUrl}`, {
-                            headers: {
-                                // Client ka real IP forward kar rahe hain
-                                "X-Forwarded-For": clientIP
-                            }
-                        });
+                        let response = await axios.get(`${shortnersData.shortnerApiLink}${fullUrl}`);
                         shortedLink = response.data?.shortenedUrl || null;
+                        console.log(response);
                     } catch (error) {
-                        console.error("Error fetching shortened URL:", error);
+                        console.error("Error fetching shortened URL:", error.message);
                     }
                 }
             }
