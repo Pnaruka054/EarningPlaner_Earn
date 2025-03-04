@@ -746,6 +746,10 @@ const user_survey_available_get = async (req, res) => {
             {
                 surveyNetworkName: "CPX Research",
                 url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}`
+            },
+            {
+                surveyNetworkName: "Theoremreach",
+                url: `https://theoremreach.com/respondent_entry/direct?api_key=aded5d2fcb4e683c0f60034c8c5e&user_id=${userId}`
             }
         ];
 
