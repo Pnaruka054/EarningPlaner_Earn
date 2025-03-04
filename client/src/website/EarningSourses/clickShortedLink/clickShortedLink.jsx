@@ -262,10 +262,8 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                                                     }`}
                                             >
                                                 <h3 className="text-lg font-semibold text-gray-800">
-                                                    {link.shortName || "Short Link"}
+                                                    {link.shortnerName || "Short Link"}
                                                 </h3>
-                                                <p className="text-sm text-gray-600 truncate">{link?.shortnerDomain}</p>
-
                                                 {/* 🕒 Time Show Here */}
                                                 <p className="text-gray-700 mt-2">
                                                     <span className="font-semibold">⏳ Time Required:</span>
