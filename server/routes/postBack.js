@@ -10,7 +10,7 @@ route.get('/postBackCPX', async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-        const { mainPostback, bonus, status, trans_id, user_id, amount_local, amount_usd } = req.query;
+        const { mainPostback, bonus, status, user_id, amount_local, amount_usd } = req.query;
 
         if ((mainPostback === 'true' || bonus === 'true') && status === "1" && user_id) {
             console.log(`💰 User ${user_id} earned INR ${amount_local} (USD: ${amount_usd})`);
@@ -48,7 +48,7 @@ route.get('/postBackCPX', async (req, res) => {
             await session.commitTransaction();
             console.log("✅ Transaction committed successfully!");
         } else if (status === "2") {
-            console.log(`❌ Transaction ${trans_id} (User: ${user_id}) reversed!`);
+            console.log(`❌ Transaction (User: ${user_id}) reversed!`);
         }
 
         res.status(200).send("Postback received");
