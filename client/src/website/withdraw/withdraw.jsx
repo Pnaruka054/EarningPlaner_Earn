@@ -391,7 +391,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                         <hr className='w-[95%] m-auto border' />
                         <ul className='px-6 mt-2'>
                             {
-                                balanceData_state?.other_data_withdrawal_instructions?.map((value, index) => <li key={index} className='blue-right-list-image'>{value}</li>)
+                                balanceData_state?.other_data_withdrawal_instructions?.map((value, index) => <li key={index} className='blue-right-list-image' dangerouslySetInnerHTML={{ __html: value }} />)
                             }
                         </ul>
                     </div>
