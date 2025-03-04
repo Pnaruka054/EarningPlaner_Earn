@@ -497,7 +497,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
                         });
                         shortedLink = response.data?.shortenedUrl || null;
                     } catch (error) {
-                        console.error("Error fetching shortened URL:", error.message);
+                        console.error("Error fetching shortened URL:", error);
                     }
                 }
             }
