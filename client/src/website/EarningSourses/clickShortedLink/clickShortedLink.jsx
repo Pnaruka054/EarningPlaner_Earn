@@ -12,7 +12,7 @@ import { Helmet } from 'react-helmet';
 
 const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
     const [data_process_state, setData_process_state] = useState(false);
-    const [shortLinks, setShortLinks] = useState([]);
+    const [shortLinks_state, setShortLinks_state] = useState([]);
     const [shortLink_firstTimeLoad_state, setShortLink_firstTimeLoad_state] = useState([]);
     const [filter_state, setFilter_state] = useState("all")
     const navigation = useNavigate();
@@ -27,7 +27,18 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                     { withCredentials: true }
                 );
                 setAvailableBalance_forNavBar_state(response.data.msg.userAvailableBalance);
-                setShortLinks(response.data.msg.shortedLinksData);
+                function shuffleArray(array) {
+                    let shuffled = array.slice();
+                    for (let i = shuffled.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                    }
+                    return shuffled;
+                }
+
+                const randomizedData = shuffleArray(response.data.msg.shortedLinksData);
+                setShortLinks_state(randomizedData);
+
                 setShortLink_firstTimeLoad_state(response.data.msg)
             } catch (error) {
                 console.log(error);
@@ -110,7 +121,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
         return timeString;
     };
 
-    const filteredLinks = shortLinks
+    const filteredLinks = shortLinks_state
         .filter(link => {
             if (filter_state === "available") return !link.isDisable;
             if (filter_state === "completed") return link.isDisable;
@@ -218,7 +229,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                                     </div>
                                 </div>
                             </div>
-                            {shortLinks.length === 0 ? (
+                            {shortLinks_state.length === 0 ? (
                                 <p className="text-center text-gray-500 py-5">🚫 No short links available at the moment.</p>
                             ) : (
                                 <div>
