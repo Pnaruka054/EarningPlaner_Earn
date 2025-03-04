@@ -157,8 +157,8 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         setHandle_clickAds_btnClick_state(true);
         channel.postMessage("handle_clickAds_btnClick_state_true");
 
-        let newTab1 = window.open(link, '_blank');
-        if (!newTab1) {
+        let newTab = window.open('', '_blank');
+        if (!newTab) {
             setHandle_clickAds_btnClick_state(false);
             return Swal.fire({
                 icon: "error",
@@ -166,6 +166,18 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 text: "Please Allow Popup in Your Browser to Earn Money!",
             });;
         }
+
+        setTimeout(() => {
+            let newTab1 = window.open(link, '_blank');
+            if (!newTab1) {
+                setHandle_clickAds_btnClick_state(false);
+                return Swal.fire({
+                    icon: "error",
+                    title: "Success!",
+                    text: "Please Allow Popup in Your Browser to Earn Money!",
+                });;
+            }
+        }, 1000);
 
         setTimeout(() => {
             let newTab2 = window.open(link, '_blank');
@@ -177,12 +189,12 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     text: "Please Allow Popup in Your Browser to Earn Money!",
                 });;
             }
-        }, 3000);
+        }, 4000);
 
         setTimeout(() => {
             setCurrentBtnName_and_amount_For_extension_storedValue_state([btnName, amount])
             window.open(`/waitRedirecting/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
-        }, 6000);
+        }, 7000);
     };
 
     const handle_link_click2 = (link, btnName, amount) => {
