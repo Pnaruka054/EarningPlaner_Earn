@@ -123,7 +123,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
 
     const filteredLinks = shortLinks_state
         .filter(link => {
-            if (filter_state === "available") return !link.isDisable;
+            if (filter_state === "available" || filter_state === "high-to-low" || filter_state === "low-to-high") return !link.isDisable;
             if (filter_state === "completed") return link.isDisable;
             return true;
         })
