@@ -128,18 +128,18 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                         </Link>
 
                         {/* Disabled Card (No Hover, Gray Color) */}
-                        <div className="bg-gray-500 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center opacity-70">
+                        {/* <div className="bg-gray-500 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center opacity-70">
                             <div className="font-semibold">Play Betting Game</div>
                             <div className="text-lg font-bold">Null</div>
                             <img src={Betting_games_icon} className="absolute bottom-3 right-3 w-16 opacity-20" />
-                        </div>
+                        </div> */}
 
                         {/* Disabled Card (No Hover, Gray Color) */}
-                        <div className="bg-gray-500 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center opacity-70">
+                        {/* <div className="bg-gray-500 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center opacity-70">
                             <div className="font-semibold">Play Normal Games</div>
                             <div className="text-lg font-bold">Null</div>
                             <img src={Games} className="absolute bottom-3 right-3 w-16 opacity-20" />
-                        </div>
+                        </div> */}
 
                         <Link to="/member/click-shorten-link" className="bg-gradient-to-r p-2 from-green-500 to-green-600 text-white relative h-44 m-3 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
                             <div className="font-semibold">Click Shorten Link</div>
