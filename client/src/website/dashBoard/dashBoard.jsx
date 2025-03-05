@@ -226,7 +226,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                                 ) : (
                                     <tr>
                                         <td colSpan="4">
-                                            <div className="h-[240px] flex justify-center items-center">
+                                            <div className="h-[200px] flex justify-center items-center">
                                                 <div className="text-center text-gray-500 font-semibold">💰 No Earnings Yet! Start Now!</div>
                                             </div>
                                         </td>
