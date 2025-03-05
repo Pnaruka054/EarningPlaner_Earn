@@ -759,7 +759,7 @@ const post_ShortenLink_data = async (req, res) => {
 
         await newData.save();
 
-        res.status(201).json({ success: true, msg: newData });
+        res.status(201).json({ success: true, msg: "successfully posted" });
     } catch (error) {
         console.error("Error inserting new viewAds direct link data:", error);
         res.status(500).json({
@@ -800,7 +800,7 @@ const patch_ShortenLink_data = async (req, res) => {
             });
         }
 
-        res.status(200).json({ success: true, msg: updatedData });
+        res.status(200).json({ success: true, msg: "successfully updated" });
     } catch (error) {
         console.error("Error updating link Shortner data:", error);
         res.status(500).json({

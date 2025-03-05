@@ -11,37 +11,37 @@ const ShortLink = () => {
 
     const navigation = useNavigate();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setData_process_state(true);
+    const fetchData = async () => {
+        try {
+            setData_process_state(true);
 
-                const response = await axios.get(
-                    `${import.meta.env.VITE_SERVER_URL}/admin/getShortLinkData`,
-                    { withCredentials: true }
-                );
+            const response = await axios.get(
+                `${import.meta.env.VITE_SERVER_URL}/admin/getShortLinkData`,
+                { withCredentials: true }
+            );
 
-                if (response?.data?.msg) {
-                    const { other_data_shortLink_limit: { shortLink_pendingUpdates, shortLink_instructions }, linkShortnerData
-                    } = response.data.msg;
-                    setShortLinkLimit_state(shortLink_pendingUpdates)
-                    setShortLinkInstructions_state(shortLink_instructions.join("\n"))
-                    setLinkShortnersData_state(linkShortnerData.reverse())
-                }
-            } catch (error) {
-                console.error("Error fetching dashboard data:", error);
-                if (error.response.data.error_msg) {
-                    showNotification(true, error.response.data.error_msg);
-                } else if (error.response.data.adminJWT_error_msg) {
-                    showNotification(true, error.response.data.adminJWT_error_msg);
-                    navigation('/')
-                } else {
-                    showNotification(true, "Something went wrong, please try again.");
-                }
-            } finally {
-                setData_process_state(false);
+            if (response?.data?.msg) {
+                const { other_data_shortLink_limit: { shortLink_pendingUpdates, shortLink_instructions }, linkShortnerData
+                } = response.data.msg;
+                setShortLinkLimit_state(shortLink_pendingUpdates)
+                setShortLinkInstructions_state(shortLink_instructions.join("\n"))
+                setLinkShortnersData_state(linkShortnerData.reverse())
             }
-        };
+        } catch (error) {
+            console.error("Error fetching dashboard data:", error);
+            if (error.response.data.error_msg) {
+                showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
+                navigation('/')
+            } else {
+                showNotification(true, "Something went wrong, please try again.");
+            }
+        } finally {
+            setData_process_state(false);
+        }
+    };
+    useEffect(() => {
         fetchData()
     }, []);
 
@@ -141,18 +141,9 @@ const ShortLink = () => {
                 { withCredentials: true }
             );
             if (response?.data?.msg) {
-                const { shortnerName, amount, time, _id, shortnerDomain, shortnerApiLink } = response.data.msg;
-                setLinkShortnersData_state([
-                    {
-                        _id,
-                        shortnerName,
-                        amount,
-                        time,
-                        shortnerDomain,
-                        shortnerApiLink
-                    },
-                    ...linkShortnersData_state,
-                ]);
+                fetchData()
+                setEditingId_state(null);
+                setEditData_state(null);
                 showNotification(false, 'updated success!')
                 setNewLinkShortner_state({ shortnerName: '', amount: '', time: '', _id: '', shortnerDomain: '', shortnerApiLink: '' });
             }
@@ -212,18 +203,7 @@ const ShortLink = () => {
             );
 
             if (response?.data?.msg) {
-                const { shortnerName, amount, time, _id, shortnerDomain, shortnerApiLink } = response.data.msg;
-                setLinkShortnersData_state([
-                    {
-                        _id,
-                        shortnerName,
-                        amount,
-                        time,
-                        shortnerDomain,
-                        shortnerApiLink
-                    },
-                    ...linkShortnersData_state,
-                ]);
+                fetchData()
                 setEditingId_state(null);
                 setEditData_state(null);
                 showNotification(false, 'Updated successfully!');
