@@ -5,8 +5,10 @@ const WaitRedirecting = () => {
     const [redirectLink, setRedirectLink] = useState('');
     const [waitingTimer_state, setWaitingTimer_state] = useState(6);
     const [isAbort_state, setIsAbort_state] = useState(false);
+    const [adBlockDetected_state, setAdBlockDetected_state] = useState(false);
     const channel = new BroadcastChannel("viewAds_channel");
 
+    // Process query params and broadcast channel events
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
         const link = queryParams.get('link');
@@ -15,25 +17,25 @@ const WaitRedirecting = () => {
         }
         channel.onmessage = (event) => {
             if (event.data === "isAbort") {
-                setIsAbort_state(true)
+                setIsAbort_state(true);
             }
         };
 
         function handle_userStayOrNot() {
-            let isExist = sessionStorage.getItem("isStay")
+            let isExist = sessionStorage.getItem("isStay");
             if (!isExist) {
-                channel.postMessage("isAbortFromWaitingPage")
+                channel.postMessage("isAbortFromWaitingPage");
             }
         }
 
-        window.addEventListener("beforeunload", handle_userStayOrNot)
+        window.addEventListener("beforeunload", handle_userStayOrNot);
         return () => {
             channel.close(); // Cleanup channel on unmount
-            window.removeEventListener("beforeunload", handle_userStayOrNot)
+            window.removeEventListener("beforeunload", handle_userStayOrNot);
         };
     }, []);
 
-    // For ads: inject external scripts
+    // Load external ad scripts and detect ad blockers
     useEffect(() => {
         const scripts = [
             { src: "https://kulroakonsu.net/88/tag.min.js", attributes: { 'data-zone': '132939', 'data-cfasync': 'false' } },
@@ -41,6 +43,7 @@ const WaitRedirecting = () => {
             { src: "https://js.wpadmngr.com/static/adManager.js", attributes: { 'data-admpid': '287339' } }
         ];
 
+        let loadedScripts = 0;
         const scriptElements = scripts.map(({ src, attributes }) => {
             const script = document.createElement('script');
             script.src = src;
@@ -48,12 +51,28 @@ const WaitRedirecting = () => {
             Object.entries(attributes).forEach(([key, value]) => {
                 script.setAttribute(key, value);
             });
+
+            // If script loads successfully
+            script.onload = () => {
+                loadedScripts++;
+                if (loadedScripts === scripts.length) {
+                    console.log("All ad scripts loaded successfully");
+                }
+            };
+
+            // If script fails to load (likely blocked by an ad blocker)
+            script.onerror = () => {
+                setAdBlockDetected_state(true);
+            };
+
             document.body.appendChild(script);
             return script;
         });
 
         return () => {
-            scriptElements.forEach(script => document.body.removeChild(script));
+            scriptElements.forEach(script => {
+                document.body.removeChild(script);
+            });
         };
     }, []);
 
@@ -74,11 +93,31 @@ const WaitRedirecting = () => {
     const handleRedirect = () => {
         if (redirectLink) {
             channel.postMessage(`isSuccess`);
-            sessionStorage.setItem("isStay", "true")
+            sessionStorage.setItem("isStay", "true");
             window.location.replace(redirectLink);
         }
     };
 
+    // If ad blocker detected, render an error page
+    if (adBlockDetected_state) {
+        return (
+            <>
+                <Helmet>
+                    <title>Ad Blocker Detected</title>
+                </Helmet>
+                <div className="flex items-center justify-center min-h-screen bg-red-50">
+                    <div className="bg-white p-8 rounded-xl shadow-lg w-96">
+                        <h2 className="text-3xl font-semibold text-center text-red-600 mb-4">Ad Blocker Detected</h2>
+                        <p className="text-xl text-center text-gray-700 mb-4">
+                            It appears that you are using an ad blocker. Please disable your ad blocker to continue using our service.
+                        </p>
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+    // Main content if no ad blocker is detected
     return (
         <>
             <Helmet>
@@ -95,7 +134,7 @@ const WaitRedirecting = () => {
                             </p>
                         ) : (
                             <button
-                                disabled={isAbort_state ? true : false}
+                                disabled={isAbort_state}
                                 className={`px-4 py-2 rounded text-white ${isAbort_state
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : "bg-blue-500 hover:bg-blue-600"

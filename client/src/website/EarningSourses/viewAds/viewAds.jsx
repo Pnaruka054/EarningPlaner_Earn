@@ -157,15 +157,11 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         setHandle_clickAds_btnClick_state(true);
         channel.postMessage("handle_clickAds_btnClick_state_true");
 
-        let newTab = window.open('', '_blank');
+        const newTab = window.open("", '_blank');
         if (!newTab) {
-            setHandle_clickAds_btnClick_state(false);
-            return Swal.fire({
-                icon: "error",
-                title: "Success!",
-                text: "Please Allow Popup in Your Browser to Earn Money!",
-            });;
+            return alert("Please Allow Popup in Your Browser to Earn Money!");
         }
+        newTab.close();
 
         setTimeout(() => {
             let newTab1 = window.open(link, '_blank');
@@ -177,7 +173,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     text: "Please Allow Popup in Your Browser to Earn Money!",
                 });;
             }
-        }, 1000);
+        }, 100);
 
         setTimeout(() => {
             let newTab2 = window.open(link, '_blank');
@@ -189,12 +185,12 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                     text: "Please Allow Popup in Your Browser to Earn Money!",
                 });;
             }
-        }, 4000);
+        }, 1600);
 
         setTimeout(() => {
             setCurrentBtnName_and_amount_For_extension_storedValue_state([btnName, amount])
             window.open(`/waitRedirecting/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
-        }, 7000);
+        }, 3100);
     };
 
     const handle_link_click2 = (link, btnName, amount) => {
@@ -221,7 +217,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         const handleIsExtensionUpdated = (e) => {
             const [btnName, amount] = currentBtnName_and_amount_For_extension_storedValue_state;
             const extension_storedValue = localStorage.getItem('extension_storedValue');
-            if (viewAds_firstTimeLoad_state && viewAds_firstTimeLoad_state.clickBalance) {
+            if (viewAds_firstTimeLoad_state && viewAds_firstTimeLoad_state.pendingClick) {
                 if ((extension_storedValue === 'true') && btnName && amount) {
                     localStorage.removeItem('extension_storedValue');
                     setHandle_clickAds_btnClick_state(false);
@@ -291,6 +287,28 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             });
         };
     }, [viewAds_firstTimeLoad_state, currentBtnName_and_amount_For_extension_storedValue_state]);
+    useEffect(() => {
+        // Function to check the extension state from localStorage
+        const checkExtensionState = () => {
+            const isExtension = localStorage.getItem('isExtension');
+            if (isExtension === 'true') {
+                setIsExtension_state(true);
+            } else {
+                setIsExtension_state(false);
+            }
+        };
+
+        // Initial check on component mount
+        checkExtensionState();
+
+        // Add event listener for storage changes
+        window.addEventListener('storage', checkExtensionState);
+
+        // Cleanup event listener on component unmount
+        return () => {
+            window.removeEventListener('storage', checkExtensionState);
+        };
+    }, []);
 
     // for handle sound
     useEffect(() => {
@@ -579,9 +597,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                             </div>
                         </div>
                     </div>
-                    {/* adsterra Native Banner start */}
-                    <div id="container-f2e76b1a9af84306102d9f8675c030e8"></div>
-                    {/* adsterra Native Banner End*/}
                     <div className='bg-white rounded shadow px-5 py-2'>
                         <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>View Ads Instructions</p>
                         <hr className='mt-2 border' />

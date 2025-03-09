@@ -301,9 +301,6 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                             )}
                         </div>
                     </div>
-                    {/* adsterra Native Banner start */}
-                    <div id="container-f2e76b1a9af84306102d9f8675c030e8"></div>
-                    {/* adsterra Native Banner End*/}
                     <div className='bg-white rounded shadow px-5 py-2'>
                         <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>View Ads Instructions</p>
                         <hr className='mt-2 border' />

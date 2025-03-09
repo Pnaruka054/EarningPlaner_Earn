@@ -30,6 +30,7 @@ const other_data_schema = new mongoose.Schema({
     shortlink_required: { type: String },
     fillSurvey_required: { type: String },
     giftCode_page_Message: { type: String },
+    extension_Message: { type: String },
 })
 
 const other_data_module = mongoose.model("other_data", other_data_schema)

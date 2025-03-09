@@ -97,6 +97,7 @@ const getDashboardData = async (req, res) => {
         // Fetch Referral Data
         const other_data_referralRate = await other_data_module.findOne({ documentName: "referralRate" }) || {};
         const other_data_giftCode = await other_data_module.findOne({ documentName: "giftCode" }) || {};
+        const other_data_extension = await other_data_module.findOne({ documentName: "extension" }) || {};
         const referral_rate = other_data_referralRate.referralRate || 0;
         const referral_page_text = other_data_referralRate.referralPageText || "";
 
@@ -111,7 +112,8 @@ const getDashboardData = async (req, res) => {
             announcementData: other_data_announcementsArray,
             faqData: other_data_faqArray,
             withdrawalMethodData: other_data_withdrawalMethodArray,
-            other_data_giftCode
+            other_data_giftCode,
+            extension_Message: other_data_extension.extension_Message || ''
         };
 
         // Send Success Response
