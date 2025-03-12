@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
+import axios from 'axios'
+import ProcessBgBlack from '../../components/processBgBlack/processBgBlack';
 
 const WaitRedirecting = () => {
     const [redirectLink, setRedirectLink] = useState('');
@@ -7,9 +9,25 @@ const WaitRedirecting = () => {
     const [isAbort_state, setIsAbort_state] = useState(false);
     const [adBlockDetected_state, setAdBlockDetected_state] = useState(false);
     const channel = new BroadcastChannel("viewAds_channel");
+    const [data_process_state, setData_process_state] = useState(false);
+    const [vpn_detected_state, setVpn_detected_state] = useState(false);
 
     // Process query params and broadcast channel events
     useEffect(() => {
+        const vpnChecker = async () => {
+            setData_process_state(true)
+            try {
+                let response = await axios.get("https://bitcotasks.com/promote/44879")
+                if (response.data.trim() === "Proxy Detected!") {
+                    setVpn_detected_state(true)
+                }
+            } catch (error) {
+                console.error(response)
+            } finally {
+                setData_process_state(false)
+            }
+        }
+        vpnChecker()
         const queryParams = new URLSearchParams(window.location.search);
         const link = queryParams.get('link');
         if (link) {
@@ -117,6 +135,24 @@ const WaitRedirecting = () => {
         );
     }
 
+    if (vpn_detected_state) {
+        return (
+            <>
+                <Helmet>
+                    <title>VPN Detected</title>
+                </Helmet>
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="bg-white p-8 rounded-xl shadow-lg w-96 text-center">
+                        <h2 className="text-3xl font-semibold text-red-600 mb-4">VPN Detected</h2>
+                        <p className="text-xl text-gray-700 mb-4">
+                            We have detected that you are using a VPN. Please disable your VPN to continue using our service.
+                        </p>
+                    </div>
+                </div>
+            </>
+        );
+    }
+
     // Main content if no ad blocker is detected
     return (
         <>
@@ -152,6 +188,7 @@ const WaitRedirecting = () => {
                         </p>
                     </div>
                 </div>
+                {data_process_state && <ProcessBgBlack />}
             </div>
         </>
     );

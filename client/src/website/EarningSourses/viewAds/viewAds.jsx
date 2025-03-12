@@ -176,18 +176,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         }, 100);
 
         setTimeout(() => {
-            let newTab2 = window.open(link, '_blank');
-            if (!newTab2) {
-                setHandle_clickAds_btnClick_state(false);
-                return Swal.fire({
-                    icon: "error",
-                    title: "Success!",
-                    text: "Please Allow Popup in Your Browser to Earn Money!",
-                });;
-            }
-        }, 1600);
-
-        setTimeout(() => {
             setCurrentBtnName_and_amount_For_extension_storedValue_state([btnName, amount])
             window.open(`/waitRedirecting/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
         }, 3100);

@@ -8,15 +8,8 @@ import SubscribeOurChannel from "../components/subscribeOurChannel/subscribeOurC
 import ContactUs from "../components/contactUs/contactUs";
 import FAQs from "../components/FAQs/FAQs";
 import { Helmet } from 'react-helmet';
-import axios from 'axios'
 
 const Home = () => {
-
-  useEffect(() => {
-    axios.get("https://bitcotasks.com/promote/44879").then((Response) => {
-      console.log(Response.data);
-    })
-  }, []);
 
   return (
     <>
