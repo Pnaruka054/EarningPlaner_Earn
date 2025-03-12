@@ -8,16 +8,16 @@ import SubscribeOurChannel from "../components/subscribeOurChannel/subscribeOurC
 import ContactUs from "../components/contactUs/contactUs";
 import FAQs from "../components/FAQs/FAQs";
 import { Helmet } from 'react-helmet';
-import axios from "axios";
+import axios from 'axios'
 
 const Home = () => {
+
   useEffect(() => {
-    async function database() {
-      let response = await axios.get("https://bitcotasks.com/promote/44879")
-      console.log(response);
-    }
-    database()
+    axios.get("https://bitcotasks.com/promote/44879").then((Response) => {
+      console.log(Response.data);
+    })
   }, []);
+
   return (
     <>
       <Helmet>
