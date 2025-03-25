@@ -1,8 +1,10 @@
 const userMail_message_module = require('../../../model/userMessage/userMail_message_module')
-const googleSheetsDataAdd = require('../../../helper/googleSheetsDataAdd')
+const googleSheetsDataAdd = require('../../../helper/googleSheetsDataAdd');
+const { decryptData } = require('../../../helper/encrypt_decrypt_data');
 
 const userMessageSave_post = async (req, res) => {
     try {
+        req.body = await decryptData(req.body.obj)
         // Request body se data extract karna
         const { name, email_address, mobile_number, subject, message, consent } = req.body;
 

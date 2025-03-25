@@ -13,6 +13,9 @@ const current_time_get = require('../../../helper/currentTimeUTC')
 const getFormattedMonth = require("../../../helper/getFormattedMonth")
 const userUniqueTokenData_module = require('../../../model/userUniqueTokenData_10minEx/userUniqueTokenData_module')
 const other_data_module = require('../../../model/other_data/other_data_module')
+const withdrawal_record = require("../../../model/withdraw/withdrawal_records_module")
+const { decryptData } = require('../../../helper/encrypt_decrypt_data')
+const ipAddress_records_module = require('../../../model/IPAddress/useripAddresses_records_module')
 
 function jwt_accessToken(user, time) {
     return jwt.sign({ jwtUser: user }, process.env.JWT_ACCESS_KEY, { expiresIn: time })
@@ -23,6 +26,8 @@ let userSignUp = async (req, res) => {
     try {
         // check express validation errors
         const errors = validationResult(req)
+        const userIp = req.ip
+
         if (!errors.isEmpty()) {
             return res.status(400).json({
                 success: false,
@@ -30,10 +35,22 @@ let userSignUp = async (req, res) => {
             })
         }
 
+        // check if user have already using another account with same ip address
+        let existingRecord = await ipAddress_records_module.findOne({ ipAddress: userIp });
+        if (existingRecord) {
+            return res.status(400).json({
+                success: false,
+                error_msg: 'Multiple accounts from the same IP address are not allowed.'
+            })
+        }
+
         // format current month and year (e.g., "January 2024")
         const monthName = getFormattedMonth()
 
-        const { name, mobile_number, email_address, password, refer_by } = req.body
+        let { name, mobile_number, email_address, password, refer_by } = req.body
+
+        email_address = email_address.toLowerCase().trim()
+        password = password.trim()
 
         // taking userName from email Address
         let userName = email_address.split('@')[0]
@@ -107,6 +124,10 @@ let userSignUp = async (req, res) => {
             monthName,
         }).save()
 
+        // add user ip record in ip address data
+        existingRecord = new ipAddress_records_module({ ipAddress: userIp });
+        await existingRecord.save();
+
         res.status(200).json({
             success: true,
             msg: 'Register successfully!',
@@ -123,6 +144,7 @@ let userSignUp = async (req, res) => {
 // for user login
 const userLogin = async (req, res) => {
     try {
+        req.body = await decryptData(req.body.obj)
         let { email_userName, password, loginRemember_state } = req.body;
 
         // check if your details are received or not
@@ -135,6 +157,7 @@ const userLogin = async (req, res) => {
 
         // arrange email without spaces and upper case letters
         email_userName = email_userName.toLowerCase().trim();
+        password = password.trim()
 
         let userName = null
         // check if email address if vaild or not
@@ -145,7 +168,6 @@ const userLogin = async (req, res) => {
 
         // findinig user in register data using email
         const isExists = await userSignUp_module.findOne({ email_address: email_userName });
-
         // check if user finded or not
         if (!isExists) {
             return res.status(401).json({
@@ -194,6 +216,18 @@ const userLogin = async (req, res) => {
             });
         }
 
+        // add login users ip address in ip address record
+        const userIp = req.ip;
+        let existingRecord = await ipAddress_records_module.findOne({ ipAddress: userIp });
+        if (existingRecord) {
+            existingRecord.ipAddress = userIp; // Update existing record
+            await existingRecord.save();
+        } else {
+            // ❇️ Create a new record if not found
+            existingRecord = new ipAddress_records_module({ ipAddress: userIp });
+            await existingRecord.save();
+        }
+
         return res.status(200).json({
             success: true,
             msg: 'Logged in successfully'
@@ -210,11 +244,8 @@ const userLogin = async (req, res) => {
 // for user registration & login using google direct option
 const user_signUp_login_google = async (req, res) => {
     try {
-        // get google unique code for user from query
-        const google_code = req.query.google_code;
-
-        // get referral userid if available from query
-        const referral_id_signup = req.query.referral_id_signup
+        // get google unique code,  referral userid and varibal to check user already registered or not for user from query
+        const { google_code, userAlreadyHaveAccount_state, referral_id_signup, userEmail } = req.query;
 
         // format current month and year (e.g., "January 2024")
         const monthName = getFormattedMonth()
@@ -226,6 +257,10 @@ const user_signUp_login_google = async (req, res) => {
                 error_msg: 'Missing credentials'
             });
         }
+
+        // check user ip address already available
+        const userIp = req.ip;
+        let existingRecord = await ipAddress_records_module.findOne({ ipAddress: userIp });
 
         // get google user token using google unique code
         const googleRes = await oauth2Client.getToken(google_code);
@@ -243,6 +278,13 @@ const user_signUp_login_google = async (req, res) => {
         // taking userName from email Address
         let userName = email.split('@')[0]
 
+        if (userEmail && userEmail !== email) {
+            return res.status(409).json({
+                success: false,
+                error_msg: `Account switching is restricted. Please log in with ${userEmail}.`
+            });
+        }
+
         // check user already registered or not using email
         const isExists = await userSignUp_module.findOne({
             $or: [
@@ -250,6 +292,14 @@ const user_signUp_login_google = async (req, res) => {
                 { userName }
             ]
         })
+
+        // if user not available means it's trying to signup and with that is user ip address already available in ip address record then give error
+        if ((!isExists && existingRecord) || (!isExists && userAlreadyHaveAccount_state === 'true')) {
+            return res.status(400).json({
+                success: false,
+                error_msg: 'Multiple accounts from the same IP address are not allowed.'
+            })
+        }
 
         // check user already registered with google or not
         if (!isExists?.google_id && isExists) {
@@ -282,7 +332,7 @@ const user_signUp_login_google = async (req, res) => {
         };
 
         // checking if refer by id is available or not
-        if (referral_id_signup !== 'undefined') {
+        if (referral_id_signup) {
             // check user registration referral link is valid or not
             const referred_by_userData = await userSignUp_module.findOne({ userName: referral_id_signup })
             if (!referred_by_userData) {
@@ -320,9 +370,21 @@ const user_signUp_login_google = async (req, res) => {
                 monthName,
             }).save()
 
+            // after ip address check user registration success and add user ip address in ip address records
+            existingRecord = new ipAddress_records_module({ ipAddress: userIp });
+            await existingRecord.save();
             // create jwt token to login
             jwt_token = jwt_accessToken(user_data, '12h')
         } else {
+            // add user ip address in ip address records
+            if (existingRecord) {
+                existingRecord.ipAddress = userIp; // Update existing record
+                await existingRecord.save();
+            } else {
+                // ❇️ Create a new record if not found
+                existingRecord = new ipAddress_records_module({ ipAddress: userIp });
+                await existingRecord.save();
+            }
             // create jwt token to login
             jwt_token = jwt_accessToken(isExists, '12h')
         }
@@ -351,6 +413,7 @@ const user_signUp_login_google = async (req, res) => {
 // for send mail to reset password
 const userLoginforgot_password_send_mail = async (req, res) => {
     try {
+        req.body = await decryptData(req.body.obj)
         let { email } = req.body;
 
         // arrange email without spaces and upper case letters
@@ -396,7 +459,11 @@ const userLoginforgot_password_send_mail = async (req, res) => {
         }
 
         // decorate message for user email
-        const msg = `<p>Hello ${isExists.name} Welcome To Earning Planer, Click <a href="${fullUrl}/password-reset-form/${token}"> here </a> To Reset Your Password</p>`
+        const msg = `<p>Hi ${isExists.name},</p> 
+        <p>Welcome to EarnWiz! We received a request to reset your password.</p>  
+        <p>Click <a href="${fullUrl}/password-reset-form/${token}">here</a> to reset your password.</p>  
+        <p>If you didn't request this, please ignore this email.</p>  
+        <p>Best regards, <br> EarnWiz Team</p>`;
         // send mail function
         mailSender(isExists.email_address, 'Reset/update Password', msg)
         await new userUniqueTokenData_module(obj).save()
@@ -416,6 +483,7 @@ const userLoginforgot_password_send_mail = async (req, res) => {
 // for reset password after link click
 const reset_password_form_post = async (req, res) => {
     try {
+        req.body = await decryptData(req.body.obj)
         let { token, password } = req.body;
 
         // remove starting and ending spaces
@@ -587,10 +655,11 @@ const userDataGet_dashboard = async (req, res) => {
             msg: {
                 user_month_records,
                 user_date_records,
+                userEmail: userData?.email_address,
                 userAvailableBalance: (
                     parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)
                 ).toFixed(3),
-                other_data_announcementsArray
+                other_data_announcementsArray: other_data_announcementsArray.reverse()
             }
         });
     } catch (error) {
@@ -663,6 +732,7 @@ const userProfileData_get = async (req, res) => {
 const userProfileData_patch = async (req, res) => {
     try {
         const userData = req.user;
+        req.body = await decryptData(req.body.obj)
         const updateFields = req.body;
 
         // update userData using req.body data directly
@@ -695,16 +765,25 @@ const userWebstatisticsGet = async (req, res) => {
     try {
         // Pehle database se saare users ko fetch karo
         let users = await userSignUp_module.find();
-        users = users.length
+        let usersWithdrawalRecords = await withdrawal_record.find();
 
-        // if total lenght is less then 100 then set it 542
+        // Total Withdrawal Amount Calculate karo
+        let totalWithdrawalAmount = usersWithdrawalRecords.reduce((sum, record) => {
+            return sum + (parseFloat(record.balance) || 0);
+        }, 0);
+
+        // Users ki length nikalo
+        users = users.length;
+
+        // Agar users 100 se kam hain, toh default value set karo
         if (users < 100) {
             users = 5254;
         }
 
-        // Agar 100 ya usse zyada hain, toh original data send karo
-        res.status(200).json({ users, fixed: true });
+        // Response send karo 
+        res.status(200).json({ users, fixed: true, totalWithdrawalAmount });
     } catch (error) {
+        console.error("❌ Error in userWebstatisticsGet:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
@@ -735,7 +814,8 @@ const userpassword_and_email_get = async (req, res) => {
 // to update user password and email id
 const userpassword_and_email_patch = async (req, res) => {
     try {
-        let { email_address, newPassword, currentPassword } = req.body;
+        req.body = await decryptData(req.body.obj)
+        let { email_address, newPassword_state, currentPassword_state } = req.body;
         const userData = req.user;
 
         // Update Email Address
@@ -808,8 +888,8 @@ const userpassword_and_email_patch = async (req, res) => {
         }
 
         // Update Password
-        if (newPassword && currentPassword) {
-            const passwordMatched = await bcrypt.compare(currentPassword, userData.password);
+        if (newPassword_state && currentPassword_state) {
+            const passwordMatched = await bcrypt.compare(currentPassword_state, userData.password);
 
             if (!passwordMatched) {
                 return res.status(400).json({
@@ -818,14 +898,14 @@ const userpassword_and_email_patch = async (req, res) => {
                 });
             }
 
-            if (newPassword.length < 8) {
+            if (newPassword_state.length < 8) {
                 return res.status(400).json({
                     success: false,
                     error_msg: "New password must be at least 8 characters long"
                 });
             }
 
-            const bcryptPassword = await bcrypt.hash(newPassword, 10);
+            const bcryptPassword = await bcrypt.hash(newPassword_state, 10);
             userData.password = bcryptPassword;
             await userData.save();
 

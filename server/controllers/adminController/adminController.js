@@ -8,6 +8,7 @@ const withdrawal_record = require('../../model/withdraw/withdrawal_records_modul
 const userSignUp_module = require('../../model/userSignUp/userSignUp_module')
 const mongoose = require("mongoose");
 const generateRandomString = require('../../helper/generateRandomString')
+const offerWallsData_module = require('../../model/offerWallsData/offerWallsData_module')
 
 function jwt_accessToken(user) {
     return jwt.sign({ jwtUser: user }, process.env.JWT_ACCESS_KEY, { expiresIn: '2h' })
@@ -97,12 +98,12 @@ const getDashboardData = async (req, res) => {
         // Fetch Referral Data
         const other_data_referralRate = await other_data_module.findOne({ documentName: "referralRate" }) || {};
         const other_data_giftCode = await other_data_module.findOne({ documentName: "giftCode" }) || {};
-        const other_data_extension = await other_data_module.findOne({ documentName: "extension" }) || {};
         const referral_rate = other_data_referralRate.referralRate || 0;
         const referral_page_text = other_data_referralRate.referralPageText || "";
 
         // Fetch Other Data (Announcements, FAQs, Withdrawal Methods)
         const other_data_announcementsArray = await other_data_module.find({ documentName: "announcement" }) || [];
+        const other_data_homepageArray = await other_data_module.find({ documentName: "homepage" }) || [];
         const other_data_faqArray = await other_data_module.find({ documentName: "faq" }) || [];
         const other_data_withdrawalMethodArray = await other_data_module.find({ documentName: "withdrawalMethod" }) || [];
 
@@ -113,7 +114,7 @@ const getDashboardData = async (req, res) => {
             faqData: other_data_faqArray,
             withdrawalMethodData: other_data_withdrawalMethodArray,
             other_data_giftCode,
-            extension_Message: other_data_extension.extension_Message || ''
+            other_data_homepageArray
         };
 
         // Send Success Response
@@ -673,11 +674,11 @@ const delete_viewAds_directLink_data = async (req, res) => {
 // handle short Link data get
 const getShortLinkData = async (req, res) => {
     try {
-        const other_data_shortLink_limit = await other_data_module.findOne({ documentName: "shortLink" }) || {};
+        const other_data_shortLink_Instructions = await other_data_module.findOne({ documentName: "shortLink" }) || {};
         let linkShortnerData = await shortedLinksData_module.find();
 
         const res_data = {
-            other_data_shortLink_limit,
+            other_data_shortLink_Instructions : other_data_shortLink_Instructions?.shortLink_instructions,
             linkShortnerData,
         };
 
@@ -692,23 +693,21 @@ const getShortLinkData = async (req, res) => {
     }
 };
 
-// handle view ads update data
+// handle short link update data
 const update_ShortLink_data = async (req, res) => {
     try {
-        let { data, btnName } = req.body;
+        let { data } = req.body;
 
-        if (!["text", "limit"].includes(btnName)) {
+        if (!data) {
             return res.status(400).json({
                 success: false,
-                error_msg: "Invalid button name. Must be 'text' or 'limit'."
+                error_msg: "Invalid data recived'."
             });
         }
 
-        let updateField = btnName === "text" ? { shortLink_instructions: data } : { shortLink_pendingUpdates: data };
-
         let updatedData = await other_data_module.findOneAndUpdate(
             { documentName: "shortLink" },
-            updateField,
+            { shortLink_instructions: data },
             { new: true, upsert: true }
         );
 
@@ -756,7 +755,8 @@ const post_ShortenLink_data = async (req, res) => {
             amount: linkShortner_data.amount,
             time: linkShortner_data.time,
             shortnerDomain: linkShortner_data.shortnerDomain,
-            shortnerApiLink: linkShortner_data.shortnerApiLink
+            shortnerApiLink: linkShortner_data.shortnerApiLink,
+            how_to_complete: linkShortner_data.how_to_complete
         });
 
         await newData.save();
@@ -774,9 +774,9 @@ const post_ShortenLink_data = async (req, res) => {
 
 const patch_ShortenLink_data = async (req, res) => {
     try {
-        let { shortnerName, amount, time, shortnerDomain, shortnerApiLink, _id } = req.body;
+        let { shortnerName, amount, time, shortnerDomain, shortnerApiLink, how_to_complete, _id, how_much_click_allow } = req.body;
 
-        if (!shortnerName || !amount || !_id || !shortnerApiLink || !shortnerDomain || !time) {
+        if (!shortnerName || !amount || !_id || !shortnerApiLink || !shortnerDomain || !time || !how_much_click_allow) {
             return res.status(400).json({
                 success: false,
                 error_msg: "Invalid or missing data received."
@@ -790,7 +790,9 @@ const patch_ShortenLink_data = async (req, res) => {
                 amount,
                 time,
                 shortnerDomain,
-                shortnerApiLink
+                shortnerApiLink,
+                how_to_complete,
+                how_much_click_allow
             },
             { new: true }
         );
@@ -1174,7 +1176,7 @@ const patch_dmca_data = async (req, res) => {
 const postGift_code_data = async (req, res) => {
     try {
         // Destructure required fields from the request body
-        const { viewAds_required, giftCode_claim_limit, shortlink_required, fillSurvey_required, giftCode_amount, isPageMessage, giftCode_page_Message } = req.body;
+        const { viewAds_required, giftCode_claim_limit, shortlink_required, offerWall_required, giftCode_amount, isPageMessage, giftCode_page_Message } = req.body;
 
         // Validate that required fields are present (update condition as per your business logic)
         if (
@@ -1184,7 +1186,7 @@ const postGift_code_data = async (req, res) => {
             giftCode_amount === undefined ||
             isPageMessage === undefined ||
             giftCode_page_Message === undefined ||
-            fillSurvey_required === undefined
+            offerWall_required === undefined
         ) {
             return res.status(400).json({
                 success: false,
@@ -1214,7 +1216,7 @@ const postGift_code_data = async (req, res) => {
                     giftCode_claimed: "0",
                     giftCode: generateRandomString(10).toUpperCase(),
                     shortlink_required,
-                    fillSurvey_required,
+                    offerWall_required,
                 },
                 { new: true, upsert: true }
             );
@@ -1230,6 +1232,290 @@ const postGift_code_data = async (req, res) => {
             success: false,
             msg: "Internal Server Error. Please try again later.",
             error: error.message,
+        });
+    }
+};
+
+// handle offerwall
+const getOfferWallData = async (req, res) => {
+    try {
+        // Retrieve offer wall instructions and other related data (if exists)
+        const other_data_offerWall = await other_data_module.findOne({ documentName: "offerWall" }) || {};
+        // Retrieve all offer wall entries
+        const offerWallData = await offerWallsData_module.find();
+
+        return res.status(200).json({
+            success: true,
+            msg: {
+                other_data_offerWall,
+                offerWallData,
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching offerWall data:", error);
+        return res.status(500).json({
+            success: false,
+            msg: "Internal Server Error. Please try again later.",
+            error: error.message
+        });
+    }
+};
+
+// Controller to update offer wall instructions
+const patchOfferWallInstructions = async (req, res) => {
+    try {
+        const { offerWall_instructions } = req.body;
+
+        // Validate that offerWall_instructions exists and is an array (if you expect multiple instructions)
+        if (!offerWall_instructions || !Array.isArray(offerWall_instructions)) {
+            return res.status(400).json({
+                success: false,
+                msg: "Invalid instructions provided. It must be a valid array of instructions.",
+            });
+        }
+
+        // Use $set to update only the offerWall_instructions field
+        const updatedData = await other_data_module.findOneAndUpdate(
+            { documentName: "offerWall" },
+            { $set: { offerWall_instructions } },
+            { new: true, upsert: true }
+        );
+
+        return res.status(200).json({
+            success: true,
+            msg: updatedData,
+        });
+    } catch (error) {
+        console.error("Error updating offerwall data:", error);
+        return res.status(500).json({
+            success: false,
+            msg: "Internal Server Error. Please try again later.",
+            error: error.message,
+        });
+    }
+};
+
+// Controller to add a new offer wall entry
+const postOfferWall = async (req, res) => {
+    try {
+        const { offerWallName, offerWallApiLink } = req.body;
+
+        // Basic validation for required fields
+        if (!offerWallName || !offerWallApiLink) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Both offerWallName and offerWallApiLink are required."
+            });
+        }
+
+        // Create a new instance of the offer wall document
+        const newOfferWall = new offerWallsData_module({
+            offerWallName,
+            offerWallApiLink,
+        });
+
+        await newOfferWall.save();
+
+        return res.status(201).json({ success: true, msg: "OfferWall successfully posted", newOfferWall });
+    } catch (error) {
+        console.error("Error inserting new offerWall link data:", error);
+        return res.status(500).json({
+            success: false,
+            msg: "Internal Server Error. Please try again later.",
+            error: error.message
+        });
+    }
+};
+
+// Controller to update an existing offer wall entry
+const patchOfferWall = async (req, res) => {
+    try {
+        const { editingId_state, editData_state } = req.body;
+
+        if (!editingId_state || !editData_state) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Invalid or missing data received. editingId_state and editData_state are required."
+            });
+        }
+
+        // Validate required fields in editData_state if needed
+        if (!editData_state.offerWallName || !editData_state.offerWallApiLink) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Both offerWallName and offerWallApiLink are required in editData_state."
+            });
+        }
+
+        // Update the document using $set operator for clarity
+        const updatedData = await offerWallsData_module.findOneAndUpdate(
+            { _id: editingId_state },
+            {
+                $set: {
+                    offerWallName: editData_state.offerWallName,
+                    offerWallApiLink: editData_state.offerWallApiLink,
+                }
+            },
+            { new: true }
+        );
+
+        if (!updatedData) {
+            return res.status(404).json({
+                success: false,
+                error_msg: "OfferWall entry not found."
+            });
+        }
+
+        return res.status(200).json({ success: true, msg: "OfferWall successfully updated", updatedData });
+    } catch (error) {
+        console.error("Error updating offerWall data:", error);
+        return res.status(500).json({
+            success: false,
+            msg: "Internal Server Error. Please try again later.",
+            error: error.message
+        });
+    }
+};
+
+// Controller to delete an offer wall entry
+const deleteOfferWall = async (req, res) => {
+    try {
+        const { id } = req.query;
+
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Invalid request. OfferWall _id is required."
+            });
+        }
+
+        const deletedData = await offerWallsData_module.findOneAndDelete({ _id: id });
+
+        if (!deletedData) {
+            return res.status(404).json({
+                success: false,
+                error_msg: "OfferWall not found or already deleted."
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            msg: "OfferWall successfully deleted."
+        });
+    } catch (error) {
+        console.error("Error deleting OfferWall:", error);
+        return res.status(500).json({
+            success: false,
+            error_msg: "Internal Server Error. Please try again later.",
+            error: error.message
+        });
+    }
+};
+
+
+// handle homepage
+const post_newHomepage_data = async (req, res) => {
+    try {
+        let { newHomepage_section_data } = req.body;
+
+        if (!newHomepage_section_data || !newHomepage_section_data.homepageSection_title || !newHomepage_section_data.homepageSection_message) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Invalid data received."
+            });
+        }
+
+        let newData = new other_data_module({
+            documentName: "homepage",
+            homepageSection_title: newHomepage_section_data.homepageSection_title,
+            homepageSection_message: newHomepage_section_data.homepageSection_message,
+        });
+
+        await newData.save();
+
+        res.status(201).json({ success: true, msg: newData });
+    } catch (error) {
+        console.error("Error inserting new new homepage data:", error);
+        res.status(500).json({
+            success: false,
+            msg: "Internal Server Error. Please try again later.",
+            error: error.message
+        });
+    }
+};
+
+const patch_homepage_data = async (req, res) => {
+    try {
+        let { homepageSection_title, homepageSection_message, _id } = req.body;
+
+        if (!homepageSection_title || !homepageSection_message || !_id) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Invalid or missing data received."
+            });
+        }
+
+        let updatedData = await other_data_module.findOneAndUpdate(
+            { documentName: "homepage", _id },
+            {
+                homepageSection_title,
+                homepageSection_message,
+            },
+            { new: true }
+        );
+
+        if (!updatedData) {
+            return res.status(404).json({
+                success: false,
+                error_msg: "homepage not found."
+            });
+        }
+
+        res.status(200).json({ success: true, msg: updatedData });
+    } catch (error) {
+        console.error("Error updating homepage data:", error);
+        res.status(500).json({
+            success: false,
+            msg: "Internal Server Error. Please try again later.",
+            error: error.message
+        });
+    }
+};
+
+const delete_homepage_data = async (req, res) => {
+    try {
+        const { id } = req.query;
+
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Invalid request. homepage _id is required."
+            });
+        }
+
+        const deletedData = await other_data_module.findOneAndDelete({
+            documentName: "homepage",
+            _id: id
+        });
+
+        if (!deletedData) {
+            return res.status(404).json({
+                success: false,
+                error_msg: "homepage not found or already deleted."
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            msg: "homepage successfully deleted."
+        });
+
+    } catch (error) {
+        console.error("❌ Error deleting homepage:", error);
+        res.status(500).json({
+            success: false,
+            error_msg: "Internal Server Error. Please try again later.",
+            error: error.message
         });
     }
 };
@@ -1268,5 +1554,13 @@ module.exports = {
     patch_terms_of_use_data,
     getDmcaData,
     patch_dmca_data,
-    postGift_code_data
+    postGift_code_data,
+    getOfferWallData,
+    patchOfferWallInstructions,
+    postOfferWall,
+    patchOfferWall,
+    deleteOfferWall,
+    post_newHomepage_data,
+    patch_homepage_data,
+    delete_homepage_data
 }

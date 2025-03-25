@@ -1,12 +1,13 @@
 import './App.css';
-import { Routes, Route, useLocation } from 'react-router-dom'
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+
 import Login from './website/auth/login/login';
 import NavBar from './website/components/navBar/navBar';
 import SignUp from './website/auth/signUp/signUp';
 import DashBoard from './website/dashBoard/dashBoard';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom'
 import PopUp from './website/components/popUp/popUp';
 import Withdraw from './website/withdraw/withdraw';
 import BottomAlert from './website/components/bottomAlert/bottomAlert';
@@ -26,22 +27,39 @@ import LastPage from './website/EarningSourses/clickShortedLink/lastPage';
 import PrivacyPolicy from './website/PrivacyPolicy/PrivacyPolicy';
 import Terms_of_Use from './website/Terms_of_Use/Terms_of_Use';
 import DMCA from './website/DMCA/DMCA';
-import FillSurvey from './website/EarningSourses/fillSurvey/fillSurvey';
 import EmailVerification from './website/components/email-verification/email-verification';
 import { NavBar_global_contextProvider } from "./website/components/context/navBar_globalContext";
 import PaymentProof from './website/paymentProof/paymentProof';
 import GiftCode from './website/GiftCode/GiftCode';
+import OfferWall from './website/EarningSourses/OfferWall/OfferWall';
+import ViewOfferWall from './website/EarningSourses/OfferWall/viewOfferWall';
+
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    y: 20,
+  },
+  in: {
+    opacity: 1,
+    y: 0,
+  },
+};
+
+const pageTransition = {
+  type: "tween",
+  ease: "anticipate",
+  duration: 0.5,
+};
 
 const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
-  const [show_Full_navBar_state, setshow_Full_NavBar_state] = useState(false);
+  const [show_Full_navBar_state, setshow_Full_navBar_state] = useState(false);
   const [showPopUp_onLogOut_btn_state, setShowPopUp_onLogOut_btn_state] = useState(false);
   const [showBottomAlert_state, setShowBottomAlert_state] = useState(false);
   const [isOffline_state, setIsOffline_state] = useState(navigator.onLine ? false : true);
   const [availableBalance_forNavBar_state, setAvailableBalance_forNavBar_state] = useState(0.000);
   const location = useLocation();
   const networkStatusRef = useRef(null);
-  const nodeRefMap = useMemo(() => new Map(), []);
 
   const updateNetworkStatus = (message, classes, status) => {
     if (networkStatusRef.current) {
@@ -51,10 +69,10 @@ const App = () => {
         </div>
       `;
       if (status === 'offline') {
-        networkStatusRef.current.className = 'fixed top-0 bottom-0 right-0 left-0 bg-[#0005] z-10 text-center flex items-end'
+        networkStatusRef.current.className = 'fixed top-0 bottom-0 right-0 left-0 bg-[#0005] z-10 text-center flex items-end';
       } else if (status === 'online') {
         setTimeout(() => {
-          networkStatusRef.current.className = 'hidden'
+          networkStatusRef.current.className = 'hidden';
         }, 1200);
       }
     }
@@ -62,19 +80,18 @@ const App = () => {
 
   useEffect(() => {
     const handleOnline = () => {
-      setIsOffline_state(false); // Set to online
+      setIsOffline_state(false);
       updateNetworkStatus('You are Online', 'bg-green-500 OnlineAnimation', 'online');
     };
 
     const handleOffline = () => {
-      setIsOffline_state(true); // Set to offline
+      setIsOffline_state(true);
       updateNetworkStatus('You are Offline', 'bg-gray-500 offlineAnimation', 'offline');
     };
-    // Event listeners for online/offline events
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Cleanup listeners on component unmount
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
@@ -94,8 +111,8 @@ const App = () => {
       location.pathname.includes('/privacy-policy') ||
       location.pathname.includes('/dmca')
     ) {
-      setshow_NavBar_state((p) => p = true)
-      setshow_Full_NavBar_state((p) => p = false)
+      setshow_NavBar_state(true);
+      setshow_Full_navBar_state(false);
     } else if (
       location.pathname === '/member/dashboard' ||
       // location.pathname === '/member/deposit' ||
@@ -105,31 +122,64 @@ const App = () => {
       location.pathname === '/member/settings' ||
       location.pathname === '/member/profile' ||
       location.pathname === '/member/gift-code' ||
-      location.pathname === '/member/view-ads' || 
+      location.pathname === '/member/view-ads' ||
+      location.pathname.includes('/member/offer-wall') ||
       location.pathname === '/member/click-shorten-link'
     ) {
-      setshow_NavBar_state((p) => p = false)
-      setshow_Full_NavBar_state((p) => p = false)
+      setshow_NavBar_state(false);
+      setshow_Full_navBar_state(false);
+      localStorage.setItem("userAlreadyRegistered", 'true');
     } else if (
       location.pathname.includes('/waitRedirecting') ||
       location.pathname.includes('/member/last-page') ||
       location.pathname.includes('/email-verification')
     ) {
-      setshow_Full_NavBar_state((p) => p = true)
+      setshow_Full_navBar_state(true);
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // Ab yahan par aap button ko show kar sakte ho
+      console.log('Install prompt available');
+    });
+
+    const installButton = document.getElementById('install-button');
+    if (installButton) {
+      installButton.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          console.log('User response to the install prompt:', outcome);
+          deferredPrompt = null;
+        }
+      });
+    }
+  }, []);
 
   return (
     <NavBar_global_contextProvider>
       {
         !show_Full_navBar_state && createPortal(
-          <NavBar show={show_navBar_state} availableBalance_forNavBar_state={availableBalance_forNavBar_state} setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state} />,
+          <NavBar
+            show={show_navBar_state}
+            availableBalance_forNavBar_state={availableBalance_forNavBar_state}
+            setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state}
+          />,
           document.getElementById('navBar')
         )
       }
       {
         showPopUp_onLogOut_btn_state && createPortal(
-          <PopUp setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state} heading="Are you sure you want to log out?" btn1_text="Confirm" btn2_text="Close" />,
+          <PopUp
+            setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state}
+            heading="Are you sure you want to log out?"
+            btn1_text="Confirm"
+            btn2_text="Close"
+          />,
           document.getElementById('LoginConfirm_popup')
         )
       }
@@ -139,59 +189,430 @@ const App = () => {
           document.getElementById('showBottomAlert')
         )
       }
-      <TransitionGroup>
-        <CSSTransition
-          key={location.pathname}
-          timeout={300}
-          classNames="page-fade"
-          nodeRef={
-            nodeRefMap.has(location.pathname)
-              ? nodeRefMap.get(location.pathname)
-              : (() => {
-                const newRef = { current: null };
-                nodeRefMap.set(location.pathname, newRef);
-                return newRef;
-              })()
-          }
-        >
-          <div ref={nodeRefMap.get(location.pathname)}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/payment-proof" element={<PaymentProof />} />
-              <Route path="/contact-us" element={<ContactUs forMember={false} />} />
-              <Route path="/member/support" element={<ContactUs setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} forMember={true} />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/password-reset-form/:token" element={<PasswordResetForm />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/signup/ref/:id" element={<SignUp referral_status="true" />} />
-              <Route path="/member/dashboard" element={<DashBoard setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} getLogOut_btnClicked={showPopUp_onLogOut_btn_state} setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state} />} />
-              {/* <Route path="/member/deposit" element={<Deposit setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} setShowBottomAlert_state={setShowBottomAlert_state} />} /> */}
-              <Route path="/member/withdraw" element={<Withdraw setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} setShowBottomAlert_state={setShowBottomAlert_state} />} />
-              <Route path="/member/refer-and-earn" element={<ReferEarn setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
-              <Route path="/member/settings" element={<Setting setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
-              <Route path="/email-verification/:token/:email" element={<EmailVerification />} />
-              <Route path="/member/profile" element={<Profile setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/terms-of-use" element={<Terms_of_Use />} />
-              <Route path="/dmca" element={<DMCA />} />
-              {/* Earning Sourse */}
-              <Route path="/member/view-ads" element={<ViewAds setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
-              <Route path="/waitRedirecting" element={<WaitRedirecting />} />
-              <Route path="/waitRedirecting1" element={<WaitRedirecting1 />} />
-              <Route path="/member/click-shorten-link" element={<ClickShortedLink setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
-              <Route path="/member/last-page/:uniqueToken" element={<LastPage />} />
-              <Route path="/member/fill-survey" element={<FillSurvey setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
-              <Route path="/member/gift-code" element={<GiftCode setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />} />
-              <Route path="/*" element={<PageNotFound setshow_NavBar_state={setshow_NavBar_state} />} />
 
-              <Route path="/extension/uninstalled" element={<ExtensionUninstalled setshow_NavBar_state={setshow_NavBar_state} />} />
-            </Routes>
-          </div>
-        </CSSTransition>
-      </TransitionGroup>
-      <div id="networkStatus" ref={networkStatusRef} className='hidden' />
+      {/* Parent container with relative positioning using Tailwind */}
+      <div className="relative">
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route
+              path="/"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <Home />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/payment-proof"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <PaymentProof />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/contact-us"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <ContactUs forMember={false} />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/support"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <ContactUs setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} forMember={true} />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <Login />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/password-reset-form/:token"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <PasswordResetForm />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <SignUp />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/signup/ref/:id"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <SignUp referral_status="true" />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/dashboard"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <DashBoard
+                    setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state}
+                    getLogOut_btnClicked={showPopUp_onLogOut_btn_state}
+                    setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state}
+                  />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/withdraw"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <Withdraw
+                    setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state}
+                    setShowBottomAlert_state={setShowBottomAlert_state}
+                  />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/refer-and-earn"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <ReferEarn setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/settings"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <Setting setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/email-verification/:token/:email"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <EmailVerification />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/profile"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <Profile setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/privacy-policy"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <PrivacyPolicy />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/terms-of-use"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <Terms_of_Use />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/dmca"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <DMCA />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/view-ads"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <ViewAds setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/waitRedirecting"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <WaitRedirecting />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/waitRedirecting1"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <WaitRedirecting1 />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/click-shorten-link"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <ClickShortedLink setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/last-page/:uniqueToken"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <LastPage />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/offer-wall"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <OfferWall setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/offer-wall/:encodedUrl"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <ViewOfferWall setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/gift-code"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <GiftCode setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/*"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <PageNotFound setshow_NavBar_state={setshow_NavBar_state} />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/extension/uninstalled"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <ExtensionUninstalled setshow_NavBar_state={setshow_NavBar_state} />
+                </motion.div>
+              }
+            />
+          </Routes>
+        </AnimatePresence>
+      </div>
+
+      <div id="networkStatus" ref={networkStatusRef} className="hidden" />
     </NavBar_global_contextProvider>
   );
-}
+};
 
 export default App;

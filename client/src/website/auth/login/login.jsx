@@ -7,6 +7,9 @@ import showNotification from '../../components/showNotification'
 import { useGoogleLogin } from "@react-oauth/google";
 import formatTime from '../../components/formatTime'
 import { Helmet } from 'react-helmet';
+import { FaSpinner, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { decryptData, encryptData } from '../../components/encrypt_decrypt_data'
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const Login = () => {
     const [email_userName_state, setEmail_userName_state] = useState('');
@@ -16,10 +19,17 @@ const Login = () => {
     let [submit_process_state, setSubmit_process_state] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const navigation = useNavigate();
+    const [captchaValue, setCaptchaValue] = useState(null);
+    const [userAlreadyHaveAccount_state, setUserAlreadyHaveAccount_state] = useState(false);
+
+    const onCaptchaChange = (value) => {
+        setCaptchaValue(value);
+    };
 
     let dataBase_post_login = async (obj) => {
         try {
-            let response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/userRoute/login`, obj, {
+            obj = await encryptData(obj)
+            let response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/userRoute/login`, { obj }, {
                 withCredentials: true
             })
             setError_state([])
@@ -41,6 +51,15 @@ const Login = () => {
 
     const handleLogin_submit = (e) => {
         e.preventDefault();
+        let user = localStorage.getItem("user")
+        if (user && user !== email_userName_state) {
+            showNotification(true, `Account switching is restricted. Please log in with ${user}.`)
+            return;
+        }
+        if (!captchaValue) {
+            showNotification(true, 'Please verify that you are a human!')
+            return;
+        }
         const obj = {
             email_userName: email_userName_state,
             password: password_state,
@@ -52,8 +71,9 @@ const Login = () => {
 
     const responseGoogle = async (authResult) => {
         try {
+            let user = localStorage.getItem("user")
             if (authResult["code"]) {
-                let response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/user_signUp_login_google?google_code=${authResult.code}&referral_id_signup=undefined`, {
+                let response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/user_signUp_login_google?userEmail=${user}&google_code=${authResult.code}${userAlreadyHaveAccount_state ? `&userAlreadyHaveAccount_state=${userAlreadyHaveAccount_state}` : ""}`, {
                     withCredentials: true
                 });
                 if (response) {
@@ -64,7 +84,7 @@ const Login = () => {
                 throw new Error(authResult);
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             if (error?.response?.data?.error_msg) {
                 showNotification(true, error?.response?.data?.error_msg);
             } else {
@@ -95,60 +115,68 @@ const Login = () => {
             inputPlaceholder: "Enter your email address",
             showCancelButton: true,
             confirmButtonText: "Send Reset Link",
-            preConfirm: (email) => {
+            preConfirm: async (email) => {
                 if (!email) {
                     Swal.showValidationMessage("Email is required!");
+                    return false;
                 }
+                let obj = await decryptData({ email })
                 return fetch(`${import.meta.env.VITE_SERVER_URL}/userRoute/userLoginforgot_password_send_mail`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ email }),
+                    body: JSON.stringify({ obj }),
                 })
                     .then((response) => response.json())
                     .then((data) => {
                         if (!data?.success) {
                             let timeLeftMs = data?.time_left || 0;
 
-                            return new Promise((resolve, reject) => {
-                                Swal.fire({
-                                    title: "Error",
-                                    html: `<strong>${data?.error_msg}</strong><br>
-                                           <p>Try again after <span id="countdown">${formatTime(timeLeftMs)}</span></p>`,
-                                    icon: "error",
-                                    timer: timeLeftMs,
-                                    showConfirmButton: false,
-                                    didOpen: () => {
-                                        const countdownEl = document.getElementById("countdown");
+                            return Swal.fire({
+                                title: "Error",
+                                html: `<strong>${data?.error_msg}</strong><br>
+                                       <p>Try again after <span id="countdown">${formatTime(timeLeftMs)}</span></p>`,
+                                icon: "error",
+                                timer: timeLeftMs,
+                                showConfirmButton: false,
+                                didOpen: () => {
+                                    const countdownEl = document.getElementById("countdown");
+                                    let interval = setInterval(() => {
+                                        timeLeftMs -= 1000;
+                                        countdownEl.innerText = formatTime(timeLeftMs);
 
-                                        let interval = setInterval(() => {
-                                            timeLeftMs -= 1000;
-                                            countdownEl.innerText = formatTime(timeLeftMs);
-
-                                            if (timeLeftMs <= 0) {
-                                                clearInterval(interval);
-                                                Swal.close();
-                                                resolve();
-                                            }
-                                        }, 1000);
-                                    }
-                                });
+                                        if (timeLeftMs <= 0) {
+                                            clearInterval(interval);
+                                            Swal.close();
+                                        }
+                                    }, 1000);
+                                }
+                            }).then(() => {
+                                throw new Error(data?.error_msg || "Something went wrong");
                             });
                         }
                         return data;
                     })
                     .catch((error) => {
-                        console.log(error);
-                        Swal.showValidationMessage(`Request failed: ${error.message}`);
+                        console.error(error);
+                        Swal.fire("Request Failed", error.message, "error");
+                        return false; // This ensures the next 'then' block does not execute
                     });
             },
         }).then((result) => {
-            if (result.isConfirmed) {
+            if (result.isConfirmed && result.value) {
                 Swal.fire("Success!", "Password reset link sent successfully.", "success");
             }
         });
     };
+
+    useEffect(() => {
+        let userAlreadyRegistered = localStorage.getItem('userAlreadyRegistered')
+        if (userAlreadyRegistered) {
+            setUserAlreadyHaveAccount_state(true)
+        }
+    }, []);
 
     return (
         <>
@@ -184,11 +212,11 @@ const Login = () => {
                                 className="absolute right-3 top-3 cursor-pointer text-gray-600"
                                 onClick={() => setShowPassword(!showPassword)}
                             >
-                                {showPassword ? <i className="fa-solid fa-eye-slash"></i> : <i className="fa-solid fa-eye"></i>}
+                                {showPassword ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
                             </span>
                         </div>
 
-                        <div className='mb-4 flex items-center space-x-2'>
+                        <div className='mb-2 flex items-center space-x-2'>
                             <input
                                 type="checkbox"
                                 id="loginRememberCheck"
@@ -198,9 +226,21 @@ const Login = () => {
                             />
                             <label className='select-none cursor-pointer' htmlFor="loginRememberCheck">Remember Me</label>
                         </div>
-
-                        <button type="submit" disabled={submit_process_state} className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"} w-full text-white rounded-lg py-2 font-medium transition`}>
-                            {!submit_process_state ? "Login" : <i className="fa-solid fa-spinner fa-spin"></i>}
+                        <ReCAPTCHA
+                            sitekey={import.meta.env.VITE_GOOGLE_RECAPTCHA_SITEKEY}
+                            onChange={onCaptchaChange}
+                        />
+                        <button
+                            type="submit"
+                            disabled={submit_process_state}
+                            className={`w-full text-white rounded-lg py-2 mt-3 font-medium transition flex items-center justify-center gap-2 
+        ${submit_process_state ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
+                        >
+                            {submit_process_state ? (
+                                <FaSpinner className="animate-spin text-white text-lg" />
+                            ) : (
+                                "Login"
+                            )}
                         </button>
                     </form>
 

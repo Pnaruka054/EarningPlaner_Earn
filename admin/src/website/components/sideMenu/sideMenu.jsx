@@ -4,7 +4,7 @@ import { Menu, X, LayoutDashboard, PlayCircle, Link as LinkIcon, FileText, Dolla
 import EarnWizLogo from '../../../assets/EarnWizLogo.png';
 import { useNavigate } from 'react-router-dom'
 import Swal from 'sweetalert2';
-import axios from 'axios'; 
+import axios from 'axios';
 import ProcessBgBlack from "../processBgBlack/processBgBlack";
 import showNotification from "../showNotification";
 
@@ -77,7 +77,7 @@ const SideMenu = () => {
           <NavItem to="/admin/dashboard" icon={<LayoutDashboard />} label="Dashboard" />
           <NavItem to="/admin/view-ads" icon={<PlayCircle />} label="View Ads" />
           <NavItem to="/admin/shorten-links" icon={<LinkIcon />} label="Shorten Links" />
-          <NavItem to="/admin/surveys" icon={<FileText />} label="Surveys" />
+          <NavItem to="/admin/offer-walls" icon={<FileText />} label="OfferWall" />
           <NavItem to="/admin/withdrawals" icon={<DollarSign />} label="Withdrawals" />
 
           {/* Logout Button */}

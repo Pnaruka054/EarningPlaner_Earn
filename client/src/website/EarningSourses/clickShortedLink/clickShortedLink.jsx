@@ -9,6 +9,7 @@ import showNotification from "../../components/showNotification";
 import ProcessBgSeprate from '../../components/processBgSeprate/processBgSeprate'
 import CountdownTimer from "../../components/countDownTimer/countDownTimer";
 import { Helmet } from 'react-helmet';
+import { encryptData } from '../../components/encrypt_decrypt_data'
 
 const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
     const [data_process_state, setData_process_state] = useState(false);
@@ -41,7 +42,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
 
                 setShortLink_firstTimeLoad_state(response.data.msg)
             } catch (error) {
-                console.log(error);
+                console.error(error);
                 if (
                     error.response?.data?.jwtMiddleware_token_not_found_error ||
                     error.response?.data?.jwtMiddleware_user_not_found_error
@@ -62,11 +63,12 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
     // 🔄 **Update Link Status & Show Swal**
     const user_linkClick_patch = async (obj) => {
         try {
-            setData_process_state(true);
             const origin = `${window.location.origin}`;
+            let obj_already = await encryptData({ shortnerDomain: obj.shortnerDomain, endPageRoute: import.meta.env.VITE_CLICK_SHORTEN_LINK_ENDPAGE_ROUTE, clientOrigin: origin })
+            setData_process_state(true);
             const response = await axios.patch(
                 `${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_shortlink_firstPage_data_patch`,
-                { shortnerDomain: obj.shortnerDomain, endPageRoute: import.meta.env.VITE_CLICK_SHORTEN_LINK_ENDPAGE_ROUTE, clientOrigin: origin },
+                { obj_already },
                 { withCredentials: true }
             );
 
@@ -94,7 +96,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
             if (!response || response.error) {
                 throw new Error("API request failed"); // ✅ Agar response me error ho to manually error throw karein
             }
-            window.location.href = response.data.shortUrl || response.data.existingRecord.shortUrl;
+            window.location.href = response?.data?.shortUrl || response?.data?.existingRecord?.shortUrl;
         } catch (error) {
             console.error("Error processing link click:", error);
             if (
@@ -124,7 +126,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
     const filteredLinks = shortLinks_state
         .filter(link => {
             if (filter_state === "available" || filter_state === "high-to-low" || filter_state === "low-to-high") return !link.isDisable;
-            if (filter_state === "completed") return link.isDisable;
+            if (filter_state === "completed") return link.isDisable || !!link.expireTimer;
             return true;
         })
         .sort((a, b) => {
@@ -196,11 +198,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                     <div className="px-4 py-2">
                         <div className="bg-white shadow-md p-6 rounded-lg text-center mb-5">
                             <h2 className="text-xl font-semibold text-gray-800 mb-5">💰 Earnings Summary</h2>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4 text-gray-700">
-                                <div className="bg-gray-100 p-3 rounded-lg">
-                                    <div className="font-semibold">Pending Earnings:</div>
-                                    <div className="text-red-500 font-bold ml-2">₹{shortLink_firstTimeLoad_state.pendingEarnings}</div>
-                                </div>
+                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mt-4 text-gray-700">
                                 <div className="bg-gray-100 p-3 rounded-lg">
                                     <div className="font-semibold">Today Earnings:</div>
                                     <div className="text-green-600 font-bold ml-2">₹{shortLink_firstTimeLoad_state.today_shortLinkIncome}</div>
@@ -213,22 +211,9 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                                     <div className="font-semibold">Completed:</div>
                                     <div className="text-green-600 font-bold ml-2">{shortLink_firstTimeLoad_state.completedClick}</div>
                                 </div>
-                                <div className="bg-gray-100 p-3 rounded-lg">
-                                    <div className="font-semibold">Pending:</div>
-                                    <div className="text-red-500 font-bold ml-2">{shortLink_firstTimeLoad_state.pendingClick}</div>
-                                </div>
                             </div>
                         </div>
                         <div className="bg-white rounded-lg shadow-md p-4 relative">
-                            {/* Timer Overlay */}
-                            <div className={`${shortLink_firstTimeLoad_state.click_short_link_expireTimer ? 'flex' : 'hidden'} absolute z-[1] inset-0 bg-white bg-opacity-70 justify-center items-start`}>
-                                <div className="flex flex-col items-center text-3xl sm:text-6xl font-semibold mt-20">
-                                    <div className="text-center">Come Back After</div>
-                                    <div className="text-5xl sm:text-7xl font-bold text-red-600 drop-shadow">
-                                        <CountdownTimer expireTime={shortLink_firstTimeLoad_state.click_short_link_expireTimer} />
-                                    </div>
-                                </div>
-                            </div>
                             {shortLinks_state.length === 0 ? (
                                 <p className="text-center text-gray-500 py-5">🚫 No short links available at the moment.</p>
                             ) : (
@@ -265,44 +250,74 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
                                             Low to High ₹
                                         </button>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         {filteredLinks.map((link, index) => (
                                             <div
                                                 key={index}
-                                                className={`p-4 border rounded-lg shadow-sm transition transform ${link?.isDisable ? "bg-gray-200 opacity-70" : "bg-white"
-                                                    }`}
+                                                className={`p-4 border rounded-xl transition transform ${link?.isDisable ? "bg-gray-100 opacity-70" : "bg-white"}`}
                                             >
-                                                <h3 className="text-lg font-semibold text-gray-800">
+
+                                                <h3 className="text-xl font-semibold text-gray-900 truncate">
                                                     {link.shortnerName || "Short Link"}
                                                 </h3>
+
                                                 {/* 🕒 Time Show Here */}
-                                                <p className="text-gray-700 mt-2">
+                                                <p className="text-gray-600 mt-3 text-sm flex items-center gap-2">
                                                     <span className="font-semibold">⏳ Time Required:</span>
-                                                    <span className="ml-2 text-blue-600 font-bold">{formatTime(link?.time)}</span>
+                                                    <span className="text-blue-600 font-bold text-base">
+                                                        {formatTime(link?.time)}
+                                                    </span>
                                                 </p>
 
-                                                <div className="flex justify-between mt-3 items-center">
-                                                    <span className="text-blue-500 font-bold">₹ {link?.amount || "0.00"}</span>
-                                                    <button
-                                                        disabled={link?.isDisable}
-                                                        onClick={() => handelLink_click(link)}
-                                                        className={`px-4 py-2 text-white text-sm font-semibold rounded-md transition transform ${link.isDisable
-                                                            ? "bg-gray-400 cursor-not-allowed"
-                                                            : "bg-blue-500 hover:bg-blue-600 hover:scale-105"
-                                                            }`}
-                                                    >
-                                                        {link.isDisable ? "✅ Completed" : "👉 Visit & Earn"}
-                                                    </button>
+                                                <div className="flex justify-between items-center mt-4">
+                                                    <span className="text-green-600 font-bold text-lg">
+                                                        ₹ {link?.amount || "0.00"}
+                                                    </span>
+
+                                                    {link.how_to_complete && (
+                                                        <a
+                                                            href={link.how_to_complete}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-blue-600 font-medium text-sm underline"
+                                                        >
+                                                            How to Complete?
+                                                        </a>
+                                                    )}
                                                 </div>
+
+                                                <button
+                                                    disabled={link?.isDisable || link?.expireTimer}
+                                                    onClick={() => handelLink_click(link)}
+                                                    className={`w-full mt-4 py-2 text-white text-base font-semibold rounded-md transition ${link?.isDisable || link?.expireTimer
+                                                        ? "bg-gray-400 cursor-not-allowed"
+                                                        : "bg-blue-600"
+                                                        }`}
+                                                >
+                                                    {link.expireTimer ? (
+                                                        <div>
+                                                            <CountdownTimer expireTime={link.expireTimer} />
+                                                        </div>
+                                                    ) : link.isDisable ? (
+                                                        <div>
+                                                            ✅ Completed ({link?.completedClicks}/{link?.how_much_click_allow})
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            👉 Start & Earn ({link?.completedClicks}/{link?.how_much_click_allow})
+                                                        </div>
+                                                    )}
+                                                </button>
                                             </div>
                                         ))}
                                     </div>
+
                                 </div>
                             )}
                         </div>
                     </div>
                     <div className='bg-white rounded shadow px-5 py-2'>
-                        <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>View Ads Instructions</p>
+                        <p className='text-center text-xl font-medium drop-shadow-[0_0_0.5px_blue] text-blue-600'>Click Shorten Links Instructions</p>
                         <hr className='mt-2 border' />
                         <ul className='mt-4 font-medium text-gray-500 drop-shadow-sm space-y-4'>
                             {

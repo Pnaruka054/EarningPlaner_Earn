@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaUser, FaLock } from "react-icons/fa";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -38,6 +38,18 @@ const AdminLogin = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    let checkLogin = async () => {
+      let response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/admin/checkLogin_for_admin`, {
+        withCredentials: true // This ensures cookies are sent with the request
+      })
+      if(response?.data?.success){
+        navigate('/admin/dashboard')
+      }
+    }
+    checkLogin()
+  }, []);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

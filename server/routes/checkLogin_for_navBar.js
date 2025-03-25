@@ -13,7 +13,9 @@ route.get("/", async (req, res) => {
     if (faq) {
       const other_data_faqArray =
         (await other_data_module.find({ documentName: "faq" })) || [];
-      resData = { ...resData, other_data_faqArray };
+      const other_data_homepage_Array =
+        (await other_data_module.find({ documentName: "homepage" })) || [];
+      resData = { ...resData, other_data_faqArray, other_data_homepage_Array };
     }
     // If Payment Proof data is requested
     else if (paymentProof) {

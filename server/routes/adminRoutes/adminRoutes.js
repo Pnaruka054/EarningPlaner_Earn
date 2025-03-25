@@ -10,6 +10,7 @@ route.get("/getUserData", adminDashboardController.getUserData)
 route.get("/getPrivacy_policyData", adminDashboardController.getPrivacy_policyData)
 route.get("/getTerms_of_useData", adminDashboardController.getTerms_of_useData)
 route.get("/getDmcaData", adminDashboardController.getDmcaData)
+route.get("/getOfferWallData", adminDashboardController.getOfferWallData)
 
 route.post("/adminLogin", adminDashboardController.adminLogin)
 route.post("/post_newAnnouncement_data", adminDashboardController.post_newAnnouncement_data)
@@ -18,6 +19,8 @@ route.post("/post_withdrawalMethod_data", adminDashboardController.post_withdraw
 route.post("/post_viewAds_directLink_data", adminDashboardController.post_viewAds_directLink_data)
 route.post("/post_ShortenLink_data", adminDashboardController.post_ShortenLink_data)
 route.post("/postGift_code_data", adminDashboardController.postGift_code_data)
+route.post("/postOfferWall", adminDashboardController.postOfferWall)
+route.post("/post_newHomepage_data", adminDashboardController.post_newHomepage_data)
 
 route.patch("/update_referral_data", adminDashboardController.update_referral_data)
 route.patch("/patch_announcement_data", adminDashboardController.patch_announcement_data)
@@ -32,11 +35,16 @@ route.patch("/update_withdrawal_instructions_data", adminDashboardController.upd
 route.patch("/patch_privacy_policy_data", adminDashboardController.patch_privacy_policy_data)
 route.patch("/patch_terms_of_use_data", adminDashboardController.patch_terms_of_use_data)
 route.patch("/patch_dmca_data", adminDashboardController.patch_dmca_data)
+route.patch("/patchOfferWallInstructions", adminDashboardController.patchOfferWallInstructions)
+route.patch("/patchOfferWall", adminDashboardController.patchOfferWall)
+route.patch("/patch_homepage_data", adminDashboardController.patch_homepage_data)
 
 route.delete("/delete_announcement_data", adminDashboardController.delete_announcement_data)
 route.delete("/delete_faq_data", adminDashboardController.delete_faq_data)
 route.delete("/delete_withdrawalMethod_data", adminDashboardController.delete_withdrawalMethod_data)
 route.delete("/delete_viewAds_directLink_data", adminDashboardController.delete_viewAds_directLink_data)
 route.delete("/delete_ShortenLink_data", adminDashboardController.delete_ShortenLink_data)
+route.delete("/deleteOfferWall", adminDashboardController.deleteOfferWall)
+route.delete("/delete_homepage_data", adminDashboardController.delete_homepage_data)
 
 module.exports = route

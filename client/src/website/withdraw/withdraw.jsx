@@ -5,10 +5,12 @@ import axios from 'axios';
 import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '../components/pagination/pagination';
-import { FaClipboard, FaClipboardCheck } from "react-icons/fa";
+import { FaClipboard, FaClipboardCheck, FaCreditCard, FaRupeeSign, FaShare, FaSync, FaWallet } from "react-icons/fa";
 import showNotificationWith_timer from '../components/showNotificationWith_timer';
 import showNotification from '../components/showNotification';
 import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate';
+import { encryptData } from '../components/encrypt_decrypt_data';
+
 import { Helmet } from 'react-helmet';
 
 const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
@@ -21,11 +23,9 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
         pending_withdrawal_amount: '0.000',
         total_withdrawal_amount: '0.000',
         available_amount: '0.000',
-        withdrawal_method: '',
+        withdrawal_method: undefined,
         withdrawal_account_information: '',
         withdrawal_Records: [],
-        other_data_withdrawalMethodArray: [],
-        minimum_amount: '0.000',
         other_data_withdrawal_instructions: []
     });
     // Added missing state for current page
@@ -82,7 +82,8 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
         let dataBase_balance_convert_patch = async (balanceToConvert, charge) => {
             setSubmit_process_state(true);
             try {
-                const response = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userBalanceConvertPatch`, { balanceToConvert, charge }, {
+                obj = await encryptData({ balanceToConvert, charge })
+                const response = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userBalanceConvertPatch`, { obj }, {
                     withCredentials: true,
                 });
 
@@ -169,7 +170,8 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
     let dataBase_post_newWithdrawal = async (obj) => {
         setSubmit_process_state(true);
         try {
-            const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userWithdrawal_record_post`, obj, {
+            let encryptedObj = await encryptData(obj)
+            const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userWithdrawal_record_post`, { obj: encryptedObj }, {
                 withCredentials: true
             });
 
@@ -239,12 +241,27 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
             });
         }
 
-        if (parseFloat(withdraw_amount_state) < parseFloat(balanceData_state.minimum_amount)) {
+        if (!balanceData_state.withdrawal_method) {
+            return Swal.fire({
+                icon: 'warning',
+                title: 'Bind Payment Info',
+                text: 'Please bind Your payment information again',
+                timerProgressBar: true,
+                timer: 5000,
+                didClose: () => {
+                    navigation('/member/profile');
+                },
+                showConfirmButton: false,
+                showCancelButton: false,
+            });
+        }
+
+        if (parseFloat(withdraw_amount_state) < parseFloat(balanceData_state.withdrawalMethod_minimumAmount)) {
             return Swal.fire({
                 icon: 'warning',
                 title: 'Invalid Amount',
                 timerProgressBar: true,
-                text: `The minimum withdrawal amount for ${balanceData_state.withdrawal_method} is ₹${balanceData_state.minimum_amount}. Please enter a valid amount.`
+                text: `The minimum withdrawal amount for ${balanceData_state.withdrawal_method} is ₹${balanceData_state.withdrawalMethod_minimumAmount}. Please enter a valid amount.`
             });
         }
 
@@ -252,7 +269,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
             return Swal.fire({
                 icon: 'warning',
                 title: 'Insufficient Balance',
-                text: `Your withdrawal amount exceeds your available balance of ₹${balanceData_state.withdrawable_amount}. Please enter a valid amount.`
+                text: `Your available balance is ₹${balanceData_state.withdrawable_amount}. Please enter a valid amount.`
             });
         }
 
@@ -302,7 +319,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                                 <p className="text-lg">Deposit Balance</p>
                             </div>
                             <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
-                                <i className="fa-solid fa-credit-card"></i>
+                                <FaCreditCard className="text-5xl" />
                             </div>
                         </div>
                         <div className="bg-teal-500 p-6 rounded-lg shadow-md text-white relative">
@@ -311,7 +328,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                                 <p className="text-lg">Withdrawable Balance</p>
                             </div>
                             <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
-                                <i className="fa-duotone fa-light fa-money-from-bracket"></i>
+                                <FaRupeeSign className="text-6xl" />
                             </div>
                         </div>
                         <div className="bg-cyan-500 p-6 hidden lg:block rounded-lg shadow-md text-white relative row-span-3">
@@ -326,12 +343,12 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                                 <p className="text-lg">Available Balance</p>
                             </div>
                             <div className="absolute top-4 right-4 text-5xl opacity-[0.2]">
-                                <i className="fa-solid fa-wallet"></i>
+                                <FaWallet className="text-6xl" />
                             </div>
                         </div>
                         <div className="p-2 rounded-lg relative col-span-2 flex justify-center text-xl">
-                            <button onClick={handelDeposit_to_withdrawal} className='bg-blue-500 hover:bg-blue-600 px-4 py-2 text-white'>
-                                <i className="fa-solid fa-rotate"></i> <span>Convert to withdrawable Balance</span>
+                            <button onClick={handelDeposit_to_withdrawal} className='bg-blue-500 hover:bg-blue-600 px-4 flex items-center space-x-3 py-2 text-white'>
+                                <FaSync className="text-2xl inline-block" /> <span>Convert to withdrawable Balance</span>
                             </button>
                         </div>
                         <div className="bg-cyan-500 p-6 max-h-60 block lg:hidden rounded-lg shadow-md text-white relative row-span-3">
@@ -346,7 +363,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                                 <p className="text-lg">Available Balance</p>
                             </div>
                             <div className="absolute top-4 right-4 text-7xl opacity-[0.2]">
-                                <i className="fa-solid fa-wallet"></i>
+                                <FaWallet className="text-6xl" />
                             </div>
                         </div>
                         <div className="bg-red-500 p-6 rounded-lg shadow-md text-white relative">
@@ -355,7 +372,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                                 <p className="text-lg">Pending Withdrawn</p>
                             </div>
                             <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
-                                <i className="fa fa-share"></i>
+                                <FaShare className="text-6xl" />
                             </div>
                         </div>
                         <div className="bg-green-500 p-6 rounded-lg shadow-md text-white relative">
@@ -364,7 +381,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                                 <p className="text-lg">Total Withdraw</p>
                             </div>
                             <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
-                                <i className="fa-solid fa-indian-rupee-sign"></i>
+                                <FaRupeeSign className="text-6xl" />
                             </div>
                         </div>
                     </div>
@@ -473,7 +490,7 @@ const WithdrawalRow = ({ record }) => {
                 <div className="flex justify-between items-center">
                     <span className="text-gray-600 font-medium">Order Number</span>
                     <span className="text-gray-800 font-medium flex items-center space-x-2">
-                        <span>{record._id.toUpperCase()}</span>
+                        <span className='break-all sm:text-auto'>{record._id.toUpperCase()}</span>
                         <button onClick={handleCopy} className="text-gray-600">
                             {copiedState ? (
                                 <FaClipboardCheck className="text-green-600" />

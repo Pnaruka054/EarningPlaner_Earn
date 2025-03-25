@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const userSignUp_module = require('../model/userSignUp/userSignUp_module')
 const admin_module = require('../model/admin/admin_module')
+const cookie = require('cookie');
 
 const middleware_userLogin_check = async (req, res, next) => {
     try {
@@ -9,6 +10,7 @@ const middleware_userLogin_check = async (req, res, next) => {
             || req.originalUrl === '/userRoute/signUp'
             || req.originalUrl === '/userRoute/userWebstatisticsGet'
             || req.originalUrl === '/userWithdraw/websitePaymentProof_get'
+            || req.originalUrl === '/userMessageRoute/userMessageSave_post'
             || req.originalUrl.includes('/checkLogin_for_navBar')
             || req.originalUrl.includes('/userRoute/user_signUp_login_google')
             || req.originalUrl.includes('/userRoute/userLoginforgot_password_send_mail')
@@ -159,6 +161,11 @@ const adminCheck_middleware = async (req, res, next) => {
         // Attach admin data to the request object
         req.adminData = admin;
 
+        if (req.originalUrl === '/admin/checkLogin_for_admin') {
+            return res.status(200).json({
+                success: true,
+            });
+        }
         // Proceed to the next middleware or route handler
         next();
     } catch (error) {
@@ -170,7 +177,57 @@ const adminCheck_middleware = async (req, res, next) => {
     }
 };
 
+const socketAuthMiddleware = async (socket, next) => {
+    try {
+        // Cookies ko parse karne ke liye
+        const cookies = cookie.parse(socket.handshake.headers.cookie || '');
+        const token = cookies.jwtToken; // 'jwtToken' wo naam hai jo aapne login ke time set kiya tha
+        if (!token) {
+            return next(new Error(JSON.stringify({
+                success: false,
+                jwtMiddleware_token_not_found_error: 'Authorization token missing or invalid'
+            })));
+        }
+
+        // Token verify karein
+        const decoded = await jwt.verify(token, process.env.JWT_ACCESS_KEY);
+        let decodedData_fromDB = await userSignUp_module.findById(decoded.jwtUser._id);
+        if (!decodedData_fromDB) {
+            return next(new Error(JSON.stringify({
+                success: false,
+                jwtMiddleware_user_not_found_error: 'Authorization token invalid or user not found'
+            })));
+        }
+
+        if (decoded.jwtUser.password !== decodedData_fromDB.password) {
+            return next(new Error(JSON.stringify({
+                success: false,
+                jwtMiddleware_user_not_found_error: 'Password mismatch, please login again'
+            })));
+        }
+
+        if (decoded.jwtUser.email_address !== decodedData_fromDB.email_address) {
+            return next(new Error(JSON.stringify({
+                success: false,
+                jwtMiddleware_user_not_found_error: 'Email updated, please login again'
+            })));
+        }
+
+        // Attach user data to socket object
+        socket.user = decodedData_fromDB;
+        next();
+
+    } catch (error) {
+        return next(new Error(JSON.stringify({
+            success: false,
+            jwtMiddleware_error: 'Invalid or expired token',
+            error: error.message
+        })));
+    }
+};
+
 module.exports = {
     middleware_userLogin_check,
-    adminCheck_middleware
+    adminCheck_middleware,
+    socketAuthMiddleware
 };

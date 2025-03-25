@@ -11,6 +11,7 @@ import showNotification from '../../components/showNotification';
 import ProcessBgSeprate from '../../components/processBgSeprate/processBgSeprate';
 import { setItemWithExpiry, getItemWithExpiry } from '../../components/handle_localStorage'
 import { Helmet } from 'react-helmet';
+import { encryptData } from '../../components/encrypt_decrypt_data';
 
 const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const [handle_clickAds_btnClick_state, setHandle_clickAds_btnClick_state] = useState(false);
@@ -80,6 +81,12 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         fetchData();
     }, []);
 
+    const isUserActiveOnPageRef = useRef(isUserActiveOnPage);
+
+    useEffect(() => {
+        isUserActiveOnPageRef.current = isUserActiveOnPage;
+    }, [isUserActiveOnPage]);
+
     // handle channel messages
     useEffect(() => {
         channel.onmessage = (event) => {
@@ -89,59 +96,49 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 setHandle_clickAds_btnClick_state(false);
             } else if (event.data.includes("isSuccess")) {
                 const [btnName, amount] = currentBtnName_and_amount_For_extension_storedValue_state;
-                if (!isUserActiveOnPage) {
-                    setHandle_clickAds_btnClick_state(false);
-                    channel.postMessage("handle_clickAds_btnClick_state_false");
-                    console.log(currentBtnName_and_amount_For_extension_storedValue_state);
-                    if (viewAds_firstTimeLoad_state?.pendingClick && btnName && amount) {
-                        setDisabledButtons_state((prevDisabled) => {
-                            if (!prevDisabled.includes(btnName)) {
-                                return [...prevDisabled, btnName];
-                            }
-                            return prevDisabled;
+                setTimeout(() => {
+                    // Use the ref to check the latest value of isUserActiveOnPage
+                    if (!isUserActiveOnPageRef.current) {
+                        channel.postMessage("handle_clickAds_btnClick_state_false");
+                        if (viewAds_firstTimeLoad_state?.pendingClick && btnName && amount) {
+                            setDisabledButtons_state((prevDisabled) => {
+                                if (!prevDisabled.includes(btnName)) {
+                                    return [...prevDisabled, btnName];
+                                }
+                                return prevDisabled;
+                            });
+
+                            const obj = {
+                                disabledButtons_state: [...disabledButtons_state, btnName],
+                                pendingClick: `${parseFloat(viewAds_firstTimeLoad_state.pendingClick)}`,
+                                btnClickEarn: amount,
+                            };
+
+                            user_adsView_income_patch(obj)
+                        }
+                    } else if (isUserActiveOnPageRef.current && btnName && amount) {
+                        setIsUserActiveOnPage(false);
+                        setHandle_clickAds_btnClick_state(false);
+                        Swal.fire({
+                            icon: "error",
+                            title: "Operation failed. Please try again.",
+                            text: "Please stay on the new tab and do not reload / refresh it until the process is complete."
                         });
-
-                        const obj = {
-                            disabledButtons_state: [...disabledButtons_state, btnName],
-                            pendingClick: `${parseFloat(viewAds_firstTimeLoad_state.pendingClick)}`,
-                            btnClickEarn: amount
-                        };
-
-                        user_adsView_income_patch(obj)
-                            .then(() => {
-                                Swal.fire({
-                                    title: "Success!",
-                                    icon: "success",
-                                });
-                                document.title = "✅ success!";
-                                earningSound(isChecked_state, true)
-                                setTimeout(() => document.title = originalTitle, 4000);
-                            })
-                            .catch((error) => console.error("Error updating income:", error));
-                        setCurrentBtnName_and_amount_For_extension_storedValue_state([])
+                        document.title = "❌ failed";
+                        earningSound(isChecked_state, false);
+                        setTimeout(() => {
+                            document.title = originalTitle;
+                        }, 2000);
                     }
-                } else if (isUserActiveOnPage && btnName && amount) {
-                    setIsUserActiveOnPage(false);
-                    setHandle_clickAds_btnClick_state(false);
-                    channel.postMessage("handle_clickAds_btnClick_state_false");
-                    Swal.fire({
-                        icon: "error",
-                        title: "Operation failed. Please try again.",
-                        text: "Please do not close this tab until the timer has completed and you have clicked the claim button.",
-                    });
-                    document.title = "❌ failed";
-                    earningSound(isChecked_state, false)
-                    setTimeout(() => document.title = originalTitle, 2000);
-                    channel.postMessage('isAbort')
-                }
+                }, 6000);
             } else if (event.data.includes("isAbortFromWaitingPage")) {
-                setIsUserActiveOnPage(false);
+                setIsUserActiveOnPage(true);
                 setHandle_clickAds_btnClick_state(false);
                 channel.postMessage("handle_clickAds_btnClick_state_false");
                 Swal.fire({
                     icon: "error",
                     title: "Operation failed. Please try again.",
-                    text: `Please wait for the timer to finish Then click "Click here to continue" button.`,
+                    text: "Please do not close / reload new tab until You have clicked the Claim Bonus button.",
                 });
                 document.title = "❌ failed";
                 earningSound(isChecked_state, false)
@@ -155,6 +152,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
     const handle_link_click = (link, btnName, amount) => {
         setHandle_clickAds_btnClick_state(true);
+        setIsUserActiveOnPage(false);
         channel.postMessage("handle_clickAds_btnClick_state_true");
 
         const newTab = window.open("", '_blank');
@@ -169,7 +167,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 setHandle_clickAds_btnClick_state(false);
                 return Swal.fire({
                     icon: "error",
-                    title: "Success!",
+                    title: "Operation failed. Please try again!",
                     text: "Please Allow Popup in Your Browser to Earn Money!",
                 });;
             }
@@ -178,127 +176,128 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         setTimeout(() => {
             setCurrentBtnName_and_amount_For_extension_storedValue_state([btnName, amount])
             window.open(`/waitRedirecting/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
-        }, 3100);
+        }, 8100);
     };
 
-    const handle_link_click2 = (link, btnName, amount) => {
-        window.postMessage({ action: "startExtension", data: true }, "*");
-        setHandle_clickAds_btnClick_state(true);
-        channel.postMessage("handle_clickAds_btnClick_state_true");
-        setCurrentBtnName_and_amount_For_extension_storedValue_state([btnName, amount]);
+    // const handle_link_click2 = (link, btnName, amount) => {
+    //     window.postMessage({ action: "startExtension", data: true }, "*");
+    //     setHandle_clickAds_btnClick_state(true);
+    //     channel.postMessage("handle_clickAds_btnClick_state_true");
+    //     setCurrentBtnName_and_amount_For_extension_storedValue_state([btnName, amount]);
 
-        const newTab = window.open("", '_blank');
-        if (!newTab) {
-            return alert("Please Allow Popup in Your Browser to Earn Money!");
-        }
-        newTab.close();
-        let isExtension = localStorage.getItem('isExtension');
-        if (isExtension !== 'true') {
-            return alert('please install extension');
-        }
+    //     const newTab = window.open("", '_blank');
+    //     if (!newTab) {
+    //         return alert("Please Allow Popup in Your Browser to Earn Money!");
+    //     }
+    //     newTab.close();
+    //     let isExtension = localStorage.getItem('isExtension');
+    //     if (isExtension !== 'true') {
+    //         return alert('please install extension');
+    //     }
 
-        window.open(`/waitRedirecting1/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
-    };
+    //     window.open(`/waitRedirecting1/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
+    // };
 
-    // for extension brn ads success check
-    useEffect(() => {
-        const handleIsExtensionUpdated = (e) => {
-            const [btnName, amount] = currentBtnName_and_amount_For_extension_storedValue_state;
-            const extension_storedValue = localStorage.getItem('extension_storedValue');
-            if (viewAds_firstTimeLoad_state && viewAds_firstTimeLoad_state.pendingClick) {
-                if ((extension_storedValue === 'true') && btnName && amount) {
-                    localStorage.removeItem('extension_storedValue');
-                    setHandle_clickAds_btnClick_state(false);
-                    channel.postMessage("handle_clickAds_btnClick_state_false");
+    // // for extension brn ads success check
+    // useEffect(() => {
+    //     const handleIsExtensionUpdated = (e) => {
+    //         const [btnName, amount] = currentBtnName_and_amount_For_extension_storedValue_state;
+    //         const extension_storedValue = localStorage.getItem('extension_storedValue');
+    //         if (viewAds_firstTimeLoad_state && viewAds_firstTimeLoad_state.pendingClick) {
+    //             if ((extension_storedValue === 'true') && btnName && amount) {
+    //                 localStorage.removeItem('extension_storedValue');
+    //                 setHandle_clickAds_btnClick_state(false);
+    //                 channel.postMessage("handle_clickAds_btnClick_state_false");
 
-                    setDisabledButtons_state((prevDisabled) => {
-                        if (!prevDisabled.includes(btnName)) {
-                            return [...prevDisabled, btnName];
-                        }
-                        return prevDisabled;
-                    });
+    //                 setDisabledButtons_state((prevDisabled) => {
+    //                     if (!prevDisabled.includes(btnName)) {
+    //                         return [...prevDisabled, btnName];
+    //                     }
+    //                     return prevDisabled;
+    //                 });
 
-                    const obj = {
-                        disabledButtons_state: [...disabledButtons_state, btnName],
-                        pendingClick: parseFloat(viewAds_firstTimeLoad_state.pendingClick),
-                        btnClickEarn: amount,
-                    };
+    //                 const obj = {
+    //                     disabledButtons_state: [...disabledButtons_state, btnName],
+    //                     pendingClick: parseFloat(viewAds_firstTimeLoad_state.pendingClick),
+    //                     btnClickEarn: amount,
+    //                 };
 
-                    user_adsView_income_patch(obj)
-                        .then(() => {
-                            Swal.fire({
-                                title: "Success!",
-                                icon: "success",
-                            });
-                            document.title = "✅ success!"
-                            earningSound(isChecked_state, true)
-                            setTimeout(() => {
-                                document.title = originalTitle
-                            }, 4000);
-                        })
-                        .catch((error) => {
-                            console.error("Error updating income:", error);
-                        });
-                } else if (extension_storedValue === 'false') {
-                    localStorage.removeItem('extension_storedValue');
-                    setHandle_clickAds_btnClick_state(false);
-                    channel.postMessage("handle_clickAds_btnClick_state_false");
-                    Swal.fire({
-                        icon: "error",
-                        title: "Operation failed. Please try again.",
-                        text: "Something went wrong please try again",
-                    });
-                    document.title = "❌ failed"
-                    earningSound(isChecked_state, false)
-                    setTimeout(() => {
-                        document.title = originalTitle
-                    }, 4000);
-                }
-            }
+    //                 user_adsView_income_patch(obj)
+    //                     .then(() => {
+    //                         Swal.fire({
+    //                             title: "Success!",
+    //                             icon: "success",
+    //                         });
+    //                         document.title = "✅ success!"
+    //                         earningSound(isChecked_state, true)
+    //                         setTimeout(() => {
+    //                             document.title = originalTitle
+    //                         }, 4000);
+    //                     })
+    //                     .catch((error) => {
+    //                         console.error("Error updating income:", error);
+    //                     });
+    //             } else if (extension_storedValue === 'false') {
+    //                 localStorage.removeItem('extension_storedValue');
+    //                 setHandle_clickAds_btnClick_state(false);
+    //                 channel.postMessage("handle_clickAds_btnClick_state_false");
+    //                 Swal.fire({
+    //                     icon: "error",
+    //                     title: "Operation failed. Please try again.",
+    //                     text: "Something went wrong please try again",
+    //                 });
+    //                 document.title = "❌ failed"
+    //                 earningSound(isChecked_state, false)
+    //                 setTimeout(() => {
+    //                     document.title = originalTitle
+    //                 }, 4000);
+    //             }
+    //         }
 
-            const isExtension = localStorage.getItem('isExtension');
-            if (isExtension === 'true') {
-                setIsExtension_state(true);
-            } else {
-                setIsExtension_state(false);
-            }
-        };
+    //         const isExtension = localStorage.getItem('isExtension');
+    //         if (isExtension === 'true') {
+    //             setIsExtension_state(true);
+    //         } else {
+    //             setIsExtension_state(false);
+    //         }
+    //     };
 
-        window.addEventListener("isExtensionUpdated", handleIsExtensionUpdated);
-        window.addEventListener("beforeunload", () => {
-            localStorage.removeItem('extension_storedValue');
-        });
-        return () => {
-            window.removeEventListener("isExtensionUpdated", handleIsExtensionUpdated);
-            window.removeEventListener("beforeunload", () => {
-                localStorage.removeItem('extension_storedValue');
-            });
-        };
-    }, [viewAds_firstTimeLoad_state, currentBtnName_and_amount_For_extension_storedValue_state]);
-    useEffect(() => {
-        // Function to check the extension state from localStorage
-        const checkExtensionState = () => {
-            const isExtension = localStorage.getItem('isExtension');
-            if (isExtension === 'true') {
-                setIsExtension_state(true);
-            } else {
-                setIsExtension_state(false);
-            }
-        };
+    //     window.addEventListener("isExtensionUpdated", handleIsExtensionUpdated);
+    //     window.addEventListener("beforeunload", () => {
+    //         localStorage.removeItem('extension_storedValue');
+    //     });
+    //     return () => {
+    //         window.removeEventListener("isExtensionUpdated", handleIsExtensionUpdated);
+    //         window.removeEventListener("beforeunload", () => {
+    //             localStorage.removeItem('extension_storedValue');
+    //         });
+    //     };
+    // }, [viewAds_firstTimeLoad_state, currentBtnName_and_amount_For_extension_storedValue_state]);
+    // useEffect(() => {
+    //     // Function to check the extension state from localStorage
+    //     const checkExtensionState = () => {
+    //         const isExtension = localStorage.getItem('isExtension');
+    //         if (isExtension === 'true') {
+    //             setIsExtension_state(true);
+    //         } else {
+    //             setIsExtension_state(false);
+    //         }
+    //     };
 
-        // Initial check on component mount
-        checkExtensionState();
+    //     // Initial check on component mount
+    //     checkExtensionState();
 
-        // Add event listener for storage changes
-        window.addEventListener('storage', checkExtensionState);
+    //     // Add event listener for storage changes
+    //     window.addEventListener('storage', checkExtensionState);
 
-        // Cleanup event listener on component unmount
-        return () => {
-            window.removeEventListener('storage', checkExtensionState);
-        };
-    }, []);
+    //     // Cleanup event listener on component unmount
+    //     return () => {
+    //         window.removeEventListener('storage', checkExtensionState);
+    //     };
+    // }, []);
 
     // for handle sound
+
     useEffect(() => {
         const soundStart = getItemWithExpiry("sound");
 
@@ -319,21 +318,33 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
     const userClickHandle = () => setIsChecked_state((prev) => !prev);
 
-    let user_adsView_income_patch = async (obj) => {
+    let user_adsView_income_patch = async (dataObj) => {
         setData_process_state(true);
         try {
-            const response = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_adsView_income_patch`, obj, {
+            let obj = await encryptData(dataObj)
+            const response = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_adsView_income_patch`, { obj }, {
                 withCredentials: true
             });
+            Swal.fire({
+                title: "Success!",
+                icon: "success",
+            });
+            document.title = "✅ success!";
+            earningSound(isChecked_state, true);
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 4000);
             setAvailableBalance_forNavBar_state(response.data.msg.userAvailableBalance)
             setViewAds_firstTimeLoad_state((prev) => ({
                 ...prev,
-                pendingEarnings: (parseFloat(prev.pendingEarnings || 0) - parseFloat(obj.btnClickEarn || 0)).toFixed(3),
-                today_adsviewIncome: (parseFloat(prev.today_adsviewIncome || 0) + parseFloat(obj.btnClickEarn || 0)).toFixed(3),
+                pendingEarnings: (parseFloat(prev.pendingEarnings || 0) - parseFloat(dataObj.btnClickEarn || 0)).toFixed(3),
+                today_adsviewIncome: (parseFloat(prev.today_adsviewIncome || 0) + parseFloat(dataObj.btnClickEarn || 0)).toFixed(3),
                 totalLinks: (parseFloat(prev.totalLinks || 0) - 1),
                 completedClick: (parseFloat(prev.completedClick || 0) + 1),
-                pendingClick: (parseFloat(prev.pendingClick || 0) - 1)
-            }))
+                pendingClick: (parseFloat(prev.pendingClick || 0) - 1),
+                ...(response.data.msg.viewAdsexpireTimer && { viewAdsexpireTimer: response.data.msg.viewAdsexpireTimer })
+            }));            
+            
         } catch (error) {
             console.error(error);
             if (error.response.data.jwtMiddleware_token_not_found_error) {
@@ -341,13 +352,33 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             } else if (error?.response?.data?.jwtMiddleware_error) {
                 showNotificationWith_timer(true, 'Your session has expired. Please log in again.', '/login', navigation);
             } else if (error?.response?.data?.error_msg) {
-                showNotification(true, error?.response?.data?.error_msg);
+                Swal.fire({
+                    icon: "error",
+                    title: "Operation failed. Please try again.",
+                    text: error?.response?.data?.error_msg,
+                });
+                document.title = "❌ failed";
+                earningSound(isChecked_state, false);
+                setTimeout(() => {
+                    document.title = originalTitle;
+                }, 2000);
             } else {
-                showNotification(true, "Something went wrong, please try again.");
+                Swal.fire({
+                    icon: "error",
+                    title: "Operation failed. Please try again.",
+                    text: "Something went wrong, please try again.",
+                });
+                document.title = "❌ failed";
+                earningSound(isChecked_state, false);
+                setTimeout(() => {
+                    document.title = originalTitle;
+                }, 2000);
             }
 
         } finally {
             setData_process_state(false);
+            setHandle_clickAds_btnClick_state(false);
+            setCurrentBtnName_and_amount_For_extension_storedValue_state([]);
         }
     }
 
@@ -448,6 +479,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             }
         });
     };
+
     if (data_process_state) {
         return (
             <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] mt-12">
@@ -515,7 +547,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                 </div>
                             </div>
                             {/* Timer Overlay */}
-                            <div className={`${viewAds_firstTimeLoad_state.click_short_link_expireTimer ? 'flex' : 'hidden'} absolute z-[1] inset-0 bg-white bg-opacity-70 justify-center items-start`}>
+                            <div className={`${viewAds_firstTimeLoad_state.viewAdsexpireTimer ? 'flex' : 'hidden'} absolute z-[1] inset-0 bg-white bg-opacity-70 justify-center items-start`}>
                                 <div className="flex flex-col items-center text-3xl sm:text-6xl font-semibold mt-20">
                                     <div className="text-center">Come Back After</div>
                                     <div className="text-5xl sm:text-7xl font-bold text-red-600 drop-shadow">
@@ -547,17 +579,14 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                             </div>
 
                             {/* Extension Install Section */}
-                            <div className="my-6 text-center text-lg font-semibold text-gray-700">
+                            {/*<div className="my-6 text-center text-lg font-semibold text-gray-700">
                                 ---- Boost Your Earnings: Install Our Extension ----
                             </div>
-
-                            {/* Instruction Message */}
                             <div className="text-center bg-blue-100 text-blue-700 p-3 rounded-lg shadow-md mb-4">
                                 <span className="font-semibold">Important:</span> Only click these buttons below! The extension will handle ads automatically.
                             </div>
 
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 relative">
-                                {/* Extension Lock Overlay */}
                                 <div className={`${isExtension_state ? 'hidden' : 'flex'} absolute inset-0 bg-white bg-opacity-70 justify-center items-center`}>
                                     <button
                                         onClick={ExtensionInstallPopup}
@@ -582,7 +611,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                         <span className="mt-2 text-lg font-bold text-green-600">₹{values.amount}</span>
                                     </div>
                                 ))}
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                     <div className='bg-white rounded shadow px-5 py-2'>

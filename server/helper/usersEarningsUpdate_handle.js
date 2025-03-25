@@ -40,6 +40,11 @@ const userReferByIncome_handle = async (session, userData, earningAmount, attemp
                         date: today,
                     });
                 }
+            } else if (!referredUser) {
+                await referral_records_module
+                    .findOneAndDelete({ userName: userData.userName })
+                    .session(session);
+                delete userData.refer_by;
             }
 
             if (dateRecords_referBy) {

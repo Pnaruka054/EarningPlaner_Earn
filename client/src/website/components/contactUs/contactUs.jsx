@@ -4,8 +4,10 @@ import ContactUs_gif from '../../../assets/ContactUs.gif'
 import ProcessBgBlack from "../processBgBlack/processBgBlack";
 import Footer from "../footer/footer";
 import { Helmet } from 'react-helmet';
+import { encryptData } from "../encrypt_decrypt_data";
+import showNotification from "../showNotification";
 
-const ContactUs = ({ forMember, setAvailableBalance_forNavBar_state }) => {
+const ContactUs = ({ forMember }) => {
   const [formData_state, setFormData_state] = useState({
     name: "",
     email_address: "",
@@ -15,7 +17,6 @@ const ContactUs = ({ forMember, setAvailableBalance_forNavBar_state }) => {
     consent: false,
   });
   const [submit_process_state, setSubmit_process_state] = useState(false);
-  let [data_process_state, setData_process_state] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -29,11 +30,13 @@ const ContactUs = ({ forMember, setAvailableBalance_forNavBar_state }) => {
     e.preventDefault();
     setSubmit_process_state(true); // Set to false when starting to submit
     try {
-      await axios.post(`${import.meta.env.VITE_SERVER_URL}/userMessageRoute/userMessageSave_post`, formData_state);
+      let obj = await encryptData(formData_state)
+      await axios.post(`${import.meta.env.VITE_SERVER_URL}/userMessageRoute/userMessageSave_post`, { obj });
       setSubmit_process_state(false); // Set back to true if successful
+      showNotification(false, "Thank you! Your message has been successfully received. We will be in touch with you shortly.", true);
     } catch (error) {
       setSubmit_process_state(false); // Set back to true on error
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -141,10 +144,9 @@ const ContactUs = ({ forMember, setAvailableBalance_forNavBar_state }) => {
                 </form>
               </div>
             </div>
-            {(data_process_state || submit_process_state) && <ProcessBgBlack />}
           </div>
         </div>
-        {(data_process_state || submit_process_state) && <ProcessBgBlack />}
+        {(submit_process_state) && <ProcessBgBlack />}
         <div className='mt-3'>
           <Footer />
         </div>
@@ -269,9 +271,8 @@ const ContactUs = ({ forMember, setAvailableBalance_forNavBar_state }) => {
                 <img src={ContactUs_gif} alt="Contact Us" className="w-full h-auto object-cover select-none" draggable="false" />
               </div>
             </div>
-            {(data_process_state || submit_process_state) && <ProcessBgBlack />}
           </section>
-          {(data_process_state || submit_process_state) && <ProcessBgBlack />}
+          {(submit_process_state) && <ProcessBgBlack />}
           <div className='mt-3'>
             <Footer />
           </div>
@@ -392,7 +393,7 @@ const ContactUs = ({ forMember, setAvailableBalance_forNavBar_state }) => {
           <img src={ContactUs_gif} alt="Contact Us" className="w-full h-auto object-cover select-none" draggable="false" />
         </div>
       </div>
-      {(data_process_state || submit_process_state) && <ProcessBgBlack />}
+      {(submit_process_state) && <ProcessBgBlack />}
     </section>
   );
 };

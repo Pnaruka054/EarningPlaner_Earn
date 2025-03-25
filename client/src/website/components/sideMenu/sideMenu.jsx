@@ -1,5 +1,4 @@
 import { Link, useLocation } from "react-router-dom";
-import Support_icon from "../../../assets/Support.png";
 
 const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
     const location = useLocation(); // Get the current URL
@@ -28,6 +27,7 @@ const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
 
             {/* Main Navigation Section */}
             <div className="space-y-2">
+                <NavItem to="/" icon="home-outline" label="Home" currentPath={location.pathname} />
                 <NavItem to="/member/profile" icon="person-outline" label="Profile" currentPath={location.pathname} />
                 <NavItem to="/member/dashboard" icon="bar-chart-outline" label="Dashboard" currentPath={location.pathname} />
                 <NavItem to="/member/withdraw" icon="cash-outline" label="Withdraw" currentPath={location.pathname} />
@@ -35,18 +35,18 @@ const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
                 <NavItem to="/member/gift-code" icon="gift-outline" label="GiftCode" currentPath={location.pathname} />
                 <NavItem to="/member/view-ads" icon="eye-outline" label="View Ads" currentPath={location.pathname} />
                 <NavItem to="/member/click-shorten-link" icon="link-outline" label="Click Short Link" currentPath={location.pathname} />
-                <NavItem to="/member/fill-survey" icon="clipboard-outline" label="Fill Survey" currentPath={location.pathname} />
+                <NavItem to="/member/offer-wall" icon="clipboard-outline" label="Offer Walls" currentPath={location.pathname} />
             </div>
 
             {/* Divider and Support/Logout Section */}
             <div className="mt-6">
                 <div className="border-t border-gray-600"></div>
                 <div className="pt-4 space-y-2">
-                    <NavItem to="/member/support" imgSrc={Support_icon} label="Support" currentPath={location.pathname} />
-                    <NavItem to="/member/settings" icon="fa-solid fa-gear" label="Settings" currentPath={location.pathname} />
+                    <NavItem to="/member/support" icon="headset-outline" label="Support" currentPath={location.pathname} />
+                    <NavItem to="/member/settings" icon="settings-outline" label="Settings" currentPath={location.pathname} />
                     <button
                         onClick={() => setLogOut_btnClicked(true)}
-                        className="flex items-center font-semibold space-x-3 px-3 text-red-500 py-2 rounded-lg transition-colors duration-300 w-full text-left"
+                        className="flex items-center font-semibold space-x-3 px-3 hover:text-red-300 text-red-500 hover:bg-red-500 hover:bg-opacity-35 py-2 rounded-lg transition-colors duration-300 w-full text-left"
                     >
                         <span className="text-2xl font-bold flex items-center">
                             <ion-icon name="log-out-outline"></ion-icon>
@@ -61,7 +61,7 @@ const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
 
 // Active Menu Item Highlight Logic
 const NavItem = ({ to, icon, imgSrc, label, currentPath }) => {
-    const isActive = currentPath === to;
+    const isActive = to === "/member/offer-wall" ? currentPath.includes(to) : currentPath === to;
 
     return (
         <Link
@@ -82,5 +82,6 @@ const NavItem = ({ to, icon, imgSrc, label, currentPath }) => {
         </Link>
     );
 };
+
 
 export default SideMenu;

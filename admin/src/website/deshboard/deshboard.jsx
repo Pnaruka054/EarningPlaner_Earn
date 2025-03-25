@@ -13,22 +13,7 @@ const Dashboard = () => {
     // Dashboard data states
     const [referralRate_state, setReferralRate_state] = useState(10);
     const [referralMessage_state, setReferralMessage_state] = useState("");
-    const [announcements_state, setAnnouncements_state] = useState([
-        {
-            announcementTitle: "",
-            announcementMessage: "",
-            announcementTime: ""
-        }
-    ]);
-    const [newAnnouncement_state, setNewAnnouncement_state] = useState({
-        announcementTitle: "",
-        announcementMessage: ""
-    });
-    const [editingId_announcement_state, setEditingId_announcement_state] = useState(null);
-    const [edited_announcement_state, setEdited_announcement_state] = useState({
-        announcementTitle: "",
-        announcementMessage: ""
-    });
+
     const [faqs_state, setFaqs_state] = useState([
         {
             faqQuestioin: "",
@@ -68,7 +53,7 @@ const Dashboard = () => {
         giftCode_claimed: "", // preview only
         shortlink_required: "",
         giftCode_amount: "",
-        fillSurvey_required: "",
+        offerWall_required: "",
         giftCode_page_Message: ""
     })
 
@@ -130,14 +115,14 @@ const Dashboard = () => {
                 );
 
                 if (response?.data?.msg) {
-                    const { referralData, announcementData, faqData, withdrawalMethodData, other_data_giftCode } = response.data.msg;
-                    console.log(other_data_giftCode);
+                    const { referralData, announcementData, faqData, withdrawalMethodData, other_data_giftCode, other_data_homepageArray } = response.data.msg;
                     setGiftCode_state(other_data_giftCode)
                     setReferralMessage_state(referralData?.referral_page_text || "");
                     setReferralRate_state(parseFloat(referralData?.referral_rate || 0) * 100);
                     setAnnouncements_state(announcementData.reverse() || []);
                     setFaqs_state(faqData.reverse() || []);
                     setWithdrawalMethods_state(withdrawalMethodData.reverse() || []);
+                    setHomepageSections_state(other_data_homepageArray.reverse() || [])
                 }
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
@@ -213,6 +198,24 @@ const Dashboard = () => {
             }
         });
     };
+
+
+    const [announcements_state, setAnnouncements_state] = useState([
+        {
+            announcementTitle: "",
+            announcementMessage: "",
+            announcementTime: ""
+        }
+    ]);
+    const [newAnnouncement_state, setNewAnnouncement_state] = useState({
+        announcementTitle: "",
+        announcementMessage: ""
+    });
+    const [editingId_announcement_state, setEditingId_announcement_state] = useState(null);
+    const [edited_announcement_state, setEdited_announcement_state] = useState({
+        announcementTitle: "",
+        announcementMessage: ""
+    });
 
     // Announcements handling
     const announcement_database_post = async (newAnnouncement_data) => {
@@ -734,10 +737,302 @@ const Dashboard = () => {
         }
     };
 
+
+    // Homepage handling
+    const [homepageSections_state, setHomepageSections_state] = useState([
+        {
+            homepageSection_title: "",
+            homepageSection_message: ""
+        }
+    ]);
+    const [newHomepageSection_state, setNewHomepageSection_state] = useState({
+        homepageSection_title: "",
+        homepageSection_message: ""
+    });
+    const [editingId_homepageSection_state, setEditingId_homepageSection_state] = useState(null);
+    const [edited_homepageSection_state, setEdited_homepageSection_state] = useState({
+        homepageSection_title: "",
+        homepageSection_message: ""
+    });
+
+    const homepage_database_post = async (newHomepage_section_data) => {
+        try {
+            setData_process_state(true);
+
+            const response = await axios.post(
+                `${import.meta.env.VITE_SERVER_URL}/admin/post_newHomepage_data`,
+                { newHomepage_section_data },
+                { withCredentials: true }
+            );
+            if (response?.data?.msg) {
+                const { homepageSection_title, homepageSection_message, _id } = response.data.msg;
+                setHomepageSections_state([
+                    {
+                        _id,
+                        homepageSection_title,
+                        homepageSection_message,
+                    },
+                    ...homepageSections_state,
+                ]);
+                showNotification(false, "updated success!");
+                setNewHomepageSection_state({
+                    homepageSection_title: "",
+                    homepageSection_message: "",
+                });
+            }
+        } catch (error) {
+            console.error("Error posting new homepage section:", error);
+            if (error.response.data.error_msg) {
+                showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
+                navigation("/");
+            } else {
+                showNotification(true, "Something went wrong, please try again.");
+            }
+        } finally {
+            setData_process_state(false);
+        }
+    };
+
+    const addHomepageSection = () => {
+        if (newHomepageSection_state.homepageSection_title || newHomepageSection_state.homepageSection_message) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "Add new homepage section?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, update it!",
+                cancelButtonText: "Cancel"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    homepage_database_post(newHomepageSection_state);
+                }
+            });
+        }
+    };
+
+    const homepage_database_delete = async (id) => {
+        try {
+            setData_process_state(true);
+
+            const response = await axios.delete(
+                `${import.meta.env.VITE_SERVER_URL}/admin/delete_homepage_data?id=${id}`,
+                { withCredentials: true }
+            );
+
+            if (response?.data?.msg) {
+                showNotification(false, "Deleted successfully!");
+                setHomepageSections_state(homepageSections_state.filter((a) => a._id !== id));
+            }
+        } catch (error) {
+            console.error("Error deleting homepage section:", error);
+            if (error.response.data.error_msg) {
+                showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
+                navigation("/");
+            } else {
+                showNotification(true, "Something went wrong, please try again.");
+            }
+        } finally {
+            setData_process_state(false);
+        }
+    };
+
+    const deleteHomepageSection = (id) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Delete This homepage section?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, update it!",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                homepage_database_delete(id);
+            }
+        });
+    };
+
+    const startEditing_homepageSection = (homepageSection) => {
+        setEditingId_homepageSection_state(homepageSection._id);
+        setEdited_homepageSection_state({
+            _id: homepageSection._id,
+            homepageSection_title: homepageSection.homepageSection_title,
+            homepageSection_message: homepageSection.homepageSection_message,
+        });
+    };
+
+    const homepage_database_patch = async () => {
+        try {
+            setData_process_state(true);
+            const response = await axios.patch(
+                `${import.meta.env.VITE_SERVER_URL}/admin/patch_homepage_data`,
+                {
+                    _id: edited_homepageSection_state._id,
+                    homepageSection_title: edited_homepageSection_state.homepageSection_title,
+                    homepageSection_message: edited_homepageSection_state.homepageSection_message,
+                },
+                { withCredentials: true }
+            );
+
+            if (response?.data?.msg) {
+                const { homepageSection_title, homepageSection_message, _id } = response.data.msg;
+                setHomepageSections_state((prevState) =>
+                    prevState.map((item) =>
+                        item._id === _id
+                            ? { _id, homepageSection_title, homepageSection_message }
+                            : item
+                    )
+                );
+                setEditingId_homepageSection_state(null);
+                showNotification(false, "Updated successfully!");
+            }
+        } catch (error) {
+            console.error("Error updating homepage section:", error);
+            if (error.response.data.error_msg) {
+                showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
+                navigation("/");
+            } else {
+                showNotification(true, "Something went wrong, please try again.");
+            }
+        } finally {
+            setData_process_state(false);
+        }
+    };
+
+    const saveEdit_homepageSection = () => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Update This homepage section?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, update it!",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                homepage_database_patch();
+            }
+        });
+    };
+
     return (
         <div>
             <SideMenu sideMenu_show={true} />
             <div className="mt-[75px] md:ml-[256px] p-6 space-y-8">
+                {/* Home data Section */}
+                <div className="p-6 border border-gray-300 rounded-lg shadow-md">
+                    <h2 className="text-xl font-semibold mb-4">Home page Data</h2>
+                    <input
+                        type="text"
+                        placeholder="Title"
+                        className="border p-2 rounded w-full mb-2"
+                        value={newHomepageSection_state.homepageSection_title}
+                        onChange={(e) =>
+                            setNewHomepageSection_state({
+                                ...newHomepageSection_state,
+                                homepageSection_title: e.target.value,
+                            })
+                        }
+                    />
+                    <textarea
+                        placeholder="Details (use HTML for better design)"
+                        className="border overflow-hidden p-2 rounded w-full mb-2 auto-resize"
+                        rows="4"
+                        value={newHomepageSection_state.homepageSection_message}
+                        onChange={(e) =>
+                            setNewHomepageSection_state({
+                                ...newHomepageSection_state,
+                                homepageSection_message: e.target.value,
+                            })
+                        }
+                    />
+                    <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                        onClick={addHomepageSection}
+                    >
+                        Add Section
+                    </button>
+                    {/* homepage Section List */}
+                    {homepageSections_state.map((item, index) => (
+                        <div key={index} className="p-4 space-y-2 border-b pb-4">
+                            {editingId_homepageSection_state === item._id ? (
+                                <>
+                                    <input
+                                        type="text"
+                                        className="border p-2 rounded w-full mb-2"
+                                        value={edited_homepageSection_state.homepageSection_title}
+                                        onChange={(e) =>
+                                            setEdited_homepageSection_state((prevState) => ({
+                                                ...prevState,
+                                                homepageSection_title: e.target.value,
+                                            }))
+                                        }
+                                    />
+                                    <textarea
+                                        className="border p-2 overflow-hidden rounded w-full mb-2 auto-resize"
+                                        rows="4"
+                                        value={edited_homepageSection_state.homepageSection_message}
+                                        onChange={(e) =>
+                                            setEdited_homepageSection_state((prevState) => ({
+                                                ...prevState,
+                                                homepageSection_message: e.target.value,
+                                            }))
+                                        }
+                                    />
+                                    <div className="flex flex-col sm:flex-row gap-4">
+                                        <button
+                                            className="bg-green-500 text-white px-4 py-2 rounded"
+                                            onClick={saveEdit_homepageSection}
+                                        >
+                                            Save
+                                        </button>
+                                        <button
+                                            className="bg-gray-500 text-white px-4 py-2 rounded"
+                                            onClick={() => setEditingId_homepageSection_state(null)}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                homepageSections_state[0].homepageSection_title !== '' && homepageSections_state[0].homepageSection_message !== '' && <>
+                                    <p dangerouslySetInnerHTML={{ __html: item.homepageSection_title }} />
+                                    <p
+                                        dangerouslySetInnerHTML={{
+                                            __html: item.homepageSection_message,
+                                        }}
+                                    ></p>
+                                    <div className="flex flex-col sm:flex-row gap-4">
+                                        <button
+                                            className="bg-yellow-500 text-white px-4 py-2 rounded"
+                                            onClick={() => startEditing_homepageSection(item)}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="bg-red-500 text-white px-4 py-2 rounded"
+                                            onClick={() => deleteHomepageSection(item._id)}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+
                 {/* Referral Rate Section */}
                 <div className="p-6 border border-gray-300 rounded-lg shadow-md">
                     <h2 className="text-xl font-semibold mb-4">Referral Rate</h2>
@@ -796,7 +1091,7 @@ const Dashboard = () => {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
                             <label className="text-gray-700 sm:w-1/2">View Ads Required:</label>
                             <input
-                                type="number"
+                                type="text"
                                 className="border p-2 rounded w-full sm:w-1/2"
                                 value={giftCode_state.viewAds_required}
                                 onChange={(e) => handleChange("viewAds_required", e.target.value)}
@@ -817,7 +1112,7 @@ const Dashboard = () => {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
                             <label className="text-gray-700 sm:w-1/2">Gift Code Claim Limit:</label>
                             <input
-                                type="number"
+                                type="text"
                                 className="border p-2 rounded w-full sm:w-1/2"
                                 value={giftCode_state.giftCode_claim_limit}
                                 onChange={(e) => handleChange("giftCode_claim_limit", e.target.value)}
@@ -839,21 +1134,21 @@ const Dashboard = () => {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
                             <label className="text-gray-700 sm:w-1/2">Shortlink Required:</label>
                             <input
-                                type="number"
+                                type="text"
                                 className="border p-2 rounded w-full sm:w-1/2"
                                 value={giftCode_state.shortlink_required}
                                 onChange={(e) => handleChange("shortlink_required", e.target.value)}
                             />
                         </div>
 
-                        {/* Fill Survey Required Input */}
+                        {/* OfferWall Required Input */}
                         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
-                            <label className="text-gray-700 sm:w-1/2">Fill Survey Required:</label>
+                            <label className="text-gray-700 sm:w-1/2">OfferWall Required:</label>
                             <input
-                                type="number"
+                                type="text"
                                 className="border p-2 rounded w-full sm:w-1/2"
-                                value={giftCode_state.fillSurvey_required}
-                                onChange={(e) => handleChange("fillSurvey_required", e.target.value)}
+                                value={giftCode_state.offerWall_required}
+                                onChange={(e) => handleChange("offerWall_required", e.target.value)}
                             />
                         </div>
                     </div>
@@ -895,7 +1190,7 @@ const Dashboard = () => {
                             }
                         />
                         <textarea
-                            placeholder="Details (use new line for multiple points)"
+                            placeholder="Details (use HTML for better design)"
                             className="border overflow-hidden p-2 rounded w-full mb-2 auto-resize"
                             rows="4"
                             value={newAnnouncement_state.announcementMessage}

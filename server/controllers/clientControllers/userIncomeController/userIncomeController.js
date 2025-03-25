@@ -9,13 +9,15 @@ const generateRandomString = require("../../../helper/generateRandomString")
 const axios = require('axios')
 const viewAds_directLinksData_module = require("../../../model/view_ads_direct_links/viewAds_directLinksData_module");
 const { userReferByIncome_handle, userIncome_handle } = require('../../../helper/usersEarningsUpdate_handle')
-const userID_data_for_survey_module = require('../../../model/userID_data_for_survey/userID_data_for_survey_module')
+const userID_data_for_offerWall_module = require('../../../model/userID_data_for_offerWall/userID_data_for_offerWall_module')
 const other_data_module = require('../../../model/other_data/other_data_module')
 const earningCalculator = require('../../../helper/earningCalculator')
 const MAX_RETRIES = parseFloat(process.env.MAX_RETRIES) || 3;
 const userGiftCode_history_module = require('../../../model/userGiftCode_history/userGiftCode_history_module');
 const getFormattedMonth = require('../../../helper/getFormattedMonth');
 const current_time_get = require('../../../helper/currentTimeUTC');
+const { decryptData } = require('../../../helper/encrypt_decrypt_data');
+const offerWallsData_module = require('../../../model/offerWallsData/offerWallsData_module')
 
 // for view ads page get data
 const user_adsView_home_get = async (req, res) => {
@@ -41,15 +43,6 @@ const user_adsView_home_get = async (req, res) => {
                 .findOne({ ipAddress: user_ip })
                 .session(session);
 
-            // If no ipAddress record found, create a new one with empty buttonNames Array
-            if (!ipAddress_recordData) {
-                ipAddress_recordData = new ipAddress_records_module({
-                    userDB_id: userData._id,
-                    buttonNames: [],
-                    ipAddress: user_ip,
-                });
-            }
-
             // find current date record
             let userDate_recordData = await userDate_records_module
                 .findOne({ userDB_id: userData._id, date: todayDate })
@@ -73,9 +66,9 @@ const user_adsView_home_get = async (req, res) => {
                 pendingClick,
                 completedClick,
                 pendingEarnings: (userWillEarn - today_adsviewIncome).toFixed(3),
-                totalLinks: viewAds_directLinksData.length - (ipAddress_recordData.buttonNames || []).length,
+                totalLinks: viewAds_directLinksData.length - (ipAddress_recordData?.buttonNames || []).length,
                 userAvailableBalance: (parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)).toFixed(3),
-                buttonNames: ipAddress_recordData.buttonNames || [],
+                buttonNames: ipAddress_recordData?.buttonNames || [],
                 viewAds_directLinksData,
                 other_data_viewAds_instructions: other_data_viewAds.viewAds_instructions
             };
@@ -83,16 +76,17 @@ const user_adsView_home_get = async (req, res) => {
             let idTimer_recordsData = await idTimer_records_module.findOne({
                 $and: [
                     { userDB_id: userData._id },
-                    { viewAdsexpireTimer: { $exists: null } }
+                    { for_viewAds_expire_timer: { $exists: true } }
                 ]
             }).session(session)
+
             // change res data if timer started for user
-            if (idTimer_recordsData?.viewAdsexpireTimer) {
-                resData = { ...resData, viewAdsexpireTimer: idTimer_recordsData.viewAdsexpireTimer }
+            if (idTimer_recordsData?.for_viewAds_expire_timer) {
+                resData = { ...resData, viewAdsexpireTimer: idTimer_recordsData.for_viewAds_expire_timer }
             }
 
             // Save (or update) the ipAddress_recordData document
-            await ipAddress_recordData.save({ session });
+            await ipAddress_recordData?.save({ session });
 
             // Commit the transaction and end the session
             await session.commitTransaction();
@@ -131,6 +125,7 @@ const user_adsView_income_patch = async (req, res) => {
         session.startTransaction(); // Start transaction immediately
 
         try {
+            req.body = await decryptData(req.body.obj)
             // Extract required data
             const { disabledButtons_state, pendingClick, btnClickEarn } = req.body;
             const userIp = req.ip;
@@ -169,17 +164,19 @@ const user_adsView_income_patch = async (req, res) => {
                     .findOne({
                         $and: [
                             { userDB_id: userData._id },
-                            { viewAdsexpireTimer: { $exists: null } }
+                            { for_viewAds: { $exists: true } }
                         ]
                     })
                     .session(session);
 
                 // check if timer already available or not if not available then create new one
                 if (!idTimerRecordsData) {
-                    const currentTime_fromNewDate = new Date();
+                    const indiaTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+                    const indiaDate = new Date(indiaTime);
                     idTimerRecordsData = new idTimer_records_module({
                         userDB_id: userData._id,
-                        viewAdsexpireTimer: new Date(currentTime_fromNewDate.getFullYear(), currentTime_fromNewDate.getMonth(), currentTime_fromNewDate.getDate() + 1, 0, 0, 0),
+                        expiresAt: new Date(indiaDate.getFullYear(), indiaDate.getMonth(), indiaDate.getDate() + 1, 0, 0, 0),
+                        for_viewAds_expire_timer: new Date(indiaDate.getFullYear(), indiaDate.getMonth(), indiaDate.getDate() + 1, 0, 0, 0)
                     });
                     await idTimerRecordsData.save({ session });
                 } else {
@@ -206,7 +203,21 @@ const user_adsView_income_patch = async (req, res) => {
 
             // check if ip address already available if available then Update existing IP record otherwise Create new IP record 
             if (ipAddressRecord) {
+                const lastValue = disabledButtons_state[disabledButtons_state.length - 1];
+
+                // ✅ Check if lastValue already exists using `includes()`
+                if (ipAddressRecord?.buttonNames?.includes(lastValue)) {
+                    await session.abortTransaction();
+                    session.endSession();
+                    return res.status(400).json({
+                        success: false,
+                        error_msg: "You Already Completed This",
+                    });
+                }
+
+                // ✅ Update buttonNames
                 ipAddressRecord.buttonNames = disabledButtons_state;
+                await ipAddressRecord.save({ session });
             } else {
                 ipAddressRecord = new ipAddress_records_module({
                     userDB_id: userData._id,
@@ -243,8 +254,8 @@ const user_adsView_income_patch = async (req, res) => {
             };
 
             // check if user limit timer started then change res
-            if (idTimerRecordsData?.viewAdsexpireTimer) {
-                response.viewAdsexpireTimer = idTimerRecordsData.viewAdsexpireTimer;
+            if (idTimerRecordsData?.for_viewAds_expire_timer) {
+                response.viewAdsexpireTimer = idTimerRecordsData.for_viewAds_expire_timer;
             }
 
             return res.status(200).json({
@@ -307,61 +318,88 @@ const user_shortlink_data_get = async (req, res) => {
             // Get all clicked URLs
             const clickedUrls = new Set(ipAddressRecords.map(record => record.shortnerDomain));
 
-            // Calculate user earnings based on shortLink data
-            let userWillEarn = shortedLinksData.length
-                ? earningCalculator(shortedLinksData, 'amount', other_data_shortLink?.shortLink_pendingClick)
-                : 0;
-
-            // Mark matched shorted links as isDisable: true
-            shortedLinksData = shortedLinksData.map(link => {
-                const isClicked = clickedUrls.has(link.shortnerDomain);
-                const relatedRecords = ipAddressRecords.filter(record => record.shortnerDomain === link.shortnerDomain);
-                // isDisable will be true only if all related records have status === true
-                const isDisable = isClicked && relatedRecords.length > 0 && relatedRecords.every(record => record.status === true);
-
-                return {
-                    ...link.toObject(),
-                    isDisable
-                };
-            });
-
             // Find current date record with session
             let userDate_recordData = await userDate_records_module.findOne({
                 userDB_id: userData._id,
                 date: todayDate
             }).session(session);
 
-            // Safely extract income and pendingClick if available, otherwise use 0
-            const today_shortLinkIncome = parseFloat(userDate_recordData?.earningSources?.click_short_link?.income || 0);
-            let pendingClick = parseFloat(userDate_recordData?.earningSources?.click_short_link?.pendingClick || other_data_shortLink?.shortLink_pendingClick || 0);
+            // If no record exists, create a new one with a default structure
+            if (!userDate_recordData) {
+                userDate_recordData = new userDate_records_module({
+                    userDB_id: userData._id,
+                    date: todayDate,
+                    earningSources: {
+                        click_short_link: {
+                            short_linkDomails_data: [],
+                            income: 0
+                        }
+                    }
+                });
+            }
+
+            // Ensure that short_linkDomails_data array exists
+            if (!userDate_recordData.earningSources?.click_short_link?.short_linkDomails_data) {
+                userDate_recordData.earningSources = userDate_recordData.earningSources || {};
+                userDate_recordData.earningSources.click_short_link = userDate_recordData.earningSources.click_short_link || {};
+                userDate_recordData.earningSources.click_short_link.short_linkDomails_data = [];
+            }
+
+            // Mark matched shorted links as isDisable: true
+            shortedLinksData = await Promise.all(
+                shortedLinksData.map(async (link) => {
+                    // Try to find an existing record for the link; if not found, assume 0 completed clicks
+                    const existingRecord = userDate_recordData.earningSources.click_short_link.short_linkDomails_data
+                        .find(value => value.domainName === link.shortnerDomain);
+                    const completedClicks = existingRecord ? parseFloat(existingRecord.click_completed || 0) : 0;
+                    const allowedClicks = parseFloat(link.how_much_click_allow);
+                    const isClicked = clickedUrls.has(link.shortnerDomain) || allowedClicks <= completedClicks;
+
+                    // Get related records for this shortnerDomain
+                    const relatedRecords = ipAddressRecords.filter(record => record.shortnerDomain === link.shortnerDomain);
+                    // isDisable will be true only if the link is clicked and all related records have status === true
+                    const isDisable = isClicked && relatedRecords.length > 0 && relatedRecords.every(record => record.status === true);
+
+                    // Find timer record with session
+                    let idTimer_recordsData = await idTimer_records_module.findOne({
+                        $and: [
+                            { userDB_id: userData._id },
+                            { click_short_link_domainName: link.shortnerDomain },
+                            { for_link_shortner_expire_timer: { $exists: true } }
+                        ]
+                    }).session(session);
+
+                    return {
+                        ...link.toObject(),
+                        isDisable,
+                        completedClicks,
+                        expireTimer: idTimer_recordsData?.for_link_shortner_expire_timer
+                    };
+                })
+            );
+
+            // Safely extract income if available, otherwise use 0
+            const today_shortLinkIncome = parseFloat(userDate_recordData.earningSources.click_short_link.income || 0);
 
             // Calculate completed clicks
-            let completedClick = Math.max(parseFloat(other_data_shortLink?.shortLink_pendingClick || 0) - pendingClick, 0);
+            let completedClick = userDate_recordData.earningSources.click_short_link.short_linkDomails_data.reduce(
+                (total, current) => total + parseFloat(current.click_completed || 0),
+                0
+            );
 
             // Prepare response data
             let resData = {
-                userAvailableBalance: (parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)).toFixed(3),
+                userAvailableBalance: (
+                    parseFloat(userData.deposit_amount || 0) +
+                    parseFloat(userData.withdrawable_amount || 0)
+                ).toFixed(3),
                 shortedLinksData,
                 today_shortLinkIncome: today_shortLinkIncome.toFixed(3),
-                pendingClick,
                 completedClick,
-                pendingEarnings: (userWillEarn - today_shortLinkIncome).toFixed(3),
-                totalLinks: shortedLinksData.length - ipAddressRecords.filter(values => values.processCount === 1 && values.status === true).length,
+                totalLinks: shortedLinksData.length -
+                    ipAddressRecords.filter(values => values.processCount === 1 && values.status === true).length,
                 other_data_shortLink_instructions: other_data_shortLink.shortLink_instructions
             };
-
-            // Find timer record with session
-            let idTimer_recordsData = await idTimer_records_module.findOne({
-                $and: [
-                    { userDB_id: userData._id },
-                    { click_short_link_expireTimer: { $exists: true } }
-                ]
-            }).session(session);
-
-            // Change res data if timer started for user
-            if (idTimer_recordsData?.click_short_link_expireTimer) {
-                resData = { ...resData, click_short_link_expireTimer: idTimer_recordsData.click_short_link_expireTimer };
-            }
 
             // Commit transaction
             await session.commitTransaction();
@@ -405,6 +443,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
         session.startTransaction(); // Start transaction
 
         try {
+            req.body = await decryptData(req.body.obj_already)
             const userData = req.user;
             const userIp = req.ip;
             const { shortnerDomain, endPageRoute, clientOrigin } = req.body;
@@ -417,12 +456,16 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             let idTimer_recordsData = await idTimer_records_module.findOne({
                 $and: [
                     { userDB_id: userData._id },
-                    { click_short_link_expireTimer: { $exists: true } }
+                    { click_short_link_domainName: shortnerDomain },
+                    { for_link_shortner_expire_timer: { $exists: true } }
                 ]
             }).session(session);
 
             // Change res data if timer started for user
-            if (idTimer_recordsData?.click_short_link_expireTimer) {
+            if (
+                idTimer_recordsData?.for_link_shortner_expire_timer &&
+                idTimer_recordsData.click_short_link_domainName === shortnerDomain
+            ) {
                 await session.abortTransaction(); // Rollback transaction
                 session.endSession();
                 return res.status(400).json({
@@ -461,7 +504,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
 
             // create shorted url for user using shortner api
             if (shortnersData && shortnersData.shortnerApiLink) {
-                const fullUrl = `https://earningplaner-earn.onrender.com${endPageRoute}/${uniqueRandomID}`;
+                const fullUrl = `${req.headers.origin}${endPageRoute}/${uniqueRandomID}` || `${req.protocol}://${req.get('host')}/${endPageRoute}/${uniqueRandomID}`;
                 const matches_two_shortners = shortnersData.shortnerApiLink.split("&url=");
                 if (matches_two_shortners.length >= 2) {
                     try {
@@ -564,7 +607,7 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
             }
 
             // ✅ Agar processCount already 2 hai, toh process skip karo aur error bhejo
-            if (!ipAddressRecord.processCount || ipAddressRecord.status || ipAddressRecord.processCount === 2 || ipAddressRecord.status) {
+            if (ipAddressRecord.status || ipAddressRecord.processCount === 2) {
                 await session.abortTransaction();
                 session.endSession();
                 return res.status(400).json({ message: "Already processed", amount: 0 });
@@ -583,12 +626,16 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
             let idTimer_recordsData = await idTimer_records_module.findOne({
                 $and: [
                     { userDB_id: userData._id },
-                    { click_short_link_expireTimer: { $exists: true } }
+                    { click_short_link_domainName: ipAddressRecord.shortnerDomain },
+                    { for_link_shortner_expire_timer: { $exists: true } }
                 ]
             }).session(session);
 
             // Change res data if timer started for user
-            if (idTimer_recordsData?.click_short_link_expireTimer) {
+            if (
+                idTimer_recordsData?.for_link_shortner_expire_timer &&
+                idTimer_recordsData.click_short_link_domainName === ipAddressRecord.shortnerDomain
+            ) {
                 await session.abortTransaction(); // Rollback transaction
                 session.endSession();
                 return res.status(400).json({
@@ -597,64 +644,64 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
                 });
             }
 
-            let user_incomeUpdate = await userIncome_handle(session, userData, amount)
+            let user_incomeUpdate = await userIncome_handle(session, userData, amount);
             if (!user_incomeUpdate.success) {
                 throw new Error(user_incomeUpdate.error);
             }
-            const { userMonthlyRecord, dateRecords } = user_incomeUpdate.values
+            const { userMonthlyRecord, dateRecords } = user_incomeUpdate.values;
 
-            // get all viewAds links data
-            const other_data_shortLink = await other_data_module
-                .findOne({ documentName: "shortLink" })
-                .session(session);
-
-            // check if pendingClick is available in date data if not then create
-            if (!dateRecords?.earningSources?.click_short_link?.pendingClick) {
-                dateRecords.earningSources.click_short_link.pendingClick = other_data_shortLink.shortLink_pendingClick
+            // check if click_completed is available in date data if not then create
+            if (!dateRecords?.earningSources?.click_short_link?.short_linkDomails_data) {
+                dateRecords.earningSources = dateRecords.earningSources || {};
+                dateRecords.earningSources.click_short_link = dateRecords.earningSources.click_short_link || { income: 0 };
+                dateRecords.earningSources.click_short_link.short_linkDomails_data = [];
             }
 
-            // check current pending number is lessthen equel to total available pending click limit if its true then Update user's pending clicks and income
-            if (parseFloat(dateRecords?.earningSources?.click_short_link?.pendingClick) <= parseFloat(other_data_shortLink.shortLink_pendingClick)) {
-                dateRecords.earningSources.click_short_link.pendingClick = (parseFloat(dateRecords.earningSources.click_short_link.pendingClick) - 1).toString();
-                dateRecords.earningSources.click_short_link.income = (parseFloat(dateRecords.earningSources.click_short_link.income || 0) + parseFloat(amount)).toFixed(3);
-            }
+            // Check if domain already exists
+            let existing_shortlink_Domain = dateRecords.earningSources.click_short_link.short_linkDomails_data
+                .find((value) => value.domainName === ipAddressRecord.shortnerDomain);
 
-            let refer_by_incomeupdate = await userReferByIncome_handle(session, userData, amount)
-            if (!refer_by_incomeupdate.success) {
-                throw new Error(refer_by_incomeupdate.error);
-            }
-
-            // Initialize timer records (if applicable)
-
-            // if user current pending click is empety means its 0 then start timer
-            if (dateRecords.earningSources.click_short_link.pendingClick === '0') {
-                let idTimerRecordsData = null;
-                idTimerRecordsData = await idTimer_records_module
-                    .findOne({
-                        $and: [
-                            { userDB_id: userData._id },
-                            { click_short_link_expireTimer: { $exists: null } }
-                        ]
-                    })
-                    .session(session);
-
-                // check if timer already available or not if not available then create new one
-                if (!idTimerRecordsData) {
-                    const currentTime_fromNewDate = new Date();
-                    idTimerRecordsData = new idTimer_records_module({
-                        userDB_id: userData._id,
-                        click_short_link_expireTimer: new Date(currentTime_fromNewDate.getFullYear(), currentTime_fromNewDate.getMonth(), currentTime_fromNewDate.getDate() + 1, 0, 0, 0),
-                    });
-                    await idTimerRecordsData.save({ session });
+            if (!existing_shortlink_Domain) {
+                // First time: create a new record, set click_completed to 1, and update income immediately
+                existing_shortlink_Domain = {
+                    domainName: ipAddressRecord.shortnerDomain,
+                    click_completed: '1'
+                };
+                dateRecords.earningSources.click_short_link.short_linkDomails_data.push(existing_shortlink_Domain);
+                dateRecords.earningSources.click_short_link.income = (
+                    parseFloat(dateRecords.earningSources.click_short_link.income || 0) + parseFloat(amount)
+                ).toFixed(3);
+            } else {
+                // check current completed click number is less than or equal to total available how_much_click_allow limit
+                if (parseFloat(existing_shortlink_Domain.click_completed) < parseFloat(shortedLink.how_much_click_allow)) {
+                    existing_shortlink_Domain.click_completed = (parseFloat(existing_shortlink_Domain.click_completed) + 1).toString();
+                    dateRecords.earningSources.click_short_link.income = (
+                        parseFloat(dateRecords.earningSources.click_short_link.income || 0) + parseFloat(amount)
+                    ).toFixed(3);
                 } else {
-                    // Return error if the click limit timer is exceeded
-                    await session.abortTransaction();
+                    await session.abortTransaction(); // Rollback transaction
                     session.endSession();
                     return res.status(400).json({
                         success: false,
                         error_msg: "Click Limit exceeded. Try again after the timer completes.",
                     });
                 }
+            }
+
+            let refer_by_incomeupdate = await userReferByIncome_handle(session, userData, amount);
+            if (!refer_by_incomeupdate.success) {
+                throw new Error(refer_by_incomeupdate.error);
+            }
+
+            // if user current completed click is equel to how_much_click_allow then start timer
+            if (existing_shortlink_Domain.click_completed === shortedLink.how_much_click_allow) {
+                let idTimerRecordsData = new idTimer_records_module({
+                    userDB_id: userData._id,
+                    click_short_link_domainName: ipAddressRecord.shortnerDomain,
+                    for_link_shortner_expire_timer: new Date(Date.now() + 12 * 60 * 60 * 1000),
+                    expiresAt: new Date(Date.now() + (12 * 60 * 60 * 1000) - (30 * 1000))
+                });
+                await idTimerRecordsData.save({ session });
             }
 
             if (userMonthlyRecord) {
@@ -675,7 +722,6 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
 
             // Save updated documents concurrently
             const saveOperations = [
-                userMonthlyRecord.save({ session }),
                 ipAddressRecord.save({ session }),
                 userData.save({ session }),
                 dateRecords.save({ session })
@@ -706,23 +752,32 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
     return res.status(500).json({ message: "Max retry attempts reached. Please try again later." });
 };
 
-// for get all survey on survey page
-const user_survey_available_get = async (req, res) => {
+// for get all offerWall data on offerWall page
+const user_offerWall_get = async (req, res) => {
     try {
+        // format current Date YYYY-MM-DD
+        const todayDate = getFormattedDate();
+
         const userData = req.user;
 
-        // unique userID for survey api
-        let isUserIdDataFound = await userID_data_for_survey_module.findOne({ userDB_id: userData._id });
+        // Fetch other_data for offerWalls
+        let other_data_offerWall = await other_data_module.findOne({ documentName: "offerWall" })
+
+        // Retrieve all offer wall datas
+        let offerWallData = await offerWallsData_module.find() || [];
+
+        // unique userID for offerWall api
+        let isUserIdDataFound = await userID_data_for_offerWall_module.findOne({ userDB_id: userData._id });
 
         // check if user already created or not if not created then create new user
         if (!isUserIdDataFound) {
-            // function to genrate unique randomString with finding in user userID_data_for_survey_module data
+            // function to genrate unique randomString with finding in user userID_data_for_offerWall_module data
             async function generateUniqueRandomString(length) {
                 const RandomString = generateRandomString(length);
                 let increment = 0;
                 let newString = RandomString;
 
-                while (await userID_data_for_survey_module.findOne({ userId: newString })) {
+                while (await userID_data_for_offerWall_module.findOne({ userId: newString })) {
                     increment++;
                     newString = `${newString}${increment}`;
                 }
@@ -731,7 +786,7 @@ const user_survey_available_get = async (req, res) => {
             }
             userName = await generateUniqueRandomString(userData.userName.length);
 
-            isUserIdDataFound = new userID_data_for_survey_module({
+            isUserIdDataFound = new userID_data_for_offerWall_module({
                 userDB_id: userData._id,
                 userId: userName
             });
@@ -741,23 +796,36 @@ const user_survey_available_get = async (req, res) => {
 
         const userId = isUserIdDataFound.userId;
 
-        // surveys data
-        const surveysWebsites = [
-            {
-                surveyNetworkName: "CPX Research",
-                url: `https://wall.cpx-research.com/index.php?app_id=26205&ext_user_id=${userId}`
-            },
-            {
-                surveyNetworkName: "Theoremreach",
-                url: `https://theoremreach.com/respondent_entry/direct?api_key=aded5d2fcb4e683c0f60034c8c5e&user_id=${userId}`
-            }
-        ];
+        let offerWallData_after_replace = offerWallData.map(doc => {
+            const obj = doc.toObject();
+            obj.offerWallApiLink = obj.offerWallApiLink?.replace("${userId}", userId);
+            return obj;
+        });
 
         const available_balance = (parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)).toFixed(3);
 
+        // Find current date record with session
+        let userDate_recordData = await userDate_records_module.findOne({
+            userDB_id: userData._id,
+            date: todayDate
+        });
+
+        const today_offerWallIncome = parseFloat(userDate_recordData?.earningSources?.offerWall?.income || 0);
+        let today_completed = parseFloat(userDate_recordData?.earningSources?.offerWall?.completed || 0);
+        let total_offerWall = offerWallData_after_replace.length
+
+        let resData = {
+            available_balance,
+            offerWallData_after_replace,
+            today_offerWallIncome,
+            today_completed,
+            total_offerWall,
+            other_data_offerWalls_instructions: other_data_offerWall.offerWall_instructions
+        }
+
         return res.status(200).json({
             success: true,
-            msg: { available_balance, surveysWebsites }
+            msg: resData
         });
 
     } catch (error) {
@@ -812,9 +880,10 @@ const user_giftCode_get = async (req, res) => {
 const user_giftCode_verify_and_patch = async (req, res) => {
     let attempt = 0;
     while (attempt < MAX_RETRIES) {
+        let session;
         try {
             // Start a new session and begin a transaction
-            const session = await mongoose.startSession();
+            session = await mongoose.startSession();
             session.startTransaction();
 
             // Retrieve the authenticated user and gift code from the request
@@ -862,22 +931,45 @@ const user_giftCode_verify_and_patch = async (req, res) => {
                 .findOne({ userDB_id: userData._id, monthName })
                 .session(session);
 
-            // Check if user meets the required tasks:
-            //   - Today's record must exist.
-            //   - The monthly record must not exist (indicating that the claim hasn't been made yet).
-            //   - User has completed the required number of ad views and short link clicks.
-
-            if (
-                !dateRecords_1 ||
-                !userMonthlyRecord_1 ||
-                (parseFloat(other_data_viewAds.viewAds_pendingClick) -
-                    parseFloat(dateRecords_1.earningSources.view_ads.pendingClick)) < parseFloat(other_data_giftCode.viewAds_required) ||
-                (parseFloat(other_data_shortLink.shortLink_pendingClick) -
-                    parseFloat(dateRecords_1.earningSources.click_short_link.pendingClick)) < parseFloat(other_data_giftCode.shortlink_required)
-            ) {
+            // Validate that both date and monthly records exist
+            if (!dateRecords_1 || !dateRecords_1.earningSources || !userMonthlyRecord_1) {
                 return res.status(400).json({
                     success: false,
-                    error_msg: `Before claiming, you must complete today ${other_data_giftCode.viewAds_required} ad views, ${other_data_giftCode.shortlink_required} short link clicks, and ${other_data_giftCode.fillSurvey_required} survey completions.`,
+                    error_msg: `Before claiming, you must complete today ${other_data_giftCode.viewAds_required} ad views, ${other_data_giftCode.shortlink_required} short link clicks, and ${other_data_giftCode.offerWall_required} OfferWall completions.`,
+                });
+            }
+
+            // Dynamically determine which tasks are incomplete
+            const missingRequirements = [];
+            const requiredViewAds = parseFloat(other_data_giftCode.viewAds_required);
+            const requiredShortLink = parseFloat(other_data_giftCode.shortlink_required);
+            const requiredOfferWall = parseFloat(other_data_giftCode.offerWall_required);
+
+            // Directly compare user’s completed counts to the required values
+            const completedViewAds = parseFloat(dateRecords_1.earningSources.view_ads.pendingClick);
+            let completedShortLink = dateRecords_1?.earningSources?.click_short_link?.short_linkDomails_data?.reduce(
+                (total, current) => total + parseFloat(current.click_completed || 0),
+                0
+            );
+            const completedOfferWall = parseFloat(dateRecords_1.earningSources.offerWall.completed);
+
+
+            if (!dateRecords_1?.earningSources?.view_ads?.pendingClick || completedViewAds < requiredViewAds) {
+                missingRequirements.push(`${requiredViewAds} ad views`);
+            }
+
+            if (!completedShortLink || completedShortLink < requiredShortLink) {
+                missingRequirements.push(`${requiredShortLink} short link clicks`);
+            }
+
+            if (!dateRecords_1?.earningSources?.offerWall?.completed || completedOfferWall < requiredOfferWall) {
+                missingRequirements.push(`${requiredOfferWall} OfferWall completions`);
+            }
+
+            if (missingRequirements.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    error_msg: `Before claiming, you must complete today ${missingRequirements.join(', ')}.`,
                 });
             }
 
@@ -892,7 +984,8 @@ const user_giftCode_verify_and_patch = async (req, res) => {
                 });
             }
 
-            other_data_giftCode.giftCode_claimed = await parseFloat(other_data_giftCode?.giftCode_claimed) + 1;
+            // Increment the claimed count
+            other_data_giftCode.giftCode_claimed = parseFloat(other_data_giftCode.giftCode_claimed) + 1;
 
             // Increase user income by calling a helper function (which uses the session)
             const userIncomeUpdate = await userIncome_handle(session, userData, other_data_giftCode.giftCode_amount);
@@ -927,11 +1020,10 @@ const user_giftCode_verify_and_patch = async (req, res) => {
                 msg: `₹${other_data_giftCode.giftCode_amount} claimed successfully!`,
             });
         } catch (error) {
-            // Handle transaction rollback and session cleanup
-            if (session.inTransaction()) {
+            if (session && session.inTransaction()) {
                 await session.abortTransaction();
             }
-            session.endSession();
+            if (session) session.endSession();
 
             console.error("Error in updating user data:", error);
             const isWriteConflict = error.code === 112 ||
@@ -957,7 +1049,7 @@ module.exports = {
     user_shortlink_data_get,
     user_shortlink_firstPage_data_patch,
     user_shortlink_lastPage_data_patch,
-    user_survey_available_get,
+    user_offerWall_get,
     user_giftCode_get,
     user_giftCode_verify_and_patch
 }

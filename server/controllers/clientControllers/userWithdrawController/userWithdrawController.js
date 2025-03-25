@@ -3,6 +3,7 @@ const withdrawal_records_module = require('../../../model/withdraw/withdrawal_re
 const current_time_get = require('../../../helper/currentTimeUTC')
 const mongoose = require('mongoose')
 const other_data_module = require('../../../model/other_data/other_data_module')
+const { decryptData } = require('../../../helper/encrypt_decrypt_data')
 const MAX_RETRIES = parseInt(process.env.MAX_RETRIES, 10) || 3;
 
 const userBalanceData_get = async (req, res) => {
@@ -21,18 +22,19 @@ const userBalanceData_get = async (req, res) => {
             });
         }
 
+        let matchedWithdrawalMethod = other_data_withdrawalMethodArray.find(
+            (value) => value.withdrawalMethod_name === user_DB_Data.withdrawal_method
+        )
+
         let resData = {
             withdrawable_amount: user_DB_Data.withdrawable_amount,
             deposit_amount: user_DB_Data.deposit_amount,
             pending_withdrawal_amount: user_DB_Data.pending_withdrawal_amount,
             total_withdrawal_amount: user_DB_Data.total_withdrawal_amount,
             withdrawal_account_information: user_DB_Data.withdrawal_account_information,
-            withdrawal_method: user_DB_Data.withdrawal_method,
+            withdrawal_method: matchedWithdrawalMethod?.withdrawalMethod_name,
+            withdrawalMethod_minimumAmount: matchedWithdrawalMethod?.withdrawalMethod_minimumAmount,
             withdrawal_Records: user_DB_Withdrawal_Data,
-            other_data_withdrawalMethodArray,
-            minimum_amount: other_data_withdrawalMethodArray.find(
-                (value) => value.withdrawalMethod_name === user_DB_Data.withdrawal_method
-            )?.withdrawalMethod_minimumAmount || 0,
             other_data_withdrawal_instructions: other_data_withdrawal_instructions.withdrawal_instructions
         };
 
@@ -57,6 +59,7 @@ const userWithdrawal_record_post = async (req, res) => {
         session.startTransaction(); // Begin transaction
         try {
             const userDB_id = req.user._id;
+            req.body = await decryptData(req.body.obj)
             const { balance, type } = req.body;
 
             // Validate balance input
@@ -77,7 +80,7 @@ const userWithdrawal_record_post = async (req, res) => {
             }
 
             // Check if the user has sufficient balance for withdrawal
-            if (parseInt(userSignUpData.withdrawable_amount) < parseInt(balance)) {
+            if (parseFloat(userSignUpData.withdrawable_amount) < parseFloat(balance)) {
                 return res.status(400).json({
                     success: false,
                     msg: "Insufficient funds."
@@ -88,8 +91,8 @@ const userWithdrawal_record_post = async (req, res) => {
             const time = current_time_get();
 
             // Update the withdrawable amount
-            userSignUpData.withdrawable_amount = (parseInt(userSignUpData.withdrawable_amount) - parseInt(balance)).toFixed(3).toString();
-            userSignUpData.pending_withdrawal_amount = ((parseInt(userSignUpData.pending_withdrawal_amount) || 0) + parseInt(balance)).toString();
+            userSignUpData.withdrawable_amount = (parseFloat(userSignUpData.withdrawable_amount) - parseFloat(balance)).toFixed(3).toString();
+            userSignUpData.pending_withdrawal_amount = ((parseFloat(userSignUpData.pending_withdrawal_amount) || 0) + parseFloat(balance)).toString();
 
             // Save the updated user data
             await userSignUpData.save({ session });
@@ -153,7 +156,7 @@ const userBalanceConvertPatch = async (req, res) => {
                     msg: "Unauthorized: User not found.",
                 });
             }
-
+            req.body = await decryptData(req.body.obj)
             const { balanceToConvert, charge } = req.body;
             const convertAmount = parseFloat(balanceToConvert);
             const conversionCharge = parseFloat(charge);

@@ -4,7 +4,7 @@ const userIncomeController = require('../../controllers/clientControllers/userIn
 
 route.get('/user_adsView_home_get', userIncomeController.user_adsView_home_get)
 route.get('/user_shortlink_data_get', userIncomeController.user_shortlink_data_get)
-route.get('/user_survey_available_get', userIncomeController.user_survey_available_get)
+route.get('/user_offerWall_get', userIncomeController.user_offerWall_get)
 route.get('/user_giftCode_get', userIncomeController.user_giftCode_get)
 
 route.patch('/user_adsView_income_patch', userIncomeController.user_adsView_income_patch)

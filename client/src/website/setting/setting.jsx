@@ -9,6 +9,8 @@ import showNotification from '../components/showNotification';
 import formatTime from '../components/formatTime';
 import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate'
 import { Helmet } from 'react-helmet';
+import { encryptData } from '../components/encrypt_decrypt_data'
+import { FaSpinner } from 'react-icons/fa';
 
 const Setting = ({ setAvailableBalance_forNavBar_state }) => {
     // States for ChangePassword component
@@ -56,17 +58,19 @@ const Setting = ({ setAvailableBalance_forNavBar_state }) => {
     const userDataUpdate_patch = async (obj) => {
         setSubmit_process_state(true);
         try {
-            const response = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userRoute/userpassword_and_email_patch`, obj, {
+            obj = await encryptData(obj)
+            const response = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userRoute/userpassword_and_email_patch`, { obj }, {
                 withCredentials: true
             });
             fetchData()
-            showNotification(false, response?.data?.msg);
         } catch (error) {
             console.error(error);
             if (error?.response?.data?.jwtMiddleware_token_not_found_error || error?.response?.data?.jwtMiddleware_user_not_found_error) {
                 navigation('/login');
             } else if (error?.response?.data?.jwtMiddleware_error) {
                 showNotificationWith_timer(true, 'Your session has expired. Please log in again.', '/login', navigation);
+            } else if (error?.response?.data?.error_msg) {
+                showNotification(true, error?.response?.data?.error_msg)
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -111,7 +115,11 @@ const Setting = ({ setAvailableBalance_forNavBar_state }) => {
     const handleChangePassword = async (e) => {
         e.preventDefault();
         if (newPassword_state === currentPassword_state) {
-            return
+            showNotification(true, "New password must differ from the current password.");
+            return;
+        } else if (confirmPassword_state !== newPassword_state) {
+            showNotification(true, "New password and confirm password not match.");
+            return;
         }
         let obj = {
             currentPassword_state,
@@ -122,9 +130,14 @@ const Setting = ({ setAvailableBalance_forNavBar_state }) => {
 
     const handleChangeEmail = async (e) => {
         e.preventDefault();
-        if (email_address_state !== newEmail_state) {
-            return
+        if (availableEmail_state === newEmail_state) {
+            showNotification(true, "The new email is already in use. Please choose a different email.");
+            return;
+        } else if (email_address_state !== newEmail_state) {
+            showNotification(true, "new Email and confirm Email not match.");
+            return;
         }
+
         let obj = {
             email_address: newEmail_state
         }
@@ -149,7 +162,7 @@ const Setting = ({ setAvailableBalance_forNavBar_state }) => {
                         Settings
                     </div>
                     <div className="bg-white rounded-lg shadow-lg p-6">
-                        <h3 className="text-lg font-semibold text-gray-700 mb-4">Change Password</h3>
+                        <h2 className="text-xl font-bold text-gray-800 mt-6 mb-2">🔒 Change Password</h2>
                         <form onSubmit={handleChangePassword} className="bg-gray-50 p-4 rounded-lg shadow-sm">
                             <div className="mb-3">
                                 <label className="text-sm font-semibold text-gray-700">Current Password</label>
@@ -194,7 +207,7 @@ const Setting = ({ setAvailableBalance_forNavBar_state }) => {
                                 className={`w-full py-3 font-semibold text-white rounded-md transition ${!submit_process_state ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-400 cursor-not-allowed'
                                     }`}
                             >
-                                {!submit_process_state ? 'Update Password' : <i className="fa-solid fa-spinner fa-spin"></i>}
+                                {!submit_process_state ? 'Update Password' : <FaSpinner className="animate-spin text-white text-lg" />}
                             </button>
                         </form>
 
@@ -241,7 +254,7 @@ const Setting = ({ setAvailableBalance_forNavBar_state }) => {
                                 className={`w-full py-3 font-semibold text-white rounded-md transition ${!submit_process_state ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-400 cursor-not-allowed'
                                     }`}
                             >
-                                {!submit_process_state ? 'Update Email' : <i className="fa-solid fa-spinner fa-spin"></i>}
+                                {!submit_process_state ? 'Update Email' : <FaSpinner className="animate-spin text-white text-lg" />}
                             </button>
                         </form>
                     </div>

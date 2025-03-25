@@ -3,13 +3,14 @@ import { FaChevronDown } from "react-icons/fa";
 import { NavBar_global_context } from "../context/navBar_globalContext";
 
 const FAQs = () => {
-    const { navBar_global_context_state } = useContext(NavBar_global_context);
+    const { navBar_to_faq_and_homePage_section_context_state } = useContext(NavBar_global_context);
 
     const [openIndex, setOpenIndex] = useState(null);
 
     const toggleFAQ = (index) => {
         setOpenIndex(openIndex === index ? null : index);
     };
+    
     return (
         <section id="FAQs" className="mt-5 mx-2 md:p-8">
             {/* Section Title */}
@@ -20,7 +21,7 @@ const FAQs = () => {
 
             {/* FAQs Box */}
             <div className="mx-auto">
-                {Array.from(navBar_global_context_state).map((faq, index) => (
+                {navBar_to_faq_and_homePage_section_context_state && Array.from(navBar_to_faq_and_homePage_section_context_state?.faq).map((faq, index) => (
                     <div key={index} className="mb-4">
                         {/* Question Box */}
                         <button

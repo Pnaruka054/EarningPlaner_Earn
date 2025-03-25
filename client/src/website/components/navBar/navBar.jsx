@@ -12,7 +12,7 @@ const NavBar = ({ show, availableBalance_forNavBar_state, setLogOut_btnClicked }
     const [toggelMenu_state, setToggelMenu_state] = useState("reorder-three");
     let [data_process_state, setData_process_state] = useState(false);
     let [isUserLogin_state, setIsUserLogin_state] = useState(false);
-    const { setNavBar_global_context_state, setNavBar_to_privacyPolicy_dmca_termsOfUse_context_state } = useContext(NavBar_global_context);
+    const { setNavBar_global_context_state, setNavBar_to_privacyPolicy_dmca_termsOfUse_context_state, setNavBar_to_faq_and_homePage_section_context_state } = useContext(NavBar_global_context);
 
     let toggleMenu_icon = useRef(null)
     const navigation = useNavigate();
@@ -106,7 +106,10 @@ const NavBar = ({ show, availableBalance_forNavBar_state, setLogOut_btnClicked }
                 const response = await axios.get(url, { withCredentials: true });
 
                 if (location.pathname === "/") {
-                    setNavBar_global_context_state(response?.data?.msg?.other_data_faqArray);
+                    setNavBar_to_faq_and_homePage_section_context_state({
+                        faq: response?.data?.msg?.other_data_faqArray,
+                        homepage_section: response?.data?.msg?.other_data_homepage_Array
+                    });
                 } else if (location.pathname === "/payment-proof") {
                     setNavBar_global_context_state(response.data.msg.paymentProof_data);
                 } else if (location.pathname === "/privacy-policy") {

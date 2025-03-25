@@ -5,7 +5,7 @@ import Betting_games_icon from '../../assets/BettingGames.png'
 import ClickShortenLink_icon from '../../assets/ClickShortenLink.png'
 import ViewAds from '../../assets/ViewAds.png'
 import Games from '../../assets/Games.png'
-import FillSurvey from '../../assets/FillSurvey.png'
+import OfferWall from '../../assets/OfferWall.png'
 import Footer from '../components/footer/footer';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -14,6 +14,7 @@ import showNotificationWith_timer from '../components/showNotificationWith_timer
 import showNotification from '../components/showNotification'
 import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate'
 import { Helmet } from 'react-helmet';
+import { FaBullhorn } from 'react-icons/fa';
 
 const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBalance_forNavBar_state }) => {
     const [userData_state, setUserData_state] = useState([[]]);
@@ -56,6 +57,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                 const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userDataGet_dashboard`, {
                     withCredentials: true
                 });
+                localStorage.setItem("user", response?.data?.msg?.userEmail);
                 setUserData_state(response?.data?.msg);
                 setDropdownButtonValue_state(response?.data?.msg?.user_month_records[0]?.monthName)
                 setAvailableBalance_forNavBar_state(response?.data?.msg?.userAvailableBalance);
@@ -120,89 +122,41 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                             {getLogOut_btnClicked ? <FaSpinner className="animate-spin" /> : "LogOut"}
                         </button>
                     </div>
-                    <div className="grid grid-cols-2 grid-rows-2 gap-4 font-poppins mb-5 text-md sm:text-xl text-center">
-                        <Link
-                            to="/member/view-ads"
-                            className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div"
-                        >
+                    <div className="grid grid-cols-2 grid-rows-2 grid-flow-col font-poppins mb-5 text-md sm:text-xl text-center">
+                        <Link to="/member/view-ads" className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
                             <div className="font-semibold">View Ads</div>
-                            <div className="z-[1] text-lg font-bold">
-                                ₹{Array.isArray(userData_state.user_month_records) &&
-                                    userData_state.user_month_records[0]
-                                    ? userData_state?.user_month_records[0]?.earningSources?.view_ads
-                                        ?.income || "0.000"
-                                    : "0.000"}
-                            </div>
-                            <img
-                                src={ViewAds}
-                                className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image"
-                            />
+                            <div className="z-[1] text-lg font-bold">₹{Array.isArray(userData_state.user_month_records) && userData_state.user_month_records[0] ? userData_state?.user_month_records[0]?.earningSources?.view_ads?.income || '0.000' : '0.000'}</div>
+                            <img src={ViewAds} className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image" />
                         </Link>
 
-                        <Link
-                            to="/member/click-shorten-link"
-                            className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div"
-                        >
+                        <Link to="/member/click-shorten-link" className="bg-gradient-to-r p-2 from-green-500 to-green-600 text-white relative h-44 m-3 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
                             <div className="font-semibold">Click Shorten Link</div>
-                            <div className="z-[1] text-lg font-bold">
-                                ₹{Array.isArray(userData_state.user_month_records) &&
-                                    userData_state.user_month_records[0]
-                                    ? userData_state?.user_month_records[0]?.earningSources
-                                        ?.click_short_link?.income || "0.000"
-                                    : "0.000"}
-                            </div>
-                            <img
-                                src={ClickShortenLink_icon}
-                                className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image"
-                            />
+                            <div className="z-[1] text-lg font-bold">₹{Array.isArray(userData_state.user_month_records) && userData_state.user_month_records[0] ? userData_state?.user_month_records[0]?.earningSources?.click_short_link?.income || '0.000' : '0.000'}</div>
+                            <img src={ClickShortenLink_icon} className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image" />
                         </Link>
 
-                        <Link
-                            to="/member/fill-survey"
-                            className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div"
-                        >
-                            <div className="font-semibold">Fill Survey</div>
-                            <div className="z-[1] text-lg font-bold">
-                                ₹{Array.isArray(userData_state.user_month_records) &&
-                                    userData_state.user_month_records[0]
-                                    ? userData_state?.user_month_records[0]?.earningSources?.fill_survey
-                                        ?.income || "0.000"
-                                    : "0.000"}
-                            </div>
-                            <img
-                                src={FillSurvey}
-                                className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image"
-                            />
+                        <Link to="/member/offer-wall" className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
+                            <div className="font-semibold">OfferWalls</div>
+                            <div className="z-[1] text-lg font-bold">₹{Array.isArray(userData_state.user_month_records) && userData_state.user_month_records[0] ? userData_state?.user_month_records[0]?.earningSources?.offerWall?.income || '0.000' : '0.000'}</div>
+                            <img src={OfferWall} className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image" />
                         </Link>
 
-                        <Link
-                            to="/member/refer-and-earn"
-                            className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div"
-                        >
+                        <Link to="/member/refer-and-earn" className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
                             <div className="font-semibold">Referral Income</div>
-                            <div className="z-[1] text-lg font-bold">
-                                ₹{Array.isArray(userData_state.user_month_records) &&
-                                    userData_state.user_month_records[0]
-                                    ? userData_state?.user_month_records[0]?.earningSources
-                                        ?.referral_income?.income || "0.000"
-                                    : "0.000"}
-                            </div>
-                            <img
-                                src={Watch_Video_icon}
-                                className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image"
-                            />
+                            <div className="z-[1] text-lg font-bold">₹{Array.isArray(userData_state.user_month_records) && userData_state.user_month_records[0] ? userData_state?.user_month_records[0]?.earningSources?.referral_income?.income || '0.000' : '0.000'}</div>
+                            <img src={Watch_Video_icon} className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image" />
                         </Link>
                     </div>
                     <div className="w-full mt-4 bg-white border border-blue-500 rounded-lg shadow-md mb-4">
                         <div className="bg-red-800 text-white p-4 rounded-t-lg flex items-center space-x-2">
-                            <i className="fa fa-bullhorn"></i>
+                            <FaBullhorn />
                             <span>Announcements</span>
                             <span className="relative flex size-3">
                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
                                 <span className="relative inline-flex size-3 rounded-full bg-red-500"></span>
                             </span>
                         </div>
-                        <div className="p-4 space-y-4 max-h-[600px] overflow-auto hidden-scrollbar">
+                        <div className="p-4 space-y-4 overflow-auto hidden-scrollbar">
                             {userData_state?.other_data_announcementsArray?.map((item, index) => (
                                 <div key={index} className='border-b pb-2'>
                                     <span className="text-gray-500 text-sm whitespace-nowrap mb-15">

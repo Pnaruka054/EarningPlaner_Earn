@@ -3,9 +3,9 @@ import React, { useEffect, useRef, useState } from 'react';
 const WebStatistics = () => {
     const stats = [
         { icon: "👥", target: 15942, text: "Registered Users", fixed: true },
-        { icon: "🔗", target: 1446214, text: "Users Created URL" },
+        { icon: "✅", target: 1446214, text: "User Completed Tasks" }, // Updated text
         { icon: "📊", target: 63531163, text: "Visits This Month" },
-        { icon: "💰", target: 79711 * 83, text: "Total Withdrawal (₹)" }, // Dollar to INR (₹)
+        { icon: "💰", target: 79711 * 70, text: "Total Withdrawal (₹)" },
     ];
 
     const [counts, setCounts] = useState(stats.map(stat => (stat.fixed ? stat.target : 0)));
@@ -17,12 +17,18 @@ const WebStatistics = () => {
             const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/userRoute/userWebstatisticsGet`);
             if (response.ok) {
                 const data = await response.json();
-                const updatedCounts = stats.map(stat =>
-                    stat.fixed ? { ...stat, target: data.users } : stat
-                );
+                const updatedCounts = stats.map(stat => {
+                    if (stat.fixed) {
+                        return { ...stat, target: data.users };
+                    } else if (stat.text === "Total Withdrawal (₹)") {
+                        return { ...stat, target: data.totalWithdrawalAmount };
+                    }
+                    return stat;
+                });
+
                 setStats_state(updatedCounts);
             } else {
-                console.log("Unexpected response:", response);
+                console.error("Unexpected response:", response);
             }
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -55,27 +61,32 @@ const WebStatistics = () => {
     useEffect(() => {
         if (!isVisible) return;
 
-        const intervals = stats_state.map((stat, index) => {
-            let start = 0;
-            const increment = Math.ceil(stat.target / 100); // Increment speed
-            const interval = setInterval(() => {
-                start += increment;
-                if (start >= stat.target) {
-                    start = stat.target;
-                    clearInterval(interval);
-                }
-                setCounts(prevCounts => {
-                    const newCounts = [...prevCounts];
-                    newCounts[index] = start;
-                    return newCounts;
-                });
-            }, 30);
-            return interval;
-        });
+        let maxDuration = 2000; // Animation duration in ms
+        let steps = 50; // Number of steps to reach the target
+        let intervalTime = maxDuration / steps;
 
-        return () => intervals.forEach(interval => clearInterval(interval));
+        let finalCounts = stats_state.map(stat => stat.target);
+        let increments = finalCounts.map(target => Math.ceil(target / steps));
+
+        let currentCounts = Array(stats_state.length).fill(0);
+
+        let interval = setInterval(() => {
+            let updatedCounts = currentCounts.map((count, i) => {
+                let newCount = count + increments[i];
+                return newCount >= finalCounts[i] ? finalCounts[i] : newCount;
+            });
+
+            setCounts(updatedCounts);
+            currentCounts = updatedCounts;
+
+            if (updatedCounts.every((count, i) => count === finalCounts[i])) {
+                clearInterval(interval);
+            }
+        }, intervalTime);
+
+        return () => clearInterval(interval);
+
     }, [isVisible, stats_state]);
-
 
     return (
         <section ref={statsRef} className="my-5 mx-2 text-center rounded-md p-4 md:p-5 bg-white shadow-md">

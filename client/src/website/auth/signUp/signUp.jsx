@@ -1,12 +1,14 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from "axios";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Error from '../../components/error/error';
 import ProcessBgBlack from '../../components/processBgBlack/processBgBlack';
 import showNotification from '../../components/showNotification'
 import { useGoogleLogin } from "@react-oauth/google";
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Helmet } from 'react-helmet';
+import { FaSpinner, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { encryptData } from '../../components/encrypt_decrypt_data';
 
 const Signup = ({ referral_status }) => {
     const [formData_state, setFormData_state] = useState({
@@ -24,6 +26,7 @@ const Signup = ({ referral_status }) => {
     const [error_state, setError_state] = useState([]);
     let [submit_process_state, setSubmit_process_state] = useState(false);
     const [captchaValue, setCaptchaValue] = useState(null);
+    const [userAlreadyHaveAccount_state, setUserAlreadyHaveAccount_state] = useState(false);
 
     const onCaptchaChange = (value) => {
         setCaptchaValue(value);
@@ -31,13 +34,14 @@ const Signup = ({ referral_status }) => {
 
     const dataBase_post_signUp = async (obj) => {
         try {
-            let response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/userRoute/signUp`, obj);
+            obj = await encryptData(obj)
+            let response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/userRoute/signUp`, { obj });
             if (response.data.user) {
                 showNotification(false, 'user registered successfully!')
                 navigation('/login');
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             if (typeof (error?.response?.data?.error_msg) === 'object') {
                 let error_array = [];
                 for (let a of error?.response?.data?.error_msg) {
@@ -53,7 +57,7 @@ const Signup = ({ referral_status }) => {
             } else if (error?.response?.data?.error_msg) {
                 showNotification(true, error?.response?.data?.error_msg)
             } else if (error?.response?.data?.msg) {
-                showNotification(false, "Something went wrong please try again after sometime")
+                showNotification(true, "Something went wrong please try again after sometime")
             }
         } finally {
             setSubmit_process_state(false);
@@ -63,6 +67,10 @@ const Signup = ({ referral_status }) => {
     // singUp button click handle
     const handleSingUp_submit = async (e) => {
         e.preventDefault();
+        if (userAlreadyHaveAccount_state) {
+            showNotification(true, 'Multiple accounts from the same IP address are not allowed.')
+            return
+        }
         if (!captchaValue) {
             showNotification(true, 'Please verify that you are a human!')
             return;
@@ -97,7 +105,7 @@ const Signup = ({ referral_status }) => {
     const responseGoogle = async (authResult) => {
         try {
             if (authResult["code"]) {
-                let response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/user_signUp_login_google?google_code=${authResult.code}&referral_id_signup=${id}`, {
+                let response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/user_signUp_login_google?google_code=${authResult.code}${id ? `&referral_id_signup=${id}` : ""}`, {
                     withCredentials: true // This ensures cookies are sent with the request
                 });
                 if (response) {
@@ -108,14 +116,14 @@ const Signup = ({ referral_status }) => {
                 throw new Error(authResult);
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             if (error?.response?.data?.error_msg === "Missing credentials") {
                 showNotification(true, "Missing credentials");
             } else if (error?.response?.data?.error_msg === "Please Login With Password") {
                 showNotification(true, "You Already Registered Please Login With Password");
                 navigation('/login')
-            } else if (error?.response?.data?.error_msg === "Your Registration Link is invalid") {
-                showNotification(true, "Your Registration Link is invalid");
+            } else if (error?.response?.data?.error_msg) {
+                showNotification(true, error?.response?.data?.error_msg);
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -133,6 +141,14 @@ const Signup = ({ referral_status }) => {
     // sighup with google button click handle
     const handleGoogleSingUp = async (e) => {
         e.preventDefault();
+        if (!formData_state.signupTerms) {
+            showNotification(true, 'You have to check I agree checkbox for registration')
+            return
+        }
+        if (userAlreadyHaveAccount_state) {
+            showNotification(true, 'Multiple accounts from the same IP address are not allowed.')
+            return
+        }
         if (!captchaValue) {
             showNotification(true, 'Please verify that you are a human!')
             return;
@@ -140,6 +156,13 @@ const Signup = ({ referral_status }) => {
         googleLogin();
         setSubmit_process_state(true)
     };
+
+    useEffect(() => {
+        let userAlreadyRegistered = localStorage.getItem('userAlreadyRegistered')
+        if (userAlreadyRegistered) {
+            setUserAlreadyHaveAccount_state(true)
+        }
+    }, []);
 
     return (
         <>
@@ -203,7 +226,7 @@ const Signup = ({ referral_status }) => {
                                 className="absolute right-3 top-3 cursor-pointer text-gray-600"
                                 onClick={() => setShowPassword(!showPassword)}
                             >
-                                {showPassword ? <i className="fa-solid fa-eye-slash"></i> : <i className="fa-solid fa-eye"></i>}
+                                {showPassword ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
                             </span>
                         </div>
 
@@ -221,7 +244,7 @@ const Signup = ({ referral_status }) => {
                                 className="absolute right-3 top-3 cursor-pointer text-gray-600"
                                 onClick={() => setShowReenterPassword(!showReenterPassword)}
                             >
-                                {showReenterPassword ? <i className="fa-solid fa-eye-slash"></i> : <i className="fa-solid fa-eye"></i>}
+                                {showReenterPassword ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
                             </span>
                         </div>
 
@@ -234,14 +257,14 @@ const Signup = ({ referral_status }) => {
                                 onChange={handleInputChange}
                                 className='size-4 cursor-pointer'
                             />
-                            <label className='select-none cursor-pointer' htmlFor="signupTerms">I agree to the Terms of Use and Privacy Policy.</label>
+                            <label className='select-none cursor-pointer' htmlFor="signupTerms">I agree to <Link className='text-blue-500' to="/terms-of-use">the Terms of Use</Link> and <Link className='text-blue-500' to="/privacy-policy">Privacy Policy</Link>.</label>
                         </div>
                         <ReCAPTCHA
                             sitekey={import.meta.env.VITE_GOOGLE_RECAPTCHA_SITEKEY}
                             onChange={onCaptchaChange}
                         />
                         <button type="submit" disabled={submit_process_state} className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"} w-full text-white rounded-lg py-2 mt-3 font-medium transition`}>
-                            {!submit_process_state ? "Sign Up" : <i className="fa-solid fa-spinner fa-spin"></i>}
+                            {!submit_process_state ? "Sign Up" : <FaSpinner className="animate-spin text-white text-lg" />}
                         </button>
                     </form>
 

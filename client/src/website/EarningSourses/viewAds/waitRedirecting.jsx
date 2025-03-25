@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import axios from 'axios'
 import ProcessBgBlack from '../../components/processBgBlack/processBgBlack';
+import { AlertTriangle } from "lucide-react";
 
 const WaitRedirecting = () => {
     const [redirectLink, setRedirectLink] = useState('');
@@ -9,15 +10,15 @@ const WaitRedirecting = () => {
     const [isAbort_state, setIsAbort_state] = useState(false);
     const [adBlockDetected_state, setAdBlockDetected_state] = useState(false);
     const channel = new BroadcastChannel("viewAds_channel");
-    const [data_process_state, setData_process_state] = useState(false);
     const [vpn_detected_state, setVpn_detected_state] = useState(false);
+    const [data_process_state, setData_process_state] = useState(false);
 
     // Process query params and broadcast channel events
     useEffect(() => {
         const vpnChecker = async () => {
             setData_process_state(true)
             try {
-                let response = await axios.get("https://bitcotasks.com/promote/44879")
+                let response = await axios.get("https://bitcotasks.com/promote/41234")
                 if (response.data.trim() === "Proxy Detected!") {
                     setVpn_detected_state(true)
                 }
@@ -28,6 +29,7 @@ const WaitRedirecting = () => {
             }
         }
         vpnChecker()
+
         const queryParams = new URLSearchParams(window.location.search);
         const link = queryParams.get('link');
         if (link) {
@@ -41,8 +43,10 @@ const WaitRedirecting = () => {
 
         function handle_userStayOrNot() {
             let isExist = sessionStorage.getItem("isStay");
-            if (!isExist) {
+            let idExist1 = sessionStorage.getItem('isStayOnPage')
+            if (!isExist && !idExist1) {
                 channel.postMessage("isAbortFromWaitingPage");
+                sessionStorage.setItem("isStayOnPage", "true");
             }
         }
 
@@ -73,9 +77,6 @@ const WaitRedirecting = () => {
             // If script loads successfully
             script.onload = () => {
                 loadedScripts++;
-                if (loadedScripts === scripts.length) {
-                    console.log("All ad scripts loaded successfully");
-                }
             };
 
             // If script fails to load (likely blocked by an ad blocker)
@@ -91,6 +92,32 @@ const WaitRedirecting = () => {
             scriptElements.forEach(script => {
                 document.body.removeChild(script);
             });
+        };
+    }, []);
+    // Load external ad scripts for hilltop ads.
+    useEffect(() => {
+        const scriptContainer = document.getElementById("script-container");
+
+        // Pehli Script
+        const script1 = document.createElement("script");
+        script1.src = "\/\/shady-ride.com\/bNXOVXs.doGwlj0aY\/WvdtiLYdWw5kunZ\/XrII\/ZeEmJ9\/urZFULlJkyPSTQYpxeNyzGcMxhMhDng-t\/Nej\/EU3JNkz\/ElwjOfQT";
+        script1.async = true;
+        script1.referrerPolicy = "no-referrer-when-downgrade";
+
+        // Dusri Script
+        const script2 = document.createElement("script");
+        script2.src = "\/\/bechipivy.com\/c\/D\/9s6lb.2Z5\/l\/SQW-Qo9GNSjAEC3\/NqzsEUyuMaCQ0Y2jMeT\/c_3xMqTCIfxx";
+        script2.async = true;
+        script2.referrerPolicy = "no-referrer-when-downgrade";
+
+        // Scripts ko add karna
+        scriptContainer.appendChild(script1);
+        scriptContainer.appendChild(script2);
+
+        return () => {
+            // Cleanup: Scripts remove karna
+            scriptContainer.removeChild(script1);
+            scriptContainer.removeChild(script2);
         };
     }, []);
 
@@ -123,11 +150,12 @@ const WaitRedirecting = () => {
                 <Helmet>
                     <title>Ad Blocker Detected</title>
                 </Helmet>
-                <div className="flex items-center justify-center min-h-screen bg-red-50">
-                    <div className="bg-white p-8 rounded-xl shadow-lg w-96">
-                        <h2 className="text-3xl font-semibold text-center text-red-600 mb-4">Ad Blocker Detected</h2>
-                        <p className="text-xl text-center text-gray-700 mb-4">
-                            It appears that you are using an ad blocker. Please disable your ad blocker to continue using our service.
+                <div className="flex items-center justify-center min-h-screen px-4">
+                    <div className="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full text-center">
+                        <AlertTriangle className="text-red-600 w-12 h-12 mx-auto mb-4" />
+                        <h2 className="text-2xl font-semibold text-red-600 mb-2">Ad Blocker Detected</h2>
+                        <p className="text-lg text-gray-700">
+                            It appears that you are using an ad blocker. Please disable your ad blocker to continue your earnings.
                         </p>
                     </div>
                 </div>
@@ -139,13 +167,14 @@ const WaitRedirecting = () => {
         return (
             <>
                 <Helmet>
-                    <title>VPN Detected</title>
+                    <title>Proxy Detected</title>
                 </Helmet>
-                <div className="flex items-center justify-center min-h-screen">
-                    <div className="bg-white p-8 rounded-xl shadow-lg w-96 text-center">
-                        <h2 className="text-3xl font-semibold text-red-600 mb-4">VPN Detected</h2>
-                        <p className="text-xl text-gray-700 mb-4">
-                            We have detected that you are using a VPN. Please disable your VPN to continue using our service.
+                <div className="flex items-center justify-center min-h-screen px-4">
+                    <div className="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full text-center">
+                        <AlertTriangle className="text-red-600 w-12 h-12 mx-auto mb-4" />
+                        <h2 className="text-2xl font-semibold text-red-600 mb-2">Proxy Detected</h2>
+                        <p className="text-lg text-gray-700">
+                            We have detected that you are using a Proxy. Please disable your Proxy to continue your earnings.
                         </p>
                     </div>
                 </div>
@@ -159,8 +188,9 @@ const WaitRedirecting = () => {
             <Helmet>
                 <title>EarnWiz Verifying Click</title>
             </Helmet>
-            <div className="flex items-center justify-center min-h-screen bg-blue-50">
-                <div className="bg-white p-8 rounded-xl shadow-lg w-96">
+            <div className="flex flex-col items-center justify-center overflow-auto custom-scrollbar min-h-screen bg-blue-50">
+                <div className='mb-5' id="script-container"></div>
+                <div className="bg-white p-8 rounded-xl shadow-lg w-full sm:w-96">
                     <h2 className="text-3xl font-semibold text-center text-blue-600 mb-4">Please Wait...</h2>
                     <p className="text-xl text-center text-gray-700 mb-4">We are processing</p>
                     <div className="mt-4 text-center">
@@ -177,7 +207,7 @@ const WaitRedirecting = () => {
                                     }`}
                                 onClick={handleRedirect}
                             >
-                                Click here to continue
+                                Claim Bonus
                             </button>
                         )}
                         <p className="text-sm text-gray-500 mt-4">
@@ -188,8 +218,8 @@ const WaitRedirecting = () => {
                         </p>
                     </div>
                 </div>
-                {data_process_state && <ProcessBgBlack />}
             </div>
+            {data_process_state && <ProcessBgBlack />}
         </>
     );
 };

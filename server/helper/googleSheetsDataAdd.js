@@ -36,7 +36,7 @@ const checkEmailOrMobileExists = async (client, email, mobile) => {
   } catch (error) {
     throw new Error("Error fetching data from Google Sheets: " + error.message);
   }
-};
+}; 
 
 // Centralized function to add data to Google Sheets
 const googleSheetsDataAdd = async (name, email, mobile) => {

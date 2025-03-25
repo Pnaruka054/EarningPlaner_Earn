@@ -5,9 +5,8 @@ const other_data_schema = new mongoose.Schema({
     viewAds_pendingClick: { type: String },
     viewAds_pendingUpdates: { type: String },
     viewAds_instructions: { type: Array, default: undefined },
-    shortLink_pendingClick: { type: String },
-    shortLink_pendingUpdates: { type: String },
     shortLink_instructions: { type: Array, default: undefined },
+    offerWall_instructions: { type: Array, default: undefined },
     referralRate: { type: String },
     referralPageText: { type: String },
     announcementTitle: { type: String },
@@ -28,9 +27,10 @@ const other_data_schema = new mongoose.Schema({
     giftCode_claimed: { type: String },
     viewAds_required: { type: String },
     shortlink_required: { type: String },
-    fillSurvey_required: { type: String },
+    offerWall_required: { type: String },
     giftCode_page_Message: { type: String },
-    extension_Message: { type: String },
+    homepageSection_title: { type: String },
+    homepageSection_message: { type: String },
 })
 
 const other_data_module = mongoose.model("other_data", other_data_schema)

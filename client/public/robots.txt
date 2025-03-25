@@ -1,2 +1,9 @@
 User-agent: *
-Disallow:
+Disallow: /member/
+Disallow: /waitRedirecting
+Disallow: /email-verification
+Disallow: /waitRedirecting1
+
+Allow: /
+
+Disallow: /*.earnwiz.in/

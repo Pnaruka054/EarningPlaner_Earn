@@ -13,7 +13,7 @@ const monthSchema = new mongoose.Schema({
         referral_income: {
             income: { type: String },
         },
-        fill_survey: {
+        offerWall: {
             income: { type: String },
         },
     },

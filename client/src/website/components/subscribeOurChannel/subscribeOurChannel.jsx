@@ -70,9 +70,9 @@ const SubscribeOurChannel = () => {
                     {/* Channel Description */}
                     <div className="flex-1">
                         <h5 className="text-lg font-semibold text-gray-700">Description:</h5>
-                        <p className="mt-2 text-gray-600 text-base leading-relaxed bg-gray-100 p-4 rounded-md shadow-inner">
+                        <pre className="mt-2 text-gray-600 text-base leading-relaxed bg-gray-100 p-4 rounded-md shadow-inner whitespace-pre-wrap">
                             {channelData.snippet.description}
-                        </p>
+                        </pre>
                     </div>
                 </div>
             )}

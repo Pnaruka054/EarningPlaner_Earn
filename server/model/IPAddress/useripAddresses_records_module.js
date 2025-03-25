@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const ipAddressRecordSchema = new mongoose.Schema({
-  userDB_id: { type: String, required: true },
+  userDB_id: { type: String },
   buttonNames: { type: Array, default: undefined },
   status: { type: Boolean },
   processCount: { type: Number },

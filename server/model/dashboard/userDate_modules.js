@@ -14,13 +14,19 @@ const userDateSchema = new mongoose.Schema({
         },
         click_short_link: {
             income: { type: String },
-            pendingClick: { type: String },
+            short_linkDomails_data: [
+                {
+                    domainName: { type: String },
+                    click_completed: { type: String },
+                }
+            ]
         },
         referral_income: {
             income: { type: String },
         },
-        fill_survey: {
+        offerWall: {
             income: { type: String },
+            completed: { type: String },
         },
     },
     createdAt: { type: Date, default: Date.now, expires: '1y' }

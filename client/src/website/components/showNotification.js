@@ -7,7 +7,7 @@ const showNotification = (isError, message, autoClose = false) => {
         icon: isError ? 'error' : 'success',
         title: message,
         showConfirmButton: false,
-        timer: autoClose ? null : 3000 
+        timer: autoClose ? 10000 : 3000 
     });
 };
 

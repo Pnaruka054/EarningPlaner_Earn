@@ -6,6 +6,8 @@ import showNotificationWith_timer from '../components/showNotificationWith_timer
 import showNotification from '../components/showNotification';
 import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate'
 import { Helmet } from 'react-helmet';
+import { FaSpinner } from 'react-icons/fa';
+import { encryptData } from '../components/encrypt_decrypt_data';
 
 const Profile = ({ setAvailableBalance_forNavBar_state }) => {
     const [formData_state, setFormData_state] = useState({
@@ -48,7 +50,8 @@ const Profile = ({ setAvailableBalance_forNavBar_state }) => {
     }, []);
     let dataBase_patch_userData = async (obj) => {
         try {
-            await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userRoute/userProfileData_patch`, obj, {
+            obj = await encryptData(obj)
+            await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userRoute/userProfileData_patch`, { obj }, {
                 withCredentials: true
             });
             showNotification(false, "Profile Updated Successfully!");
@@ -262,7 +265,7 @@ const Profile = ({ setAvailableBalance_forNavBar_state }) => {
                         ></textarea>
                     </div>
                     <button type="submit" disabled={submit_process_state} className={`${submit_process_state ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"} w-full py-3 mt-4 text-white rounded mb-2 transition`}>
-                        {!submit_process_state ? "Submit" : <i className="fa-solid fa-spinner fa-spin"></i>}
+                        {!submit_process_state ? "Submit" : <FaSpinner className="animate-spin text-white text-lg" />}
                     </button>
                 </form >
                 {submit_process_state && <ProcessBgBlack />}

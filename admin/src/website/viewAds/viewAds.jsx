@@ -210,8 +210,6 @@ const ViewAds = () => {
                 { withCredentials: true }
             );
 
-            console.log(response);
-
             if (response?.data?.msg) {
                 const { buttonTitle, amount, url, _id, isExtension, adNetworkName } = response.data.msg;
                 setDirectLinkData_state([

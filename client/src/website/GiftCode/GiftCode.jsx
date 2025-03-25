@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Footer from '../components/footer/footer';
-import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
+import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate';
 import showNotification from '../components/showNotification'
 
 const GiftCode = ({ setAvailableBalance_forNavBar_state }) => {
@@ -66,6 +66,14 @@ const GiftCode = ({ setAvailableBalance_forNavBar_state }) => {
         }
     };
 
+    if (data_process_state) {
+        return (
+            <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] mt-12">
+                <ProcessBgSeprate />
+            </div>
+        );
+    }
+
     return (
         <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] custom-scrollbar mt-12">
             <div className='bg-[#ecf0f5] flex flex-col items-center'>
@@ -73,7 +81,7 @@ const GiftCode = ({ setAvailableBalance_forNavBar_state }) => {
                 <div className="w-full bg-gradient-to-r from-blue-100 to-blue-200 py-8 px-4 text-center" dangerouslySetInnerHTML={{ __html: giftCode_page_Message_state }} />
 
                 {/* Input and Claim Bonus Section */}
-                <div className="w-full max-w-md mt-8">
+                <div className="w-full max-w-md mt-8 p-3">
                     <input
                         type="text"
                         value={giftCode_state}
@@ -93,7 +101,7 @@ const GiftCode = ({ setAvailableBalance_forNavBar_state }) => {
                 <div className="w-full max-w-md mt-8 border-t border-gray-300"></div>
 
                 {/* Claim History Section */}
-                <div className="w-full max-w-md mt-8">
+                <div className="w-full max-w-md mt-8 p-3">
                     <h2 className="text-xl sm:text-2xl font-bold text-blue-700 mb-4 text-center">
                         Claim History
                     </h2>
@@ -130,7 +138,6 @@ const GiftCode = ({ setAvailableBalance_forNavBar_state }) => {
             <div className='pt-5'>
                 <Footer />
             </div>
-            {data_process_state && <ProcessBgBlack />}
         </div>
     );
 };

@@ -5,6 +5,7 @@ import ProcessBgBlack from "../components/processBgBlack/processBgBlack";
 import showNotificationWith_timer from '../components/showNotificationWith_timer'
 import showNotification from '../components/showNotification'
 import { Helmet } from 'react-helmet';
+import { encryptData } from '../components/encrypt_decrypt_data'
 
 const PasswordResetForm = () => {
     const [password_state, setPassword_state] = useState("");
@@ -55,6 +56,10 @@ const PasswordResetForm = () => {
         }
 
         try {
+            let obj = await encryptData({
+                password: password_state,
+                token
+            })
             const response = await fetch(
                 `${import.meta.env.VITE_SERVER_URL}/userRoute/reset_password_form_post`,
                 {
@@ -62,10 +67,7 @@ const PasswordResetForm = () => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({
-                        password: password_state,
-                        token
-                    }),
+                    body: JSON.stringify({ obj }),
                 }
             );
 

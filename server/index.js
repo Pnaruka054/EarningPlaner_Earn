@@ -16,42 +16,49 @@ const postBack = require('./routes/postBack')
 const checkLogin_for_navBar = require('./routes/checkLogin_for_navBar')
 const { cronForDaily_midNight_update } = require('./helper/cronJobs')
 const adminRoutes = require('./routes/adminRoutes/adminRoutes')
+const bodyParser = require('body-parser');
+const { userDateIncome } = require('./helper/socketIo_realTime_db_monitor');
 
-const io = socketIo(server, {
-    cors: {
-        origin: 'https://earningplaner-earn.onrender.com/login', // Allow your frontend URL here
-        methods: ['GET', 'POST'],
-        credentials: true, // Allow cookies if needed
-    }
-});
 const allowedOrigins = [
-    'https://earningplaner-earn.onrender.com',
-    'https://earningplaner-earn-admin.onrender.com',
     'http://localhost:5173',
-    'http://192.168.1.2:5173',
     'http://localhost:5174'
 ];
-app.set('trust proxy', true);
+
 const corsOptions = {
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);  // Allow request
+        // Regular expression jo "earnwiz.in" aur uske subdomains ko match karega.
+        const earnwizRegex = /^https?:\/\/([a-z0-9-]+\.)*earnwiz\.in$/i;
+
+        if (allowedOrigins.includes(origin) || earnwizRegex.test(origin)) {
+            callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));  // Block request
+            callback(new Error('Not allowed by CORS'));
         }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    credentials: true,  // Allow credentials (cookies, authorization headers, etc.)
+    credentials: true,
 };
 
+app.set('trust proxy', true);
 
 // middlewares
+app.use((req, res, next) => {
+    if (req.path.startsWith('/postBack')) {
+        next(); // Bypass CORS middleware
+    } else {
+        cors(corsOptions)(req, res, next); // Apply CORS middleware
+    }
+});
+const io = socketIo(server, {
+    cors: corsOptions
+});
 app.use((req, res, next) => {
     req.io = io;
     next();
 });
 app.use(cookieParser());
-app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Database connection
 async function Database_connection() {
@@ -66,7 +73,6 @@ Database_connection();
 
 
 // Global Middleware Setup
-app.use(cors(corsOptions)); // CORS ko ek hi jagah set karo
 app.use(middleware.middleware_userLogin_check); // Global login check middleware
 
 // Routes
@@ -80,6 +86,10 @@ app.use('/admin', middleware.adminCheck_middleware, adminRoutes);
 
 // cron jobs
 cronForDaily_midNight_update()
+
+// handle socket io
+io.use(middleware.socketAuthMiddleware)
+userDateIncome(io)
 
 // Server listen
 const PORT = process.env.PORT || 3000;
