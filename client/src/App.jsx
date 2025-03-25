@@ -10,7 +10,6 @@ import SignUp from './website/auth/signUp/signUp';
 import DashBoard from './website/dashBoard/dashBoard';
 import PopUp from './website/components/popUp/popUp';
 import Withdraw from './website/withdraw/withdraw';
-import BottomAlert from './website/components/bottomAlert/bottomAlert';
 import ReferEarn from './website/ReferEarn/ReferEarn';
 import Profile from './website/profile/profile';
 import Setting from './website/setting/setting';
@@ -58,6 +57,7 @@ const App = () => {
   const [showPopUp_onLogOut_btn_state, setShowPopUp_onLogOut_btn_state] = useState(false);
   const [isOffline_state, setIsOffline_state] = useState(navigator.onLine ? false : true);
   const [availableBalance_forNavBar_state, setAvailableBalance_forNavBar_state] = useState(0.000);
+  const [appDownloadBtn_state, setAppDownloadBtn_state] = useState(false);
   const location = useLocation();
   const networkStatusRef = useRef(null);
 
@@ -136,12 +136,26 @@ const App = () => {
     ) {
       setshow_Full_navBar_state(true);
     }
+
+
+    if (
+      location.pathname === '/' ||
+      location.pathname === '/payment-proof' ||
+      location.pathname.includes('/terms-of-use') ||
+      location.pathname.includes('/privacy-policy') ||
+      location.pathname.includes('/dmca') ||
+      location.pathname === '/member/dashboard'
+    ) {
+      setAppDownloadBtn_state(true)
+    } else {
+      setAppDownloadBtn_state(false)
+    }
   }, [location.pathname]);
 
   return (
     <NavBar_global_contextProvider>
       {
-        createPortal(
+        appDownloadBtn_state && createPortal(
           <AppInstallButton />,
           document.getElementById('appInstall')
         )
