@@ -33,6 +33,7 @@ import PaymentProof from './website/paymentProof/paymentProof';
 import GiftCode from './website/GiftCode/GiftCode';
 import OfferWall from './website/EarningSourses/OfferWall/OfferWall';
 import ViewOfferWall from './website/EarningSourses/OfferWall/viewOfferWall';
+import AppInstallButton from './website/components/appInstallButton/appInstallButton';
 
 const pageVariants = {
   initial: {
@@ -55,7 +56,6 @@ const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
   const [show_Full_navBar_state, setshow_Full_navBar_state] = useState(false);
   const [showPopUp_onLogOut_btn_state, setShowPopUp_onLogOut_btn_state] = useState(false);
-  const [showBottomAlert_state, setShowBottomAlert_state] = useState(false);
   const [isOffline_state, setIsOffline_state] = useState(navigator.onLine ? false : true);
   const [availableBalance_forNavBar_state, setAvailableBalance_forNavBar_state] = useState(0.000);
   const location = useLocation();
@@ -138,70 +138,33 @@ const App = () => {
     }
   }, [location.pathname]);
 
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [showInstallButton, setShowInstallButton] = useState(false);
-
-  useEffect(() => {
-    const handler = (e) => {
-      // Prevent the default mini-infobar from appearing on mobile
-      e.preventDefault();
-      // Save the event for later use
-      setDeferredPrompt(e);
-      // Ab aap custom install button dikhayein
-      setShowInstallButton(true);
-      console.log('Install prompt available');
-    };
-
-    window.addEventListener('beforeinstallprompt', handler);
-
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    // Show the prompt
-    deferredPrompt.prompt();
-    // Wait for the user's response
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`User response: ${outcome}`);
-    // Hide the install button
-    setShowInstallButton(false);
-    // Optionally, reset the deferred prompt variable if you want to allow prompt again later
-    setDeferredPrompt(null);
-  };
-
   return (
     <NavBar_global_contextProvider>
-      {showInstallButton && (
-        <button onClick={handleInstallClick}>
-          Install App
-        </button>
-      )}
-      { 
+      {
+        createPortal(
+          <AppInstallButton />,
+          document.getElementById('appInstall')
+        )
+      }
+      {
         !show_Full_navBar_state && createPortal(
-          <NavBar 
-            show={show_navBar_state} 
-            availableBalance_forNavBar_state={availableBalance_forNavBar_state} 
-            setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state} 
+          <NavBar
+            show={show_navBar_state}
+            availableBalance_forNavBar_state={availableBalance_forNavBar_state}
+            setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state}
           />,
           document.getElementById('navBar')
         )
       }
-      { 
+      {
         showPopUp_onLogOut_btn_state && createPortal(
-          <PopUp 
-            setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state} 
-            heading="Are you sure you want to log out?" 
-            btn1_text="Confirm" 
-            btn2_text="Close" 
+          <PopUp
+            setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state}
+            heading="Are you sure you want to log out?"
+            btn1_text="Confirm"
+            btn2_text="Close"
           />,
           document.getElementById('LoginConfirm_popup')
-        )
-      }
-      { 
-        showBottomAlert_state && createPortal(
-          <BottomAlert text={'Text copied to clipboard!'} />,
-          document.getElementById('showBottomAlert')
         )
       }
 
@@ -209,8 +172,8 @@ const App = () => {
       <div className="relative">
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
-            <Route 
-              path="/" 
+            <Route
+              path="/"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -222,10 +185,10 @@ const App = () => {
                 >
                   <Home />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/payment-proof" 
+            <Route
+              path="/payment-proof"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -237,10 +200,10 @@ const App = () => {
                 >
                   <PaymentProof />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/contact-us" 
+            <Route
+              path="/contact-us"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -252,10 +215,10 @@ const App = () => {
                 >
                   <ContactUs forMember={false} />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/member/support" 
+            <Route
+              path="/member/support"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -267,10 +230,10 @@ const App = () => {
                 >
                   <ContactUs setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} forMember={true} />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/login" 
+            <Route
+              path="/login"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -282,10 +245,10 @@ const App = () => {
                 >
                   <Login />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/password-reset-form/:token" 
+            <Route
+              path="/password-reset-form/:token"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -297,10 +260,10 @@ const App = () => {
                 >
                   <PasswordResetForm />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/signup" 
+            <Route
+              path="/signup"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -312,10 +275,10 @@ const App = () => {
                 >
                   <SignUp />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/signup/ref/:id" 
+            <Route
+              path="/signup/ref/:id"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -327,10 +290,10 @@ const App = () => {
                 >
                   <SignUp referral_status="true" />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/member/dashboard" 
+            <Route
+              path="/member/dashboard"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -340,16 +303,16 @@ const App = () => {
                   variants={pageVariants}
                   transition={pageTransition}
                 >
-                  <DashBoard 
-                    setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} 
-                    getLogOut_btnClicked={showPopUp_onLogOut_btn_state} 
-                    setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state} 
+                  <DashBoard
+                    setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state}
+                    getLogOut_btnClicked={showPopUp_onLogOut_btn_state}
+                    setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state}
                   />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/member/withdraw" 
+            <Route
+              path="/member/withdraw"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -359,15 +322,14 @@ const App = () => {
                   variants={pageVariants}
                   transition={pageTransition}
                 >
-                  <Withdraw 
-                    setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} 
-                    setShowBottomAlert_state={setShowBottomAlert_state} 
+                  <Withdraw
+                    setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state}
                   />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/member/refer-and-earn" 
+            <Route
+              path="/member/refer-and-earn"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -379,10 +341,10 @@ const App = () => {
                 >
                   <ReferEarn setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/member/settings" 
+            <Route
+              path="/member/settings"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -394,10 +356,10 @@ const App = () => {
                 >
                   <Setting setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/email-verification/:token/:email" 
+            <Route
+              path="/email-verification/:token/:email"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -409,10 +371,10 @@ const App = () => {
                 >
                   <EmailVerification />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/member/profile" 
+            <Route
+              path="/member/profile"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -424,10 +386,10 @@ const App = () => {
                 >
                   <Profile setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/privacy-policy" 
+            <Route
+              path="/privacy-policy"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -439,10 +401,10 @@ const App = () => {
                 >
                   <PrivacyPolicy />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/terms-of-use" 
+            <Route
+              path="/terms-of-use"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -454,10 +416,10 @@ const App = () => {
                 >
                   <Terms_of_Use />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/dmca" 
+            <Route
+              path="/dmca"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -469,10 +431,10 @@ const App = () => {
                 >
                   <DMCA />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/member/view-ads" 
+            <Route
+              path="/member/view-ads"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -484,10 +446,10 @@ const App = () => {
                 >
                   <ViewAds setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/waitRedirecting" 
+            <Route
+              path="/waitRedirecting"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -499,10 +461,10 @@ const App = () => {
                 >
                   <WaitRedirecting />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/waitRedirecting1" 
+            <Route
+              path="/waitRedirecting1"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -514,10 +476,10 @@ const App = () => {
                 >
                   <WaitRedirecting1 />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/member/click-shorten-link" 
+            <Route
+              path="/member/click-shorten-link"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -529,10 +491,10 @@ const App = () => {
                 >
                   <ClickShortedLink setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/member/last-page/:uniqueToken" 
+            <Route
+              path="/member/last-page/:uniqueToken"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -544,10 +506,10 @@ const App = () => {
                 >
                   <LastPage />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/member/offer-wall" 
+            <Route
+              path="/member/offer-wall"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -559,10 +521,10 @@ const App = () => {
                 >
                   <OfferWall setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/member/offer-wall/:encodedUrl" 
+            <Route
+              path="/member/offer-wall/:encodedUrl"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -574,10 +536,10 @@ const App = () => {
                 >
                   <ViewOfferWall setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/member/gift-code" 
+            <Route
+              path="/member/gift-code"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -589,10 +551,10 @@ const App = () => {
                 >
                   <GiftCode setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/*" 
+            <Route
+              path="/*"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -604,10 +566,10 @@ const App = () => {
                 >
                   <PageNotFound setshow_NavBar_state={setshow_NavBar_state} />
                 </motion.div>
-              } 
+              }
             />
-            <Route 
-              path="/extension/uninstalled" 
+            <Route
+              path="/extension/uninstalled"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -619,7 +581,7 @@ const App = () => {
                 >
                   <ExtensionUninstalled setshow_NavBar_state={setshow_NavBar_state} />
                 </motion.div>
-              } 
+              }
             />
           </Routes>
         </AnimatePresence>
