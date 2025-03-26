@@ -139,6 +139,15 @@ const NavBar = ({ show, availableBalance_forNavBar_state, setLogOut_btnClicked }
 
         if (show) {
             fetchData();
+            const handle_userOnline = () => {
+                fetchData();
+            };
+
+            window.addEventListener('online', handle_userOnline);
+
+            return () => {
+                window.removeEventListener('online', handle_userOnline);
+            };
         }
     }, [show, location]);
 
