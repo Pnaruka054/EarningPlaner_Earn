@@ -34,6 +34,7 @@ import OfferWall from './website/EarningSourses/OfferWall/OfferWall';
 import ViewOfferWall from './website/EarningSourses/OfferWall/viewOfferWall';
 import AppInstallButton from './website/components/appInstallButton/appInstallButton';
 import UserNetworkStatusCheck from './website/components/userNetworkStatus_check';
+import useExternalLinkHandler from './website/components/useExternalLinkHandler'
 
 const pageVariants = {
   initial: {
@@ -59,6 +60,7 @@ const App = () => {
   const [availableBalance_forNavBar_state, setAvailableBalance_forNavBar_state] = useState(0.000);
   const [appDownloadBtn_state, setAppDownloadBtn_state] = useState(false);
   const location = useLocation();
+  useExternalLinkHandler()
 
   useLayoutEffect(() => {
     if (
