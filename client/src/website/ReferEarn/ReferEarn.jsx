@@ -56,87 +56,86 @@ const ReferEarn = ({ setAvailableBalance_forNavBar_state }) => {
 
     const referralLink = `${window.location.origin}/signup/ref/${referralRecords_state.userName}`;
 
-    if (data_process_state) {
-        return (
-            <div className="ml-auto flex flex-col justify-between  bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] mt-12">
-                <ProcessBgSeprate />
-            </div>
-        )
-    }
     return (
         <>
             <Helmet>
                 <title>EarnWiz Refer & Earn</title>
                 <meta name="description" content="Invite friends and earn rewards with EarnWiz's Refer & Earn program. Boost your earnings by sharing our platform and benefiting from referrals." />
             </Helmet>
-            <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] mt-12 custom-scrollbar">
-                <div className='p-2'>
-                    <div className="text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between">
-                        My Referrals
-                    </div>
-
-                    <div className="mt-6">
-                        <div className="bg-blue-100 p-4 rounded mb-4">
-                            <i className="fa fa-bullhorn"></i> Referral Earnings increased by {parseFloat(referralRecords_state?.other_data_referralRate?.referralRate) * 100}%
+            {data_process_state ? (
+                <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] mt-[6.7dvh]">
+                    <ProcessBgSeprate />
+                </div>
+            ) : (
+                <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] mt-[6.7dvh] custom-scrollbar">
+                    <div className='p-2'>
+                        <div className="text-2xl text-blue-600 font-semibold my-4 mx-2 select-none flex justify-between">
+                            My Referrals
                         </div>
-                    </div>
 
-                    <div className="bg-white p-4 rounded shadow">
-                        <div dangerouslySetInnerHTML={{ __html: referralRecords_state?.other_data_referralRate?.referralPageText }} className="text-gray-800 mb-4">
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <div className='overflow-auto bg-gray-100 p-2'>
-                                <pre className="rounded-md text-gray-800 font-bold">{referralLink}</pre>
+                        <div className="mt-6">
+                            <div className="bg-blue-100 p-4 rounded mb-4">
+                                <i className="fa fa-bullhorn"></i> Referral Earnings increased by {parseFloat(referralRecords_state?.other_data_referralRate?.referralRate) * 100}%
                             </div>
-                            <button
-                                className="btn btn-outline-primary text-sm bg-blue-500 hover:bg-blue-600 text-white rounded p-2 flex items-center"
-                                onClick={copyToClipboard}
-                            >
-                                {copied_state ? <FaClipboardCheck size={18} /> : <FaClipboard size={18} />}
-                            </button>
                         </div>
-                    </div>
 
-                    <div className="mt-6">
-                        <div className="overflow-x-auto rounded-lg shadow bg-white">
-                            {referralRecords_state.lenght === 0 || referralRecords_state.referral_data?.length === 0 ? (
-                                <div className="text-center py-6 text-gray-500 font-medium h-[294px] flex justify-center items-center">
-                                    📉 No referrals found
+                        <div className="bg-white p-4 rounded shadow">
+                            <div dangerouslySetInnerHTML={{ __html: referralRecords_state?.other_data_referralRate?.referralPageText }} className="text-gray-800 mb-4">
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <div className='overflow-auto bg-gray-100 p-2'>
+                                    <pre className="rounded-md text-gray-800 font-bold">{referralLink}</pre>
                                 </div>
-                            ) : (
-                                <table className="min-w-full table-auto border-collapse text-left">
-                                    <thead>
-                                        <tr className="text-gray-700 bg-gray-100">
-                                            <th className="px-4 py-3 border-l border-t border-b">Username</th>
-                                            <th className="px-4 py-3 border-t border-b">Income</th>
-                                            <th className="px-4 py-3 border-t border-b">Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {currentReferrals?.map((referral, index) => (
-                                            <tr key={index} className="border-b">
-                                                <td className="px-4 py-3 border-l">{referral.userName}</td>
-                                                <td className="px-4 py-3 text-green-600 font-medium">
-                                                    ₹{referral.income || '0.000'}
-                                                </td>
-                                                <td className="px-4 py-3">{referral.date}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
+                                <button
+                                    className="btn btn-outline-primary text-sm bg-blue-500 hover:bg-blue-600 text-white rounded p-2 flex items-center"
+                                    onClick={copyToClipboard}
+                                >
+                                    {copied_state ? <FaClipboardCheck size={18} /> : <FaClipboard size={18} />}
+                                </button>
+                            </div>
                         </div>
+
+                        <div className="mt-6">
+                            <div className="overflow-x-auto rounded-lg shadow bg-white">
+                                {referralRecords_state.lenght === 0 || referralRecords_state.referral_data?.length === 0 ? (
+                                    <div className="text-center py-6 text-gray-500 font-medium h-[294px] flex justify-center items-center">
+                                        📉 No referrals found
+                                    </div>
+                                ) : (
+                                    <table className="min-w-full table-auto border-collapse text-left">
+                                        <thead>
+                                            <tr className="text-gray-700 bg-gray-100">
+                                                <th className="px-4 py-3 border-l border-t border-b">Username</th>
+                                                <th className="px-4 py-3 border-t border-b">Income</th>
+                                                <th className="px-4 py-3 border-t border-b">Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {currentReferrals?.map((referral, index) => (
+                                                <tr key={index} className="border-b">
+                                                    <td className="px-4 py-3 border-l">{referral.userName}</td>
+                                                    <td className="px-4 py-3 text-green-600 font-medium">
+                                                        ₹{referral.income || '0.000'}
+                                                    </td>
+                                                    <td className="px-4 py-3">{referral.date}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                )}
+                            </div>
+                        </div>
+                        {totalPages > 1 && <Pagination
+                            totalPages={totalPages}
+                            currentPage={currentPage_state}
+                            onPageChange={setCurrentPage_state}
+                        />}
                     </div>
-                    {totalPages > 1 && <Pagination
-                        totalPages={totalPages}
-                        currentPage={currentPage_state}
-                        onPageChange={setCurrentPage_state}
-                    />}
+                    <div className='mt-3'>
+                        <Footer />
+                    </div>
                 </div>
-                <div className='mt-3'>
-                    <Footer />
-                </div>
-            </div>
+            )}
         </>
     )
 };

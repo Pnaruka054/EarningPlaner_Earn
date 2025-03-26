@@ -16,9 +16,9 @@ const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
                     : "translate-x-[-100%] opacity-0 md:translate-x-0 md:opacity-100"
                 } 
         select-none md:block bg-slate-800/90 backdrop-blur-lg shadow-lg absolute z-[2] 
-        md:fixed h-[93.3dvh] mt-2 left-0 px-4 py-6 top-12 w-full sm:w-52 md:w-[25%] 
+        md:fixed h-[93.3dvh] mt-[100dvh] left-0 px-4 py-6 w-full sm:w-52 md:w-[25%] 
         lg:w-[20%] text-white transition-transform duration-300 ease-in-out
-        border-r border-gray-700 overflow-auto custom-scrollbar-sidemenu
+        border border-gray-700 overflow-auto custom-scrollbar-sidemenu
       `}
         >
             <h2 className="font-semibold text-gray-300 text-[14px] mb-5 px-2">

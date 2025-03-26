@@ -33,6 +33,7 @@ import GiftCode from './website/GiftCode/GiftCode';
 import OfferWall from './website/EarningSourses/OfferWall/OfferWall';
 import ViewOfferWall from './website/EarningSourses/OfferWall/viewOfferWall';
 import AppInstallButton from './website/components/appInstallButton/appInstallButton';
+import UserNetworkStatusCheck from './website/components/userNetworkStatus_check';
 
 const pageVariants = {
   initial: {
@@ -55,48 +56,9 @@ const App = () => {
   const [show_navBar_state, setshow_NavBar_state] = useState(false);
   const [show_Full_navBar_state, setshow_Full_navBar_state] = useState(false);
   const [showPopUp_onLogOut_btn_state, setShowPopUp_onLogOut_btn_state] = useState(false);
-  const [isOffline_state, setIsOffline_state] = useState(navigator.onLine ? false : true);
   const [availableBalance_forNavBar_state, setAvailableBalance_forNavBar_state] = useState(0.000);
   const [appDownloadBtn_state, setAppDownloadBtn_state] = useState(false);
   const location = useLocation();
-  const networkStatusRef = useRef(null);
-
-  const updateNetworkStatus = (message, classes, status) => {
-    if (networkStatusRef.current) {
-      networkStatusRef.current.innerHTML = `
-        <div class="rounded-[5%] h-96 w-full font-bold text-white pt-1 drop-shadow select-none text-sm ${classes}">
-          ${message}
-        </div>
-      `;
-      if (status === 'offline') {
-        networkStatusRef.current.className = 'fixed top-0 bottom-0 right-0 left-0 bg-[#0005] z-10 text-center flex items-end';
-      } else if (status === 'online') {
-        setTimeout(() => {
-          networkStatusRef.current.className = 'hidden';
-        }, 1200);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const handleOnline = () => {
-      setIsOffline_state(false);
-      updateNetworkStatus('You are Online', 'bg-green-500 OnlineAnimation', 'online');
-    };
-
-    const handleOffline = () => {
-      setIsOffline_state(true);
-      updateNetworkStatus('You are Offline', 'bg-gray-500 offlineAnimation', 'offline');
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, [isOffline_state]);
 
   useLayoutEffect(() => {
     if (
@@ -154,6 +116,7 @@ const App = () => {
 
   return (
     <NavBar_global_contextProvider>
+      <UserNetworkStatusCheck />
       {
         appDownloadBtn_state && createPortal(
           <AppInstallButton />,
@@ -600,8 +563,6 @@ const App = () => {
           </Routes>
         </AnimatePresence>
       </div>
-
-      <div id="networkStatus" ref={networkStatusRef} className="hidden" />
     </NavBar_global_contextProvider>
   );
 };

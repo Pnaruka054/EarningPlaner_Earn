@@ -144,7 +144,7 @@ const NavBar = ({ show, availableBalance_forNavBar_state, setLogOut_btnClicked }
 
     if (show) {
         return (
-            <nav className={`bg-blue-800 z-[1] select-none h-14 px-4 flex items-center justify-between ${toggelMenu_state === 'close' ? '' : 'shadow-lg'} text-white relative`}>
+            <nav className={`bg-blue-800 z-[1] select-none h-[7.5dvh] px-4 flex items-center justify-between ${toggelMenu_state === 'close' ? '' : 'shadow-lg'} text-white relative`}>
                 <Link to="/" className="h-full flex items-center z-[1] select-none" draggable="false">
                     <div
                         className="h-10 w-40 bg-no-repeat bg-contain"
@@ -215,7 +215,7 @@ const NavBar = ({ show, availableBalance_forNavBar_state, setLogOut_btnClicked }
     }
 
     return (
-        <nav className="bg-blue-800 select-none z-[2] h-14 px-4 flex items-center fixed top-0 left-0 right-0 justify-between shadow-lg text-white">
+        <nav className="bg-blue-800 select-none z-[2] h-[6.7dvh] min-h-12 px-4 flex items-center fixed top-0 left-0 right-0 justify-between shadow-lg text-white">
             <Link to="/" className="h-full hidden md:flex items-center">
                 <img className="h-10" src={EarnWizLogo} alt="EarnWiz Logo" />
             </Link>
