@@ -22,7 +22,6 @@ const { userDateIncome } = require('./helper/socketIo_realTime_db_monitor');
 const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:5174',
-    'https://earningplaner-earn.onrender.com'
 ];
 
 const corsOptions = {

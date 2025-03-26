@@ -278,7 +278,7 @@ const user_signUp_login_google = async (req, res) => {
         // taking userName from email Address
         let userName = email.split('@')[0]
 
-        if (userEmail && userEmail !== email) {
+        if (userEmail && userEmail.includes('@') && userEmail !== email) {
             return res.status(409).json({
                 success: false,
                 error_msg: `Account switching is restricted. Please log in with ${userEmail}.`

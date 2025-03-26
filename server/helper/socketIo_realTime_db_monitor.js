@@ -53,7 +53,6 @@ async function userDateIncome(io) {
 
                 // Clean up the change stream when the socket disconnects.
                 socket.on("disconnect", () => {
-                    console.info(`Socket ${socket.id} disconnected. Closing change stream.`);
                     changeStream.close();
                 });
             } catch (error) {

@@ -52,7 +52,7 @@ const Login = () => {
     const handleLogin_submit = (e) => {
         e.preventDefault();
         let user = localStorage.getItem("user")
-        if (user && user !== email_userName_state) {
+        if (user && user.includes('@') && user !== email_userName_state) {
             showNotification(true, `Account switching is restricted. Please log in with ${user}.`)
             return;
         }
