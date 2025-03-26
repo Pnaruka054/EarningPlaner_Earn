@@ -10,6 +10,7 @@ import ProcessBgSeprate from '../../components/processBgSeprate/processBgSeprate
 import CountdownTimer from "../../components/countDownTimer/countDownTimer";
 import { Helmet } from 'react-helmet';
 import { encryptData } from '../../components/encrypt_decrypt_data'
+import useExternalLinkHandler from '../../components/useExternalLinkHandler'
 
 const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
     const [data_process_state, setData_process_state] = useState(false);
@@ -18,6 +19,7 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
     const [filter_state, setFilter_state] = useState("all")
     const navigation = useNavigate();
     const [isChecked_state, setIsChecked_state] = useState(true);
+    useExternalLinkHandler()
 
     const fetchData = async () => {
         setData_process_state(true);
