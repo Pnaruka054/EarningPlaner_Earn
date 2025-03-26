@@ -50,31 +50,30 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
     }, [dropdownButtonValue_state]);
 
     // get all data from server
-    useEffect(() => {
-        const fetchData = async () => {
-            setData_process_state(true);
-            try {
-                const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userDataGet_dashboard`, {
-                    withCredentials: true
-                });
-                localStorage.setItem("user", response?.data?.msg?.userEmail);
-                setUserData_state(response?.data?.msg);
-                setDropdownButtonValue_state(response?.data?.msg?.user_month_records[0]?.monthName)
-                setAvailableBalance_forNavBar_state(response?.data?.msg?.userAvailableBalance);
-            } catch (error) {
-                console.error(error);
-                if (error?.response?.data?.jwtMiddleware_token_not_found_error || error?.response?.data?.jwtMiddleware_user_not_found_error) {
-                    navigation('/login');
-                } else if (error?.response?.data?.jwtMiddleware_error) {
-                    showNotificationWith_timer(true, 'Your session has expired. Please log in again.', '/login', navigation);
-                } else {
-                    showNotification(true, "Something went wrong, please try again.");
-                }
-            } finally {
-                setData_process_state(false);
+    const fetchData = async () => {
+        setData_process_state(true);
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userRoute/userDataGet_dashboard`, {
+                withCredentials: true
+            });
+            localStorage.setItem("user", response?.data?.msg?.userEmail);
+            setUserData_state(response?.data?.msg);
+            setDropdownButtonValue_state(response?.data?.msg?.user_month_records[0]?.monthName)
+            setAvailableBalance_forNavBar_state(response?.data?.msg?.userAvailableBalance);
+        } catch (error) {
+            console.error(error);
+            if (error?.response?.data?.jwtMiddleware_token_not_found_error || error?.response?.data?.jwtMiddleware_user_not_found_error) {
+                navigation('/login');
+            } else if (error?.response?.data?.jwtMiddleware_error) {
+                showNotificationWith_timer(true, 'Your session has expired. Please log in again.', '/login', navigation);
+            } else {
+                showNotification(true, "Something went wrong, please try again.");
             }
-        };
- 
+        } finally {
+            setData_process_state(false);
+        }
+    };
+    useEffect(() => {
         fetchData();
     }, []);
 
