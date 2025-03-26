@@ -19,45 +19,54 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
     const navigation = useNavigate();
     const [isChecked_state, setIsChecked_state] = useState(true);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setData_process_state(true);
-            try {
-                const response = await axios.get(
-                    `${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_shortlink_data_get`,
-                    { withCredentials: true }
-                );
-                setAvailableBalance_forNavBar_state(response.data.msg.userAvailableBalance);
-                function shuffleArray(array) {
-                    let shuffled = array.slice();
-                    for (let i = shuffled.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-                    }
-                    return shuffled;
+    const fetchData = async () => {
+        setData_process_state(true);
+        try {
+            const response = await axios.get(
+                `${import.meta.env.VITE_SERVER_URL}/userIncomeRoute/user_shortlink_data_get`,
+                { withCredentials: true }
+            );
+            setAvailableBalance_forNavBar_state(response.data.msg.userAvailableBalance);
+            function shuffleArray(array) {
+                let shuffled = array.slice();
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
                 }
-
-                const randomizedData = shuffleArray(response.data.msg.shortedLinksData);
-                setShortLinks_state(randomizedData);
-
-                setShortLink_firstTimeLoad_state(response.data.msg)
-            } catch (error) {
-                console.error(error);
-                if (
-                    error.response?.data?.jwtMiddleware_token_not_found_error ||
-                    error.response?.data?.jwtMiddleware_user_not_found_error
-                ) {
-                    navigation("/login");
-                } else if (error.response?.data?.jwtMiddleware_error) {
-                    showNotificationWith_timer(true, 'Your session has expired. Please log in again.', '/login', navigation);
-                } else {
-                    showNotification(true, "Something went wrong, please try again.");
-                }
-            } finally {
-                setData_process_state(false);
+                return shuffled;
             }
-        };
+
+            const randomizedData = shuffleArray(response.data.msg.shortedLinksData);
+            setShortLinks_state(randomizedData);
+
+            setShortLink_firstTimeLoad_state(response.data.msg)
+        } catch (error) {
+            console.error(error);
+            if (
+                error.response?.data?.jwtMiddleware_token_not_found_error ||
+                error.response?.data?.jwtMiddleware_user_not_found_error
+            ) {
+                navigation("/login");
+            } else if (error.response?.data?.jwtMiddleware_error) {
+                showNotificationWith_timer(true, 'Your session has expired. Please log in again.', '/login', navigation);
+            } else {
+                showNotification(true, "Something went wrong, please try again.");
+            }
+        } finally {
+            setData_process_state(false);
+        }
+    };
+    useEffect(() => {
         fetchData();
+        const handle_userOnline = () => {
+            fetchData();
+        };
+
+        window.addEventListener('online', handle_userOnline);
+
+        return () => {
+            window.removeEventListener('online', handle_userOnline);
+        };
     }, []);
 
     // 🔄 **Update Link Status & Show Swal**

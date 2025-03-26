@@ -76,6 +76,16 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
 
     useEffect(() => {
         fetchData();
+
+        const handle_userOnline = () => {
+            fetchData();
+        };
+
+        window.addEventListener('online', handle_userOnline);
+
+        return () => {
+            window.removeEventListener('online', handle_userOnline);
+        };
     }, []);
 
     function handelDeposit_to_withdrawal() {

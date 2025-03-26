@@ -47,6 +47,16 @@ const Profile = ({ setAvailableBalance_forNavBar_state }) => {
             }
         };
         fetchData();
+
+        const handle_userOnline = () => {
+            fetchData();
+        };
+
+        window.addEventListener('online', handle_userOnline);
+
+        return () => {
+            window.removeEventListener('online', handle_userOnline);
+        };
     }, []);
     let dataBase_patch_userData = async (obj) => {
         try {

@@ -75,12 +75,8 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
     };
     useEffect(() => {
         fetchData();
-    }, []);
-
-    useEffect(() => {
         const handle_userOnline = () => {
             fetchData();
-            alert("sdfhskfhskfshf")
         };
 
         window.addEventListener('online', handle_userOnline);
