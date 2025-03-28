@@ -98,8 +98,9 @@ const App = () => {
     ) {
       setshow_Full_navBar_state(true);
     }
+  }, [location.pathname]);
 
-
+  useEffect(() => {
     if (
       location.pathname === '/' ||
       location.pathname === '/payment-proof' ||
@@ -108,11 +109,9 @@ const App = () => {
       location.pathname.includes('/dmca') ||
       location.pathname === '/member/dashboard'
     ) {
-      setAppDownloadBtn_state(true)
-      console.log(location.pathname, true);
+      setAppDownloadBtn_state(true);
     } else {
-      setAppDownloadBtn_state(false)
-      console.log(location.pathname, false);
+      setAppDownloadBtn_state(false);
     }
   }, [location.pathname]);
 
