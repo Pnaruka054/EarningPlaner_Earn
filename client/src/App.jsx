@@ -109,10 +109,8 @@ const App = () => {
       location.pathname === '/member/dashboard'
     ) {
       setAppDownloadBtn_state(true)
-      console.log(location.pathname, true);
     } else {
       setAppDownloadBtn_state(false)
-      console.log(location.pathname, false);
     }
   }, [location.pathname]);
 
