@@ -7,7 +7,6 @@ const AppInstallButton = () => {
     const [deferredPrompt, setDeferredPrompt] = useState(null);
     const [showInstallButton, setShowInstallButton] = useState(false);
     const [isStandalone, setIsStandalone] = useState(false);
-    const location = useLocation();
 
     useEffect(() => {
         // Check if the app is running in standalone mode (PWA)
@@ -23,7 +22,7 @@ const AppInstallButton = () => {
 
         window.addEventListener("beforeinstallprompt", handler);
         return () => window.removeEventListener("beforeinstallprompt", handler);
-    }, [location.pathname]);
+    }, []);
 
     const handleInstallClick = async () => {
         if (deferredPrompt) {

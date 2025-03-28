@@ -113,6 +113,7 @@ const App = () => {
     } else {
       setAppDownloadBtn_state(false);
     }
+    console.log("sdf");
   }, [location.pathname]);
 
   return (
