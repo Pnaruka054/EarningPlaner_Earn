@@ -121,7 +121,7 @@ const App = () => {
       <UserNetworkStatusCheck />
       {
         appDownloadBtn_state && createPortal(
-          <AppInstallButton />,
+          <AppInstallButton key={location.pathname} />,
           document.getElementById('appInstall')
         )
       }
