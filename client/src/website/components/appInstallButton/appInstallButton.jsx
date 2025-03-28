@@ -10,15 +10,15 @@ const AppInstallButton = () => {
     const location = useLocation();
 
     useEffect(() => {
-        // Check if the app is already installed or running in PWA mode
+        // Check if the app is running in standalone mode (PWA)
         if (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone) {
             setIsStandalone(true);
         }
 
         const handler = (e) => {
-            e.preventDefault();
-            setDeferredPrompt(e);
-            setShowInstallButton(true);
+            e.preventDefault(); // Block automatic prompt
+            setDeferredPrompt(e); // Store the event for later use
+            setShowInstallButton(true); // Show the install button
         };
 
         window.addEventListener("beforeinstallprompt", handler);
@@ -26,16 +26,18 @@ const AppInstallButton = () => {
     }, [location.pathname]);
 
     const handleInstallClick = async () => {
-        if (showInstallButton && deferredPrompt) {
-            deferredPrompt.prompt();
-            setShowInstallButton(false);
-            setDeferredPrompt(null);
+        if (deferredPrompt) {
+            deferredPrompt.prompt(); // Show the install prompt
+            const { outcome } = await deferredPrompt.userChoice; // Wait for user choice
+            console.log("User choice:", outcome); // Log user's choice (accepted or dismissed)
+            setDeferredPrompt(null); // Reset deferredPrompt after use
+            setShowInstallButton(false); // Hide button after interaction
         } else {
-            AppInstallPopup();
+            AppInstallPopup(); // Show manual installation instructions if prompt is unavailable
         }
     };
 
-    // Agar PWA ya standalone mode me chala raha hai to button hide kar do
+    // Hide button if app is already installed (PWA mode)
     if (isStandalone) return null;
 
     return (
