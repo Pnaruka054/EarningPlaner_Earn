@@ -3,35 +3,45 @@ import { FaAndroid, FaDownload } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 
+let globalDeferredPrompt = null; // ✅ Global variable to store the prompt
+
 const AppInstallButton = () => {
-    const [deferredPrompt, setDeferredPrompt] = useState(null);
     const [showInstallButton, setShowInstallButton] = useState(false);
     const [isStandalone, setIsStandalone] = useState(false);
     const location = useLocation();
 
     useEffect(() => {
-        console.log("called");
         // Check if the app is running in standalone mode (PWA)
         if (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone) {
             setIsStandalone(true);
+            return;
         }
 
         const handler = (e) => {
             e.preventDefault(); // Block automatic prompt
-            setDeferredPrompt(e); // Store the event for later use
+            globalDeferredPrompt = e; // Store the event globally
             setShowInstallButton(true); // Show the install button
         };
 
         window.addEventListener("beforeinstallprompt", handler);
+
+        // Cleanup function
         return () => window.removeEventListener("beforeinstallprompt", handler);
+    }, []);
+
+    useEffect(() => {
+        // When location changes, check if the button should be shown again
+        if (globalDeferredPrompt) {
+            setShowInstallButton(true);
+        }
     }, [location.pathname]);
 
     const handleInstallClick = async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt(); // Show the install prompt
-            const { outcome } = await deferredPrompt.userChoice; // Wait for user choice
+        if (globalDeferredPrompt) {
+            globalDeferredPrompt.prompt(); // Show the install prompt
+            const { outcome } = await globalDeferredPrompt.userChoice; // Wait for user choice
             console.log("User choice:", outcome); // Log user's choice (accepted or dismissed)
-            setDeferredPrompt(null); // Reset deferredPrompt after use
+            globalDeferredPrompt = null; // Reset deferredPrompt after use
             setShowInstallButton(false); // Hide button after interaction
         } else {
             AppInstallPopup(); // Show manual installation instructions if prompt is unavailable
