@@ -8,6 +8,7 @@ import showNotification from '../../components/showNotification';
 import ProcessBgSeprate from '../../components/processBgSeprate/processBgSeprate'
 import { Helmet } from 'react-helmet';
 import io from "socket.io-client";
+import earningSound from '../../components/earningSound'
 
 const socket = io(import.meta.env.VITE_SERVER_URL, {
     withCredentials: true, // Allow cookies to be sent automatically
@@ -57,10 +58,13 @@ const ViewOfferWall = ({ setAvailableBalance_forNavBar_state }) => {
                 } catch (parseError) {
                     console.error("Error parsing real-time response error:", parseError);
                     showNotification(true, "Something went wrong, please try again.");
+                } finally {
+                    earningSound(true, false)
                 }
             } else {
                 setOfferWallsData_state(response.msg);
                 setAvailableBalance_forNavBar_state(response.msg.available_balance);
+                earningSound(true, true)
             }
         };
 
