@@ -516,7 +516,6 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
                         let value2 = split_all_shortners[index + 1] ? split_all_shortners[index + 1] + "&url=" : null;
                         try {
                             if (!value2 && value && index === 0) {
-                                console.log("sfdlok");
                                 let response = await axios.get(`${value}${fullUrl}`);
                                 let shortedLink = response.data?.shortenedUrl || null;
 
@@ -547,13 +546,10 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
                         }
                     }
 
-                    return lastQuickShortedURL + fullUrl || lastShortedURL;  // Ensure one of them is returned
+                    return lastQuickShortedURL + lastShortedURL;  // Ensure one of them is returned
                 }
                 try {
                     shortedLink = await create_final_shortlink(fullUrl, shortnersData);
-                    // Remove multiple &url= occurrences
-                    shortedLink = shortedLink.replace(/(&url=)+/g, "&url=");
-                    console.log("Generated Shortlink:", shortedLink);
                 } catch (error) {
                     console.error("Error fetching shortened URL:", error.message);
                 }
