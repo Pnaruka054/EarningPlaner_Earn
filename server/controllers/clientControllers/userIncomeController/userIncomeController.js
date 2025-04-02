@@ -505,7 +505,6 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             // create shorted url for user using shortner api
             if (shortnersData && shortnersData.shortnerApiLink) {
                 const fullUrl = `${req.headers.origin}${endPageRoute}/${uniqueRandomID}` || `${req.protocol}://${req.get('host')}/${endPageRoute}/${uniqueRandomID}`;
-                const split_all_shortners = shortnersData.shortnerApiLink.split("&url=");
                 async function create_final_shortlink(fullUrl, shortnersData) {
                     let lastShortedURL = fullUrl;
                     let lastQuickShortedURL = '';
@@ -513,10 +512,11 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
                     const split_all_shortners = shortnersData.shortnerApiLink.split("&url=");
 
                     for (let index = 0; index < split_all_shortners.length; index++) {
-                        let value = split_all_shortners[index] + "&url=";
+                        let value = split_all_shortners[index] ? split_all_shortners[index] + "&url=" : '';
                         let value2 = split_all_shortners[index + 1] ? split_all_shortners[index + 1] + "&url=" : null;
                         try {
                             if (!value2 && value && index === 0) {
+                                console.log("sfdlok");
                                 let response = await axios.get(`${value}${fullUrl}`);
                                 let shortedLink = response.data?.shortenedUrl || null;
 
