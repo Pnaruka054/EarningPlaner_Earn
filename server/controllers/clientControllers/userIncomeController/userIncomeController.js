@@ -512,7 +512,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
 
                     const split_all_shortners = shortnersData.shortnerApiLink.split("&url=");
 
-                    for (let index = 0; index < split_all_shortners.length - 1; index++) {
+                    for (let index = 0; index < split_all_shortners.length; index++) {
                         let value = split_all_shortners[index] + "&url=";
                         let value2 = split_all_shortners[index + 1] ? split_all_shortners[index + 1] + "&url=" : null;
                         try {
@@ -551,6 +551,8 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
                 }
                 try {
                     shortedLink = await create_final_shortlink(fullUrl, shortnersData);
+                    // Remove multiple &url= occurrences
+                    shortedLink = shortedLink.replace(/(&url=)+/g, "&url=");
                     console.log("Generated Shortlink:", shortedLink);
                 } catch (error) {
                     console.error("Error fetching shortened URL:", error.message);
