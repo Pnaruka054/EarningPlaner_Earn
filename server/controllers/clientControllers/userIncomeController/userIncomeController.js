@@ -524,13 +524,17 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
                                 if (!lastShortedURL) {
                                     lastShortedURL = fullUrl
                                 }
-                                let response = await axios.get(`${value}${lastShortedURL}`);
-                                let shortedLink = response.data?.shortenedUrl || null;
-                                if (!shortedLink) {
-                                    const split_all_shortners_quick_urls = shortnersData.shortnerQuickLink.split("&url=")
-                                    lastQuickShortedURL += split_all_shortners_quick_urls[index] + "&url="
+                                if (value.includes("/api?api=")) {
+                                    let response = await axios.get(`${value}${lastShortedURL}`);
+                                    let shortedLink = response.data?.shortenedUrl || null;
+                                    if (!shortedLink) {
+                                        const split_all_shortners_quick_urls = shortnersData.shortnerQuickLink.split("&url=")
+                                        lastQuickShortedURL += split_all_shortners_quick_urls[index] + "&url="
+                                    } else {
+                                        lastShortedURL = shortedLink
+                                    }
                                 } else {
-                                    lastShortedURL = shortedLink
+                                    lastQuickShortedURL += value + "&url="
                                 }
                             }
                         }
