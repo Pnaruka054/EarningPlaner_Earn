@@ -16,8 +16,6 @@ const Withdrawal = () => {
     // State for filtering withdrawals by status
     const [filterStatus_state, setFilterStatus_state] = useState("All");
     // State for searching user data by User ID
-    const [userSearchId_state, setUserSearchId_state] = useState("");
-    const [userData_state, setUserData_state] = useState(null);
     const navigation = useNavigate();
 
     // Fetch withdrawal records on component mount
@@ -101,46 +99,6 @@ const Withdrawal = () => {
             showNotification(true, errorMsg);
             if (error?.response?.data?.adminJWT_error_msg) {
                 navigation('/');
-            }
-        } finally {
-            setData_process_state(false);
-        }
-    };
-
-
-    // Handler to search user by ID (simulate API call)
-    const handleUserSearch = async () => {
-        // Validate that a User ID is provided
-        if (!userSearchId_state.trim()) {
-            showNotification(true, "Please enter a valid User ID.");
-            return;
-        }
-
-        setData_process_state(true);
-        try {
-            // Using axios params to pass query parameter cleanly
-            const { data } = await axios.get(
-                `${import.meta.env.VITE_SERVER_URL}/admin/getUserData`,
-                {
-                    params: { userSearchId: userSearchId_state },
-                    withCredentials: true,
-                }
-            );
-
-            if (data?.msg) {
-                setUserData_state(data.msg);
-            } else {
-                showNotification(true, "No user data found.");
-            }
-        } catch (error) {
-            console.error("Error fetching user data:", error);
-            const errorMsg =
-                error?.response?.data?.error_msg ||
-                error?.response?.data?.adminJWT_error_msg ||
-                "Something went wrong, please try again.";
-            showNotification(true, errorMsg);
-            if (error?.response?.data?.adminJWT_error_msg) {
-                navigation("/admin");
             }
         } finally {
             setData_process_state(false);
@@ -241,45 +199,6 @@ const Withdrawal = () => {
                     >
                         Update
                     </button>
-                </div>
-
-                {/* User Search Section */}
-                <div className="p-4 border border-gray-300 rounded">
-                    <h2 className="text-xl font-semibold mb-2">Search User Information</h2>
-                    <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2">
-                        <input
-                            type="text"
-                            placeholder="Enter User ID"
-                            value={userSearchId_state}
-                            onChange={(e) => setUserSearchId_state(e.target.value)}
-                            className="w-full md:w-[50%] border border-gray-300 rounded px-3 py-1 focus:outline-none focus:border-blue-400"
-                        />
-                        <button
-                            onClick={handleUserSearch}
-                            className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white rounded px-3 py-1 transition"
-                        >
-                            Search User
-                        </button>
-                    </div>
-                    {userData_state && (
-                        <div className="mt-4 space-y-1">
-                            <p><strong>ID:</strong> {userData_state._id}</p>
-                            <p><strong>Name:</strong> {userData_state.name}</p>
-                            <p><strong>Email:</strong> {userData_state.email_address}</p>
-                            <p><strong>UserName:</strong> {userData_state.userName}</p>
-                            <p><strong>Google ID:</strong> {userData_state.google_id}</p>
-                            <p><strong>Withdrawable Amount:</strong> {userData_state.withdrawable_amount}</p>
-                            <p><strong>Address:</strong> {userData_state.address}</p>
-                            <p><strong>City:</strong> {userData_state.city}</p>
-                            <p><strong>Mobile Number:</strong> {userData_state.mobile_number}</p>
-                            <p><strong>State:</strong> {userData_state.state}</p>
-                            <p><strong>Withdrawal Account Information:</strong> {userData_state.withdrawal_account_information}</p>
-                            <p><strong>Withdrawal Method:</strong> {userData_state.withdrawal_method}</p>
-                            <p><strong>Zip Code:</strong> {userData_state.zip_code}</p>
-                            <p><strong>Pending Withdrawal Amount:</strong> {userData_state.pending_withdrawal_amount}</p>
-                            <p><strong>Total Withdrawal Amount:</strong> {userData_state.total_withdrawal_amount || "Not Withdrawal"}</p>
-                        </div>
-                    )}
                 </div>
 
                 {/* Search and Filter Controls for Withdrawals */}

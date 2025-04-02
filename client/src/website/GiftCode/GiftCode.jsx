@@ -5,6 +5,7 @@ import Footer from '../components/footer/footer';
 import ProcessBgSeprate from '../components/processBgSeprate/processBgSeprate';
 import showNotification from '../components/showNotification'
 import { Helmet } from 'react-helmet';
+import { IoGiftOutline } from "react-icons/io5";
 
 const GiftCode = ({ setAvailableBalance_forNavBar_state }) => {
     const [giftCode_state, setGiftCode_state] = useState('');
@@ -120,7 +121,7 @@ const GiftCode = ({ setAvailableBalance_forNavBar_state }) => {
                             </h2>
                             {claimHistory_state.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center p-6 border">
-                                    <ion-icon name="gift-outline" className="w-16 h-16 text-blue-400 mb-4"></ion-icon>
+                                    <IoGiftOutline className="w-16 h-16 text-blue-400 mb-4" />
                                     <p className="text-center text-blue-600 text-base font-semibold">
                                         No claim history available.
                                     </p>

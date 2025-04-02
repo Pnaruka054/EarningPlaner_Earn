@@ -505,14 +505,42 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
             // create shorted url for user using shortner api
             if (shortnersData && shortnersData.shortnerApiLink) {
                 const fullUrl = `${req.headers.origin}${endPageRoute}/${uniqueRandomID}` || `${req.protocol}://${req.get('host')}/${endPageRoute}/${uniqueRandomID}`;
-                const matches_two_shortners = shortnersData.shortnerApiLink.split("&url=");
+                const split_all_shortners = shortnersData.shortnerApiLink.split("&url=");
+                function create_final_shortlink(fullUrl) {
+                    let lastShortedURL;
+                    let lastQuickShortedURL = '';
+                    for (let index = 0; index < split_all_shortners.length; index++) {
+                        let value = split_all_shortners[index] + "&url="
+                        let value2 = split_all_shortners[index + 1] + "&url="
+                        async function callBack() {
+                            if (!value2 && value && index === 0) {
+                                let response = await axios.get(`${value}${fullUrl}`);
+                                let shortedLink = response.data?.shortenedUrl || null;
+                                if (!shortedLink) {
+                                    const split_all_shortners_quick_urls = shortnersData.shortnerQuickLink.split("&url=")
+                                    return split_all_shortners_quick_urls[index] + "&url=" + fullUrl
+                                }
+                            } else {
+                                if (!lastShortedURL) {
+                                    lastShortedURL = fullUrl
+                                }
+                                let response = await axios.get(`${value}${lastShortedURL}`);
+                                let shortedLink = response.data?.shortenedUrl || null;
+                                if (!shortedLink) {
+                                    const split_all_shortners_quick_urls = shortnersData.shortnerQuickLink.split("&url=")
+                                    lastQuickShortedURL += split_all_shortners_quick_urls[index] + "&url="
+                                } else {
+                                    lastShortedURL = shortedLink
+                                }
+                            }
+                        }
+                        callBack()
+                    }
+                    return lastQuickShortedURL + lastShortedURL
+                }
                 if (matches_two_shortners.length >= 2) {
                     try {
-                        const firstUrl = matches_two_shortners[0] + "&url=";
-                        const secondUrl = matches_two_shortners[1];
-                        let response = await axios.get(`${firstUrl}${fullUrl}`);
-                        let secondUrlShortedLink = response.data?.shortenedUrl || null;
-                        shortedLink = decodeURIComponent(secondUrl) + secondUrlShortedLink
+                        await create_final_shortlink(fullUrl)
                     } catch (error) {
                         console.error("Error fetching shortened URL:", error.message);
                     }

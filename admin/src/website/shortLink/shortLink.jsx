@@ -101,6 +101,7 @@ const ShortLink = () => {
         time: "",
         shortnerDomain: "",
         shortnerApiLink: "",
+        shortnerQuickLink: "",
         how_much_click_allow: "",
         how_to_complete: ""
     });
@@ -175,6 +176,7 @@ const ShortLink = () => {
                     time: editData_state.time,
                     shortnerDomain: editData_state.shortnerDomain,
                     shortnerApiLink: editData_state.shortnerApiLink,
+                    shortnerQuickLink: editData_state.shortnerQuickLink,
                     how_much_click_allow: editData_state.how_much_click_allow,
                     how_to_complete: editData_state.how_to_complete
                 },
@@ -339,6 +341,7 @@ const ShortLink = () => {
                                         <input type="text" className="border p-2 rounded w-full" placeholder="Amount" value={editData_state.amount} onChange={(e) => setEditData_state({ ...editData_state, amount: e.target.value })} />
                                         <input type="text" className="border p-2 rounded w-full" placeholder="Shortner Domain" value={editData_state.shortnerDomain} onChange={(e) => setEditData_state({ ...editData_state, shortnerDomain: e.target.value })} />
                                         <input type="text" className="border p-2 rounded w-full" placeholder="API Link" value={editData_state.shortnerApiLink} onChange={(e) => setEditData_state({ ...editData_state, shortnerApiLink: e.target.value })} />
+                                        <input type="text" className="border p-2 rounded w-full" placeholder="Quick Link" value={editData_state.shortnerQuickLink} onChange={(e) => setEditData_state({ ...editData_state, shortnerQuickLink: e.target.value })} />
                                         <input type="text" className="border p-2 rounded w-full" placeholder="Time" value={editData_state.time} onChange={(e) => setEditData_state({ ...editData_state, time: e.target.value })} />
                                         <input type="text" className="border p-2 rounded w-full" placeholder="Clicks Allowed" value={editData_state.how_much_click_allow} onChange={(e) => setEditData_state({ ...editData_state, how_much_click_allow: e.target.value })} />
                                         <input type="text" className="border p-2 rounded w-full" placeholder="How to Complete Video Link" value={editData_state.how_to_complete} onChange={(e) => setEditData_state({ ...editData_state, how_to_complete: e.target.value })} />
@@ -353,6 +356,7 @@ const ShortLink = () => {
                                         <p><strong>Amount:</strong> {link.amount}</p>
                                         <p><strong>Shortner Domain:</strong> {link.shortnerDomain}</p>
                                         <p className='break-all whitespace-normal'><strong>Shortner API Link:</strong> {link.shortnerApiLink}</p>
+                                        <p className='break-all whitespace-normal'><strong>Shortner Quick Link:</strong> {link.shortnerQuickLink}</p>
                                         <p><strong>time:</strong> {link.time}</p>
                                         <p><strong>Clicks Allowed:</strong> {link.how_much_click_allow}</p>
                                         <p><strong>Video Link:</strong> {link.how_to_complete}</p>

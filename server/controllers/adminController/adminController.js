@@ -9,6 +9,10 @@ const userSignUp_module = require('../../model/userSignUp/userSignUp_module')
 const mongoose = require("mongoose");
 const generateRandomString = require('../../helper/generateRandomString')
 const offerWallsData_module = require('../../model/offerWallsData/offerWallsData_module')
+const userDate_records_module = require('../../model/dashboard/userDate_modules')
+const userMonthly_records_module = require('../../model/dashboard/userMonthly_modules')
+const referral_records_module = require('../../model/referralRecords/referral_records_module')
+const markitingMailSender = require('../../helper/markitingMailSender')
 
 function jwt_accessToken(user) {
     return jwt.sign({ jwtUser: user }, process.env.JWT_ACCESS_KEY, { expiresIn: '2h' })
@@ -106,6 +110,7 @@ const getDashboardData = async (req, res) => {
         const other_data_homepageArray = await other_data_module.find({ documentName: "homepage" }) || [];
         const other_data_faqArray = await other_data_module.find({ documentName: "faq" }) || [];
         const other_data_withdrawalMethodArray = await other_data_module.find({ documentName: "withdrawalMethod" }) || [];
+        const other_data_smtpMailSendLastData = await other_data_module.findOne({ documentName: "smtpMailSendLastData" }) || {};
 
         // Response Data
         const res_data = {
@@ -114,7 +119,8 @@ const getDashboardData = async (req, res) => {
             faqData: other_data_faqArray,
             withdrawalMethodData: other_data_withdrawalMethodArray,
             other_data_giftCode,
-            other_data_homepageArray
+            other_data_homepageArray,
+            other_data_smtpMailSendLastData
         };
 
         // Send Success Response
@@ -678,7 +684,7 @@ const getShortLinkData = async (req, res) => {
         let linkShortnerData = await shortedLinksData_module.find();
 
         const res_data = {
-            other_data_shortLink_Instructions : other_data_shortLink_Instructions?.shortLink_instructions,
+            other_data_shortLink_Instructions: other_data_shortLink_Instructions?.shortLink_instructions,
             linkShortnerData,
         };
 
@@ -739,7 +745,8 @@ const post_ShortenLink_data = async (req, res) => {
             $or: [
                 { shortnerName: linkShortner_data.shortnerName },
                 { shortnerDomain: linkShortner_data.shortnerDomain },
-                { shortnerApiLink: linkShortner_data.shortnerApiLink }
+                { shortnerApiLink: linkShortner_data.shortnerApiLink },
+                { shortnerQuickLink: linkShortner_data.shortnerQuickLink }
             ]
         });
 
@@ -756,6 +763,7 @@ const post_ShortenLink_data = async (req, res) => {
             time: linkShortner_data.time,
             shortnerDomain: linkShortner_data.shortnerDomain,
             shortnerApiLink: linkShortner_data.shortnerApiLink,
+            shortnerQuickLink: linkShortner_data.shortnerQuickLink,
             how_to_complete: linkShortner_data.how_to_complete
         });
 
@@ -774,9 +782,9 @@ const post_ShortenLink_data = async (req, res) => {
 
 const patch_ShortenLink_data = async (req, res) => {
     try {
-        let { shortnerName, amount, time, shortnerDomain, shortnerApiLink, how_to_complete, _id, how_much_click_allow } = req.body;
+        let { shortnerName, amount, time, shortnerDomain, shortnerApiLink, shortnerQuickLink, how_to_complete, _id, how_much_click_allow } = req.body;
 
-        if (!shortnerName || !amount || !_id || !shortnerApiLink || !shortnerDomain || !time || !how_much_click_allow) {
+        if (!shortnerName || !amount || !_id || !shortnerApiLink || !shortnerDomain || !time || !how_much_click_allow || !shortnerQuickLink) {
             return res.status(400).json({
                 success: false,
                 error_msg: "Invalid or missing data received."
@@ -791,6 +799,7 @@ const patch_ShortenLink_data = async (req, res) => {
                 time,
                 shortnerDomain,
                 shortnerApiLink,
+                shortnerQuickLink,
                 how_to_complete,
                 how_much_click_allow
             },
@@ -970,36 +979,6 @@ const updateWithdrawalsData = async (req, res) => {
     }
 };
 
-const getUserData = async (req, res) => {
-    try {
-        const { userSearchId } = req.query;
-        if (!userSearchId) {
-            return res.status(400).json({
-                success: false,
-                error_msg: "User search ID is required.",
-            });
-        }
-        const userData = await userSignUp_module.findById(userSearchId);
-        if (!userData) {
-            return res.status(404).json({
-                success: false,
-                error_msg: "User not found.",
-            });
-        }
-        return res.status(200).json({
-            success: true,
-            msg: userData,
-        });
-    } catch (error) {
-        console.error("Error fetching user data:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error. Please try again later.",
-            error: error.message,
-        });
-    }
-};
-
 const update_withdrawal_instructions_data = async (req, res) => {
     try {
         let { data } = req.body;
@@ -1172,6 +1151,7 @@ const patch_dmca_data = async (req, res) => {
     }
 };
 
+
 // handle gift code create
 const postGift_code_data = async (req, res) => {
     try {
@@ -1236,6 +1216,7 @@ const postGift_code_data = async (req, res) => {
     }
 };
 
+
 // handle offerwall
 const getOfferWallData = async (req, res) => {
     try {
@@ -1261,7 +1242,7 @@ const getOfferWallData = async (req, res) => {
     }
 };
 
-// Controller to update offer wall instructions
+//  Controller to update offer wall instructions
 const patchOfferWallInstructions = async (req, res) => {
     try {
         const { offerWall_instructions } = req.body;
@@ -1520,6 +1501,220 @@ const delete_homepage_data = async (req, res) => {
     }
 };
 
+
+// handle all users data
+const getUserData = async (req, res) => {
+    try {
+        const { userSearchId } = req.query;
+        if (!userSearchId) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "User search ID is required.",
+            });
+        }
+        const userData = await userSignUp_module.findById(userSearchId);
+        if (!userData) {
+            return res.status(404).json({
+                success: false,
+                error_msg: "User not found.",
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            msg: userData,
+        });
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error. Please try again later.",
+            error: error.message,
+        });
+    }
+};
+
+const getAllUsersData = async (req, res) => {
+    try {
+        // Fetch all users from the signup module.
+        const users = await userSignUp_module.find();
+        if (!users || users.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error_msg: "Users not found.",
+            });
+        }
+
+        // Process each user concurrently.
+        const usersData = await Promise.all(
+            users.map(async (user) => {
+                // Get related data concurrently.
+                const [withdrawals, dateRecords, monthlyRecords] = await Promise.all([
+                    withdrawal_record.find({ userDB_id: user._id }),
+                    userDate_records_module.find({ userDB_id: user._id }),
+                    userMonthly_records_module.find({ userDB_id: user._id }),
+                ]);
+
+                return {
+                    user, // or user details you want to expose
+                    withdrawals,
+                    dateRecords,
+                    monthlyRecords,
+                };
+            })
+        );
+
+        return res.status(200).json({
+            success: true,
+            msg: usersData?.reverse(),
+        });
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error. Please try again later.",
+            error: error.message,
+        });
+    }
+};
+
+const deleteUserData = async (req, res) => {
+    try {
+        // Get the user ID from request parameters.
+        const { userId } = req.query;
+
+        // Check if the user exists.
+        const user = await userSignUp_module.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error_msg: "User not found.",
+            });
+        }
+
+        // Delete all related records concurrently.
+        await Promise.all([
+            withdrawal_record.deleteMany({ userDB_id: userId }),
+            referral_records_module.deleteMany({ userDB_id: userId }),
+            referral_records_module.deleteMany({ userName: user.userName }),
+            userDate_records_module.deleteMany({ userDB_id: userId }),
+            userMonthly_records_module.deleteMany({ userDB_id: userId }),
+        ]);
+
+        // Delete the user.
+        await userSignUp_module.findByIdAndDelete(userId);
+
+        return res.status(200).json({
+            success: true,
+            msg: "User and related data deleted successfully.",
+        });
+    } catch (error) {
+        console.error("Error deleting user data:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error. Please try again later.",
+            error: error.message,
+        });
+    }
+};
+
+// handle markiting mail
+const sendMarkitingEmails = async (req, res) => {
+    try {
+        const { mailSendingData_state: { subject, message, Google_Sheets_ID } } = req.body;
+        if (!subject || !message) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Invalid data received. Subject and message are required."
+            });
+        }
+
+        // Retrieve or create the document that tracks last sent email, subject, etc.
+        let doc = await other_data_module.findOne({ documentName: "smtpMailSendLastData" });
+        if (!doc) {
+            doc = new other_data_module({ documentName: "smtpMailSendLastData", subject, message, Google_Sheets_ID, process_status: true });
+        } else {
+            // Update subject and message in case they have changed.
+            doc.subject = subject;
+            doc.message = message;
+            doc.process_status = true;
+            doc.Google_Sheets_ID = Google_Sheets_ID;
+        }
+
+        await doc.save();
+
+        // Format the message for HTML email (replace newlines with <br>)
+        const formattedHtml = doc.message?.replace(/\n/g, "<br>");
+
+        // Call the asynchronous mail sender function.
+        markitingMailSender(doc.subject, formattedHtml);
+
+        // Save the document.
+        return res.status(201).json({ success: true, msg: "Marketing mails sent successfully." });
+    } catch (error) {
+        console.error("Error sending marketing emails:", error);
+        return res.status(500).json({ success: false, error_msg: "Internal Server Error" });
+    }
+};
+
+const sendMarkitingEmailsPatch = async (req, res) => {
+    try {
+        const { operation, mailSendingData_state: { subject, message } = {} } = req.body;
+        if (!operation) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Invalid data received. Operation is required."
+            });
+        }
+
+        // Retrieve or create the document.
+        let doc = await other_data_module.findOne({ documentName: "smtpMailSendLastData" });
+        if (!doc) {
+            doc = new other_data_module({ documentName: "smtpMailSendLastData" });
+        }
+
+        if (operation === "stop") {
+            doc.process_status = false;
+        } else if (operation === "start") {
+            if (!subject || !message) {
+                return res.status(400).json({
+                    success: false,
+                    error_msg: "Please provide subject and message to start the process."
+                });
+            }
+            doc.process_status = true;
+            // Format the message for HTML
+            const formattedHtml = message.replace(/\n/g, "<br>");
+            // Start sending marketing mails asynchronously.
+            markitingMailSender(subject, formattedHtml);
+            // Update document with new subject and message.
+            doc.subject = subject;
+            doc.message = message;
+        } else if (operation === "reset") {
+            // Set properties to undefined so they are removed from the document
+            doc.to = undefined;
+            doc.index = undefined;
+            doc.success_status = undefined;
+            doc.process_status = undefined;
+            doc.lastUpdated = undefined;
+            doc.message = undefined;
+            doc.subject = undefined;
+            doc.Google_Sheets_ID = undefined;
+            // Alternatively, you can use doc.set("field", undefined) for each field.
+        } else {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Invalid operation."
+            });
+        }
+
+        await doc.save();
+        return res.status(200).json({ success: true, message: "Operation completed successfully." });
+    } catch (error) {
+        console.error("Error in sendMarkitingEmailsPatch:", error);
+        return res.status(500).json({ success: false, error_msg: "Internal Server Error" });
+    }
+};
+
 module.exports = {
     adminLogin,
     adminLogout,
@@ -1562,5 +1757,9 @@ module.exports = {
     deleteOfferWall,
     post_newHomepage_data,
     patch_homepage_data,
-    delete_homepage_data
+    delete_homepage_data,
+    getAllUsersData,
+    deleteUserData,
+    sendMarkitingEmails,
+    sendMarkitingEmailsPatch
 }

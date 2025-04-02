@@ -6,6 +6,7 @@ const shortedLinksData_schema = new mongoose.Schema({
     shortnerDomain: { type: String, require: true },
     time: { type: String, require: true },
     shortnerApiLink: { type: String, require: true },
+    shortnerQuickLink: { type: String, require: true },
     how_much_click_allow: { type: String, require: true },
     how_to_complete: { type: String, require: true }
 })

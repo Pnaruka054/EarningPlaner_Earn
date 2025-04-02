@@ -8,6 +8,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Helmet } from 'react-helmet';
 import { FaSpinner, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { IoLogoGoogle } from "react-icons/io5";
 import { encryptData } from '../../components/encrypt_decrypt_data';
 
 const Signup = ({ referral_status }) => {
@@ -149,10 +150,6 @@ const Signup = ({ referral_status }) => {
             showNotification(true, 'Multiple accounts from the same IP address are not allowed.')
             return
         }
-        if (!captchaValue) {
-            showNotification(true, 'Please verify that you are a human!')
-            return;
-        }
         googleLogin();
         setSubmit_process_state(true)
     };
@@ -269,7 +266,7 @@ const Signup = ({ referral_status }) => {
                     </form>
 
                     <button onClick={handleGoogleSingUp} className='w-full mt-4 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg flex items-center justify-center space-x-2 font-medium transition'>
-                        <ion-icon name="logo-google"></ion-icon> <span>Sign Up With Google</span>
+                        <IoLogoGoogle /> <span>Sign Up With Google</span>
                     </button>
 
                 </div>

@@ -115,7 +115,7 @@ const Dashboard = () => {
                 );
 
                 if (response?.data?.msg) {
-                    const { referralData, announcementData, faqData, withdrawalMethodData, other_data_giftCode, other_data_homepageArray } = response.data.msg;
+                    const { referralData, announcementData, faqData, withdrawalMethodData, other_data_giftCode, other_data_homepageArray, other_data_smtpMailSendLastData } = response.data.msg;
                     setGiftCode_state(other_data_giftCode)
                     setReferralMessage_state(referralData?.referral_page_text || "");
                     setReferralRate_state(parseFloat(referralData?.referral_rate || 0) * 100);
@@ -123,6 +123,12 @@ const Dashboard = () => {
                     setFaqs_state(faqData.reverse() || []);
                     setWithdrawalMethods_state(withdrawalMethodData.reverse() || []);
                     setHomepageSections_state(other_data_homepageArray.reverse() || [])
+                    setMailSendProcess_state(other_data_smtpMailSendLastData);
+                    setMailSendingData_state({
+                        subject: other_data_smtpMailSendLastData.subject,
+                        message: other_data_smtpMailSendLastData.message,
+                        Google_Sheets_ID: other_data_smtpMailSendLastData.Google_Sheets_ID,
+                    })
                 }
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
@@ -925,10 +931,174 @@ const Dashboard = () => {
         });
     };
 
+
+    // mail send handling
+    const [mailSendingData_state, setMailSendingData_state] = useState({
+        subject: "",
+        message: "",
+        Google_Sheets_ID: ""
+    });
+    const [mailSendProcess_state, setMailSendProcess_state] = useState({})
+    const SendMail = () => {
+        if (mailSendingData_state.subject && mailSendingData_state.message) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "Send Message?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, update it!",
+                cancelButtonText: "Cancel"
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        setData_process_state(true);
+                        const response = await axios.post(
+                            `${import.meta.env.VITE_SERVER_URL}/admin/sendMarkitingEmails`,
+                            { mailSendingData_state },
+                            { withCredentials: true }
+                        );
+                        if (response?.data?.msg) {
+                            showNotification(false, "Sended success!");
+                            setNewHomepageSection_state({
+                                subject: "",
+                                message: "",
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Error posting new homepage section:", error);
+                        if (error.response.data.error_msg) {
+                            showNotification(true, error.response.data.error_msg);
+                        } else if (error.response.data.adminJWT_error_msg) {
+                            showNotification(true, error.response.data.adminJWT_error_msg);
+                            navigation("/");
+                        } else {
+                            showNotification(true, "Something went wrong, please try again.");
+                        }
+                    } finally {
+                        setData_process_state(false);
+                    }
+                }
+            });
+        }
+    };
+
+    const handleSendMail_operations = (operation) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: operation === 'stop' ? "Stop Message?" : operation === 'start' ? "Start Message?" : "Reset Message?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, update it!",
+            cancelButtonText: "Cancel"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    setData_process_state(true);
+                    const response = await axios.patch(
+                        `${import.meta.env.VITE_SERVER_URL}/admin/sendMarkitingEmailsPatch`,
+                        { operation, mailSendingData_state },
+                        { withCredentials: true }
+                    );
+                    if (response?.data?.msg) {
+                        showNotification(false, "Sended success!");
+                        setMailSendProcess_state({});
+                    }
+                } catch (error) {
+                    console.error("Error to patch sendmail:", error);
+                    if (error.response.data.error_msg) {
+                        showNotification(true, error.response.data.error_msg);
+                    } else if (error.response.data.adminJWT_error_msg) {
+                        showNotification(true, error.response.data.adminJWT_error_msg);
+                        navigation("/");
+                    } else {
+                        showNotification(true, "Something went wrong, please try again.");
+                    }
+                } finally {
+                    setData_process_state(false);
+                }
+            }
+        });
+    }
+
     return (
         <div>
             <SideMenu sideMenu_show={true} />
             <div className="mt-[75px] md:ml-[256px] p-6 space-y-8">
+                {/* Send Mails */}
+                <div className="p-6 border border-gray-300 rounded-lg shadow-md">
+                    <h2 className="text-xl font-semibold mb-4">Send Mails</h2>
+                    <input
+                        type="text"
+                        placeholder="Google Sheets ID"
+                        className="border p-2 rounded w-full mb-2"
+                        value={mailSendingData_state.Google_Sheets_ID}
+                        required
+                        onChange={(e) =>
+                            setMailSendingData_state({
+                                ...mailSendingData_state,
+                                Google_Sheets_ID: e.target.value,
+                            })
+                        }
+                    />
+                    <input
+                        type="text"
+                        placeholder="Subject"
+                        required
+                        className="border p-2 rounded w-full mb-2"
+                        value={mailSendingData_state.subject}
+                        onChange={(e) =>
+                            setMailSendingData_state({
+                                ...mailSendingData_state,
+                                subject: e.target.value,
+                            })
+                        }
+                    />
+                    <textarea
+                        placeholder="Message (use HTML for better design)"
+                        className="border overflow-hidden p-2 rounded w-full mb-2 auto-resize"
+                        rows="4"
+                        required
+                        value={mailSendingData_state.message}
+                        onChange={(e) =>
+                            setMailSendingData_state({
+                                ...mailSendingData_state,
+                                message: e.target.value,
+                            })
+                        }
+                    />
+                    <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                        onClick={SendMail}
+                    >
+                        Send Mail To All Users
+                    </button>
+                    {mailSendProcess_state && <div className="mt-3">
+                        <p><strong>to:</strong> {mailSendProcess_state.to}</p>
+                        <p><strong>index:</strong> {mailSendProcess_state.index}</p>
+                        <p><strong>success_status:</strong> {mailSendProcess_state.success_status}</p>
+                        <p><strong>process_status:</strong> {mailSendProcess_state.process_status?.toString()}</p>
+                        <p><strong>lastUpdated:</strong> {new Date(mailSendProcess_state.lastUpdated).toLocaleString('en-GB', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: true
+                        })}
+                        </p>
+                        <div className="mt-3 space-x-4">
+                            <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => handleSendMail_operations("stop")}>Stop</button>
+                            <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={() => handleSendMail_operations("start")}>Start</button>
+                            <button className="bg-yellow-500 text-white px-4 py-2 rounded" onClick={() => handleSendMail_operations("reset")}>Reset</button>
+                        </div>
+                    </div>}
+                </div>
+
                 {/* Home data Section */}
                 <div className="p-6 border border-gray-300 rounded-lg shadow-md">
                     <h2 className="text-xl font-semibold mb-4">Home page Data</h2>
@@ -1031,7 +1201,6 @@ const Dashboard = () => {
                         </div>
                     ))}
                 </div>
-
 
                 {/* Referral Rate Section */}
                 <div className="p-6 border border-gray-300 rounded-lg shadow-md">

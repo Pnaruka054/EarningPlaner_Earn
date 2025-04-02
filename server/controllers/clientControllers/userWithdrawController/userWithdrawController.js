@@ -10,12 +10,11 @@ const userBalanceData_get = async (req, res) => {
     try {
         const userData = req.user;
 
-        const user_DB_Data = await userSignUp_module.findById(userData._id);
         const user_DB_Withdrawal_Data = await withdrawal_records_module.find({ userDB_id: userData._id });
         const other_data_withdrawalMethodArray = await other_data_module.find({ documentName: "withdrawalMethod" }) || [];
         const other_data_withdrawal_instructions = await other_data_module.findOne({ documentName: "withdrawal_instructions" }) || {};
 
-        if (!user_DB_Data || !user_DB_Withdrawal_Data) {
+        if (!userData || !user_DB_Withdrawal_Data) {
             return res.status(404).json({
                 success: false,
                 msg: 'User not found'
@@ -23,15 +22,15 @@ const userBalanceData_get = async (req, res) => {
         }
 
         let matchedWithdrawalMethod = other_data_withdrawalMethodArray.find(
-            (value) => value.withdrawalMethod_name === user_DB_Data.withdrawal_method
+            (value) => value.withdrawalMethod_name === userData.withdrawal_method
         )
 
         let resData = {
-            withdrawable_amount: user_DB_Data.withdrawable_amount,
-            deposit_amount: user_DB_Data.deposit_amount,
-            pending_withdrawal_amount: user_DB_Data.pending_withdrawal_amount,
-            total_withdrawal_amount: user_DB_Data.total_withdrawal_amount,
-            withdrawal_account_information: user_DB_Data.withdrawal_account_information,
+            withdrawable_amount: userData.withdrawable_amount,
+            deposit_amount: userData.deposit_amount,
+            pending_withdrawal_amount: userData.pending_withdrawal_amount,
+            total_withdrawal_amount: userData.total_withdrawal_amount,
+            withdrawal_account_information: userData.withdrawal_account_information,
             withdrawal_method: matchedWithdrawalMethod?.withdrawalMethod_name,
             withdrawalMethod_minimumAmount: matchedWithdrawalMethod?.withdrawalMethod_minimumAmount,
             withdrawal_Records: user_DB_Withdrawal_Data,

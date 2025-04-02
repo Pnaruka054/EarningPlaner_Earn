@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 import ProcessBgBlack from "../processBgBlack/processBgBlack";
 import showNotification from "../showNotification";
+import { Users } from "lucide-react";
 
 const SideMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -75,6 +76,7 @@ const SideMenu = () => {
         {/* Menu Items */}
         <nav className="space-y-2">
           <NavItem to="/admin/dashboard" icon={<LayoutDashboard />} label="Dashboard" />
+          <NavItem to="/admin/users" icon={<Users />} label="Users" />
           <NavItem to="/admin/view-ads" icon={<PlayCircle />} label="View Ads" />
           <NavItem to="/admin/shorten-links" icon={<LinkIcon />} label="Shorten Links" />
           <NavItem to="/admin/offer-walls" icon={<FileText />} label="OfferWall" />

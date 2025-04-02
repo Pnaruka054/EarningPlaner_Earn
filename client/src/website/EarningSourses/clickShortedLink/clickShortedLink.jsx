@@ -92,9 +92,8 @@ const ClickShortedLink = ({ setAvailableBalance_forNavBar_state }) => {
             return response
         } catch (error) {
             console.error("Error updating link status:", error);
-            return error
-        } finally {
             setData_process_state(false);
+            return error
         }
     };
 

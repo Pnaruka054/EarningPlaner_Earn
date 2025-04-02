@@ -1,7 +1,7 @@
 import './App.css';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import Login from './website/auth/login/login';
@@ -15,11 +15,9 @@ import Profile from './website/profile/profile';
 import Setting from './website/setting/setting';
 import ViewAds from './website/EarningSourses/viewAds/viewAds';
 import WaitRedirecting from './website/EarningSourses/viewAds/waitRedirecting';
-import WaitRedirecting1 from './website/EarningSourses/viewAds/waitRedirecting1';
 import Home from './website/home/home';
 import ContactUs from './website/components/contactUs/contactUs';
 import PageNotFound from './website/components/pageNotFound/pageNotFound';
-import ExtensionUninstalled from './website/extensionUninstalled/extensionUninstalled';
 import PasswordResetForm from './website/passwordResetForm/passwordResetForm';
 import ClickShortedLink from './website/EarningSourses/clickShortedLink/clickShortedLink';
 import LastPage from './website/EarningSourses/clickShortedLink/lastPage';
@@ -77,7 +75,6 @@ const App = () => {
       setshow_Full_navBar_state(false);
     } else if (
       location.pathname === '/member/dashboard' ||
-      // location.pathname === '/member/deposit' ||
       location.pathname === '/member/withdraw' ||
       location.pathname === '/member/refer-and-earn' ||
       location.pathname === '/member/support' ||
@@ -98,9 +95,8 @@ const App = () => {
     ) {
       setshow_Full_navBar_state(true);
     }
-  }, [location.pathname]);
 
-  useEffect(() => {
+
     if (
       location.pathname === '/' ||
       location.pathname === '/payment-proof' ||
@@ -109,11 +105,10 @@ const App = () => {
       location.pathname.includes('/dmca') ||
       location.pathname === '/member/dashboard'
     ) {
-      setAppDownloadBtn_state(true);
+      setAppDownloadBtn_state(true)
     } else {
-      setAppDownloadBtn_state(false);
+      setAppDownloadBtn_state(false)
     }
-    console.log("sdf");
   }, [location.pathname]);
 
   return (
@@ -121,7 +116,7 @@ const App = () => {
       <UserNetworkStatusCheck />
       {
         appDownloadBtn_state && createPortal(
-          <AppInstallButton key={location.pathname} />,
+          <AppInstallButton />,
           document.getElementById('appInstall')
         )
       }
@@ -443,21 +438,6 @@ const App = () => {
               }
             />
             <Route
-              path="/waitRedirecting1"
-              element={
-                <motion.div
-                  className="absolute w-full"
-                  initial="initial"
-                  animate="in"
-                  exit="out"
-                  variants={pageVariants}
-                  transition={pageTransition}
-                >
-                  <WaitRedirecting1 />
-                </motion.div>
-              }
-            />
-            <Route
               path="/member/click-shorten-link"
               element={
                 <motion.div
@@ -544,21 +524,6 @@ const App = () => {
                   transition={pageTransition}
                 >
                   <PageNotFound setshow_NavBar_state={setshow_NavBar_state} />
-                </motion.div>
-              }
-            />
-            <Route
-              path="/extension/uninstalled"
-              element={
-                <motion.div
-                  className="absolute w-full"
-                  initial="initial"
-                  animate="in"
-                  exit="out"
-                  variants={pageVariants}
-                  transition={pageTransition}
-                >
-                  <ExtensionUninstalled setshow_NavBar_state={setshow_NavBar_state} />
                 </motion.div>
               }
             />

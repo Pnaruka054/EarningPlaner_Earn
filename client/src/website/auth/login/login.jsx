@@ -8,7 +8,8 @@ import { useGoogleLogin } from "@react-oauth/google";
 import formatTime from '../../components/formatTime'
 import { Helmet } from 'react-helmet';
 import { FaSpinner, FaEye, FaEyeSlash } from 'react-icons/fa';
-import { decryptData, encryptData } from '../../components/encrypt_decrypt_data'
+import { IoLogoGoogle } from "react-icons/io5";
+import { encryptData } from '../../components/encrypt_decrypt_data'
 import ReCAPTCHA from 'react-google-recaptcha';
 
 const Login = () => {
@@ -39,7 +40,11 @@ const Login = () => {
             }
         } catch (error) {
             console.error(error);
-            if (error?.response?.data?.error_msg) {
+            let user = localStorage.getItem("user")
+            if (error?.response?.data?.error_msg === "Invalid details" && user && user.includes('@') && user === email_userName_state) {
+                localStorage.removeItem("user")
+                localStorage.removeItem("userAlreadyRegistered")
+            } else if (error?.response?.data?.error_msg) {
                 showNotification(true, error?.response?.data?.error_msg)
             } else {
                 showNotification(true, "Something went wrong, please try again.");
@@ -107,8 +112,8 @@ const Login = () => {
         setSubmit_process_state(true)
     };
 
-    const handleForgotPassword = () => {
-        Swal.fire({
+    const handleForgotPassword = async () => {
+        const { value: email } = await Swal.fire({
             title: "Forgot Password",
             input: "email",
             inputLabel: "Enter your email",
@@ -120,54 +125,54 @@ const Login = () => {
                     Swal.showValidationMessage("Email is required!");
                     return false;
                 }
-                let obj = await decryptData({ email })
-                return fetch(`${import.meta.env.VITE_SERVER_URL}/userRoute/userLoginforgot_password_send_mail`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ obj }),
-                })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (!data?.success) {
-                            let timeLeftMs = data?.time_left || 0;
+                try {
+                    let obj = await encryptData({ email });
 
-                            return Swal.fire({
-                                title: "Error",
-                                html: `<strong>${data?.error_msg}</strong><br>
-                                       <p>Try again after <span id="countdown">${formatTime(timeLeftMs)}</span></p>`,
-                                icon: "error",
-                                timer: timeLeftMs,
-                                showConfirmButton: false,
-                                didOpen: () => {
-                                    const countdownEl = document.getElementById("countdown");
-                                    let interval = setInterval(() => {
-                                        timeLeftMs -= 1000;
-                                        countdownEl.innerText = formatTime(timeLeftMs);
+                    const response = await axios.post(
+                        `${import.meta.env.VITE_SERVER_URL}/userRoute/userLoginforgot_password_send_mail`,
+                        { obj },
+                        { headers: { "Content-Type": "application/json" } }
+                    );
 
-                                        if (timeLeftMs <= 0) {
-                                            clearInterval(interval);
-                                            Swal.close();
-                                        }
-                                    }, 1000);
-                                }
-                            }).then(() => {
-                                throw new Error(data?.error_msg || "Something went wrong");
-                            });
-                        }
-                        return data;
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                        Swal.fire("Request Failed", error.message, "error");
-                        return false; // This ensures the next 'then' block does not execute
-                    });
+                    const data = response.data;
+
+
+                    if (data.success) {
+                        Swal.fire("Success!", "Password reset link sent successfully.", "success");
+                    }
+
+                    if (!data?.success) {
+                        let timeLeftMs = data?.time_left || 0;
+
+                        await Swal.fire({
+                            title: "Error",
+                            html: `<strong>${data?.msg}</strong><br>
+                                   <p>Try again after <span id="countdown">${formatTime(timeLeftMs)}</span></p>`,
+                            icon: "error",
+                            timer: timeLeftMs,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                const countdownEl = document.getElementById("countdown");
+                                let interval = setInterval(() => {
+                                    timeLeftMs -= 1000;
+                                    countdownEl.innerText = formatTime(timeLeftMs);
+
+                                    if (timeLeftMs <= 0) {
+                                        clearInterval(interval);
+                                        Swal.close();
+                                    }
+                                }, 1000);
+                            }
+                        })
+                    }
+
+                    return data;
+                } catch (error) {
+                    console.error(error);
+                    Swal.fire("Request Failed", error.message, "error");
+                    return false;
+                }
             },
-        }).then((result) => {
-            if (result.isConfirmed && result.value) {
-                Swal.fire("Success!", "Password reset link sent successfully.", "success");
-            }
         });
     };
 
@@ -245,7 +250,7 @@ const Login = () => {
                     </form>
 
                     <button onClick={handleGoogleLogin} className='w-full mt-4 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg flex items-center justify-center space-x-2 font-medium transition'>
-                        <ion-icon name="logo-google"></ion-icon> <span>Login With Google</span>
+                        <IoLogoGoogle /> <span>Login With Google</span>
                     </button>
 
                     <p onClick={handleForgotPassword} className='text-blue-600 mt-4 text-center underline cursor-pointer'>I Forgot My Password</p>

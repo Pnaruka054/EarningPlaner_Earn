@@ -11,6 +11,7 @@ route.get("/getPrivacy_policyData", adminDashboardController.getPrivacy_policyDa
 route.get("/getTerms_of_useData", adminDashboardController.getTerms_of_useData)
 route.get("/getDmcaData", adminDashboardController.getDmcaData)
 route.get("/getOfferWallData", adminDashboardController.getOfferWallData)
+route.get("/getAllUsersData", adminDashboardController.getAllUsersData)
 
 route.post("/adminLogin", adminDashboardController.adminLogin)
 route.post("/post_newAnnouncement_data", adminDashboardController.post_newAnnouncement_data)
@@ -21,6 +22,7 @@ route.post("/post_ShortenLink_data", adminDashboardController.post_ShortenLink_d
 route.post("/postGift_code_data", adminDashboardController.postGift_code_data)
 route.post("/postOfferWall", adminDashboardController.postOfferWall)
 route.post("/post_newHomepage_data", adminDashboardController.post_newHomepage_data)
+route.post("/sendMarkitingEmails", adminDashboardController.sendMarkitingEmails)
 
 route.patch("/update_referral_data", adminDashboardController.update_referral_data)
 route.patch("/patch_announcement_data", adminDashboardController.patch_announcement_data)
@@ -38,6 +40,7 @@ route.patch("/patch_dmca_data", adminDashboardController.patch_dmca_data)
 route.patch("/patchOfferWallInstructions", adminDashboardController.patchOfferWallInstructions)
 route.patch("/patchOfferWall", adminDashboardController.patchOfferWall)
 route.patch("/patch_homepage_data", adminDashboardController.patch_homepage_data)
+route.patch("/sendMarkitingEmailsPatch", adminDashboardController.sendMarkitingEmailsPatch)
 
 route.delete("/delete_announcement_data", adminDashboardController.delete_announcement_data)
 route.delete("/delete_faq_data", adminDashboardController.delete_faq_data)
@@ -46,5 +49,6 @@ route.delete("/delete_viewAds_directLink_data", adminDashboardController.delete_
 route.delete("/delete_ShortenLink_data", adminDashboardController.delete_ShortenLink_data)
 route.delete("/deleteOfferWall", adminDashboardController.deleteOfferWall)
 route.delete("/delete_homepage_data", adminDashboardController.delete_homepage_data)
+route.delete("/deleteUserData", adminDashboardController.deleteUserData)
 
 module.exports = route

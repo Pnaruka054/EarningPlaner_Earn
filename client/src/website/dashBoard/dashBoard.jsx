@@ -34,20 +34,9 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
     // filter user selected month
     useEffect(() => {
         setMonthlyData_state(
-            userData_state?.user_date_records?.filter((value) => {
-                return dropdownButtonValue_state === value.monthName
-            })
-        )
-
-        setUserData_state(prev => ({
-            ...prev,
-            user_month_records: [
-                ...(prev?.user_month_records ?? []).filter(value => value.monthName === dropdownButtonValue_state),
-                ...(prev?.user_month_records ?? []).filter(value => value.monthName !== dropdownButtonValue_state)
-            ]
-        }));
-
-    }, [dropdownButtonValue_state]);
+            userData_state?.user_date_records?.filter(record => record.monthName === dropdownButtonValue_state)
+        );
+    }, [dropdownButtonValue_state, userData_state]);
 
     // get all data from server
     const fetchData = async () => {
@@ -233,7 +222,7 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                     <div className='mt-3'>
                         <Footer />
                     </div>
-                </div>
+                </div >
             )}
         </>
     );

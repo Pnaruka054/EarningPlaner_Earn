@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Footer from '../../components/footer/footer';
 import { useParams } from "react-router-dom";
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import showNotificationWith_timer from '../../components/showNotificationWith_timer';
 import showNotification from '../../components/showNotification';

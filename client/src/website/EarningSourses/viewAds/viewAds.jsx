@@ -19,7 +19,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     const navigation = useNavigate();
     const [viewAds_firstTimeLoad_state, setViewAds_firstTimeLoad_state] = useState([]);
     const [disabledButtons_state, setDisabledButtons_state] = useState([]);
-    const [isExtension_state, setIsExtension_state] = useState(false);
     const [currentBtnName_and_amount_For_extension_storedValue_state, setCurrentBtnName_and_amount_For_extension_storedValue_state] = useState([]);
     const [originalTitle] = useState(document.title);
     const [isUserActiveOnPage, setIsUserActiveOnPage] = useState(false);
@@ -79,7 +78,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
     };
     useEffect(() => {
         fetchData();
-        
+
         const handle_userOnline = () => {
             fetchData();
         };
@@ -99,24 +98,30 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
 
     // handle channel messages
     useEffect(() => {
-        channel.onmessage = (event) => {
-            if (event.data === "handle_clickAds_btnClick_state_true") {
+        const handleMessage = (event) => {
+            const { data } = event;
+
+            if (data === "handle_clickAds_btnClick_state_true") {
                 setHandle_clickAds_btnClick_state(true);
-            } else if (event.data === "handle_clickAds_btnClick_state_false") {
+            } else if (data === "handle_clickAds_btnClick_state_false") {
                 setHandle_clickAds_btnClick_state(false);
-            } else if (event.data.includes("isSuccess")) {
+            } else if (data.includes("isSuccess")) {
                 const [btnName, amount] = currentBtnName_and_amount_For_extension_storedValue_state;
+                let timer = 10;
+                const countdownInterval = setInterval(() => {
+                    timer--;
+                    document.title = `Wait : ${timer}sec`;
+                    if (timer <= 0) clearInterval(countdownInterval);
+                }, 1000);
+
                 setTimeout(() => {
-                    // Use the ref to check the latest value of isUserActiveOnPage
                     if (!isUserActiveOnPageRef.current) {
                         channel.postMessage("handle_clickAds_btnClick_state_false");
+
                         if (viewAds_firstTimeLoad_state?.pendingClick && btnName && amount) {
-                            setDisabledButtons_state((prevDisabled) => {
-                                if (!prevDisabled.includes(btnName)) {
-                                    return [...prevDisabled, btnName];
-                                }
-                                return prevDisabled;
-                            });
+                            setDisabledButtons_state((prevDisabled) =>
+                                prevDisabled.includes(btnName) ? prevDisabled : [...prevDisabled, btnName]
+                            );
 
                             const obj = {
                                 disabledButtons_state: [...disabledButtons_state, btnName],
@@ -124,39 +129,56 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                 btnClickEarn: amount,
                             };
 
-                            user_adsView_income_patch(obj)
+                            user_adsView_income_patch(obj);
                         }
-                    } else if (isUserActiveOnPageRef.current && btnName && amount) {
+                    } else if (btnName && amount) {
                         setIsUserActiveOnPage(false);
                         setHandle_clickAds_btnClick_state(false);
+
                         Swal.fire({
                             icon: "error",
                             title: "Operation failed. Please try again.",
                             text: "Please stay on the new tab and do not reload / refresh it until the process is complete."
                         });
+
                         document.title = "❌ failed";
+                        clearInterval(countdownInterval)
                         earningSound(isChecked_state, false);
-                        setTimeout(() => {
-                            document.title = originalTitle;
-                        }, 2000);
+                        let interval = setInterval(() => {
+                            if (!document.hidden) {
+                                document.title = originalTitle;
+                                clearInterval(interval)
+                            }
+                        }, 1000);
                     }
-                }, 6000);
-            } else if (event.data.includes("isAbortFromWaitingPage")) {
+                }, 9000);
+            } else if (data.includes("isAbortFromWaitingPage")) {
                 setIsUserActiveOnPage(true);
                 setHandle_clickAds_btnClick_state(false);
                 channel.postMessage("handle_clickAds_btnClick_state_false");
+
                 Swal.fire({
                     icon: "error",
                     title: "Operation failed. Please try again.",
-                    text: "Please do not close / reload new tab until You have clicked the Claim Bonus button.",
+                    text: "Please do not close / reload new tab until You have clicked the Claim Bonus button."
                 });
+
                 document.title = "❌ failed";
-                earningSound(isChecked_state, false)
-                setTimeout(() => document.title = originalTitle, 2000);
+                let interval = setInterval(() => {
+                    if (!document.hidden) {
+                        document.title = originalTitle;
+                        clearInterval(interval)
+                    }
+                }, 1000);
+                earningSound(isChecked_state, false);
             }
         };
+
+        channel.onmessage = handleMessage;
+
         return () => {
-            channel.close(); // Cleanup channel on unmount
+            channel.removeEventListener("message", handleMessage);
+            channel.close();
         };
     }, [viewAds_firstTimeLoad_state, currentBtnName_and_amount_For_extension_storedValue_state, isUserActiveOnPage]);
 
@@ -165,16 +187,11 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
         setIsUserActiveOnPage(false);
         channel.postMessage("handle_clickAds_btnClick_state_true");
 
-        const newTab = window.open("", '_blank');
-        if (!newTab) {
-            return alert("Please Allow Popup in Your Browser to Earn Money!");
-        }
-        newTab.close();
-
         setTimeout(() => {
-            let newTab1 = window.open(link, '_blank');
+            let newTab1 = window.open(`/waitRedirecting/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');;
             if (!newTab1) {
                 setHandle_clickAds_btnClick_state(false);
+                setCurrentBtnName_and_amount_For_extension_storedValue_state([btnName, amount])
                 return Swal.fire({
                     icon: "error",
                     title: "Operation failed. Please try again!",
@@ -182,131 +199,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 });;
             }
         }, 100);
-
-        setTimeout(() => {
-            setCurrentBtnName_and_amount_For_extension_storedValue_state([btnName, amount])
-            window.open(`/waitRedirecting/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
-        }, 8100);
     };
-
-    // const handle_link_click2 = (link, btnName, amount) => {
-    //     window.postMessage({ action: "startExtension", data: true }, "*");
-    //     setHandle_clickAds_btnClick_state(true);
-    //     channel.postMessage("handle_clickAds_btnClick_state_true");
-    //     setCurrentBtnName_and_amount_For_extension_storedValue_state([btnName, amount]);
-
-    //     const newTab = window.open("", '_blank');
-    //     if (!newTab) {
-    //         return alert("Please Allow Popup in Your Browser to Earn Money!");
-    //     }
-    //     newTab.close();
-    //     let isExtension = localStorage.getItem('isExtension');
-    //     if (isExtension !== 'true') {
-    //         return alert('please install extension');
-    //     }
-
-    //     window.open(`/waitRedirecting1/?link=${encodeURIComponent(link)}`, '_blank', 'noopener noreferrer');
-    // };
-
-    // // for extension brn ads success check
-    // useEffect(() => {
-    //     const handleIsExtensionUpdated = (e) => {
-    //         const [btnName, amount] = currentBtnName_and_amount_For_extension_storedValue_state;
-    //         const extension_storedValue = localStorage.getItem('extension_storedValue');
-    //         if (viewAds_firstTimeLoad_state && viewAds_firstTimeLoad_state.pendingClick) {
-    //             if ((extension_storedValue === 'true') && btnName && amount) {
-    //                 localStorage.removeItem('extension_storedValue');
-    //                 setHandle_clickAds_btnClick_state(false);
-    //                 channel.postMessage("handle_clickAds_btnClick_state_false");
-
-    //                 setDisabledButtons_state((prevDisabled) => {
-    //                     if (!prevDisabled.includes(btnName)) {
-    //                         return [...prevDisabled, btnName];
-    //                     }
-    //                     return prevDisabled;
-    //                 });
-
-    //                 const obj = {
-    //                     disabledButtons_state: [...disabledButtons_state, btnName],
-    //                     pendingClick: parseFloat(viewAds_firstTimeLoad_state.pendingClick),
-    //                     btnClickEarn: amount,
-    //                 };
-
-    //                 user_adsView_income_patch(obj)
-    //                     .then(() => {
-    //                         Swal.fire({
-    //                             title: "Success!",
-    //                             icon: "success",
-    //                         });
-    //                         document.title = "✅ success!"
-    //                         earningSound(isChecked_state, true)
-    //                         setTimeout(() => {
-    //                             document.title = originalTitle
-    //                         }, 4000);
-    //                     })
-    //                     .catch((error) => {
-    //                         console.error("Error updating income:", error);
-    //                     });
-    //             } else if (extension_storedValue === 'false') {
-    //                 localStorage.removeItem('extension_storedValue');
-    //                 setHandle_clickAds_btnClick_state(false);
-    //                 channel.postMessage("handle_clickAds_btnClick_state_false");
-    //                 Swal.fire({
-    //                     icon: "error",
-    //                     title: "Operation failed. Please try again.",
-    //                     text: "Something went wrong please try again",
-    //                 });
-    //                 document.title = "❌ failed"
-    //                 earningSound(isChecked_state, false)
-    //                 setTimeout(() => {
-    //                     document.title = originalTitle
-    //                 }, 4000);
-    //             }
-    //         }
-
-    //         const isExtension = localStorage.getItem('isExtension');
-    //         if (isExtension === 'true') {
-    //             setIsExtension_state(true);
-    //         } else {
-    //             setIsExtension_state(false);
-    //         }
-    //     };
-
-    //     window.addEventListener("isExtensionUpdated", handleIsExtensionUpdated);
-    //     window.addEventListener("beforeunload", () => {
-    //         localStorage.removeItem('extension_storedValue');
-    //     });
-    //     return () => {
-    //         window.removeEventListener("isExtensionUpdated", handleIsExtensionUpdated);
-    //         window.removeEventListener("beforeunload", () => {
-    //             localStorage.removeItem('extension_storedValue');
-    //         });
-    //     };
-    // }, [viewAds_firstTimeLoad_state, currentBtnName_and_amount_For_extension_storedValue_state]);
-    // useEffect(() => {
-    //     // Function to check the extension state from localStorage
-    //     const checkExtensionState = () => {
-    //         const isExtension = localStorage.getItem('isExtension');
-    //         if (isExtension === 'true') {
-    //             setIsExtension_state(true);
-    //         } else {
-    //             setIsExtension_state(false);
-    //         }
-    //     };
-
-    //     // Initial check on component mount
-    //     checkExtensionState();
-
-    //     // Add event listener for storage changes
-    //     window.addEventListener('storage', checkExtensionState);
-
-    //     // Cleanup event listener on component unmount
-    //     return () => {
-    //         window.removeEventListener('storage', checkExtensionState);
-    //     };
-    // }, []);
-
-    // for handle sound
 
     useEffect(() => {
         const soundStart = getItemWithExpiry("sound");
@@ -339,11 +232,16 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                 title: "Success!",
                 icon: "success",
             });
+
             document.title = "✅ success!";
+            let interval = setInterval(() => {
+                if (!document.hidden) {
+                    document.title = originalTitle;
+                    clearInterval(interval)
+                }
+            }, 1000);
+
             earningSound(isChecked_state, true);
-            setTimeout(() => {
-                document.title = originalTitle;
-            }, 4000);
             setAvailableBalance_forNavBar_state(response.data.msg.userAvailableBalance)
             setViewAds_firstTimeLoad_state((prev) => ({
                 ...prev,
@@ -391,104 +289,6 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
             setCurrentBtnName_and_amount_For_extension_storedValue_state([]);
         }
     }
-
-    const ExtensionInstallPopup = () => {
-        Swal.fire({
-            title: '',
-            html: `
-            <div class="fixed inset-0 flex items-center justify-start bg-black bg-opacity-80 z-50">
-                <div class="w-full h-full max-w-none bg-gray-900 text-white shadow-xl overflow-auto p-8 relative">
-                    
-                    <!-- Close Icon -->
-                    <button data-close="true" class="absolute top-4 right-6 text-white text-3xl font-bold hover:text-gray-400 transition duration-300">
-                        ✖
-                    </button>
-                    
-                    <h2 class="text-4xl font-bold text-white mb-6">🚀 Install Our Chrome Extension</h2>
-                    
-                    <!-- Step 1: Download ZIP -->
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-6 text-left">
-                        <h3 class="text-2xl font-semibold text-yellow-400">📌 Step 1: Download the ZIP File</h3>
-                        <p class="mt-2 text-gray-300">
-                            To start earning more, install our extension by downloading the file below.
-                        </p>
-                        <div class="mt-4">
-                            <a href="https://drive.google.com/uc?export=download&id=1pz2538vWbMUcq0pqBzikY1n_4KB3_XTg" 
-                               download 
-                               class="inline-block bg-blue-500 text-white px-8 py-3 rounded-md text-lg hover:bg-blue-600 transition duration-300">
-                                Download Extension ZIP
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <!-- Step 2: Install in Chrome -->
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-6 text-left">
-                        <h3 class="text-2xl font-semibold text-green-400">📌 Step 2: Install on Chrome (Desktop)</h3>
-                        <ol class="list-decimal list-inside mt-2 text-gray-300 space-y-2">
-                            <li>Open <code class="bg-gray-700 p-1 rounded">chrome://extensions/</code> in Chrome.</li>
-                            <li>Enable <strong>Developer Mode</strong> (Top-Right Toggle).</li>
-                            <li>Click "Load Unpacked".</li>
-                            <li>Select the <strong>Extracted Folder</strong> & Install.</li>
-                            <li>Your extension is now installed successfully! 🎉</li>
-                        </ol>
-                    </div>
-                    
-                    <!-- Step 3: Mobile Users (Yandex Browser) -->
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-6 text-left">
-                        <h3 class="text-2xl font-semibold text-purple-400">📌 Step 3: Mobile Users (Use Yandex Browser)</h3>
-                        <p class="mt-2 text-gray-300">
-                            Most mobile browsers <strong>do not support Chrome Extensions</strong>. But you can use the <strong>Yandex Browser</strong> to install and use extensions on mobile!
-                        </p>
-                        <ol class="list-decimal list-inside mt-2 text-gray-300 space-y-2">
-                            <li>Download <strong>Yandex Browser</strong> from the Play Store.</li>
-                            <li>Open <code class="bg-gray-700 p-1 rounded">chrome.google.com/webstore</code>.</li>
-                            <li>Search for our extension and click "Add to Chrome".</li>
-                            <li>Your extension will be installed successfully! 🎉</li>
-                        </ol>
-                        <div class="mt-4">
-                            <a href="https://play.google.com/store/apps/details?id=com.yandex.browser"
-                               target="_blank"
-                               class="inline-block bg-purple-500 text-white px-8 py-3 rounded-md text-lg hover:bg-purple-600 transition duration-300">
-                                Download Yandex Browser
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <!-- Step 4: Watch Video -->
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-md text-left">
-                        <h3 class="text-2xl font-semibold text-red-400">📌 Step 4: Watch Video Tutorial</h3>
-                        <div class="relative w-full h-0 pt-[56.25%] mt-3">
-                            <iframe class="absolute top-0 left-0 w-full h-full rounded-lg"
-                                    src="https://www.youtube.com/embed/VIDEO_ID" 
-                                    frameborder="0" allowfullscreen>
-                            </iframe>
-                        </div>
-                    </div>
-                    
-                    <!-- Close Button -->
-                    <div class="mt-6 text-left">
-                        <button data-close="true" 
-                                class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg text-lg transition duration-300">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            </div>
-            `,
-            showConfirmButton: false,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            background: "transparent",
-            customClass: {
-                popup: "p-0 m-0 w-full h-full max-w-none shadow-none border-0"
-            },
-            didOpen: () => {
-                document.querySelectorAll("[data-close]").forEach((btn) => {
-                    btn.addEventListener("click", () => Swal.close());
-                });
-            }
-        });
-    };
 
     return (
         <>
@@ -578,47 +378,12 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                                     }`}
                                                 onClick={(e) => handle_link_click(values.url, `btn${index + 1}`, values.amount)}
                                             >
-                                                {values.buttonTitle} {index + 1}
+                                                {values.buttonTitle}
                                             </button>
                                             <span className="mt-2 text-lg font-bold text-green-600">₹{values.amount}</span>
                                         </div>
                                     ))}
                                 </div>
-
-                                {/* Extension Install Section */}
-                                {/*<div className="my-6 text-center text-lg font-semibold text-gray-700">
-                                ---- Boost Your Earnings: Install Our Extension ----
-                            </div>
-                            <div className="text-center bg-blue-100 text-blue-700 p-3 rounded-lg shadow-md mb-4">
-                                <span className="font-semibold">Important:</span> Only click these buttons below! The extension will handle ads automatically.
-                            </div>
-
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 relative">
-                                <div className={`${isExtension_state ? 'hidden' : 'flex'} absolute inset-0 bg-white bg-opacity-70 justify-center items-center`}>
-                                    <button
-                                        onClick={ExtensionInstallPopup}
-                                        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 shadow-lg"
-                                    >
-                                        What Happened?
-                                    </button>
-                                </div>
-
-                                {totalDirectLinkBtns_state.filter((values) => values.isExtension).map((values, index) => (
-                                    <div key={index} className="bg-gray-100 rounded-lg p-3 sm:p-4 shadow-md flex flex-col items-center">
-                                        <button
-                                            disabled={handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1))}
-                                            className={`w-full px-5 py-2 rounded-md font-medium transition ${handle_clickAds_btnClick_state || disabledButtons_state.includes('1btn' + (index + 1))
-                                                ? 'bg-gray-400 cursor-not-allowed'
-                                                : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md'
-                                                }`}
-                                            onClick={(e) => handle_link_click2(values.url, `1btn${index + 1}`, values.amount)}
-                                        >
-                                            {values.buttonTitle} {index + 1}
-                                        </button>
-                                        <span className="mt-2 text-lg font-bold text-green-600">₹{values.amount}</span>
-                                    </div>
-                                ))}
-                            </div> */}
                             </div>
                         </div>
                         <div className='bg-white rounded shadow px-5 py-2'>

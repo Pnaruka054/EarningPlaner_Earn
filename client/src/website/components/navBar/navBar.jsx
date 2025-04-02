@@ -6,6 +6,8 @@ import ProcessBgBlack from '../processBgBlack/processBgBlack';
 import axios from 'axios';
 import showNotificationWith_timer from '../showNotificationWith_timer';
 import { NavBar_global_context } from "../context/navBar_globalContext";
+import { FaBars, FaTimes } from 'react-icons/fa';
+import { IoPerson } from "react-icons/io5";
 
 const NavBar = ({ show, availableBalance_forNavBar_state, setLogOut_btnClicked }) => {
     const [sideMenu_state, setSideMenu_state] = useState('menu-outline');
@@ -21,10 +23,10 @@ const NavBar = ({ show, availableBalance_forNavBar_state, setLogOut_btnClicked }
     let toggleMenu = (e) => {
         e.stopPropagation()
         let menuIcon = toggleMenu_icon.current
-        if (e.target.name === 'reorder-three') {
+        if (e.currentTarget.firstChild.getAttribute('name') === 'reorder-three') {
             setToggelMenu_state('close')
             menuIcon.classList.remove("hidden")
-        } else if (e.target.name === 'close') {
+        } else if (e.currentTarget.firstChild.getAttribute('name') === 'close') {
             setToggelMenu_state('reorder-three')
             menuIcon.classList.add("hidden")
         }
@@ -164,10 +166,13 @@ const NavBar = ({ show, availableBalance_forNavBar_state, setLogOut_btnClicked }
                 <ul
                     onClick={(e) => e.stopPropagation()}
                     ref={toggleMenu_icon}
-                    className={`md:flex md:items-center md:space-x-6 absolute md:relative md:top-0 md:left-0 md:right-0 
+                    className={`md:flex md:items-center md:space-x-3 absolute md:relative md:top-0 md:left-0 md:right-0 
                         bg-blue-800 md:bg-transparent py-2 md:py-0 shadow-lg md:shadow-none md:text-white
-                        transition-all duration-300 ease-in-out transform ${toggelMenu_state === 'close' ? 'translate-y-0 md:space-y-0 space-y-2 opacity-100 text-white' : 'translate-y-[-100%] opacity-0 md:translate-y-0 md:opacity-100 text-blue-800'
-                        } w-full md:w-auto top-14 left-0 right-0`}                >
+                        transition-all duration-300 ease-in-out transform 
+                        ${toggelMenu_state === 'close'
+                            ? 'translate-y-0 opacity-100 pointer-events-auto text-white'
+                            : 'translate-y-[-100%] md:translate-y-0 opacity-0 md:opacity-100 pointer-events-none md:pointer-events-auto text-blue-800'
+                        } w-full md:w-auto top-14 left-0 right-0`}               >
                     <li>
                         <Link className="hover:text-yellow-400 px-3 py-2 rounded-lg transition" to="/">
                             Home
@@ -216,7 +221,7 @@ const NavBar = ({ show, availableBalance_forNavBar_state, setLogOut_btnClicked }
                     </span>
                 </ul >
                 <p onClick={toggleMenu} className="md:hidden text-3xl text-white cursor-pointer">
-                    <ion-icon name={toggelMenu_state}></ion-icon>
+                    {toggelMenu_state !== 'close' ? <FaBars size="25px" name='reorder-three' /> : <FaTimes name='close' />}
                 </p>
                 {data_process_state && <ProcessBgBlack />}
             </nav >
@@ -236,7 +241,7 @@ const NavBar = ({ show, availableBalance_forNavBar_state, setLogOut_btnClicked }
                 }}
                 className="h-full text-3xl text-white cursor-pointer md:hidden flex items-center"
             >
-                <ion-icon name={sideMenu_state}></ion-icon>
+                {sideMenu_state !== 'close' ? <FaBars size="25px" name='menu-outline' /> : <FaTimes name='close' />}
             </span>
             <ul className="flex items-center space-x-4 text-white">
                 <li className="hover:text-yellow-400 px-3 py-2 rounded-lg transition">
@@ -245,8 +250,8 @@ const NavBar = ({ show, availableBalance_forNavBar_state, setLogOut_btnClicked }
                     </Link>
                 </li>
                 <li className="hover:text-yellow-400 px-3 py-2 rounded-lg transition">
-                    <Link to="/member/profile">
-                        <ion-icon name="person"></ion-icon> Profile
+                    <Link to="/member/profile" className='flex items-center gap-1'>
+                        <IoPerson /> Profile
                     </Link>
                 </li>
             </ul>

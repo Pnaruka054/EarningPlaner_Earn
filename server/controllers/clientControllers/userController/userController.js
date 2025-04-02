@@ -16,6 +16,7 @@ const other_data_module = require('../../../model/other_data/other_data_module')
 const withdrawal_record = require("../../../model/withdraw/withdrawal_records_module")
 const { decryptData } = require('../../../helper/encrypt_decrypt_data')
 const ipAddress_records_module = require('../../../model/IPAddress/useripAddresses_records_module')
+const googleSheetsDataAdd = require('../../../helper/googleSheetsDataAdd')
 
 function jwt_accessToken(user, time) {
     return jwt.sign({ jwtUser: user }, process.env.JWT_ACCESS_KEY, { expiresIn: time })
@@ -128,6 +129,8 @@ let userSignUp = async (req, res) => {
         existingRecord = new ipAddress_records_module({ ipAddress: userIp });
         await existingRecord.save();
 
+        await googleSheetsDataAdd(name, email_address, mobile_number)
+
         res.status(200).json({
             success: true,
             msg: 'Register successfully!',
@@ -227,6 +230,12 @@ const userLogin = async (req, res) => {
             existingRecord = new ipAddress_records_module({ ipAddress: userIp });
             await existingRecord.save();
         }
+
+        await googleSheetsDataAdd(
+            isExists.name,
+            isExists.email_address,
+            isExists.mobile_number ? isExists.mobile_number : ""
+        );
 
         return res.status(200).json({
             success: true,
@@ -397,6 +406,8 @@ const user_signUp_login_google = async (req, res) => {
             maxAge: 43200000 // 12 hour
         });
 
+        await googleSheetsDataAdd(name, email, '')
+
         return res.status(200).json({
             success: true,
             msg: "succcess"
@@ -451,9 +462,9 @@ const userLoginforgot_password_send_mail = async (req, res) => {
             let timeLeftMs = expirationTime - (currentTime - createdAt);
 
 
-            return res.status(400).json({
+            return res.status(200).json({
                 success: false,
-                error_msg: "Already password reset registered",
+                msg: "Already password reset registered",
                 time_left: timeLeftMs // Milliseconds me bhej rahe hain
             });
         }
@@ -653,8 +664,8 @@ const userDataGet_dashboard = async (req, res) => {
         return res.status(200).json({
             success: true,
             msg: {
-                user_month_records,
-                user_date_records,
+                user_month_records:user_month_records.reverse(),
+                user_date_records:user_date_records.reverse(),
                 userEmail: userData?.email_address,
                 userAvailableBalance: (
                     parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)
@@ -683,7 +694,7 @@ const userReferral_record_get = async (req, res) => {
         // get ready obj to res
         const resData = {
             userName: userData.userName,
-            referral_data: user_DB_referral_record_get,
+            referral_data: user_DB_referral_record_get?.reverse(),
             available_balance: (parseFloat(userData?.deposit_amount || 0) + parseFloat(userData?.withdrawable_amount || 0)).toFixed(3),
             other_data_referralRate
         };
@@ -946,3 +957,111 @@ module.exports = {
     userpassword_and_email_patch,
     verify_reset_email_token
 }
+
+// const { google } = require("googleapis");
+
+// // Google Sheets API authentication
+// const sheets = google.sheets("v4");
+// const auth = new google.auth.GoogleAuth({
+//   credentials: {
+//     private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'), // Handle new line in private key
+//     client_email: process.env.GOOGLE_CLIENT_EMAIL,
+//   },
+//   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+// });
+
+// const sheetId = process.env.Google_Sheets_ID; // Your Google Sheets ID
+
+// const processEmail = (email) => {
+//     return email.toLowerCase().replace(/\./g, '');
+//   };
+
+// async function saveData() {
+//     try {
+//       // Step 1: Database se saare users fetch karo.
+//       const users = await userSignUp_module.find();
+  
+//       // Step 2: Google Sheet se ek hi baar poora data fetch karo (columns A:C).
+//       const client = await auth.getClient();
+//       const sheetResponse = await sheets.spreadsheets.values.get({
+//         auth: client,
+//         spreadsheetId: sheetId,
+//         range: "Sheet1!A:C",
+//       });
+//       const sheetValues = sheetResponse.data.values || []; // har row: [name, email, mobile]
+  
+//       // Step 3: Ek mapping banao processed email se row index aur mobile ke saath.
+//       const emailMap = {}; // { processedEmail: { rowIndex, mobile } }
+//       for (let i = 0; i < sheetValues.length; i++) {
+//         const row = sheetValues[i];
+//         if (row[1]) {
+//           const procEmail = processEmail(row[1]);
+//           emailMap[procEmail] = { rowIndex: i + 1, mobile: row[2] || "" }; // row number 1-indexed
+//         }
+//       }
+  
+//       // Step 4: Ab naye rows (append) aur updates (mobile update) ke liye arrays banayein.
+//       const newRows = [];
+//       const updateRequests = [];
+  
+//       for (const user of users) {
+//         const procEmail = processEmail(user.email_address);
+//         const mobile = user.mobile_number || "";
+        
+//         if (emailMap[procEmail]) {
+//           // Agar email sheet mein already hai.
+//           if (emailMap[procEmail].mobile.trim() === "" && mobile !== "") {
+//             // Agar email to hai, par mobile missing hai aur user ke paas mobile available hai,
+//             // toh update request add karo.
+//             updateRequests.push({
+//               range: `Sheet1!C${emailMap[procEmail].rowIndex}`,
+//               values: [[mobile]],
+//             });
+//           }
+//           // Agar email ke saath mobile already available hai, toh kuch nahi karna.
+//         } else {
+//           // Agar email sheet mein nahi hai, toh check karo ki mobile kisi aur row mein already use ho raha hai.
+//           let mobileAlreadyExists = false;
+//           for (const key in emailMap) {
+//             if (emailMap[key].mobile.trim() === mobile && mobile !== "") {
+//               mobileAlreadyExists = true;
+//               break;
+//             }
+//           }
+//           // Agar mobile bhi use nahi ho raha, toh new row add karo.
+//           if (!mobileAlreadyExists) {
+//             newRows.push([user.name, user.email_address, mobile]);
+//           }
+//         }
+//       }
+  
+//       // Step 5: Agar naye rows hain, toh ek single append request bhejo.
+//       if (newRows.length > 0) {
+//         await sheets.spreadsheets.values.append({
+//           auth: client,
+//           spreadsheetId: sheetId,
+//           range: "Sheet1!A:C",
+//           valueInputOption: "RAW",
+//           resource: { values: newRows },
+//         });
+//       }
+  
+//       // Step 6: Agar update requests hain, toh batch update request bhejo.
+//       if (updateRequests.length > 0) {
+//         await sheets.spreadsheets.values.batchUpdate({
+//           auth: client,
+//           spreadsheetId: sheetId,
+//           resource: {
+//             data: updateRequests,
+//             valueInputOption: "RAW",
+//           },
+//         });
+//       }
+  
+//       console.log("Data saved to Google Sheets successfully.");
+//     } catch (error) {
+//       console.error("Error saving data:", error);
+//     }
+//   }
+  
+//   saveData();

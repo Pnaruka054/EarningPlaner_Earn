@@ -321,7 +321,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                             Withdraw Amount
                         </div>
                         <div className="sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5 mb-4 sm:space-y-0 space-y-5">
-                            <div className="bg-teal-500 p-6 rounded-lg shadow-md text-white relative">
+                            {/* <div className="bg-teal-500 p-6 rounded-lg shadow-md text-white relative">
                                 <div className="flex flex-col justify-between h-full">
                                     <h3 className="text-3xl font-semibold">₹{balanceData_state.deposit_amount}</h3>
                                     <p className="text-lg">Deposit Balance</p>
@@ -338,8 +338,8 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                                 <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
                                     <FaRupeeSign className="text-6xl" />
                                 </div>
-                            </div>
-                            <div className="bg-cyan-500 p-6 hidden lg:block rounded-lg shadow-md text-white relative row-span-3">
+                            </div> */}
+                            {/* <div className="bg-cyan-500 p-6 hidden lg:block rounded-lg shadow-md text-white relative row-span-3">
                                 <div className="flex flex-col justify-center sm:items-center h-full">
                                     <h3 className="text-3xl xl:text-4xl font-semibold">
                                         ₹{
@@ -353,14 +353,29 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                                 <div className="absolute top-4 right-4 text-5xl opacity-[0.2]">
                                     <FaWallet className="text-6xl" />
                                 </div>
-                            </div>
-                            <div className="p-2 rounded-lg relative col-span-2 flex justify-center text-xl">
+                            </div> */}
+                            {/* <div className="p-2 rounded-lg relative col-span-2 flex justify-center text-xl">
                                 <button onClick={handelDeposit_to_withdrawal} className='bg-blue-500 hover:bg-blue-600 px-4 flex items-center space-x-3 py-2 text-white'>
                                     <FaSync className="text-2xl inline-block" /> <span>Convert to withdrawable Balance</span>
                                 </button>
-                            </div>
-                            <div className="bg-cyan-500 p-6 max-h-60 block lg:hidden rounded-lg shadow-md text-white relative row-span-3">
+                            </div> */}
+                            {/* <div className="bg-cyan-500 p-6 max-h-60 block lg:hidden rounded-lg shadow-md text-white relative row-span-3">
                                 <div className="flex flex-col justify-center sm:items-center h-full">
+                                    <h3 className="text-3xl font-semibold">
+                                        ₹{
+                                            isNaN(parseFloat(balanceData_state.available_amount))
+                                                ? (parseFloat(balanceData_state.deposit_amount) || parseFloat(balanceData_state.withdrawable_amount) || "0.000")
+                                                : parseFloat(balanceData_state.available_amount).toFixed(3)
+                                        }
+                                    </h3>
+                                    <p className="text-lg">Available Balance</p>
+                                </div>
+                                <div className="absolute top-4 right-4 text-7xl opacity-[0.2]">
+                                    <FaWallet className="text-6xl" />
+                                </div>
+                            </div> */}
+                            <div className="bg-cyan-500 p-6 rounded-lg shadow-md text-white relative">
+                                <div className="flex flex-col justify-center h-full">
                                     <h3 className="text-3xl font-semibold">
                                         ₹{
                                             isNaN(parseFloat(balanceData_state.available_amount))

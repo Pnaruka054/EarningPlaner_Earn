@@ -31,6 +31,31 @@ const other_data_schema = new mongoose.Schema({
     giftCode_page_Message: { type: String },
     homepageSection_title: { type: String },
     homepageSection_message: { type: String },
+    to: {
+        type: String,
+    },
+    lastUpdated: {
+        type: Date,
+        default: Date.now,
+    },
+    success_status: {
+        type: String,
+    },
+    process_status: {
+        type: Boolean,
+    },
+    index: {
+        type: Number,
+    },
+    subject: {
+        type: String,
+    },
+    message: {
+        type: String,
+    },
+    Google_Sheets_ID: {
+        type: String,
+    },
 })
 
 const other_data_module = mongoose.model("other_data", other_data_schema)

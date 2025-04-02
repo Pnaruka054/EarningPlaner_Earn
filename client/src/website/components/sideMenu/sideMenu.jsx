@@ -1,4 +1,26 @@
 import { Link, useLocation } from "react-router-dom";
+import { 
+    IoHomeOutline, IoPersonOutline, IoBarChartOutline, IoCashOutline, 
+    IoPersonAddOutline, IoGiftOutline, IoEyeOutline, IoLinkOutline, 
+    IoClipboardOutline, IoHeadsetOutline, IoSettingsOutline, IoLogOutOutline
+} from "react-icons/io5";
+
+// Map for icon names to react-icons components
+const iconsMap = {
+    "home-outline": IoHomeOutline,
+    "person-outline": IoPersonOutline,
+    "bar-chart-outline": IoBarChartOutline,
+    "cash-outline": IoCashOutline,
+    "person-add-outline": IoPersonAddOutline,
+    "gift-outline": IoGiftOutline,
+    "eye-outline": IoEyeOutline,
+    "link-outline": IoLinkOutline,
+    "clipboard-outline": IoClipboardOutline,
+    "headset-outline": IoHeadsetOutline,
+    "settings-outline": IoSettingsOutline,
+    "log-out-outline": IoLogOutOutline
+};
+
 
 const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
     const location = useLocation(); // Get the current URL
@@ -49,7 +71,7 @@ const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
                         className="flex items-center font-semibold space-x-3 px-3 hover:text-red-300 text-red-500 hover:bg-red-500 hover:bg-opacity-35 py-2 rounded-lg transition-colors duration-300 w-full text-left"
                     >
                         <span className="text-2xl font-bold flex items-center">
-                            <ion-icon name="log-out-outline"></ion-icon>
+                            <IoLogOutOutline />
                         </span>
                         <span>LogOut</span>
                     </button>
@@ -60,8 +82,9 @@ const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
 };
 
 // Active Menu Item Highlight Logic
-const NavItem = ({ to, icon, imgSrc, label, currentPath }) => {
+const NavItem = ({ to, icon, label, currentPath }) => {
     const isActive = to === "/member/offer-wall" ? currentPath.includes(to) : currentPath === to;
+    const IconComponent = iconsMap[icon]; // Find the matching icon component
 
     return (
         <Link
@@ -70,13 +93,7 @@ const NavItem = ({ to, icon, imgSrc, label, currentPath }) => {
         ${isActive ? "bg-blue-600 text-white font-semibold" : "hover:bg-blue-600/70"}`}
         >
             <span className="text-xl font-bold">
-                {imgSrc ? (
-                    <img className="w-5 h-5" src={imgSrc} alt="icon" />
-                ) : icon.includes("fa-") ? (
-                    <i className={icon}></i>
-                ) : (
-                    <ion-icon name={icon}></ion-icon>
-                )}
+                {IconComponent ? <IconComponent /> : <span>⚠</span>}
             </span>
             <span className="font-medium text-sm">{label}</span>
         </Link>
