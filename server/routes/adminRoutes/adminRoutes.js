@@ -41,6 +41,7 @@ route.patch("/patchOfferWallInstructions", adminDashboardController.patchOfferWa
 route.patch("/patchOfferWall", adminDashboardController.patchOfferWall)
 route.patch("/patch_homepage_data", adminDashboardController.patch_homepage_data)
 route.patch("/sendMarkitingEmailsPatch", adminDashboardController.sendMarkitingEmailsPatch)
+route.patch("/balanceConverter_update", adminDashboardController.balanceConverter_update)
 
 route.delete("/delete_announcement_data", adminDashboardController.delete_announcement_data)
 route.delete("/delete_faq_data", adminDashboardController.delete_faq_data)

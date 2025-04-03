@@ -137,7 +137,7 @@ const GiftCode = ({ setAvailableBalance_forNavBar_state }) => {
                                             className="bg-white p-3 rounded-lg shadow flex flex-col justify-between"
                                         >
                                             <p className="text-sm font-semibold text-gray-800">
-                                                Code: {claim.giftCode_state}
+                                                Code: {claim.giftCode}
                                             </p>
                                             <p className="text-xs text-gray-600">Bonus: ₹{claim.bonusAmount}</p>
                                             <p className="text-xs text-gray-500">

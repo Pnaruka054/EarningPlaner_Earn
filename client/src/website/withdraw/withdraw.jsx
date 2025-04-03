@@ -39,7 +39,7 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
             setData_process_state(true);
         }
         try {
-            const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userBalanceData_get`, {
+            const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/userAmount/userBalanceData_get`, {
                 withCredentials: true
             });
             if (response?.data?.msg) {
@@ -88,100 +88,11 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
         };
     }, []);
 
-    function handelDeposit_to_withdrawal() {
-        let dataBase_balance_convert_patch = async (balanceToConvert, charge) => {
-            setSubmit_process_state(true);
-            try {
-                obj = await encryptData({ balanceToConvert, charge })
-                const response = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userBalanceConvertPatch`, { obj }, {
-                    withCredentials: true,
-                });
-
-                if (response.status === 200) {
-                    await fetchData(true);
-                    Swal.fire({
-                        title: "Success!",
-                        text: "Your balance has been successfully converted.",
-                        icon: "success",
-                    });
-                } else {
-                    Swal.fire({
-                        title: "Error",
-                        text: "There was an issue with the conversion process. Please try again later.",
-                        icon: "error"
-                    });
-                }
-            } catch (error) {
-                console.error(error);
-                Swal.fire({
-                    title: "Error",
-                    text: "Network error or server issue. Please try again later.",
-                    icon: "error"
-                });
-            } finally {
-                setSubmit_process_state(false);
-            }
-        };
-
-        Swal.fire({
-            title: "Are you sure?",
-            text: `You currently have ₹${balanceData_state.deposit_amount} in your deposit wallet. Enter the amount you want to convert.`,
-            icon: "warning",
-            input: 'text',
-            inputLabel: 'Enter the amount you want to convert',
-            inputPlaceholder: 'Enter amount',
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, Convert it!",
-            footer: `<span style="color: gray;">Note: A 5% conversion charge will be deducted from the amount you enter.</span>`
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const balanceToConvert = parseFloat(result.value);
-                if (!isNaN(balanceToConvert) && balanceToConvert > 0) {
-                    if (balanceToConvert <= balanceData_state.deposit_amount) {
-                        const charge = balanceToConvert * 0.05;
-                        const finalAmount = balanceToConvert - charge;
-                        Swal.fire({
-                            title: "Conversion Details",
-                            html: `
-                                You are converting ₹${balanceToConvert}<br>
-                                Conversion Charge (5%): ₹${charge.toFixed(2)}<br>
-                                Final Amount after Charges: ₹${finalAmount.toFixed(2)}<br>
-                                Are you sure you want to proceed with this conversion?`,
-                            icon: "question",
-                            showCancelButton: true,
-                            confirmButtonText: "Yes, Convert it!",
-                            cancelButtonText: "Cancel"
-                        }).then((confirmationResult) => {
-                            if (confirmationResult.isConfirmed) {
-                                dataBase_balance_convert_patch(balanceToConvert, charge);
-                            }
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Insufficient Balance',
-                            timerProgressBar: true,
-                            text: `Your requested amount exceeds your deposit balance of ₹${balanceData_state.deposit_amount}. Please enter a valid amount.`
-                        });
-                    }
-                } else {
-                    Swal.fire({
-                        title: 'Invalid Amount',
-                        text: "Please enter a valid positive amount to convert.",
-                        icon: "error"
-                    });
-                }
-            }
-        });
-    }
-
     let dataBase_post_newWithdrawal = async (obj) => {
         setSubmit_process_state(true);
         try {
             let encryptedObj = await encryptData(obj)
-            const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/userWithdraw/userWithdrawal_record_post`, { obj: encryptedObj }, {
+            const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/userAmount/userWithdrawal_record_post`, { obj: encryptedObj }, {
                 withCredentials: true
             });
 
@@ -299,9 +210,9 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
 
     const withdrawArray = [...balanceData_state.withdrawal_Records].reverse();
     const itemsPerPage = 5;
-    const indexOfLastReferral = currentPage_state * itemsPerPage;
-    const indexOfFirstReferral = indexOfLastReferral - itemsPerPage;
-    const currentReferrals = withdrawArray?.slice(indexOfFirstReferral, indexOfLastReferral);
+    const indexOfLast = currentPage_state * itemsPerPage;
+    const indexOfFirst = indexOfLast - itemsPerPage;
+    const current_index = withdrawArray?.slice(indexOfFirst, indexOfLast);
     const totalPages = Math.ceil(withdrawArray?.length / itemsPerPage);
 
     return (
@@ -321,59 +232,6 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                             Withdraw Amount
                         </div>
                         <div className="sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5 mb-4 sm:space-y-0 space-y-5">
-                            {/* <div className="bg-teal-500 p-6 rounded-lg shadow-md text-white relative">
-                                <div className="flex flex-col justify-between h-full">
-                                    <h3 className="text-3xl font-semibold">₹{balanceData_state.deposit_amount}</h3>
-                                    <p className="text-lg">Deposit Balance</p>
-                                </div>
-                                <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
-                                    <FaCreditCard className="text-5xl" />
-                                </div>
-                            </div>
-                            <div className="bg-teal-500 p-6 rounded-lg shadow-md text-white relative">
-                                <div className="flex flex-col justify-between h-full">
-                                    <h3 className="text-3xl font-semibold">₹{balanceData_state.withdrawable_amount}</h3>
-                                    <p className="text-lg">Withdrawable Balance</p>
-                                </div>
-                                <div className="absolute top-4 right-4 text-4xl opacity-[0.2]">
-                                    <FaRupeeSign className="text-6xl" />
-                                </div>
-                            </div> */}
-                            {/* <div className="bg-cyan-500 p-6 hidden lg:block rounded-lg shadow-md text-white relative row-span-3">
-                                <div className="flex flex-col justify-center sm:items-center h-full">
-                                    <h3 className="text-3xl xl:text-4xl font-semibold">
-                                        ₹{
-                                            isNaN(parseFloat(balanceData_state.available_amount))
-                                                ? (parseFloat(balanceData_state.deposit_amount) || parseFloat(balanceData_state.withdrawable_amount) || "0.000")
-                                                : parseFloat(balanceData_state.available_amount).toFixed(3)
-                                        }
-                                    </h3>
-                                    <p className="text-lg">Available Balance</p>
-                                </div>
-                                <div className="absolute top-4 right-4 text-5xl opacity-[0.2]">
-                                    <FaWallet className="text-6xl" />
-                                </div>
-                            </div> */}
-                            {/* <div className="p-2 rounded-lg relative col-span-2 flex justify-center text-xl">
-                                <button onClick={handelDeposit_to_withdrawal} className='bg-blue-500 hover:bg-blue-600 px-4 flex items-center space-x-3 py-2 text-white'>
-                                    <FaSync className="text-2xl inline-block" /> <span>Convert to withdrawable Balance</span>
-                                </button>
-                            </div> */}
-                            {/* <div className="bg-cyan-500 p-6 max-h-60 block lg:hidden rounded-lg shadow-md text-white relative row-span-3">
-                                <div className="flex flex-col justify-center sm:items-center h-full">
-                                    <h3 className="text-3xl font-semibold">
-                                        ₹{
-                                            isNaN(parseFloat(balanceData_state.available_amount))
-                                                ? (parseFloat(balanceData_state.deposit_amount) || parseFloat(balanceData_state.withdrawable_amount) || "0.000")
-                                                : parseFloat(balanceData_state.available_amount).toFixed(3)
-                                        }
-                                    </h3>
-                                    <p className="text-lg">Available Balance</p>
-                                </div>
-                                <div className="absolute top-4 right-4 text-7xl opacity-[0.2]">
-                                    <FaWallet className="text-6xl" />
-                                </div>
-                            </div> */}
                             <div className="bg-cyan-500 p-6 rounded-lg shadow-md text-white relative">
                                 <div className="flex flex-col justify-center h-full">
                                     <h3 className="text-3xl font-semibold">
@@ -439,14 +297,14 @@ const Withdraw = ({ setAvailableBalance_forNavBar_state }) => {
                             <p className="text-center text-xl font-bold my-4">Withdraw History</p>
                             <hr className="mx-auto w-11/12 border border-gray-300" />
                             <ul className="mt-6 space-y-4">
-                                {currentReferrals?.map((record, index) => (
+                                {current_index?.map((record, index) => (
                                     <WithdrawalRow
                                         key={index}
                                         record={record}
                                     />
                                 ))}
                             </ul>
-                            {currentReferrals.length === 0 && (
+                            {current_index.length === 0 && (
                                 <div className="text-center h-32 flex items-center justify-center text-gray-500 font-semibold">
                                     🚫 No Withdrawals Yet
                                 </div>
@@ -514,7 +372,7 @@ const WithdrawalRow = ({ record }) => {
                 <div className="flex justify-between items-center">
                     <span className="text-gray-600 font-medium">Order Number</span>
                     <span className="text-gray-800 font-medium flex items-center space-x-2">
-                        <span className='break-all sm:text-auto'>{record._id.toUpperCase()}</span>
+                        <span className='break-all text-[12px] sm:text-base sm:text-auto'>{record._id.toUpperCase()}</span>
                         <button onClick={handleCopy} className="text-gray-600">
                             {copiedState ? (
                                 <FaClipboardCheck className="text-green-600" />

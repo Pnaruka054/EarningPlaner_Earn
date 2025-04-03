@@ -284,10 +284,13 @@ const user_signUp_login_google = async (req, res) => {
         let { email, name, id } = userRes.data;
         // arrange email without spaces and upper case letters
         email = email.toLowerCase().trim();
+        let [emailUserName, domain] = email.split("@"); // Split email at '@'
+        emailUserName = emailUserName.replace(/\./g, ""); // Remove dots only from the username part
+        email = `${emailUserName}@${domain}` // Reconstruct email
         // taking userName from email Address
         let userName = email.split('@')[0]
 
-        if (userEmail && userEmail.includes('@') && userEmail !== email) {
+        if (userEmail && userEmail.includes('@') && userEmail.trim() !== email) {
             return res.status(409).json({
                 success: false,
                 error_msg: `Account switching is restricted. Please log in with ${userEmail}.`

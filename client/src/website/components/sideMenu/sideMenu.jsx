@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { 
-    IoHomeOutline, IoPersonOutline, IoBarChartOutline, IoCashOutline, 
-    IoPersonAddOutline, IoGiftOutline, IoEyeOutline, IoLinkOutline, 
+import {
+    IoHomeOutline, IoPersonOutline, IoBarChartOutline, IoCashOutline,
+    IoPersonAddOutline, IoGiftOutline, IoEyeOutline, IoLinkOutline,
     IoClipboardOutline, IoHeadsetOutline, IoSettingsOutline, IoLogOutOutline
 } from "react-icons/io5";
+import { FaExchangeAlt } from "react-icons/fa";
 
 // Map for icon names to react-icons components
 const iconsMap = {
@@ -18,6 +19,7 @@ const iconsMap = {
     "clipboard-outline": IoClipboardOutline,
     "headset-outline": IoHeadsetOutline,
     "settings-outline": IoSettingsOutline,
+    "exchange-alt": FaExchangeAlt,
     "log-out-outline": IoLogOutOutline
 };
 
@@ -53,6 +55,7 @@ const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
                 <NavItem to="/member/profile" icon="person-outline" label="Profile" currentPath={location.pathname} />
                 <NavItem to="/member/dashboard" icon="bar-chart-outline" label="Dashboard" currentPath={location.pathname} />
                 <NavItem to="/member/withdraw" icon="cash-outline" label="Withdraw" currentPath={location.pathname} />
+                <NavItem to="/member/balance-converter" icon="exchange-alt" label="Balance Converter" currentPath={location.pathname} />
                 <NavItem to="/member/refer-and-earn" icon="person-add-outline" label="Refer & Earn" currentPath={location.pathname} />
                 <NavItem to="/member/gift-code" icon="gift-outline" label="GiftCode" currentPath={location.pathname} />
                 <NavItem to="/member/view-ads" icon="eye-outline" label="View Ads" currentPath={location.pathname} />

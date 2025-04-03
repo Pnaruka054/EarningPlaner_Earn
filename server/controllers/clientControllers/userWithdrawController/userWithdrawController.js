@@ -1,5 +1,6 @@
 const userSignUp_module = require('../../../model/userSignUp/userSignUp_module')
 const withdrawal_records_module = require('../../../model/withdraw/withdrawal_records_module')
+const balanceConvert_record_module = require('../../../model/balanceConvert/balanceConvert_record_module')
 const current_time_get = require('../../../helper/currentTimeUTC')
 const mongoose = require('mongoose')
 const other_data_module = require('../../../model/other_data/other_data_module')
@@ -138,6 +139,40 @@ const userWithdrawal_record_post = async (req, res) => {
     });
 };
 
+const userConvertBalance_get = async (req, res) => {
+    try {
+        const userData = req.user;
+
+        const user_DB_balanceConvert_Data = await balanceConvert_record_module.find({ userDB_id: userData._id });
+        const other_data_convertBalance_instructions = await other_data_module.findOne({ documentName: "balanceConverterInstructions" }) || {};
+
+        if (!userData || !user_DB_balanceConvert_Data) {
+            return res.status(404).json({
+                success: false,
+                msg: 'User not found'
+            });
+        }
+
+        let resData = {
+            withdrawable_amount: userData.withdrawable_amount,
+            deposit_amount: userData.deposit_amount,
+            convertAmount_Records: user_DB_balanceConvert_Data,
+            other_data_convertBalance_instructions: other_data_convertBalance_instructions?.convertBalance_instructions
+        };
+
+        return res.status(200).json({
+            success: true,
+            msg: resData
+        });
+    } catch (error) {
+        console.error('Error fetching user profile data:', error);
+        return res.status(500).json({
+            success: false,
+            msg: 'An error occurred while fetching user profile data.'
+        });
+    }
+}
+
 const userBalanceConvertPatch = async (req, res) => {
     let attempt = 0;
 
@@ -156,9 +191,17 @@ const userBalanceConvertPatch = async (req, res) => {
                 });
             }
             req.body = await decryptData(req.body.obj)
-            const { balanceToConvert, charge } = req.body;
+            const { balanceToConvert, charge, conversionType_state } = req.body;
             const convertAmount = parseFloat(balanceToConvert);
             const conversionCharge = parseFloat(charge);
+
+            if (!conversionType_state) {
+                await session.abortTransaction();
+                return res.status(400).json({
+                    success: false,
+                    msg: "Please Select Conversion Type",
+                });
+            }
 
             // Validate conversion inputs
             if (isNaN(convertAmount) || isNaN(conversionCharge) || convertAmount <= 0) {
@@ -172,26 +215,66 @@ const userBalanceConvertPatch = async (req, res) => {
             const currentDeposit = parseFloat(user.deposit_amount || "0");
             const currentWithdrawable = parseFloat(user.withdrawable_amount || "0");
 
-            // Ensure the user has enough deposit to convert
-            if (convertAmount > currentDeposit) {
-                await session.abortTransaction();
-                return res.status(400).json({
-                    success: false,
-                    msg: "Insufficient deposit balance.",
-                });
+            // Generate order number and time
+            const currentTime = current_time_get();
+
+            if (conversionType_state === "depositToWithdraw") {
+                // Ensure the user has enough withdrawable balance to convert
+                if (convertAmount > currentWithdrawable) {
+                    await session.abortTransaction();
+                    return res.status(400).json({
+                        success: false,
+                        msg: "Insufficient Withdrawal balance.",
+                    });
+                }
+
+                // Update the user's deposit and withdrawable amounts
+                user.deposit_amount = (currentDeposit - convertAmount).toFixed(3);
+                user.withdrawable_amount = (
+                    currentWithdrawable + (convertAmount - conversionCharge)
+                ).toFixed(3);
+                await new balanceConvert_record_module({
+                    userDB_id: user._id,
+                    converted_amount: convertAmount,
+                    charges: conversionCharge,
+                    converted_amount_type: "Deposit to Withdraw",
+                    time: currentTime,
+                }).save({ session })
+
+                // Save the user document within the transaction session
+                await user.save({ session });
+
+                // Commit the transaction
+                await session.commitTransaction();
+            } else {
+                // Ensure the user has enough deposit to convert
+                if (convertAmount > currentDeposit) {
+                    await session.abortTransaction();
+                    return res.status(400).json({
+                        success: false,
+                        msg: "Insufficient deposit balance.",
+                    });
+                }
+
+                // Update the user's deposit and withdrawable amounts
+                user.deposit_amount = (currentDeposit - convertAmount).toFixed(3);
+                user.withdrawable_amount = (
+                    currentWithdrawable + convertAmount
+                ).toFixed(3);
+                await new balanceConvert_record_module({
+                    userDB_id: user._id,
+                    converted_amount: convertAmount,
+                    charges: "0",
+                    converted_amount_type: "Withdraw to Deposit",
+                    time: currentTime,
+                }).save({ session })
+
+                // Save the user document within the transaction session
+                await user.save({ session });
+
+                // Commit the transaction
+                await session.commitTransaction();
             }
-
-            // Update the user's deposit and withdrawable amounts
-            user.deposit_amount = (currentDeposit - convertAmount).toFixed(3);
-            user.withdrawable_amount = (
-                currentWithdrawable + (convertAmount - conversionCharge)
-            ).toFixed(3);
-
-            // Save the user document within the transaction session
-            await user.save({ session });
-
-            // Commit the transaction
-            await session.commitTransaction();
 
             return res.status(200).json({
                 success: true,
@@ -225,5 +308,6 @@ const userBalanceConvertPatch = async (req, res) => {
 module.exports = {
     userBalanceData_get,
     userWithdrawal_record_post,
-    userBalanceConvertPatch
+    userBalanceConvertPatch,
+    userConvertBalance_get
 }

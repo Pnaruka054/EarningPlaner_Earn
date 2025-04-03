@@ -122,7 +122,7 @@ const ShortLink = () => {
                 setEditingId_state(null);
                 setEditData_state(null);
                 showNotification(false, 'updated success!')
-                setNewLinkShortner_state({ shortnerName: '', amount: '', time: '', _id: '', shortnerDomain: '', shortnerApiLink: '', how_much_click_allow: '' });
+                setNewLinkShortner_state({ shortnerName: '', amount: '', time: '', _id: '', shortnerDomain: '', shortnerApiLink: '', how_much_click_allow: '', how_to_complete: '', shortnerQuickLink: '' });
             }
         } catch (error) {
             console.error("Error fetching dashboard data:", error);
@@ -145,6 +145,8 @@ const ShortLink = () => {
             newLinkShortner_state.time.trim() !== '' &&
             newLinkShortner_state.shortnerDomain.trim() !== '' &&
             newLinkShortner_state.how_much_click_allow.trim() !== '' &&
+            newLinkShortner_state.how_to_complete.trim() !== '' &&
+            newLinkShortner_state.shortnerQuickLink.trim() !== '' &&
             newLinkShortner_state.shortnerApiLink.trim() !== ''
         ) {
             Swal.fire({
@@ -320,6 +322,7 @@ const ShortLink = () => {
                         <input type="text" className="border p-2 rounded w-full" placeholder="Amount" value={newLinkShortner_state.amount} onChange={(e) => setNewLinkShortner_state({ ...newLinkShortner_state, amount: e.target.value })} />
                         <input type="text" className="border p-2 rounded w-full" placeholder="Shortner Domain" value={newLinkShortner_state.shortnerDomain} onChange={(e) => setNewLinkShortner_state({ ...newLinkShortner_state, shortnerDomain: e.target.value })} />
                         <input type="text" className="border p-2 rounded w-full" placeholder="API Link" value={newLinkShortner_state.shortnerApiLink} onChange={(e) => setNewLinkShortner_state({ ...newLinkShortner_state, shortnerApiLink: e.target.value })} />
+                        <input type="text" className="border p-2 rounded w-full" placeholder="Quick Link" value={newLinkShortner_state.shortnerQuickLink} onChange={(e) => setNewLinkShortner_state({ ...newLinkShortner_state, shortnerQuickLink: e.target.value })} />
                         <input type="text" className="border p-2 rounded w-full" placeholder="Time" value={newLinkShortner_state.time} onChange={(e) => setNewLinkShortner_state({ ...newLinkShortner_state, time: e.target.value })} />
                         <input type="text" className="border p-2 rounded w-full" placeholder="Clicks Allowed" value={newLinkShortner_state.how_much_click_allow} onChange={(e) => setNewLinkShortner_state({ ...newLinkShortner_state, how_much_click_allow: e.target.value })} />
                         <input type="text" className="border p-2 rounded w-full" placeholder="How to Complete Video Link" value={newLinkShortner_state.how_to_complete} onChange={(e) => setNewLinkShortner_state({ ...newLinkShortner_state, how_to_complete: e.target.value })} />

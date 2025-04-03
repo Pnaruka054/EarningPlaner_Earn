@@ -520,7 +520,10 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
                                 let shortedLink = response.data?.shortenedUrl || null;
 
                                 if (!shortedLink) {
-                                    const split_all_shortners_quick_urls = shortnersData.shortnerQuickLink.split("&url=");
+                                    const split_all_shortners_quick_urls = shortnersData.shortnerQuickLink?.split("&url=") || [];
+                                    if (split_all_shortners_quick_urls.length === 0) {
+                                        return null;
+                                    }
                                     return split_all_shortners_quick_urls[index] + "&url=" + fullUrl;
                                 }
 
@@ -545,6 +548,7 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
                             console.error(`Error calling shortener API (${value}):`, error.message);
                         }
                     }
+                    console.log(lastShortedURL);
 
                     return lastQuickShortedURL + lastShortedURL;  // Ensure one of them is returned
                 }
@@ -727,8 +731,8 @@ const user_shortlink_lastPage_data_patch = async (req, res) => {
                 let idTimerRecordsData = new idTimer_records_module({
                     userDB_id: userData._id,
                     click_short_link_domainName: ipAddressRecord.shortnerDomain,
-                    for_link_shortner_expire_timer: new Date(Date.now() + 12 * 60 * 60 * 1000),
-                    expiresAt: new Date(Date.now() + (12 * 60 * 60 * 1000) - (30 * 1000))
+                    for_link_shortner_expire_timer: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                    expiresAt: new Date(Date.now() + (24 * 60 * 60 * 1000) - (30 * 1000))
                 });
                 await idTimerRecordsData.save({ session });
             }

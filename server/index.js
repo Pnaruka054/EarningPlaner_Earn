@@ -9,7 +9,7 @@ const server = http.createServer(app);
 const cookieParser = require('cookie-parser');
 const middleware = require('./middlewares/jwt_to_userData_middleware')
 const userRouter = require('./routes/clientRoutes/user_router');
-const userWithdraw = require('./routes/clientRoutes/userWIthdraw_router');
+const userAmount = require('./routes/clientRoutes/userAmount_router');
 const userIncomeRoute = require('./routes/clientRoutes/userIncome_router');
 const userMessageRoute = require('./routes/clientRoutes/userMessage_router');
 const postBack = require('./routes/postBack')
@@ -22,7 +22,6 @@ const { userDateIncome } = require('./helper/socketIo_realTime_db_monitor');
 const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:5174',
-    "https://earningplaner-earn.onrender.com"
 ];
 
 const corsOptions = {
@@ -78,7 +77,7 @@ app.use(middleware.middleware_userLogin_check); // Global login check middleware
 
 // Routes
 app.use('/userRoute', userRouter);
-app.use('/userWithdraw', userWithdraw);
+app.use('/userAmount', userAmount);
 app.use('/userIncomeRoute', userIncomeRoute);
 app.use('/userMessageRoute', userMessageRoute);
 app.use('/postBack', postBack);

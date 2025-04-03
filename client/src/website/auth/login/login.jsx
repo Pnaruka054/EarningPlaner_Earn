@@ -40,10 +40,23 @@ const Login = () => {
             }
         } catch (error) {
             console.error(error);
-            let user = localStorage.getItem("user")
-            if (error?.response?.data?.error_msg === "Invalid details" && user && user.includes('@') && user === email_userName_state) {
-                localStorage.removeItem("user")
-                localStorage.removeItem("userAlreadyRegistered")
+            let user = localStorage.getItem("user")?.trim();
+
+            if (
+                error?.response?.data?.error_msg === "Invalid details" &&
+                user && user.includes('@')
+            ) {
+                let [userNameFromUser] = user.split("@"); // Original user email se username extract karo
+                let [userNameFromState] = email_userName_state.split("@"); // Entered value se username nikalna
+
+                let isMatching =
+                    email_userName_state.trim().toLowerCase() === user.toLowerCase() || // Full email match kare
+                    userNameFromState?.trim().toLowerCase() === userNameFromUser.toLowerCase(); // Username match kare
+
+                if (isMatching) {
+                    localStorage.removeItem("user");
+                    localStorage.removeItem("userAlreadyRegistered");
+                }
             } else if (error?.response?.data?.error_msg) {
                 showNotification(true, error?.response?.data?.error_msg)
             } else {
@@ -57,10 +70,21 @@ const Login = () => {
     const handleLogin_submit = (e) => {
         e.preventDefault();
         let user = localStorage.getItem("user")
-        if (user && user.includes('@') && user !== email_userName_state) {
-            showNotification(true, `Account switching is restricted. Please log in with ${user}.`)
-            return;
+        if (user && user.includes('@')) {
+            let [userNameFromUser] = user.split("@"); // Original user email se username extract karo
+            let [userNameFromState] = email_userName_state.split("@"); // Entered value se username nikalna
+
+            // Check agar entered value (email_userName_state) match kar rahi hai user se
+            let isMatching =
+                email_userName_state.toLowerCase().trim() === user.toLowerCase().trim() || // Full email match kare
+                userNameFromState?.toLowerCase().trim() === userNameFromUser.toLowerCase().trim(); // Username match kare
+
+            if (!isMatching) {
+                showNotification(true, `Account switching is restricted. Please log in with ${user}.`);
+                return;
+            }
         }
+
         if (!captchaValue) {
             showNotification(true, 'Please verify that you are a human!')
             return;
@@ -197,7 +221,14 @@ const Login = () => {
                             <input
                                 type="text"
                                 value={email_userName_state}
-                                onChange={(e) => setEmail_userName_state(e.target.value)}
+                                onChange={(e) =>
+                                    setEmail_userName_state(() => {
+                                        let userEmail = e.target.value.trim(); // Trim spaces
+                                        let [userName, domain] = userEmail.split("@"); // Split email at '@'
+                                        userName = userName.replace(/\./g, ""); // Remove dots only from the username part
+                                        return domain ? `${userName}@${domain}` : userName; // Return final string
+                                    })
+                                }
                                 placeholder='Enter your email or username'
                                 required
                                 className='w-full rounded-lg border-2 px-4 py-2 focus:border-blue-400 outline-none'

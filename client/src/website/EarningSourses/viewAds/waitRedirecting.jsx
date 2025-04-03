@@ -6,7 +6,7 @@ import { AlertTriangle } from "lucide-react";
 
 const WaitRedirecting = () => {
     const [redirectLink, setRedirectLink] = useState('');
-    const [waitingTimer_state, setWaitingTimer_state] = useState(6);
+    const [waitingTimer_state, setWaitingTimer_state] = useState(5);
     const [isAbort_state, setIsAbort_state] = useState(false);
     const [adBlockDetected_state, setAdBlockDetected_state] = useState(false);
     const channel = new BroadcastChannel("viewAds_channel");
@@ -60,7 +60,7 @@ const WaitRedirecting = () => {
     // Load external ad scripts and detect ad blockers
     useEffect(() => {
         const scripts = [
-            { src: "https://kulroakonsu.net/88/tag.min.js", attributes: { 'data-zone': '132939', 'data-cfasync': 'false' } },
+            // { src: "https://kulroakonsu.net/88/tag.min.js", attributes: { 'data-zone': '140207', 'data-cfasync': 'false' } },
             { src: "https://js.onclckmn.com/static/onclicka.js", attributes: { 'data-admpid': '287247' } },
             { src: "https://js.wpadmngr.com/static/adManager.js", attributes: { 'data-admpid': '287339' } }
         ];

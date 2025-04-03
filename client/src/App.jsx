@@ -32,6 +32,7 @@ import OfferWall from './website/EarningSourses/OfferWall/OfferWall';
 import ViewOfferWall from './website/EarningSourses/OfferWall/viewOfferWall';
 import AppInstallButton from './website/components/appInstallButton/appInstallButton';
 import UserNetworkStatusCheck from './website/components/userNetworkStatus_check';
+import BalanceConverter from './website/balance_converter/balance_converter';
 
 const pageVariants = {
   initial: {
@@ -76,6 +77,7 @@ const App = () => {
     } else if (
       location.pathname === '/member/dashboard' ||
       location.pathname === '/member/withdraw' ||
+      location.pathname === '/member/balance-converter' ||
       location.pathname === '/member/refer-and-earn' ||
       location.pathname === '/member/support' ||
       location.pathname === '/member/settings' ||
@@ -297,6 +299,23 @@ const App = () => {
                   transition={pageTransition}
                 >
                   <Withdraw
+                    setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state}
+                  />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/balance-converter"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <BalanceConverter
                     setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state}
                   />
                 </motion.div>

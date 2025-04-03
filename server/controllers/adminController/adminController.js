@@ -111,6 +111,7 @@ const getDashboardData = async (req, res) => {
         const other_data_faqArray = await other_data_module.find({ documentName: "faq" }) || [];
         const other_data_withdrawalMethodArray = await other_data_module.find({ documentName: "withdrawalMethod" }) || [];
         const other_data_smtpMailSendLastData = await other_data_module.findOne({ documentName: "smtpMailSendLastData" }) || {};
+        const other_data_balanceConverterInstructions = await other_data_module.findOne({ documentName: "balanceConverterInstructions" }) || {};
 
         // Response Data
         const res_data = {
@@ -120,7 +121,8 @@ const getDashboardData = async (req, res) => {
             withdrawalMethodData: other_data_withdrawalMethodArray,
             other_data_giftCode,
             other_data_homepageArray,
-            other_data_smtpMailSendLastData
+            other_data_smtpMailSendLastData,
+            other_data_balanceConverterInstructions: other_data_balanceConverterInstructions?.convertBalance_instructions
         };
 
         // Send Success Response
@@ -764,6 +766,7 @@ const post_ShortenLink_data = async (req, res) => {
             shortnerDomain: linkShortner_data.shortnerDomain,
             shortnerApiLink: linkShortner_data.shortnerApiLink,
             shortnerQuickLink: linkShortner_data.shortnerQuickLink,
+            how_much_click_allow: linkShortner_data.how_much_click_allow,
             how_to_complete: linkShortner_data.how_to_complete
         });
 
@@ -1715,6 +1718,35 @@ const sendMarkitingEmailsPatch = async (req, res) => {
     }
 };
 
+// handle balance converter
+const balanceConverter_update = async (req, res) => {
+    try {
+        let { data } = req.body;
+
+        if (!data) {
+            return res.status(400).json({
+                success: false,
+                error_msg: "Invalid Data Received."
+            });
+        }
+
+        let updatedData = await other_data_module.findOneAndUpdate(
+            { documentName: "balanceConverterInstructions" },
+            { convertBalance_instructions: data },
+            { new: true, upsert: true }
+        );
+
+        res.status(200).json({ success: true, msg: updatedData });
+    } catch (error) {
+        console.error("Error updating balance converter instructions data:", error);
+        res.status(500).json({
+            success: false,
+            msg: "Internal Server Error. Please try again later.",
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     adminLogin,
     adminLogout,
@@ -1761,5 +1793,6 @@ module.exports = {
     getAllUsersData,
     deleteUserData,
     sendMarkitingEmails,
-    sendMarkitingEmailsPatch
+    sendMarkitingEmailsPatch,
+    balanceConverter_update
 }

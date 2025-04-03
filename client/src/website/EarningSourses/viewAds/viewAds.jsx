@@ -128,21 +128,21 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                 pendingClick: `${parseFloat(viewAds_firstTimeLoad_state.pendingClick)}`,
                                 btnClickEarn: amount,
                             };
-
+                            
+                            clearInterval(countdownInterval)
                             user_adsView_income_patch(obj);
                         }
                     } else if (btnName && amount) {
                         setIsUserActiveOnPage(false);
                         setHandle_clickAds_btnClick_state(false);
 
+                        clearInterval(countdownInterval)
                         Swal.fire({
                             icon: "error",
                             title: "Operation failed. Please try again.",
                             text: "Please stay on the new tab and do not reload / refresh it until the process is complete."
                         });
-
                         document.title = "❌ failed";
-                        clearInterval(countdownInterval)
                         earningSound(isChecked_state, false);
                         let interval = setInterval(() => {
                             if (!document.hidden) {

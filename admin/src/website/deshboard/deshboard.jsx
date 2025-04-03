@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import SideMenu from "../components/sideMenu/sideMenu";
 import axios from "axios";
 import ProcessBgBlack from "../components/processBgBlack/processBgBlack";
@@ -115,7 +115,7 @@ const Dashboard = () => {
                 );
 
                 if (response?.data?.msg) {
-                    const { referralData, announcementData, faqData, withdrawalMethodData, other_data_giftCode, other_data_homepageArray, other_data_smtpMailSendLastData } = response.data.msg;
+                    const { referralData, announcementData, faqData, withdrawalMethodData, other_data_giftCode, other_data_homepageArray, other_data_smtpMailSendLastData, other_data_balanceConverterInstructions } = response.data.msg;
                     setGiftCode_state(other_data_giftCode)
                     setReferralMessage_state(referralData?.referral_page_text || "");
                     setReferralRate_state(parseFloat(referralData?.referral_rate || 0) * 100);
@@ -129,6 +129,7 @@ const Dashboard = () => {
                         message: other_data_smtpMailSendLastData.message,
                         Google_Sheets_ID: other_data_smtpMailSendLastData.Google_Sheets_ID,
                     })
+                    setConvert_balance_Instructions_state(other_data_balanceConverterInstructions.join("\n"))
                 }
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
@@ -1024,6 +1025,68 @@ const Dashboard = () => {
         });
     }
 
+    const [convert_balance_Instructions_state, setConvert_balance_Instructions_state] = useState([]);
+
+    // to adjust height dynamically
+    const textareaRef = useRef(null);
+    const adjustTextareaHeight = () => {
+        const textarea = textareaRef.current;
+        if (textarea) {
+            textarea.style.height = "auto"; // Reset height
+            textarea.style.height = textarea.scrollHeight + "px"; // Set new height
+        }
+    };
+    useEffect(() => {
+        adjustTextareaHeight(); // Adjust height on mount
+    }, [convert_balance_Instructions_state]);
+
+    const balance_converter_instructions_database_patch = async (data) => {
+        try {
+            setData_process_state(true);
+
+            const response = await axios.patch(
+                `${import.meta.env.VITE_SERVER_URL}/admin/balanceConverter_update`,
+                { data },
+                { withCredentials: true }
+            );
+            if (response?.data?.msg) {
+                const { convertBalance_instructions } = response.data.msg;
+                setConvert_balance_Instructions_state(convertBalance_instructions.join("\n"))
+                showNotification(false, "updated successfull!");
+            }
+        } catch (error) {
+            console.error("Error fetching balance converter data:", error);
+            if (error.response.data.error_msg) {
+                showNotification(true, error.response.data.error_msg);
+            } else if (error.response.data.adminJWT_error_msg) {
+                showNotification(true, error.response.data.adminJWT_error_msg);
+                navigation('/')
+            } else {
+                showNotification(true, "Something went wrong, please try again.");
+            }
+        } finally {
+            setData_process_state(false);
+        }
+    }
+    const handle_balance_converter_Instructions_update = () => {
+        if (convert_balance_Instructions_state.trim() !== '') {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "Update This Instructions?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, update it!",
+                cancelButtonText: "Cancel"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    balance_converter_instructions_database_patch(convert_balance_Instructions_state.split("\n"))
+                }
+            });
+        }
+    };
+
     return (
         <div>
             <SideMenu sideMenu_show={true} />
@@ -1681,6 +1744,26 @@ const Dashboard = () => {
                             </div>
                         ))}
                     </div>
+                </div>
+
+                {/* Balance Converter Section */}
+                <div className="p-6 border border-gray-300 rounded-lg shadow-md">
+                    <h2 className="text-xl font-semibold mb-4">Balance Converter Instructions</h2>
+                    <textarea
+                        ref={textareaRef}
+                        className="border p-2 rounded w-full overflow-hidden resize-none"
+                        value={convert_balance_Instructions_state}
+                        onChange={(e) => {
+                            setConvert_balance_Instructions_state(e.target.value);
+                            adjustTextareaHeight();
+                        }}
+                    />
+                    <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+                        onClick={() => handle_balance_converter_Instructions_update()}
+                    >
+                        Update
+                    </button>
                 </div>
             </div>
             {data_process_state && <ProcessBgBlack />}

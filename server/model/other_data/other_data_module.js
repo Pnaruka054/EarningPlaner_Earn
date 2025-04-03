@@ -31,6 +31,8 @@ const other_data_schema = new mongoose.Schema({
     giftCode_page_Message: { type: String },
     homepageSection_title: { type: String },
     homepageSection_message: { type: String },
+    convertBalance_instructions: { type: Array, default: undefined },
+    // handle mail markiting
     to: {
         type: String,
     },
