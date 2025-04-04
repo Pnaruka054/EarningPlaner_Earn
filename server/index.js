@@ -12,6 +12,7 @@ const userRouter = require('./routes/clientRoutes/user_router');
 const userAmount = require('./routes/clientRoutes/userAmount_router');
 const userIncomeRoute = require('./routes/clientRoutes/userIncome_router');
 const userMessageRoute = require('./routes/clientRoutes/userMessage_router');
+const advertiserRoute = require('./routes/advertiserRoutes/advertiserRoutes');
 const postBack = require('./routes/postBack')
 const checkLogin_for_navBar = require('./routes/checkLogin_for_navBar')
 const { cronForDaily_midNight_update } = require('./helper/cronJobs')
@@ -82,6 +83,7 @@ app.use('/userIncomeRoute', userIncomeRoute);
 app.use('/userMessageRoute', userMessageRoute);
 app.use('/postBack', postBack);
 app.use('/checkLogin_for_navBar', checkLogin_for_navBar);
+app.use('/advertiserRoute', advertiserRoute);
 app.use('/admin', middleware.adminCheck_middleware, adminRoutes);
 
 // cron jobs

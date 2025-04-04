@@ -548,8 +548,6 @@ const user_shortlink_firstPage_data_patch = async (req, res) => {
                             console.error(`Error calling shortener API (${value}):`, error.message);
                         }
                     }
-                    console.log(lastShortedURL);
-
                     return lastQuickShortedURL + lastShortedURL;  // Ensure one of them is returned
                 }
                 try {

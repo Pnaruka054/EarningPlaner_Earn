@@ -128,7 +128,7 @@ const ViewAds = ({ setAvailableBalance_forNavBar_state }) => {
                                 pendingClick: `${parseFloat(viewAds_firstTimeLoad_state.pendingClick)}`,
                                 btnClickEarn: amount,
                             };
-                            
+
                             clearInterval(countdownInterval)
                             user_adsView_income_patch(obj);
                         }

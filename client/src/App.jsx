@@ -33,6 +33,8 @@ import ViewOfferWall from './website/EarningSourses/OfferWall/viewOfferWall';
 import AppInstallButton from './website/components/appInstallButton/appInstallButton';
 import UserNetworkStatusCheck from './website/components/userNetworkStatus_check';
 import BalanceConverter from './website/balance_converter/balance_converter';
+import Advertiser from './website/advertiser/advertiser';
+import AdvertiserCreate from './website/advertiser/advertiser_create';
 
 const pageVariants = {
   initial: {
@@ -84,7 +86,9 @@ const App = () => {
       location.pathname === '/member/profile' ||
       location.pathname === '/member/gift-code' ||
       location.pathname === '/member/view-ads' ||
-      location.pathname.includes('/member/offer-wall') ||
+      location.pathname === '/member/advertiser' ||
+      location.pathname === '/member/advertiser/create' ||
+      location.pathname.includes('/member/task-wall') ||
       location.pathname === '/member/click-shorten-link'
     ) {
       setshow_NavBar_state(false);
@@ -283,6 +287,40 @@ const App = () => {
                     setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state}
                     getLogOut_btnClicked={showPopUp_onLogOut_btn_state}
                     setLogOut_btnClicked={setShowPopUp_onLogOut_btn_state}
+                  />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/advertiser"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <Advertiser
+                    setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state}
+                  />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/member/advertiser/create"
+              element={
+                <motion.div
+                  className="absolute w-full"
+                  initial="initial"
+                  animate="in"
+                  exit="out"
+                  variants={pageVariants}
+                  transition={pageTransition}
+                >
+                  <AdvertiserCreate
+                    setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state}
                   />
                 </motion.div>
               }
@@ -487,7 +525,7 @@ const App = () => {
               }
             />
             <Route
-              path="/member/offer-wall"
+              path="/member/task-wall"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -502,7 +540,7 @@ const App = () => {
               }
             />
             <Route
-              path="/member/offer-wall/:encodedUrl"
+              path="/member/task-wall/:encodedUrl"
               element={
                 <motion.div
                   className="absolute w-full"

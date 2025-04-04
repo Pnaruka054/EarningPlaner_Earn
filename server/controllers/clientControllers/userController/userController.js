@@ -167,10 +167,12 @@ const userLogin = async (req, res) => {
         if (email_userName.includes('@')) {
             // getting userName from Email
             userName = email_userName.split("@")[0];
+        }else{
+            userName = email_userName
         }
 
         // findinig user in register data using email
-        const isExists = await userSignUp_module.findOne({ email_address: email_userName });
+        const isExists = await userSignUp_module.findOne({ userName: userName });
         // check if user finded or not
         if (!isExists) {
             return res.status(401).json({

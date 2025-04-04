@@ -1,12 +1,12 @@
 const express = require('express')
 const route = express()
-const userWithdrawController = require('../../controllers/clientControllers/userWithdrawController/userWithdrawController')
+const userAmountController = require('../../controllers/clientControllers/userAmountController/userAmountController')
 
-route.get('/userBalanceData_get', userWithdrawController.userBalanceData_get)
-route.get('/userConvertBalance_get', userWithdrawController.userConvertBalance_get)
+route.get('/userBalanceData_get', userAmountController.userBalanceData_get)
+route.get('/userConvertBalance_get', userAmountController.userConvertBalance_get)
 
-route.post('/userWithdrawal_record_post', userWithdrawController.userWithdrawal_record_post)
+route.post('/userWithdrawal_record_post', userAmountController.userWithdrawal_record_post)
 
-route.patch('/userBalanceConvertPatch', userWithdrawController.userBalanceConvertPatch)
+route.patch('/userBalanceConvertPatch', userAmountController.userBalanceConvertPatch)
 
 module.exports = route

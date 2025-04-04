@@ -4,7 +4,7 @@ import {
     IoPersonAddOutline, IoGiftOutline, IoEyeOutline, IoLinkOutline,
     IoClipboardOutline, IoHeadsetOutline, IoSettingsOutline, IoLogOutOutline
 } from "react-icons/io5";
-import { FaExchangeAlt } from "react-icons/fa";
+import { FaBullhorn, FaExchangeAlt } from "react-icons/fa";
 
 // Map for icon names to react-icons components
 const iconsMap = {
@@ -20,7 +20,8 @@ const iconsMap = {
     "headset-outline": IoHeadsetOutline,
     "settings-outline": IoSettingsOutline,
     "exchange-alt": FaExchangeAlt,
-    "log-out-outline": IoLogOutOutline
+    "log-out-outline": IoLogOutOutline,
+    "bull-horn": FaBullhorn,
 };
 
 
@@ -53,6 +54,7 @@ const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
             <div className="space-y-2">
                 <NavItem to="/" icon="home-outline" label="Home" currentPath={location.pathname} />
                 <NavItem to="/member/profile" icon="person-outline" label="Profile" currentPath={location.pathname} />
+                <NavItem to="/member/advertiser" icon="bull-horn" label="Advertiser" currentPath={location.pathname} />
                 <NavItem to="/member/dashboard" icon="bar-chart-outline" label="Dashboard" currentPath={location.pathname} />
                 <NavItem to="/member/withdraw" icon="cash-outline" label="Withdraw" currentPath={location.pathname} />
                 <NavItem to="/member/balance-converter" icon="exchange-alt" label="Balance Converter" currentPath={location.pathname} />
@@ -86,7 +88,7 @@ const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
 
 // Active Menu Item Highlight Logic
 const NavItem = ({ to, icon, label, currentPath }) => {
-    const isActive = to === "/member/offer-wall" ? currentPath.includes(to) : currentPath === to;
+    const isActive = (to === "/member/offer-wall" || to === "/member/advertiser") ? currentPath.includes(to) : currentPath === to;
     const IconComponent = iconsMap[icon]; // Find the matching icon component
 
     return (

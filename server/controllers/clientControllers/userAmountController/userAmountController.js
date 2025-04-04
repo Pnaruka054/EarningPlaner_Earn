@@ -220,7 +220,7 @@ const userBalanceConvertPatch = async (req, res) => {
 
             if (conversionType_state === "depositToWithdraw") {
                 // Ensure the user has enough withdrawable balance to convert
-                if (convertAmount > currentWithdrawable) {
+                if (convertAmount > currentDeposit) {
                     await session.abortTransaction();
                     return res.status(400).json({
                         success: false,
@@ -248,19 +248,19 @@ const userBalanceConvertPatch = async (req, res) => {
                 await session.commitTransaction();
             } else {
                 // Ensure the user has enough deposit to convert
-                if (convertAmount > currentDeposit) {
+                if (convertAmount > currentWithdrawable) {
                     await session.abortTransaction();
                     return res.status(400).json({
                         success: false,
-                        msg: "Insufficient deposit balance.",
+                        msg: "Insufficient withdrawal balance.",
                     });
                 }
 
                 // Update the user's deposit and withdrawable amounts
-                user.deposit_amount = (currentDeposit - convertAmount).toFixed(3);
                 user.withdrawable_amount = (
-                    currentWithdrawable + convertAmount
+                    currentWithdrawable - convertAmount
                 ).toFixed(3);
+                user.deposit_amount = (currentDeposit + convertAmount).toFixed(3);
                 await new balanceConvert_record_module({
                     userDB_id: user._id,
                     converted_amount: convertAmount,

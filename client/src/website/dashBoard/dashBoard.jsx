@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 import Watch_Video_icon from '../../assets/WatchVideo.png'
-import Betting_games_icon from '../../assets/BettingGames.png'
 import ClickShortenLink_icon from '../../assets/ClickShortenLink.png'
 import ViewAds from '../../assets/ViewAds.png'
-import Games from '../../assets/Games.png'
 import OfferWall from '../../assets/OfferWall.png'
 import Footer from '../components/footer/footer';
 import { Link } from 'react-router-dom';
@@ -24,6 +22,18 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
     const [dropdownButtonValue_state, setDropdownButtonValue_state] = useState('');
     const [monthlyData_state, setMonthlyData_state] = useState([]);
     const navigation = useNavigate();
+    // const [shouldLoadScript_state, setShouldLoadScript_state] = useState(false);
+
+    // useEffect(() => {
+    //     const lastLoadTime = localStorage.getItem("captchaScriptLoadedTime");
+    //     const currentTime = new Date().getTime();
+
+    //     // Check if script was loaded more than 12 hours ago (12 * 60 * 60 * 1000 ms)
+    //     if (!lastLoadTime || (currentTime - parseInt(lastLoadTime)) > 43200000) {
+    //         localStorage.setItem("captchaScriptLoadedTime", currentTime.toString());
+    //         setShouldLoadScript_state(true);
+    //     }
+    // }, []);
 
     // handle dropdown buttons valus
     function dropdownButtonValue(e) {
@@ -94,6 +104,12 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
             <Helmet>
                 <title>EarnWiz Member Dashboard</title>
                 <meta name="description" content="Access your EarnWiz dashboard to manage your account, view earnings, and track tasks effortlessly. Stay updated with notifications and insights." />
+                {/* {shouldLoadScript_state && ( */}
+                <script
+                    src="https://security.dailycaptchawork.com/captcha-verification.js"
+                    data-publisher_key="3df32b528f381820ca25217b01b6067d05bca8131f87d19804"
+                ></script>
+                {/* )} */}
             </Helmet>
             {data_process_state ? (
                 <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] mt-[6.7dvh]">
@@ -128,8 +144,8 @@ const DashBoard = ({ getLogOut_btnClicked, setLogOut_btnClicked, setAvailableBal
                                 <img src={ClickShortenLink_icon} className="absolute bottom-3 right-3 w-16 opacity-20 hover_on_image" alt="Click Shorten Link" />
                             </Link>
 
-                            <Link to="/member/offer-wall" className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
-                                <div className="font-semibold">OfferWalls</div>
+                            <Link to="/member/task-wall" className="bg-gradient-to-r from-green-500 to-green-600 text-white relative h-44 m-3 p-2 rounded-xl shadow-lg flex flex-col space-y-2 items-center justify-center hover_on_image_with_div">
+                                <div className="font-semibold">TaskWalls</div>
                                 <div className="z-[1] text-lg font-bold">
                                     ₹{Array.isArray(userData_state.user_month_records) && userData_state.user_month_records[0] ? userData_state.user_month_records[0]?.earningSources?.offerWall?.income || '0.000' : '0.000'}
                                 </div>

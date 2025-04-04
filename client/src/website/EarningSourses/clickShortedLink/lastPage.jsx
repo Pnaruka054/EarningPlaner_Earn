@@ -144,7 +144,7 @@ const LastPage = () => {
   // Load external ad scripts and detect ad blockers
   useEffect(() => {
     const scripts = [
-      { src: "https://kulroakonsu.net/88/tag.min.js", attributes: { 'data-zone': '132939', 'data-cfasync': 'false' } },
+      { src: "https://kulroakonsu.net/88/tag.min.js", attributes: { 'data-zone': '140468', 'data-cfasync': 'false' } },
       { src: "https://js.onclckmn.com/static/onclicka.js", attributes: { 'data-admpid': '287247' } },
       { src: "https://js.wpadmngr.com/static/adManager.js", attributes: { 'data-admpid': '287339' } }
     ];

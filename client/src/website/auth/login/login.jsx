@@ -222,12 +222,7 @@ const Login = () => {
                                 type="text"
                                 value={email_userName_state}
                                 onChange={(e) =>
-                                    setEmail_userName_state(() => {
-                                        let userEmail = e.target.value.trim(); // Trim spaces
-                                        let [userName, domain] = userEmail.split("@"); // Split email at '@'
-                                        userName = userName.replace(/\./g, ""); // Remove dots only from the username part
-                                        return domain ? `${userName}@${domain}` : userName; // Return final string
-                                    })
+                                    setEmail_userName_state(e.target.value.trim())
                                 }
                                 placeholder='Enter your email or username'
                                 required

@@ -8,8 +8,8 @@ const balanceCOnvertRecordSchema = new mongoose.Schema({
     time: { type: String },
     expireAt: {
         type: Date,
-        default: () => new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // 60 days from now
-        index: { expires: '60d' } // TTL Index
+        default: () => new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days from now
+        index: { expires: '90d' } // TTL Index
     }
 });
 
