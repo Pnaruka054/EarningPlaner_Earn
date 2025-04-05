@@ -60,7 +60,7 @@ const SideMenu = ({ sideMenu_show, setLogOut_btnClicked }) => {
                 <NavItem to="/member/balance-converter" icon="exchange-alt" label="Balance Converter" currentPath={location.pathname} />
                 <NavItem to="/member/refer-and-earn" icon="person-add-outline" label="Refer & Earn" currentPath={location.pathname} />
                 <NavItem to="/member/gift-code" icon="gift-outline" label="GiftCode" currentPath={location.pathname} />
-                <NavItem to="/member/view-ads" icon="eye-outline" label="View Ads" currentPath={location.pathname} />
+                <NavItem to="/member/ptc-ads" icon="eye-outline" label="PTC Ads" currentPath={location.pathname} />
                 <NavItem to="/member/click-shorten-link" icon="link-outline" label="Click Short Link" currentPath={location.pathname} />
                 <NavItem to="/member/offer-wall" icon="clipboard-outline" label="Offer Walls" currentPath={location.pathname} />
             </div>

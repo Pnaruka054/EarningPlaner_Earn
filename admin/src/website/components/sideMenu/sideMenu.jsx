@@ -77,7 +77,7 @@ const SideMenu = () => {
         <nav className="space-y-2">
           <NavItem to="/admin/dashboard" icon={<LayoutDashboard />} label="Dashboard" />
           <NavItem to="/admin/users" icon={<Users />} label="Users" />
-          <NavItem to="/admin/view-ads" icon={<PlayCircle />} label="View Ads" />
+          <NavItem to="/admin/ptc-ads" icon={<PlayCircle />} label="PTC Ads" />
           <NavItem to="/admin/shorten-links" icon={<LinkIcon />} label="Shorten Links" />
           <NavItem to="/admin/offer-walls" icon={<FileText />} label="OfferWall" />
           <NavItem to="/admin/withdrawals" icon={<DollarSign />} label="Withdrawals" />

@@ -8,7 +8,6 @@ import Step_editing from '../../assets/step_editing.svg'
 import { encryptData } from '../components/encrypt_decrypt_data';
 import ProcessBgBlack from '../components/processBgBlack/processBgBlack';
 import axios from 'axios';
-import Swal from 'sweetalert2';
 import showNotification from '../components/showNotification';
 import { FaArrowLeft } from 'react-icons/fa';
 
@@ -18,6 +17,7 @@ const AdvertiserCreate = ({ setAvailableBalance_forNavBar_state }) => {
     const [errors_state, setErrors_state] = useState({});
     // All fetched data
     const [all_data_state, setAll_data_state] = useState({});
+    const [pricing_state, setPricing_state] = useState([]);
 
     const navigation = useNavigate();
 
@@ -51,6 +51,13 @@ const AdvertiserCreate = ({ setAvailableBalance_forNavBar_state }) => {
 
     const handleNext = () => {
         if (selectedOption_state && step_state < 4) {
+            if (selectedOption_state === 'window') {
+                setPricing_state(all_data_state?.PTCAds_pricing?.window || [])
+            } else if (selectedOption_state === 'iframe') {
+                setPricing_state(all_data_state?.PTCAds_pricing?.iframe || [])
+            } else {
+                setPricing_state(all_data_state?.PTCAds_pricing?.youtube || [])
+            }
             if (step_state === 2) {
                 let newErrors = {};
                 if (!formData_state.step_2_title.trim()) {
@@ -87,6 +94,9 @@ const AdvertiserCreate = ({ setAvailableBalance_forNavBar_state }) => {
                 }
                 if (!formData_state.step_3_total_views.trim()) {
                     newErrors.step_3_total_views = "Total Views is a required field";
+                }
+                if (formData_state.step_3_total_views.trim() < parseInt(all_data_state?.PTCAds_total_minimum_Views)) {
+                    newErrors.step_3_total_views = `Minimum ${all_data_state?.PTCAds_total_minimum_Views} Total View Allowed`;
                 }
                 if (!formData_state.step_3_interval_in_hours) {
                     newErrors.step_3_interval_in_hours = "Interval is a required field";
@@ -150,6 +160,10 @@ const AdvertiserCreate = ({ setAvailableBalance_forNavBar_state }) => {
     }, []);
 
     let dataBase_post_newCampaign = async (obj) => {
+        if (obj.step_3_total_views < parseFloat(all_data_state?.PTCAds_total_minimum_Views)) {
+            return showNotification(true, `Total Views must be greater or equel to ${all_data_state?.PTCAds_total_minimum_Views}`);
+        }
+
         setSubmit_process_state(true);
         try {
             let encryptedObj = await encryptData(obj)
@@ -160,33 +174,22 @@ const AdvertiserCreate = ({ setAvailableBalance_forNavBar_state }) => {
                 showNotification(false, "Your campaign has been successfully submitted.");
                 setAll_data_state(response?.data?.msg);
                 setAvailableBalance_forNavBar_state(response?.data?.msg?.userAvailableBalance);
+                navigation('/member/advertiser')
             }
         } catch (error) {
             console.error(error);
-            if (error.response.data.jwtMiddleware_token_not_found_error) {
-                Swal.fire({
-                    title: 'Authentication Error',
-                    text: 'Please log in again to continue.',
-                    icon: 'error',
-                    timer: 5000,
-                    timerProgressBar: true,
-                    confirmButtonText: 'OK',
-                    didClose: () => {
-                        navigation('/login');
-                    }
-                });
-            } else if (error.response.data.jwtMiddleware_error) {
-                Swal.fire({
-                    title: 'Session Expired',
-                    text: 'Your session has expired. Please log in again.',
-                    icon: 'error',
-                    timer: 5000,
-                    timerProgressBar: true,
-                    confirmButtonText: 'OK',
-                    didClose: () => {
-                        navigation('/login');
-                    }
-                });
+            if (
+                error?.response?.data?.jwtMiddleware_token_not_found_error ||
+                error?.response?.data?.jwtMiddleware_user_not_found_error
+            ) {
+                navigation('/login');
+            } else if (error?.response?.data?.jwtMiddleware_error) {
+                showNotificationWith_timer(
+                    true,
+                    'Your session has expired. Please log in again.',
+                    '/login',
+                    navigation
+                );
             } else {
                 showNotification(true, "Something went wrong, please try again.");
             }
@@ -201,7 +204,7 @@ const AdvertiserCreate = ({ setAvailableBalance_forNavBar_state }) => {
                 <title>EarnWiz - Create Campaigns</title>
                 <meta name="description" content="" />
             </Helmet>
-            {data_process_state ? (
+            {data_process_state || submit_process_state ? (
                 <div className="ml-auto flex flex-col justify-between bg-[#ecf0f5] select-none w-full md:w-[75%] lg:w-[80%] overflow-auto h-[93.3dvh] mt-[6.7dvh]">
                     <ProcessBgSeprate />
                 </div>
@@ -434,9 +437,7 @@ const AdvertiserCreate = ({ setAvailableBalance_forNavBar_state }) => {
                                                     }`}
                                             >
                                                 <option value="Choose Any One">Choose Any One</option>
-                                                <option value="5-0.01">5 seconds - ₹0.01 per view</option>
-                                                <option value="10-0.02">10 seconds - ₹0.02 per view</option>
-                                                <option value="15-0.03">15 seconds - ₹0.03 per view</option>
+                                                {pricing_state && pricing_state.map((value, index) => <option key={index} value={`${value.time}-${value.price}`}>{value.time} seconds - ₹{value.price} per view</option>)}
                                             </select>
                                             {errors_state.step_3_duration && (
                                                 <p className="text-red-500 text-sm">{errors_state.step_3_duration}</p>
@@ -592,7 +593,7 @@ const AdvertiserCreate = ({ setAvailableBalance_forNavBar_state }) => {
                                             <span className="font-medium w-32">Timer:</span>
                                             <span>
                                                 {formData_state.step_3_duration
-                                                    ? formData_state.step_3_duration.split(" - ")[0]
+                                                    ? `${formData_state.step_3_duration.split("-")[0]} sec`
                                                     : "N/A"}
                                             </span>
                                         </div>
@@ -619,7 +620,7 @@ const AdvertiserCreate = ({ setAvailableBalance_forNavBar_state }) => {
                                         <p className="text-gray-700 font-medium">
                                             Subtotal:{" "}
                                             <span className="text-lg font-bold">
-                                                ₹{formData_state.step_4_subTotal}
+                                                ₹{parseFloat(formData_state.step_4_subTotal)}
                                             </span>
                                         </p>
                                     </div>
@@ -666,7 +667,6 @@ const AdvertiserCreate = ({ setAvailableBalance_forNavBar_state }) => {
                             </div>
                         </div>
                     </div>
-                    {submit_process_state && <ProcessBgBlack />}
                     <div className='mt-3'>
                         <Footer />
                     </div>

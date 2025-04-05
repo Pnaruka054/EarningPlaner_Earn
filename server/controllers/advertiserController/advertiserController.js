@@ -2,6 +2,7 @@ const advertiserCampaigns_module = require("../../model/advertiserCampaigns/adve
 const userSignUp_module = require('../../model/userSignUp/userSignUp_module')
 const getFormattedDate = require('../../helper/getFormattedDate');
 const { decryptData } = require("../../helper/encrypt_decrypt_data");
+const other_data_module = require('../../model/other_data/other_data_module')
 const MAX_RETRIES = parseFloat(process.env.MAX_RETRIES) || 3;
 const mongoose = require('mongoose');
 
@@ -54,6 +55,7 @@ const advertiserDataGet = async (req, res) => {
 const advertiserCreateDataGet = async (req, res) => {
     try {
         const userData = req.user;
+        const other_data_PTCAds = await other_data_module.findOne({ documentName: "PTCAds" }) || {};
 
         // Build the response data
         const resData = {
@@ -61,7 +63,13 @@ const advertiserCreateDataGet = async (req, res) => {
                 parseFloat(userData.deposit_amount || 0) +
                 parseFloat(userData.withdrawable_amount || 0)
             ).toFixed(3),
-            userDepositBalance: userData.deposit_amount
+            userDepositBalance: userData.deposit_amount,
+            PTCAds_total_minimum_Views: other_data_PTCAds?.PTCAds_total_minimum_Views || 100,
+            PTCAds_pricing: {
+                window: other_data_PTCAds?.window,
+                iframe: other_data_PTCAds?.iframe,
+                youtube: other_data_PTCAds?.youtube
+            }
         };
 
         return res.status(200).json({
@@ -111,12 +119,22 @@ const advertiserDataPost = async (req, res) => {
             if (parseFloat(userData.deposit_amount) < step_4_subTotal) {
                 await session.abortTransaction();
                 session.endSession();
-                return res.status(400).json({ success: false, message: "Insufficient balance" });
+                return res.status(400).json({ success: false, error_msg: "Insufficient balance" });
             }
 
             // Deduct balance
             userData.deposit_amount = (parseFloat(userData.deposit_amount) - step_4_subTotal).toFixed(3);
             await userData.save({ session });
+
+            const other_data_PTCAds = await other_data_module.findOne({ documentName: "PTCAds" }).session(session) || {};
+
+            if (step_3_total_views < parseInt(other_data_PTCAds?.PTCAds_total_minimum_Views || 100)) {
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({ success: false, error_msg: "Total Views are not greater or equal" });
+            }
+
+            const today = new Date().toLocaleDateString("en-US", { timeZone: "Asia/Kolkata" });
 
             // Save campaign
             const newCampaign = new advertiserCampaigns_module({
@@ -128,11 +146,12 @@ const advertiserDataPost = async (req, res) => {
                 step_3_amount_for_user: parseFloat(step_3_duration.split('-')[1]).toFixed(3),
                 step_3_total_views,
                 step_3_interval_in_hours,
-                step_3_enableLimit,
+                step_3_enableLimit: !!step_3_enableLimit,
                 step_3_limitViewsPerDay,
                 step_4_subTotal,
                 spend: "0.000",
                 campaignType: selectedOption_state,
+                todayDate: today,
                 status: "active",
                 completed_total_views: 0,
                 expiresAt: new Date(Date.now() + (90 * 24 * 60 * 60 * 1000)),
@@ -233,6 +252,11 @@ const advertiserCampaign_paused_active_patch = async (req, res) => {
                 session.endSession();
 
                 return res.status(200).json({ success: true, msg: { userDepositBalance: userData.deposit_amount } });
+            } else if (campaign.step_3_total_views === campaign.completed_total_views) {
+                campaign.status = 'completed'
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(404).json({ success: false, message: "Campaign already completed" });
             } else {
                 campaign.status = clientMsg;
                 await campaign.save({ session });

@@ -7,7 +7,6 @@ const getFormattedDate = require('../../../helper/getFormattedDate')
 const shortedLinksData_module = require('../../../model/shortLinks/shortedLinksData_module')
 const generateRandomString = require("../../../helper/generateRandomString")
 const axios = require('axios')
-const viewAds_directLinksData_module = require("../../../model/view_ads_direct_links/viewAds_directLinksData_module");
 const { userReferByIncome_handle, userIncome_handle } = require('../../../helper/usersEarningsUpdate_handle')
 const userID_data_for_offerWall_module = require('../../../model/userID_data_for_offerWall/userID_data_for_offerWall_module')
 const other_data_module = require('../../../model/other_data/other_data_module')
@@ -18,9 +17,10 @@ const getFormattedMonth = require('../../../helper/getFormattedMonth');
 const current_time_get = require('../../../helper/currentTimeUTC');
 const { decryptData } = require('../../../helper/encrypt_decrypt_data');
 const offerWallsData_module = require('../../../model/offerWallsData/offerWallsData_module')
+const advertiserCampaigns_module = require("../../../model/advertiserCampaigns/advertiserCampaigns")
 
 // for view ads page get data
-const user_adsView_home_get = async (req, res) => {
+const user_PTCAds_home_get = async (req, res) => {
     let attempt = 0;
 
     while (attempt < MAX_RETRIES) {
@@ -30,18 +30,70 @@ const user_adsView_home_get = async (req, res) => {
             // format current Date YYYY-MM-DD
             const todayDate = getFormattedDate()
             const userData = req.user;
-            const user_ip = req.ip;
 
             // Fetch other_data for viewAds
-            let other_data_viewAds = await other_data_module.findOne({ documentName: "viewAds" }).session(session);
-
-            // get all directLinks data
-            let viewAds_directLinksData = await viewAds_directLinksData_module.find().session(session);
+            let other_data_PTCAds = await other_data_module.findOne({ documentName: "PTCAds" }).session(session);
 
             // Search for an existing record with the same ipAddress
-            let ipAddress_recordData = await ipAddress_records_module
-                .findOne({ ipAddress: user_ip })
+            let idTimer_recordsData = await idTimer_records_module.find({
+                $and: [
+                    { userDB_id: userData._id },
+                    { for_PTCAds_expire_timer: { $exists: true } },
+                    { ptcAds_btnName: { $exists: true } },
+                    { expiresAt: { $gte: new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })) } } // Only non-expired documents
+                ]
+            })
+                .sort({ expiresAt: 1 }) // Ascending order; sabse kam expiresAt sabse pehle
+                .limit(1)
                 .session(session);
+
+            // get all directLinks data
+            let excludedIds = idTimer_recordsData.map(item => item.ptcAds_btnName).filter(Boolean); // remove undefined/null if any
+            const today = new Date().toLocaleDateString("en-US", { timeZone: "Asia/Kolkata" });
+
+            let PTCAds_campaignsData = await advertiserCampaigns_module.find(
+                {
+                    $and: [
+                        { userDB_id: { $ne: userData._id } },
+                        { _id: { $nin: excludedIds } },
+                        { status: "active" },
+                        {
+                            $or: [
+                                // If limit is disabled, include the document.
+                                { step_3_enableLimit: false },
+                                // If limit is enabled and it's a new day, include the document.
+                                {
+                                    $and: [
+                                        { step_3_enableLimit: true },
+                                        { $expr: { $ne: ["$todayDate", today] } }
+                                    ]
+                                },
+                                // If limit is enabled and it's the same day, include only if today_completed_total_views is strictly less than step_3_limitViewsPerDay.
+                                {
+                                    $and: [
+                                        { step_3_enableLimit: true },
+                                        { $expr: { $eq: ["$todayDate", today] } },
+                                        { $expr: { $lt: ["$today_completed_total_views", "$step_3_limitViewsPerDay"] } }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    time: 0,
+                    step_3_limitViewsPerDay: 0,
+                    step_3_enableLimit: 0,
+                    step_3_interval_in_hours: 0,
+                    completed_total_views: 0,
+                    step_3_total_views: 0,
+                    today_completed_total_views: 0,
+                    todayDate: 0,
+                    spend: 0,
+                    step_4_subTotal: 0
+                }
+            ).session(session);
+
 
             // find current date record
             let userDate_recordData = await userDate_records_module
@@ -49,44 +101,19 @@ const user_adsView_home_get = async (req, res) => {
                 .session(session);
 
             // Safely extract income and pendingClick if available, otherwise use 0
-            const today_adsviewIncome = userDate_recordData?.earningSources?.view_ads?.income || 0;
-            let pendingClick = userDate_recordData?.earningSources?.view_ads?.pendingClick || other_data_viewAds?.viewAds_pendingClick || 0;
-
-            // Calculate user earnings based on direct links data
-            let userWillEarn = viewAds_directLinksData.length
-                ? earningCalculator(viewAds_directLinksData, 'amount', other_data_viewAds?.viewAds_pendingClick)
-                : 0;
-
-            // Calculate completed clicks
-            let completedClick = Math.max(parseFloat(other_data_viewAds?.viewAds_pendingClick || 0) - parseFloat(pendingClick), 0);
+            const today_PTCAdsIncome = userDate_recordData?.earningSources?.ptc_ads?.income || 0;
+            let completedClick = userDate_recordData?.earningSources?.ptc_ads?.ptc_adDomains_data.length || 0;
 
             // Prepare response data
             let resData = {
-                today_adsviewIncome,
-                pendingClick,
+                today_PTCAdsIncome,
                 completedClick,
-                pendingEarnings: (userWillEarn - today_adsviewIncome).toFixed(3),
-                totalLinks: viewAds_directLinksData.length - (ipAddress_recordData?.buttonNames || []).length,
+                totalLinks: PTCAds_campaignsData.length || 0,
                 userAvailableBalance: (parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)).toFixed(3),
-                buttonNames: ipAddress_recordData?.buttonNames || [],
-                viewAds_directLinksData,
-                other_data_viewAds_instructions: other_data_viewAds.viewAds_instructions
+                PTCAds_campaignsData,
+                other_data_PTCAds_instructions: other_data_PTCAds?.PTCAds_instructions || [],
+                ...(PTCAds_campaignsData.length === 0 ? { willCome_afterThis_time: idTimer_recordsData[0]?.expiresAt } : false)
             };
-
-            let idTimer_recordsData = await idTimer_records_module.findOne({
-                $and: [
-                    { userDB_id: userData._id },
-                    { for_viewAds_expire_timer: { $exists: true } }
-                ]
-            }).session(session)
-
-            // change res data if timer started for user
-            if (idTimer_recordsData?.for_viewAds_expire_timer) {
-                resData = { ...resData, viewAdsexpireTimer: idTimer_recordsData.for_viewAds_expire_timer }
-            }
-
-            // Save (or update) the ipAddress_recordData document
-            await ipAddress_recordData?.save({ session });
 
             // Commit the transaction and end the session
             await session.commitTransaction();
@@ -97,7 +124,7 @@ const user_adsView_home_get = async (req, res) => {
                 msg: resData,
             });
         } catch (error) {
-            console.error("Error in user_adsView_home_get:", error);
+            console.error("Error in user_ptcAds_home_get:", error);
             await session.abortTransaction();
             session.endSession();
             const isWriteConflict = error.code === 112 ||
@@ -118,172 +145,159 @@ const user_adsView_home_get = async (req, res) => {
 };
 
 // for view ads page income update
-const user_adsView_income_patch = async (req, res) => {
+const user_PTCAds_income_patch = async (req, res) => {
     let attempt = 0;
+
     while (attempt < MAX_RETRIES) {
         const session = await mongoose.startSession();
-        session.startTransaction(); // Start transaction immediately
+        session.startTransaction();
 
         try {
-            req.body = await decryptData(req.body.obj)
-            // Extract required data
-            const { disabledButtons_state, pendingClick, btnClickEarn } = req.body;
-            const userIp = req.ip;
+            req.body = await decryptData(req.body.obj);
+            let { btnName, btnClickEarn } = req.body;
+            btnClickEarn = parseFloat(btnClickEarn);
             const userData = req.user;
 
-            // Increase user income
+            // Update user income
             const userIncomeUpdate = await userIncome_handle(session, userData, btnClickEarn);
             if (!userIncomeUpdate.success) {
-                throw new Error(userIncomeUpdate.error);
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({ success: false, error_msg: userIncomeUpdate.error });
             }
 
-            // get monthly module and date module to update more and save al last
             const { userMonthlyRecord, dateRecords } = userIncomeUpdate.values;
+            const today = new Date().toLocaleDateString("en-US", { timeZone: "Asia/Kolkata" });
 
-            // get all viewAds links data
-            const viewAdsConfig = await other_data_module
-                .findOne({ documentName: "viewAds" })
-                .session(session);
+            dateRecords.earningSources.ptc_ads.income = (
+                parseFloat(dateRecords.earningSources.ptc_ads.income || 0) + btnClickEarn
+            ).toFixed(3);
 
-            // check if pendingClick is available in date data if not then create
-            if (!dateRecords?.earningSources?.view_ads?.pendingClick) {
-                dateRecords.earningSources.view_ads.pendingClick = pendingClick;
+            dateRecords.earningSources.ptc_ads.ptc_adDomains_data.push({ ptcAds_btnName: btnName });
+
+            const advertiserCampaign_data = await advertiserCampaigns_module.findById(btnName).session(session);
+            !advertiserCampaign_data.today_completed_total_views ? advertiserCampaign_data.today_completed_total_views = 0 : ""
+            if (!advertiserCampaign_data || advertiserCampaign_data.status === 'paused') {
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({ success: false, error_msg: "Invalid or paused campaign" });
             }
 
-            // check current pending number is lessthen equel to total available pending click limit if its true then Update user's pending clicks and income
-            if (parseFloat(dateRecords?.earningSources?.view_ads?.pendingClick) <= parseFloat(viewAdsConfig.viewAds_pendingClick)) {
-                dateRecords.earningSources.view_ads.pendingClick = (parseFloat(pendingClick) - 1).toString();
-                dateRecords.earningSources.view_ads.income = (parseFloat(dateRecords.earningSources.view_ads.income || 0) + parseFloat(btnClickEarn)).toFixed(3);
+            if (advertiserCampaign_data.step_3_total_views <= advertiserCampaign_data.completed_total_views) {
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({ success: false, error_msg: "Invalid or total views limit completed campaign" });
             }
 
-            // Initialize timer records (if applicable)
-            let idTimerRecordsData = null;
-            // if user current pending click is empety means its 0 then start timer
-            if (dateRecords.earningSources.view_ads.pendingClick === '0') {
-                idTimerRecordsData = await idTimer_records_module
-                    .findOne({
-                        $and: [
-                            { userDB_id: userData._id },
-                            { for_viewAds: { $exists: true } }
-                        ]
-                    })
-                    .session(session);
-
-                // check if timer already available or not if not available then create new one
-                if (!idTimerRecordsData) {
-                    const indiaTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
-                    const indiaDate = new Date(indiaTime);
-                    idTimerRecordsData = new idTimer_records_module({
-                        userDB_id: userData._id,
-                        expiresAt: new Date(indiaDate.getFullYear(), indiaDate.getMonth(), indiaDate.getDate() + 1, 0, 0, 0),
-                        for_viewAds_expire_timer: new Date(indiaDate.getFullYear(), indiaDate.getMonth(), indiaDate.getDate() + 1, 0, 0, 0)
-                    });
-                    await idTimerRecordsData.save({ session });
+            // Update campaign stats
+            if (advertiserCampaign_data.step_3_enableLimit) {
+                // When limit is enabled, enforce today's view limit
+                if (today === advertiserCampaign_data.todayDate) {
+                    if (advertiserCampaign_data.today_completed_total_views < advertiserCampaign_data.step_3_limitViewsPerDay) {
+                        advertiserCampaign_data.today_completed_total_views += 1;
+                    } else {
+                        await session.abortTransaction();
+                        session.endSession();
+                        return res.status(400).json({ success: false, error_msg: "View limit reached" });
+                    }
                 } else {
-                    // Return error if the click limit timer is exceeded
-                    await session.abortTransaction();
-                    session.endSession();
-                    return res.status(400).json({
-                        success: false,
-                        error_msg: "Click Limit exceeded. Try again after the timer completes.",
-                    });
+                    advertiserCampaign_data.today_completed_total_views = 1;
+                    advertiserCampaign_data.todayDate = today;
                 }
+            } else {
+                // When limit is not enabled, simply increment today's count
+                advertiserCampaign_data.today_completed_total_views += 1;
+            }
+
+            advertiserCampaign_data.expiresAt = new Date(
+                new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })).getTime() + 90 * 24 * 60 * 60 * 1000
+            ); // 90 days expire
+            advertiserCampaign_data.spend = (
+                parseFloat(advertiserCampaign_data.spend) + btnClickEarn
+            ).toFixed(3);
+            advertiserCampaign_data.completed_total_views += 1;
+
+            if (advertiserCampaign_data.step_3_total_views === advertiserCampaign_data.completed_total_views) {
+                advertiserCampaign_data.status = 'completed'
+            }
+
+            // Timer record check
+            const idTimerRecord = await idTimer_records_module.findOne({
+                userDB_id: userData._id,
+                ptcAds_btnName: btnName,
+            }).session(session);
+
+            if (!idTimerRecord) {
+                const indiaTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+                const indiaDate = new Date(indiaTime);
+                const intervalInHours = advertiserCampaign_data.step_3_interval_in_hours || 0;
+                const expiresAt = new Date(indiaDate.getTime() + intervalInHours * 60 * 60 * 1000);
+
+                await new idTimer_records_module({
+                    userDB_id: userData._id,
+                    expiresAt,
+                    for_PTCAds_expire_timer: expiresAt,
+                    ptcAds_btnName: btnName,
+                }).save({ session });
+            } else {
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({ success: false, error_msg: "already completed" });
             }
 
             // Update referral income
-            const referByIncomeUpdate = await userReferByIncome_handle(session, userData, btnClickEarn);
-            if (!referByIncomeUpdate.success) {
-                throw new Error(referByIncomeUpdate.error);
+            const referralIncome = await userReferByIncome_handle(session, userData, btnClickEarn);
+            if (!referralIncome.success) {
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({ success: false, error_msg: referralIncome.error });
             }
 
-            // Find user current IP address address record if available
-            let ipAddressRecord = await ipAddress_records_module
-                .findOne({ ipAddress: userIp })
-                .session(session);
-
-            // check if ip address already available if available then Update existing IP record otherwise Create new IP record 
-            if (ipAddressRecord) {
-                const lastValue = disabledButtons_state[disabledButtons_state.length - 1];
-
-                // ✅ Check if lastValue already exists using `includes()`
-                if (ipAddressRecord?.buttonNames?.includes(lastValue)) {
-                    await session.abortTransaction();
-                    session.endSession();
-                    return res.status(400).json({
-                        success: false,
-                        error_msg: "You Already Completed This",
-                    });
-                }
-
-                // ✅ Update buttonNames
-                ipAddressRecord.buttonNames = disabledButtons_state;
-                await ipAddressRecord.save({ session });
-            } else {
-                ipAddressRecord = new ipAddress_records_module({
-                    userDB_id: userData._id,
-                    buttonNames: disabledButtons_state,
-                    ipAddress: userIp,
-                });
-                await ipAddressRecord.save({ session });
-            }
-
-            // Update monthly income and click balance for view_ads
-            const currentIncome = parseFloat(userMonthlyRecord?.earningSources?.view_ads?.income || 0);
-            userMonthlyRecord.earningSources.view_ads.income = (
-                currentIncome + parseFloat(btnClickEarn)
+            const currentIncome = parseFloat(userMonthlyRecord?.earningSources?.ptc_ads?.income || 0);
+            userMonthlyRecord.earningSources.ptc_ads.income = (
+                currentIncome + btnClickEarn
             ).toFixed(3);
 
-            // Save all changes concurrently
+            // Save all updates
             await Promise.all([
                 userMonthlyRecord.save({ session }),
-                ipAddressRecord.save({ session }),
                 userData.save({ session }),
                 dateRecords.save({ session }),
+                advertiserCampaign_data.save({ session }),
             ]);
 
-            // Commit the transaction and end the session
             await session.commitTransaction();
             session.endSession();
 
-            // Prepare response data
-            const response = {
-                ipAddress_recordData: ipAddressRecord,
+            const responseData = {
                 userAvailableBalance: (
-                    parseFloat(userData.deposit_amount || 0) + parseFloat(userData.withdrawable_amount || 0)
+                    parseFloat(userData.deposit_amount || 0) +
+                    parseFloat(userData.withdrawable_amount || 0)
                 ).toFixed(3),
             };
 
-            // check if user limit timer started then change res
-            if (idTimerRecordsData?.for_viewAds_expire_timer) {
-                response.viewAdsexpireTimer = idTimerRecordsData.for_viewAds_expire_timer;
-            }
-
-            return res.status(200).json({
-                success: true,
-                msg: response,
-            });
-
+            return res.status(200).json({ success: true, msg: responseData });
         } catch (error) {
-            // Handle transaction rollback and session cleanup
-            if (session.inTransaction()) {
-                await session.abortTransaction();
-            }
+            if (session.inTransaction()) await session.abortTransaction();
             session.endSession();
 
             console.error("Error in updating user data:", error);
-            const isWriteConflict = error.code === 112 ||
+            const isWriteConflict =
+                error.code === 112 ||
                 (error.errorResponse && error.errorResponse.code === 112) ||
                 (error.codeName && error.codeName === 'WriteConflict');
+
             if (isWriteConflict) {
                 attempt++;
-                console.log(`Global write conflict encountered. Retrying attempt ${attempt}`);
+                console.log(`Write conflict, retrying... Attempt ${attempt}`);
                 continue;
             }
-            return res.status(500).json({ msg: "An error occurred while processing the request." });
+
+            return res.status(500).json({ success: false, error_msg: "An error occurred while processing the request." });
         }
     }
 
-    return res.status(500).json({ msg: "Max retry attempts reached. Please try again later." });
+    return res.status(500).json({ success: false, error_msg: "Max retry attempts reached. Please try again later." });
 };
 
 // for click shorten link page data get
@@ -1075,8 +1089,8 @@ const user_giftCode_verify_and_patch = async (req, res) => {
 };
 
 module.exports = {
-    user_adsView_home_get,
-    user_adsView_income_patch,
+    user_PTCAds_home_get,
+    user_PTCAds_income_patch,
     user_shortlink_data_get,
     user_shortlink_firstPage_data_patch,
     user_shortlink_lastPage_data_patch,

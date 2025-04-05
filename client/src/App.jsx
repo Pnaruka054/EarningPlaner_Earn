@@ -13,8 +13,8 @@ import Withdraw from './website/withdraw/withdraw';
 import ReferEarn from './website/ReferEarn/ReferEarn';
 import Profile from './website/profile/profile';
 import Setting from './website/setting/setting';
-import ViewAds from './website/EarningSourses/viewAds/viewAds';
-import WaitRedirecting from './website/EarningSourses/viewAds/waitRedirecting';
+import PTCAds from './website/EarningSourses/ptcAds/ptcAds';
+import WaitRedirecting from './website/EarningSourses/ptcAds/waitRedirecting';
 import Home from './website/home/home';
 import ContactUs from './website/components/contactUs/contactUs';
 import PageNotFound from './website/components/pageNotFound/pageNotFound';
@@ -85,7 +85,7 @@ const App = () => {
       location.pathname === '/member/settings' ||
       location.pathname === '/member/profile' ||
       location.pathname === '/member/gift-code' ||
-      location.pathname === '/member/view-ads' ||
+      location.pathname === '/member/ptc-ads' ||
       location.pathname === '/member/advertiser' ||
       location.pathname === '/member/advertiser/create' ||
       location.pathname.includes('/member/task-wall') ||
@@ -465,7 +465,7 @@ const App = () => {
               }
             />
             <Route
-              path="/member/view-ads"
+              path="/member/ptc-ads"
               element={
                 <motion.div
                   className="absolute w-full"
@@ -475,7 +475,7 @@ const App = () => {
                   variants={pageVariants}
                   transition={pageTransition}
                 >
-                  <ViewAds setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
+                  <PTCAds setAvailableBalance_forNavBar_state={setAvailableBalance_forNavBar_state} />
                 </motion.div>
               }
             />

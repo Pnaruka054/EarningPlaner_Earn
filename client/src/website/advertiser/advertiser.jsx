@@ -118,7 +118,7 @@ const Advertiser = ({ setAvailableBalance_forNavBar_state }) => {
           <p><strong>Description:</strong> ${campaign.step_2_description}</p>
           <p><strong>URL:</strong> <a href="${campaign.step_2_url}" target="_blank" rel="noopener noreferrer" style="color: #38a169;">${campaign.step_2_url}</a></p>
           <p><strong>Type:</strong> ${campaign.campaignType}</p>
-          <p><strong>Duration:</strong> ${campaign.step_3_duration} sec</p>
+          <p><strong>Duration:</strong> ${campaign.step_3_duration_for_user} sec</p>
           <p><strong>Views:</strong> ${campaign.completed_total_views} / ${campaign.step_3_total_views}</p>
           <p><strong>Spend:</strong> ${campaign.spend} / ${campaign.step_4_subTotal}</p>
           <p><strong>Interval:</strong> ${campaign.step_3_interval_in_hours} hours</p>

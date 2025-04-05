@@ -3,8 +3,9 @@ const mongoose = require('mongoose');
 const id_timerRecordSchema = new mongoose.Schema({
   userDB_id: { type: String, required: true },
   click_short_link_domainName: { type: String },
+  ptcAds_btnName: { type: String },
   for_link_shortner_expire_timer: { type: Date },
-  for_viewAds_expire_timer: { type: Date },
+  for_PTCAds_expire_timer: { type: Date },
   expiresAt: {
     type: Date,
     expires: 0  // Expiry `expiresAt` field ke according hoga

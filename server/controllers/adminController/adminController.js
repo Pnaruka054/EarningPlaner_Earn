@@ -2,7 +2,6 @@ const admin_module = require('../../model/admin/admin_module')
 const jwt = require('jsonwebtoken')
 const other_data_module = require('../../model/other_data/other_data_module')
 const current_time_get = require('../../helper/currentTimeUTC')
-const viewAds_directLinksData_module = require("../../model/view_ads_direct_links/viewAds_directLinksData_module");
 const shortedLinksData_module = require('../../model/shortLinks/shortedLinksData_module')
 const withdrawal_record = require('../../model/withdraw/withdrawal_records_module')
 const userSignUp_module = require('../../model/userSignUp/userSignUp_module')
@@ -12,7 +11,8 @@ const offerWallsData_module = require('../../model/offerWallsData/offerWallsData
 const userDate_records_module = require('../../model/dashboard/userDate_modules')
 const userMonthly_records_module = require('../../model/dashboard/userMonthly_modules')
 const referral_records_module = require('../../model/referralRecords/referral_records_module')
-const markitingMailSender = require('../../helper/markitingMailSender')
+const markitingMailSender = require('../../helper/markitingMailSender');
+const advertiserCampaigns_module = require('../../model/advertiserCampaigns/advertiserCampaigns');
 
 function jwt_accessToken(user) {
     return jwt.sign({ jwtUser: user }, process.env.JWT_ACCESS_KEY, { expiresIn: '2h' })
@@ -506,20 +506,20 @@ const delete_withdrawalMethod_data = async (req, res) => {
 };
 
 
-// handle views ads data get
-const getViewAdsData = async (req, res) => {
+// handle ptc ads data get
+const getPTCAdsData = async (req, res) => {
     try {
-        const other_data_viewAds_limit = await other_data_module.findOne({ documentName: "viewAds" }) || {};
-        let viewAds_directLinksData = await viewAds_directLinksData_module.find();
+        const other_data_PTCAds = await other_data_module.findOne({ documentName: "PTCAds" }) || {};
+        const PTCadvertiserCampaigns_data = await advertiserCampaigns_module.find()
 
         const res_data = {
-            other_data_viewAds_limit,
-            viewAds_directLinksData,
+            other_data_PTCAds,
+            PTCadvertiserCampaigns_data
         };
 
         res.status(200).json({ success: true, msg: res_data });
     } catch (error) {
-        console.error("Error fetching view Ads data:", error);
+        console.error("Error fetching PTC Ads data:", error);
         res.status(500).json({
             success: false,
             msg: "Internal Server Error. Please try again later.",
@@ -528,151 +528,32 @@ const getViewAdsData = async (req, res) => {
     }
 };
 
-// handle view ads update data
-const update_viewAds_data = async (req, res) => {
+// handle ptc ads update data
+const patch_PTCAds_data = async (req, res) => {
     try {
         let { data, btnName } = req.body;
 
-        if (!["text", "limit"].includes(btnName)) {
+        if (!["text", "limit", "price"].includes(btnName)) {
             return res.status(400).json({
                 success: false,
-                error_msg: "Invalid button name. Must be 'text' or 'limit'."
+                error_msg: "Invalid button name. Must be 'text', 'limit' or 'price."
             });
         }
 
-        let updateField = btnName === "text" ? { viewAds_instructions: data } : { viewAds_pendingUpdates: data };
+        let updateField = btnName === "text" ? { PTCAds_instructions: data } : btnName === "limit" ? { PTCAds_total_minimum_Views: data } : { window: data.window, iframe: data.iframe, youtube: data.youtube };
 
         let updatedData = await other_data_module.findOneAndUpdate(
-            { documentName: "viewAds" },
+            { documentName: "PTCAds" },
             updateField,
             { new: true, upsert: true }
         );
 
         res.status(200).json({ success: true, msg: updatedData });
     } catch (error) {
-        console.error("Error updating viewAds data:", error);
+        console.error("Error updating PTCAds data:", error);
         res.status(500).json({
             success: false,
             msg: "Internal Server Error. Please try again later.",
-            error: error.message
-        });
-    }
-};
-
-
-// handle view ads direct link data
-const post_viewAds_directLink_data = async (req, res) => {
-    try {
-        let { viewAdsDirectLink_data } = req.body;
-
-        if (!viewAdsDirectLink_data) {
-            return res.status(400).json({
-                success: false,
-                error_msg: "Invalid data received."
-            });
-        }
-
-        let isUrlAvailable = await viewAds_directLinksData_module.findOne({ url: viewAdsDirectLink_data.url })
-        if (isUrlAvailable) {
-            return res.status(409).json({
-                success: false,
-                error_msg: "direct link already available"
-            });
-        }
-
-        let newData = new viewAds_directLinksData_module({
-            buttonTitle: viewAdsDirectLink_data.buttonTitle,
-            amount: viewAdsDirectLink_data.amount,
-            url: viewAdsDirectLink_data.url,
-            isExtension: viewAdsDirectLink_data.isExtension,
-            adNetworkName: viewAdsDirectLink_data.adNetworkName
-        });
-
-        await newData.save();
-
-        res.status(201).json({ success: true, msg: newData });
-    } catch (error) {
-        console.error("Error inserting new viewAds direct link data:", error);
-        res.status(500).json({
-            success: false,
-            msg: "Internal Server Error. Please try again later.",
-            error: error.message
-        });
-    }
-};
-
-const patch_viewAds_directLink_data = async (req, res) => {
-    try {
-        let { buttonTitle, amount, url, isExtension, adNetworkName, _id } = req.body;
-
-        if (!buttonTitle || !amount || !_id || !url || !adNetworkName) {
-            return res.status(400).json({
-                success: false,
-                error_msg: "Invalid or missing data received."
-            });
-        }
-
-        let updatedData = await viewAds_directLinksData_module.findOneAndUpdate(
-            { _id },
-            {
-                buttonTitle,
-                amount,
-                url,
-                isExtension,
-                adNetworkName
-            },
-            { new: true }
-        );
-
-        if (!updatedData) {
-            return res.status(404).json({
-                success: false,
-                error_msg: "direct link not found."
-            });
-        }
-
-        res.status(200).json({ success: true, msg: updatedData });
-    } catch (error) {
-        console.error("Error updating viewAds direct link data:", error);
-        res.status(500).json({
-            success: false,
-            msg: "Internal Server Error. Please try again later.",
-            error: error.message
-        });
-    }
-};
-
-const delete_viewAds_directLink_data = async (req, res) => {
-    try {
-        const { id } = req.query;
-
-        if (!id) {
-            return res.status(400).json({
-                success: false,
-                error_msg: "Invalid request. direct link _id is required."
-            });
-        }
-
-        const deletedData = await viewAds_directLinksData_module.findOneAndDelete({
-            _id: id
-        });
-
-        if (!deletedData) {
-            return res.status(404).json({
-                success: false,
-                error_msg: "direct link not found or already deleted."
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            msg: "direct link successfully deleted."
-        });
-    } catch (error) {
-        console.error("❌ Error deleting viewAds direct link:", error);
-        res.status(500).json({
-            success: false,
-            error_msg: "Internal Server Error. Please try again later.",
             error: error.message
         });
     }
@@ -1761,11 +1642,8 @@ module.exports = {
     post_withdrawalMethod_data,
     patch_withdrawalMethod_data,
     delete_withdrawalMethod_data,
-    getViewAdsData,
-    update_viewAds_data,
-    patch_viewAds_directLink_data,
-    post_viewAds_directLink_data,
-    delete_viewAds_directLink_data,
+    getPTCAdsData,
+    patch_PTCAds_data,
     getShortLinkData,
     update_ShortLink_data,
     post_ShortenLink_data,

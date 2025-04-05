@@ -14,6 +14,8 @@ const advertiserCampaignsSchema = new mongoose.Schema({
     step_3_duration_for_user: { type: Number },
     step_3_total_views: { type: Number },
     completed_total_views: { type: Number },
+    today_completed_total_views: { type: Number },
+    todayDate: { type: String },
     step_3_interval_in_hours: { type: Number },
     step_3_enableLimit: { type: Boolean },
     step_3_limitViewsPerDay: { type: Number },

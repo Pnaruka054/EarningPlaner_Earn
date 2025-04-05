@@ -8,9 +8,13 @@ const userDateSchema = new mongoose.Schema({
     referral_earnings: { type: String },
     Total_earnings: { type: String },
     earningSources: {
-        view_ads: {
+        ptc_ads: {
             income: { type: String },
-            pendingClick: { type: String },
+            ptc_adDomains_data: [
+                {
+                    ptcAds_btnName: { type: String }
+                }
+            ],
         },
         click_short_link: {
             income: { type: String },

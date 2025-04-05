@@ -4,7 +4,14 @@ const other_data_schema = new mongoose.Schema({
     documentName: { type: String, require: true },
     viewAds_pendingClick: { type: String },
     viewAds_pendingUpdates: { type: String },
-    viewAds_instructions: { type: Array, default: undefined },
+
+    // handle PTC ads
+    PTCAds_instructions: { type: Array, default: undefined },
+    PTCAds_total_minimum_Views: { type: String },
+    window: { type: Array, default: undefined },
+    iframe: { type: Array, default: undefined },
+    youtube: { type: Array, default: undefined },
+
     shortLink_instructions: { type: Array, default: undefined },
     offerWall_instructions: { type: Array, default: undefined },
     referralRate: { type: String },

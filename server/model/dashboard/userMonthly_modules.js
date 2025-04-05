@@ -4,7 +4,7 @@ const monthSchema = new mongoose.Schema({
     userDB_id: { type: String, required: true },
     monthName: { type: String, required: true },
     earningSources: {
-        view_ads: {
+        ptc_ads: {
             income: { type: String },
         },
         click_short_link: {
